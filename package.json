@@ -1,12 +1,12 @@
 {
   "name": "can-stache",
-  "version": "3.0.0-pre.0",
+  "version": "3.0.0-pre.1",
   "description": "Live binding handlebars templates",
   "homepage": "http://canjs.com",
   "repository": {
-	  "type": "git",
-	  "url": "git://github.com/cajs/can-stache.git"
-	},
+    "type": "git",
+    "url": "git://github.com/cajs/can-stache.git"
+  },
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
