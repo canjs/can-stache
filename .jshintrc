@@ -2,7 +2,6 @@
 	"globals": {
 		"steal": true,
 		"can": true,
-		"Zepto": true,
 		"QUnit": true,
 		"System": true,
 		"SimpleDOM": true,
@@ -14,22 +13,25 @@
 		"equal": true,
 		"notEqual": true,
 		"deepEqual": true,
+		"propEqual": true,
 		"notDeepEqual": true,
 		"strictEqual": true,
 		"notStrictEqual": true,
 		"raises": true,
 		"start": true,
 		"stop": true,
-		"global": true
+		"global": true,
+		"Promise": true
 	},
+	"strict": false,
 	"curly": true,
 	"eqeqeq": true,
 	"freeze": true,
 	"indent": 2,
-	"latedef": true,
+	"latedef": false,
 	"noarg": true,
 	"undef": true,
-	"unused": true,
+	"unused": "vars",
 	"trailing": true,
 	"maxdepth": 4,
 	"boss" : true,
@@ -41,10 +43,7 @@
 	"jquery": true,
 	"dojo": true,
 	"mootools": true,
-	"yui": true,
 	"browser": true,
 	"phantom": true,
-	"rhino": true,
-	"node": true,
-	"esnext": true
+	"node": true
 }

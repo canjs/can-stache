@@ -2,8 +2,6 @@
 
 var parser = require('can-view-parser');
 var viewCallbacks = require('can-view-callbacks');
-var target = require('can-view-target');
-var nodeLists = require('can-view-nodelist');
 
 var HTMLSectionBuilder = require('./src/html_section');
 var TextSectionBuilder = require('./src/text_section');
@@ -15,6 +13,9 @@ var getDocument = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 // Make sure that we can also use our modules with Stache as a plugin
+
+require('can-view-target');
+require('can-view-nodelist');
 
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
@@ -336,22 +337,6 @@ function stache(template){
 
 	return section.compile();
 }
-var escMap = {
-	'\n': "\\n",
-	'\r': "\\r",
-	'\u2028': "\\u2028",
-	'\u2029': "\\u2029"
-};
-var esc = function(string){
-	return ('' + string).replace(/["'\\\n\r\u2028\u2029]/g, function (character) {
-		if("'\"\\".indexOf(character) >= 0) {
-			return "\\"+character;
-		} else  {
-			return escMap[character];
-		}
-	});
-};
-
 
 // At this point, can.stache has been created
 assign(stache, mustacheHelpers);
