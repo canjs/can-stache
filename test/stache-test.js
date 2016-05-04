@@ -1,6 +1,6 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
 require('./expression-test');
-
+require('./stache-define-test');
 var stache = require('can-stache');
 require('can-stache/helpers/join-base');
 
