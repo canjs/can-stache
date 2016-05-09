@@ -1,7 +1,7 @@
 var helpers = require('./core');
 var route = require('can-route');
 
-var last = require('can-util/js/last/last');
+var getLast = require('can-util/js/last/last');
 var stacheExpression = require('../src/expression');
 
 var looksLikeOptions = function(options){
@@ -23,7 +23,7 @@ helpers.registerHelper('routeUrl',function(params, merge){
 
 var routeCurrent = function(params){
 	// check if this a normal helper call
-	var last = last(arguments),
+	var last = getLast(arguments),
 		isOptions = last && looksLikeOptions(last);
 	if( last && isOptions && !(last.exprData instanceof stacheExpression.Call) ) {
 		if(route.current( helpers.resolveHash(params.hash || {}))) {
