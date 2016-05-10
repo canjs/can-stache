@@ -354,7 +354,7 @@ stache.async = function(source){
 	var importPromises = iAi.imports.map(function(moduleName){
 		return importer(moduleName);
 	});
-	return Promise.all.apply(can, importPromises ).then(function(){
+	return Promise.all(importPromises).then(function(){
 		return stache(iAi.intermediate);
 	});
 };
