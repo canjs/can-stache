@@ -12,6 +12,7 @@ var getIntermediateAndImports = require('./src/intermediate_and_imports');
 var getDocument = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
+var importer = require('can-util/js/import/import');
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
@@ -351,7 +352,7 @@ stache.safeString = function(text){
 stache.async = function(source){
 	var iAi = getIntermediateAndImports(source);
 	var importPromises = iAi.imports.map(function(moduleName){
-		return can["import"](moduleName);
+		return importer(moduleName);
 	});
 	return Promise.all.apply(can, importPromises ).then(function(){
 		return stache(iAi.intermediate);
