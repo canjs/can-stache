@@ -4828,5 +4828,75 @@ function makeTest(name, doc) {
           equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
 	});
 
+
+	test( "named partials don't render (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}bar{{/foo}}<div></div>" );
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.firstChild ), "" );
+	});
+
+	test( "named partials can be inserted (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>" );
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "bar" );
+	});
+
+	test('stache can accept an intermediate with a named partial (canjs/can-stache/issues/3)', function(){
+		var template = "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>";
+		var intermediate = parser( template, {}, true );
+
+		var renderer = stache(intermediate);
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "bar" );;
+	});
+
+	test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}<li>{{name}}<ul>{{#each descendants}}{{>foo}}{{/each}}</ul></li>{{/foo}} <ul>{{#with ychromosome}}{{>foo}}{{/with}}</ul>" );
+		var data = new CanMap({
+			ychromosome: {
+				name: "AJ",
+				descendants: [
+					{
+						name: "tim",
+						descendants: []
+					},
+					{
+						name: "joe",
+						descendants: [
+							{
+								name: "chad",
+								descendants: []
+							},
+							{
+								name: "goku",
+								descendants: [
+									{
+										name: "gohan",
+										descendants: []
+									}
+								]
+							}
+						]
+					},
+					{
+						name: "sam",
+						descendants: []
+					}
+				]
+			}
+		});
+		var frag = renderer( data );
+		var fraghtml = innerHTML( frag.lastChild );
+
+		equal( (fraghtml.match(/<li>/g) || []).length, 7 );
+		ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 }
