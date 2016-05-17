@@ -14,11 +14,13 @@ var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
+var makeDocument = require('can-vdom/make-document/make-document');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
-var getDocument = require('can-util/dom/document/document');
 var domData = require('can-util/dom/data/data');
 var domMutate = require('can-util/dom/mutate/mutate');
+var DOCUMENT = require('can-util/dom/document/document');
+var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
 
 var canEach = require('can-util/js/each/each');
 var canDev = require('can-util/js/dev/dev');
@@ -27,25 +29,12 @@ var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var getBaseURL = require('can-util/js/base-url/base-url');
 
-var browserDoc = window.document;
+var browserDoc = DOCUMENT();
+var mutationObserver = MUTATION_OBSERVER();
 var simpleDocument;
 
 makeTest('can/view/stache dom', browserDoc);
-
-if(window.jQuery && window.steal) {
-	//makeTest('can/view/stache vdom', simpleDocument);
-}
-
-// Add tests that shouldn't run in VDOM here.
-/*if(window.steal) {
-	QUnit.asyncTest("routeUrl and routeCurrent helper", function(){
-		makeIframe(  can.test.path("view/stache/test/route-url-current.html?"+Math.random()) );
-	});
-
-	QUnit.asyncTest("system/stache plugin accepts nodelists", function(){
-		makeIframe( can.test.path("view/stache/test/system-nodelist.html?"+Math.random()) );
-	});
-}*/
+makeTest('can/view/stache vdom', makeDocument());
 
 
 function makeIframe(src){
@@ -61,7 +50,7 @@ function makeIframe(src){
 }
 
 // HELPERS
-function makeTest(name, doc) {
+function makeTest(name, doc, mutation) {
 	var isNormalDOM = doc === window.document;
 
 	var innerHTML = function(node){
@@ -120,10 +109,13 @@ function makeTest(name, doc) {
 	QUnit.module(name ,{
 		setup: function(){
 			if(doc === window.document) {
-				getDocument(null);
+				DOCUMENT(null);
+				MUTATION_OBSERVER(mutationObserver);
+
 			} else {
 				oldDoc = window.document;
-				getDocument(doc);
+				DOCUMENT(doc);
+				MUTATION_OBSERVER(null);
 			}
 
 
@@ -133,9 +125,15 @@ function makeTest(name, doc) {
 			this.animals = ['sloth', 'bear', 'monkey'];
 		},
 		teardown: function(){
-			getDocument(window.document);
-			doc.body.removeChild(this.fixture);
 
+			doc.body.removeChild(this.fixture);
+			stop();
+
+			setTimeout(function(){
+				DOCUMENT(window.document);
+				MUTATION_OBSERVER(mutationObserver);
+				start();
+			},1)
 		}
 	});
 
@@ -2927,7 +2925,7 @@ function makeTest(name, doc) {
 			equal(data._bindings, 0, "there are no bindings");
 
 			start();
-		}, 20);
+		}, 30);
 
 	});
 
