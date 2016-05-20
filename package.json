@@ -5,7 +5,7 @@
   "homepage": "http://canjs.com",
   "repository": {
     "type": "git",
-    "url": "git://github.com/cajs/can-stache.git"
+    "url": "git://github.com/canjs/can-stache.git"
   },
   "author": {
     "name": "Bitovi",
@@ -27,7 +27,7 @@
     "document": "documentjs",
     "develop": "done-serve --static --develop --port 8080"
   },
-  "main": "dist/cjs/can-stache",
+  "main": "can-stache",
   "browser": {
     "transform": [
       "cssify"
@@ -40,19 +40,12 @@
   },
   "keywords": [
     "canjs",
+    "canjs-plugin",
     "donejs"
   ],
   "system": {
-    "main": "can-stache",
     "configDependencies": [
       "live-reload"
-    ],
-    "npmIgnore": [
-      "documentjs",
-      "testee",
-      "generator-donejs",
-      "donejs-cli",
-      "steal-tools"
     ],
     "npmAlgorithm": "flat"
   },
@@ -60,7 +53,7 @@
     "can-compute": "^3.0.0-pre.1",
     "can-observe-info": "^3.0.0-pre.5",
     "can-route": "^3.0.0-pre.4",
-    "can-util": "^3.0.0-pre.16",
+    "can-util": "^3.0.0-pre.21",
     "can-view-callbacks": "^3.0.0-pre.1",
     "can-view-live": "^3.0.0-pre.1",
     "can-view-nodelist": "^3.0.0-pre.1",
