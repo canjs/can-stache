@@ -9,6 +9,7 @@ var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('../helpers/core');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 
+var namespace = require('can-util/namespace');
 var getDocument = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
@@ -371,4 +372,4 @@ stache.registerPartial = function(id, partial) {
 	templates[id] = (typeof partial === "string" ? stache(partial) : partial);
 };
 
-module.exports = stache;
+module.exports = namespace.stache = stache;
