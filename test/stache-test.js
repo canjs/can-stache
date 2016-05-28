@@ -4824,5 +4824,22 @@ function makeTest(name, doc, mutation) {
           equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
 	});
 
+	test("Render with #each by assigning values to a specific variable", function () {
+		var animals = new CanList([{'name': 'sloth'}]),
+
+		template = "{{#each animals 'animal'}}" +
+		               "<span>{{animal.name}}</span>" +
+		           "{{/each}}";
+
+		var renderer = stache(template);
+		var div = doc.createElement('div');
+		var frag = renderer({
+			animals: animals
+		});
+
+		div.appendChild(frag);
+		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 }
