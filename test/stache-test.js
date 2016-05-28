@@ -2919,14 +2919,11 @@ function makeTest(name, doc, mutation) {
 		stop();
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
+			setTimeout(function () {
+				equal(data._bindings, 0, "there are no bindings");
+				start();
+			}, 30);
 		},10);
-		setTimeout(function () {
-
-			equal(data._bindings, 0, "there are no bindings");
-
-			start();
-		}, 30);
-
 	});
 
 	test("each directly within live html section", function () {
