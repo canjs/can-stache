@@ -38,22 +38,28 @@ var resolveHash = function(hash){
 
 
 var helpers = {
-	"each": function(items, options){
+	"each": function(items) {
+		var args = [].slice.call(arguments),
+		    options = args.pop(),
+		    argsLen = args.length,
+		    argExprs = options.exprData.argExprs,
+		    resolved = resolve(items),
+		    asVariable,
+		    result = [],
+		    aliases,
+		    keys,
+		    key,
+		    i;
 
-		var resolved = resolve(items),
-			result = [],
-			asVariable,
-			aliases,
-			keys,
-			key,
-			i;
+		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
+			asVariable = args[argsLen - 1];
 
-		if (arguments.length === 3) {
-			asVariable = arguments[1];
-			options = arguments[2];
+			if (typeof asVariable !== 'string') {
+				asVariable = argExprs[argsLen - 1].key;
+			}
 		}
 
-		if( types.isListLike(resolved) ) {
+		if (types.isListLike(resolved)) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
@@ -73,9 +79,9 @@ var helpers = {
 						aliases[asVariable] = item;
 					}
 
-					return options.fn(options.scope.add(aliases,{notContext: true}).add(item), options.options, parentNodeList);
-
+					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);
 				};
+
 				live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
 					return options.inverse(options.scope.add(list), options.options, parentNodeList);
 				});
@@ -95,8 +101,7 @@ var helpers = {
 					aliases[asVariable] = expr[i];
 				}
 
-				result.push(options.fn(options.scope.add(aliases,{notContext: true})
-					.add(expr[i])));
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[i])));
 			}
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
@@ -113,8 +118,7 @@ var helpers = {
 					aliases[asVariable] = expr[key];
 				}
 
-				result.push(options.fn(options.scope.add(aliases,{notContext: true})
-					.add(expr[key])));
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}
 		} else if (expr instanceof Object) {
 			for (key in expr) {
@@ -127,13 +131,11 @@ var helpers = {
 					aliases[asVariable] = expr[key];
 				}
 
-				result.push(options.fn(options.scope.add(aliases,{notContext: true})
-					.add(expr[key])));
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}
-
 		}
-		return result;
 
+		return result;
 	},
 	"@index": function(offset, options) {
 		if (!options) {
