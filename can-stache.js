@@ -19,6 +19,11 @@ var importer = require('can-util/js/import/import');
 require('can-view-target');
 require('can-view-nodelist');
 
+var namedPartials = /(\{\{<([^\}]+)\}\})([\s\S]*?)(\{\{\/\2\}\})/gi;
+var namedPartialRegistration = function ( whole, startTag, partialName, partialTemplate, endTag ) {
+	stache.registerPartial( partialName, partialTemplate );
+	return "";
+};
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
@@ -27,11 +32,36 @@ var namespaces = {
 },
 	textContentOnlyTag = {style: true, script: true};
 
+var intermediateNamedPartialRegistration = function ( intermediate ) {
+	var i, cur, val, partialName, partialClose, spliceStart, subIntermediate;
+	for ( i = 0; i < intermediate.length; i++ ) {
+		cur = intermediate[ i ];
+		if ( cur.tokenType === "special" ) {
+			val = cur.args[ 0 ];
+			if ( val.charAt( 0 ) === "<" ) {
+				partialName = val.substr( 1 );
+				partialClose = "/" + partialName;
+				spliceStart = i;
+			} else if ( partialClose && partialClose === val ) {
+				subIntermediate = intermediate.splice( spliceStart, i - spliceStart + 1 );
+				subIntermediate.shift();
+				subIntermediate.pop();
+				i = spliceStart - 1;
+				partialClose = null;
+				templates[ partialName ] = stache( subIntermediate );
+			}
+		}
+	}
+	return intermediate;
+};
+
 function stache(template){
 
 	// Remove line breaks according to mustache's specs.
 	if(typeof template === "string") {
-		template = mustacheCore.cleanLineEndings(template);
+		template = mustacheCore.cleanLineEndings(template).replace( namedPartials, namedPartialRegistration );
+	} else {
+		intermediateNamedPartialRegistration( template );
 	}
 
 	// The HTML section that is the root section for the entire template.
