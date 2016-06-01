@@ -2918,14 +2918,11 @@ function makeTest(name, doc, mutation) {
 		stop();
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
+			setTimeout(function () {
+				equal(data._bindings, 0, "there are no bindings");
+				start();
+			}, 30);
 		},10);
-		setTimeout(function () {
-
-			equal(data._bindings, 0, "there are no bindings");
-
-			start();
-		}, 30);
-
 	});
 
 	test("each directly within live html section", function () {
@@ -4824,6 +4821,45 @@ function makeTest(name, doc, mutation) {
           }));
 
           equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
+	});
+
+	test("Render with #each by assigning values to a specific variable wrapped in quotes", function () {
+		var template = "{{#each animals 'animal'}}" +
+		                   "<span>{{animal.name}}</span>" +
+		               "{{/each}}";
+		var renderer = stache(template);
+		var animals = new CanList([{ name: 'sloth' }]);
+		var frag = renderer({ animals: animals });
+		var div = doc.createElement('div');
+
+		div.appendChild(frag);
+		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
+	});
+
+	test("Render with #each by assigning values to a specific variable without quotes", function () {
+		var template = "{{#each animals animal}}" +
+		                   "<span>{{animal.name}}</span>" +
+		               "{{/each}}";
+		var renderer = stache(template);
+		var animals = new CanList([{ name: 'sloth' }]);
+		var frag = renderer({ animals: animals });
+		var div = doc.createElement('div');
+
+		div.appendChild(frag);
+		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
+	});
+
+	test("Render with #each by assigning values to a specific variable and expressing it with `as` between list and value variable", function () {
+		var template = "{{#each animals as animal}}" +
+		                   "<span>{{animal.name}}</span>" +
+		               "{{/each}}";
+		var renderer = stache(template);
+		var animals = new CanList([{ name: 'sloth' }]);
+		var frag = renderer({ animals: animals });
+		var div = doc.createElement('div');
+
+		div.appendChild(frag);
+		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
