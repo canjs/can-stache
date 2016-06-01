@@ -3,7 +3,6 @@ require('./expression-test');
 require('./stache-define-test');
 require('../helpers/route-test');
 var stache = require('can-stache');
-require('can-stache/helpers/join-base');
 
 var QUnit = require('steal-qunit');
 var CanMap = require('can-map');
