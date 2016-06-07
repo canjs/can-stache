@@ -14,3 +14,24 @@ test("basic replacement and updating", function(){
 
 	equal( frag.firstChild.firstChild.nodeValue, "World","got back the right text");
 });
+
+test("a Promise added to a map", function(){
+	var MyMap = DefineMap.extend({
+		one: "*"
+	});
+	var template = stache("{{#one}}{{#if isResolved}}<div>Worked</div>{{/if}}{{/one}}");
+
+	var map = new MyMap();
+	var frag = template(map);
+
+	map.one = Promise.resolve();
+
+	map.one.then(function(){
+		var div = frag.firstChild;
+		equal(div.firstChild.nodeValue, "Worked", "Promise value updated");
+
+		start();
+	});
+
+	stop();
+});
