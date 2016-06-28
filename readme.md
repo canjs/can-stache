@@ -934,10 +934,10 @@ Changes the context within a block.
   context. If the value is a function or [can-compute.computed], the function's
   return value is used.
   
-1. __BLOCK__ <code>{can.stache}</code>:
+1. __BLOCK__ <code>{[can-stache](#stachetemplate)}</code>:
   A template that is rendered
   with the context of the `key`'s value.
-  
+    
 ## Contributing
 
 ### Making a Build

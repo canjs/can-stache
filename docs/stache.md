@@ -22,7 +22,7 @@ with data and local helpers.
 
 @param {String} template The text of a mustache template.
 
-@return {renderer} A renderer function that returns a live document fragment
+@return {can-stache.renderer} A [can-stache.renderer renderer] function that returns a live document fragment
 that can be inserted in the page.
 
 @body
