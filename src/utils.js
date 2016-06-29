@@ -1,5 +1,5 @@
 var Scope = require('can-view-scope');
-var ObserveInfo = require('can-observe-info');
+var Observation = require('can-observation');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -56,7 +56,7 @@ module.exports = {
 		var rendererWithScope = function(ctx, opts, parentNodeList){
 			return renderer(ctx || parentScope, opts, parentNodeList);
 		};
-		return ObserveInfo.notObserve(function (newScope, newOptions, parentNodeList) {
+		return Observation.ignore(function (newScope, newOptions, parentNodeList) {
 			// prevent binding on fn.
 			// If a non-scope value is passed, add that to the parent scope.
 			if (newScope !== undefined && !(newScope instanceof Scope)) {
