@@ -7,6 +7,9 @@ var utils = require('../src/utils');
 var types = require('can-util/js/types/types');
 var isFunction = require('can-util/js/is-function/is-function');
 
+var getBaseURL = require('can-util/js/base-url/base-url');
+var joinURIs = require('can-util/js/join-uris/join-uris');
+
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 
@@ -38,15 +41,28 @@ var resolveHash = function(hash){
 
 
 var helpers = {
-	"each": function(items, options){
+	"each": function(items) {
+		var args = [].slice.call(arguments),
+		    options = args.pop(),
+		    argsLen = args.length,
+		    argExprs = options.exprData.argExprs,
+		    resolved = resolve(items),
+		    asVariable,
+		    result = [],
+		    aliases,
+		    keys,
+		    key,
+		    i;
 
-		var resolved = resolve(items),
-			result = [],
-			keys,
-			key,
-			i;
+		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
+			asVariable = args[argsLen - 1];
 
-		if( types.isListLike(resolved) ) {
+			if (typeof asVariable !== 'string') {
+				asVariable = argExprs[argsLen - 1].key;
+			}
+		}
+
+		if (types.isListLike(resolved)) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
@@ -57,13 +73,18 @@ var helpers = {
 				nodeLists.update(options.nodeList, [el]);
 
 				var cb = function (item, index, parentNodeList) {
+					var aliases = {
+						"%index": index,
+						"@index": index
+					};
 
-					return options.fn(options.scope.add({
-							"%index": index,
-							"@index": index
-						},{notContext: true}).add(item), options.options, parentNodeList);
+					if (asVariable) {
+						aliases[asVariable] = item;
+					}
 
+					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);
 				};
+
 				live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
 					return options.inverse(options.scope.add(list), options.options, parentNodeList);
 				});
@@ -74,11 +95,16 @@ var helpers = {
 
 		if ( !! expr && utils.isArrayLike(expr)) {
 			for (i = 0; i < expr.length; i++) {
-				result.push(options.fn(options.scope.add({
-						"%index": i,
-						"@index": i
-					},{notContext: true})
-					.add(expr[i])));
+				aliases = {
+					"%index": i,
+					"@index": i
+				};
+
+				if (asVariable) {
+					aliases[asVariable] = expr[i];
+				}
+
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[i])));
 			}
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
@@ -86,24 +112,33 @@ var helpers = {
 
 			for (i = 0; i < keys.length; i++) {
 				key = keys[i];
-				result.push(options.fn(options.scope.add({
-						"%key": key,
-						"@key": key
-					},{notContext: true})
-					.add(expr[key])));
+				aliases = {
+					"%key": key,
+					"@key": key
+				};
+
+				if (asVariable) {
+					aliases[asVariable] = expr[key];
+				}
+
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}
 		} else if (expr instanceof Object) {
 			for (key in expr) {
-				result.push(options.fn(options.scope.add({
-						"%key": key,
-						"@key": key
-					},{notContext: true})
-					.add(expr[key])));
+				aliases = {
+					"%key": key,
+					"@key": key
+				};
+
+				if (asVariable) {
+					aliases[asVariable] = expr[key];
+				}
+
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}
-
 		}
-		return result;
 
+		return result;
 	},
 	"@index": function(offset, options) {
 		if (!options) {
@@ -205,6 +240,36 @@ var helpers = {
 			}
 		});
 		return options.fn(options.scope, newOptions);
+	},
+	'joinBase': function(firstExpr/* , expr... */){
+		var args = [].slice.call(arguments);
+		var options = args.pop();
+
+		var moduleReference = args.map( function(expr){
+			var value = resolve(expr);
+			return isFunction(value) ? value() : value;
+		}).join("");
+
+		var templateModule = options.helpers.attr("helpers.module");
+		var parentAddress = templateModule ? templateModule.uri: undefined;
+
+		var isRelative = moduleReference[0] === ".";
+
+		if(isRelative && parentAddress) {
+			return joinURIs(parentAddress, moduleReference);
+		} else {
+			var baseURL = (typeof System !== "undefined" &&
+				(System.renderingLoader && System.renderingLoader.baseURL ||
+				System.baseURL)) ||
+				getBaseURL();
+
+			// Make sure one of them has a needed /
+			if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
+				baseURL += "/";
+			}
+
+			return joinURIs(baseURL, moduleReference);
+		}
 	}
 };
 

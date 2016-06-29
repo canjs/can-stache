@@ -7,7 +7,7 @@ var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var Scope = require('can-view-scope');
 var compute = require('can-compute');
-var ObserveInfo = require('can-observe-info');
+var Observation = require('can-observation');
 
 var utils = require('./utils');
 var expression = require('./expression');
@@ -244,7 +244,7 @@ var core = {
 
 					};
 				}
-				var res = ObserveInfo.notObserve(renderer)();
+				var res = Observation.ignore(renderer)();
 				return frag(res);
 			});
 
@@ -357,7 +357,7 @@ var core = {
 				// we hide any observables read in the function by saving any observables that
 				// have been read and then setting them back which overwrites any `can.__observe` calls
 				// performed in value.
-				ObserveInfo.notObserve(value)(this);
+				Observation.ignore(value)(this);
 
 			}
 			// If the computeValue has observable dependencies, setup live binding.
