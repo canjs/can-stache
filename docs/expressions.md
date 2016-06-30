@@ -57,7 +57,7 @@ The value looked up by a KeyLookup depends on what the key looks like, and
 what expression type the KeyLookup is within.
 
 For example, `{{method(~./key)}}` will call `method` with 
-the a compute that looks up the value of `key` only in the top of the [can.view.Scope scope].
+the a compute that looks up the value of `key` only in the top of the [can-view-scope scope].
 
 In general the rules are as follows:
 
@@ -141,7 +141,7 @@ Data:
 	  pluralize: function(options){
 	    return options.word+(options.count === 1 ? "" : "s")
 	  },
-	  todos: new can.List([22,32,42]),
+	  todos: new List([22,32,42]),
 	  type: "age"
 	}
 
@@ -153,7 +153,7 @@ Result:
 ## Helper expression
 
 A helpers expression calls a function looked up in the [can-view-scope.Options helpers scope] followed by 
-the [can.view.Scope scope]. It looks like:
+the [can-view-scope scope]. It looks like:
 
 ```
 Template:
@@ -164,7 +164,7 @@ Data:
 	  pluralize: function(type, count){
 	    return "data-pluralize"
 	  },
-	  todos: new can.List([22,32,42]),
+	  todos: new List([22,32,42]),
 	  type: "age"
 	}
 

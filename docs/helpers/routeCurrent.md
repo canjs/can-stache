@@ -1,7 +1,7 @@
 @function can-stache.helpers.routeCurrent {{#routeCurrent hash}}
 @parent can-stache.htags 7
 
-Returns if the hash values match the [can.route]'s current properties.
+Returns if the hash values match the [can-route]'s current properties.
 
 @signature `{{#routeCurrent hashes}}SUBEXPRESSION{{/routeCurrent}}`
 
@@ -14,7 +14,7 @@ Returns if the hash values match the [can.route]'s current properties.
 
 @signature `routeCurrent([hashes])`
 
-  Calls [can-route.current can.route.current] with `hashes` and returns the result.
+  Calls [can-route.current route.current] with `hashes` and returns the result.
 
   @param {can-stache.expressions} hashes A hash expression like `page='edit' recipeId=id`.
   

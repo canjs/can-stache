@@ -124,13 +124,13 @@ property.
 
 ## Use
 
-Read the [use section of {{helper}}](can.stache.helpers.helper.html#section_Use) to better understand how:
+Read the [use section of {{helper}}](can-stache.helpers.helper.html#section_Use) to better understand how:
 
- - [Helper functions are found](can.stache.helpers.helper.html#section_Arguments)
- - [Arguments are passed to the helper](can.stache.helpers.helper.html#section_Arguments)
- - [Hash values are passed to the helper](can.stache.helpers.helper.html#section_Hash)
+ - [Helper functions are found](can-stache.helpers.helper.html#section_Arguments)
+ - [Arguments are passed to the helper](can-stache.helpers.helper.html#section_Arguments)
+ - [Hash values are passed to the helper](can-stache.helpers.helper.html#section_Hash)
 
-Read how [helpers that return functions](can.stache.helper.html#section_Returninganelementcallbackfunction) can
+Read how [helpers that return functions](can-stache.helper.html#section_Returninganelementcallbackfunction) can
 be used for rich behavior like 2-way binding.
 
 

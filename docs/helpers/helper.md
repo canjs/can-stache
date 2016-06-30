@@ -33,8 +33,8 @@ current or parent [can-stache.context context].
 @param {...can-stache.key|String|Number} [args] Space seperated arguments
 that get passed to the helper function as arguments. If the key's value is a:
 
- - [can-map] - A getter/setter [can.compute] is passed.
- - [can-compute.computed] - The can.compute is passed.
+ - [can-map] - A getter/setter [can-compute.computed] is passed.
+ - [can-compute.computed] - The compute is passed.
  - `function` - The function's return value is passed.
 
 @param {String} hashProperty
@@ -81,7 +81,7 @@ Results in:
 ## Arguments
 
 Arguments can be passed from the template to helper function by
-listing space seperated strings, numbers or other [can.stache.key keys] after the
+listing space seperated strings, numbers or other [can-stache.key keys] after the
 `helper` name.  For example:
 
 The template:
@@ -127,7 +127,7 @@ on the [can-stache.helper helper functions] docs.
 
 If enumerated arguments isn't an appropriate way to configure the behavior
 of a helper, it's possible to pass a hash of key-value pairs to the
-[can.stache.helperOptions helper option argument]'s
+[can-stache.helperOptions helper option argument]'s
 hash object.  Properties and values are specified
 as `hashProperty=hashValue`.  For example:
 
@@ -158,5 +158,5 @@ Results in:
 If a helper returns a function, that function is called back after
 the template has been rendered into DOM elements. This can
 be used to create stache tags that have rich behavior. Read about it
-on the [can.stache.helper helper function] page.
+on the [can-stache.helper helper function] page.
 

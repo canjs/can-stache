@@ -11,15 +11,15 @@ not become escaped, even if you use [can-stache.tags.unescaped](triple slash).
 
 If you write a helper that generates its own HTML, you will
 usually want to return a `stache.safeString.` In this case,
-you will want to manually escape parameters with `[can.esc].`
+you will want to manually escape parameters with [can-util/js/strin/string.esc].
 
 
     stache.registerHelper('link', function(text, url) {
-      text = can.esc(text);
-      url  = can.esc(url);
+      text = string.esc(text);
+      url  = string.esc(url);
     
       var result = '<a href="' + url + '">' + text + '</a>';
-      return mustache.safeString(result);
+      return stache.safeString(result);
     });
 
 
@@ -36,5 +36,5 @@ Results in:
 ```
 
 As an anchor tag whereas if we would have just returned the result rather than a
-`can-stache.safeString` our template would have rendered a div with the escaped anchor tag.
+`stache.safeString` our template would have rendered a div with the escaped anchor tag.
 

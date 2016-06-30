@@ -4,13 +4,13 @@
 
 @signature `{{@key}}`
 
-Insert the property name of an Object or attribute name of a can.Map that we iterate over with [#each](can.stache.helpers.each)
+Insert the property name of an Object or attribute name of a [can-map] that we iterate over with [#each](can-stache.helpers.each)
 
 @body
 
 ## Use
 
-Use `{{@key}}` to render the property or attribute name of an Object or can.Map, when iterating over it with [can-stache.helpers.each each]. For example,
+Use `{{@key}}` to render the property or attribute name of an Object or Map, when iterating over it with [can-stache.helpers.each each]. For example,
 
 The template:
 

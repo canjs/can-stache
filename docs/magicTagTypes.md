@@ -62,7 +62,7 @@ var frag = template(
 	frag //-> <h1><blink>Hello</blink></h1>
 ```
 
-Other ways to load and reference partials are discussed [can.stache.helpers.partial here]. 
+Other ways to load and reference partials are discussed [can-stache.helpers.partial here]. 
 
 #### [can-stache.tags.comment]
 
@@ -158,10 +158,10 @@ Result:
 
 #### [can-stache.tags.inverse {{^key}} ... {{/key}}]
 
-The [can.stache.tags.inverse inverse] section does the opposite of the
-normal [can.stache.tags.section] tag.  That is, it renders
-the subsection when [can.stache.tags.section] would render the inverse subsection 
-and it renders the inverse subsection when [can.stache.tags.section] would
+The [can-stache.tags.inverse inverse] section does the opposite of the
+normal [can-stache.tags.section] tag.  That is, it renders
+the subsection when [can-stache.tags.section] would render the inverse subsection 
+and it renders the inverse subsection when [can-stache.tags.section] would
 render the subsection.
 
 ```

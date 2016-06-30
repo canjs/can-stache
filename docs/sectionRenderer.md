@@ -33,8 +33,8 @@ a documentFragment is returned.
 
 ## Use
 
-Renderer functions are provided to stache [can.stache.helper helpers] on 
-the [can.stache.helperOptions options] argument and are used to render the
+Renderer functions are provided to stache [can-stache.helper helpers] on 
+the [can-stache.helperOptions options] argument and are used to render the
 content between sections. The `context` and `helpers` option let you control
 the data and helpers used to render the section.
 
@@ -46,7 +46,7 @@ data. Notice how the section has access to `first` and `last`.
       return $("<h1>").append( section );
     })
 
-    var template = can.stache(
+    var template = stache(
       "{{#helper}}{{first}} {{last}}{{/helper}}");
       
     template({last: "Meyer"}) //-> <h1>Justin Meyer</h1>

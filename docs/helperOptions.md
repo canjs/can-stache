@@ -10,7 +10,7 @@ BLOCK.  `options.fn` is only available if the helper is called as a
 
 Available if the helper is called 
 as a section or inverse section. 
-[can.stache.helpers.sectionHelper section helper] is called.  Call `fn` to
+[can-stache.helpers.sectionHelper section helper] is called.  Call `fn` to
 render the BLOCK with the specified `context`.
 
 @option {can-stache.sectionRenderer} [inverse] Provided if a 
@@ -38,7 +38,7 @@ arguments listed as `name=value` pairs for the helper.
     
     var data = {person: {name: {first: "Justin"}}};
     
-    can.stache.registerHelper("helper", function(options){
+    stache.registerHelper("helper", function(options){
     
       options.context === data.person //-> true
       
@@ -67,8 +67,8 @@ contexts.  It can be used to look up [can-stache.key key] values in the current 
     
     temp(data);
 
-@option {can.view-scope.Options} options An object that represents the local stache helpers.  It can be used to look 
-up [can.stache.key key] values
+@option {can-view-scope.Options} options An object that represents the local stache helpers.  It can be used to look 
+up [can-stache.key key] values
 
     var temp = stache("{{#person.name}}{{helper}}{{/person.name}}");
     
