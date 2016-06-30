@@ -6,18 +6,18 @@
 Render the block of text for each item in key's value.
 
 @param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or can.compute, the function's
+context. If the value is a function or [can-compute.computed], the function's
 return value is used.
 
-If the value of the key is a [can.List], the resulting HTML is updated when the
+If the value of the key is a [can-list], the resulting HTML is updated when the
 list changes. When a change in the list happens, only the minimum amount of DOM
 element changes occur.
 
-If the value of the key is a [can.Map], the resulting HTML is updated whenever
+If the value of the key is a [can-map], the resulting HTML is updated whenever
 attributes are added or removed. When a change in the map happens, only
 the minimum amount of DOM element changes occur.
 
-@param {can.stache} BLOCK A template that is rendered for each item in
+@param {can-stache} BLOCK A template that is rendered for each item in
 the `key`'s value. The `BLOCK` is rendered with the context set to the item being rendered.
 
 @body
@@ -75,16 +75,16 @@ Renders:
 
 {{#each key}} iteration will do basic diffing and aim to only update the DOM where the change occured. Whereas
 [can-stache.Sections Sections] iteration will re-render the entire section for any change in the list.
-[can.stache.Sections Sections] iteration is the prefered method to use when a list is replaced or changing significantly.
+[can-stache.Sections Sections] iteration is the prefered method to use when a list is replaced or changing significantly.
 When doing single list item changes frequently, {{#each key}} iteration is the faster choice.
 
-For example, assuming "list" is a can.List instance:
+For example, assuming "list" is a [can-list] instance:
 
 {{#if list}} will check for the truthy value of list. This is akin to checking for the truthy value of any JS object and will result to true, regardless of list contents or length.
 
 {{#if list.length}} will check for the truthy value of the length attribute. If you have an empty list, the length will be 0, so the #if will result to false and no contents will be rendered. If there is a length >= 1, this will result to true and the contents of the #if will be rendered.
 
-{{#each list}} and {{#list}} both iterate through an instance of can.List, however we setup the bindings differently.
+{{#each list}} and {{#list}} both iterate through an instance of [can-list], however we setup the bindings differently.
 
 {{#each list}} will setup bindings on every individual item being iterated through, while {{#list}} will not. This makes a difference in two scenarios:
 

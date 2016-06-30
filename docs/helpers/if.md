@@ -5,7 +5,7 @@
 Renders the `BLOCK` template within the current template.
 
 @param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or can.compute, the function's return value is used.
+context. If the value is a function or [can-compute.computed], the function's return value is used.
 
 @param {can-stache} BLOCK A stache template.
 

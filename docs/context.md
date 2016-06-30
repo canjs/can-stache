@@ -5,7 +5,7 @@
 ## Scope and Contexts
 
 Every part of a stache template is rendered with a 
-given [can.view.Scope scope]. The scope is used to lookup 
+given [can-view-scope scope]. The scope is used to lookup 
 values. A scope can contain multiple places to lookup values. 
 
 Lets look at what happens with the scope the following example:
@@ -50,7 +50,7 @@ Result:
 ```
 
 [can-stache.tags.section Sections], Helpers, 
-and [can.Component custom elements] can modify the scope used to render a subsection.
+and [can-component custom elements] can modify the scope used to render a subsection.
 
 ## Older
 

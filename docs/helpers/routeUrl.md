@@ -37,7 +37,7 @@ It this functionality could also be written as:
 <a href='{{ routeUrl(page="recipe" id=5) }}'>{{recipe.name}}</a>
 ```
 
-Using call expressions/parenthesis lets you pass the `merge` option to `can.route`.  This
+Using call expressions/parenthesis lets you pass the `merge` option to `route`.  This
 lets you write a url that only changes specified properties:
 
 ```

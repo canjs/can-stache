@@ -71,7 +71,7 @@ var core = {
 	/**
 	 * @hide
 	 * Given a mode and expresion data, returns a function that evaluates that expression.
-	 * @param {can.view.Scope} The scope in which the expression is evaluated.
+	 * @param {can-view-scope} The scope in which the expression is evaluated.
 	 * @param {can.view.Options} The option helpers in which the expression is evaluated.
 	 * @param {String} mode Either null, #, ^. > is handled elsewhere
 	 * @param {Object} exprData Data about what was in the mustache expression
@@ -181,7 +181,7 @@ var core = {
 	 * @hide
 	 * Returns a renderer function that live binds a partial.
 	 * @param {String} partialName the name of the partial.
-	 * @return {function(this:HTMLElement,can.view.Scope,can.view.Options)} A renderer function
+	 * @return {function(this:HTMLElement,can-view-scope,can.view.Options)} A renderer function
 	 * live binds a partial.
 	 */
 	makeLiveBindingPartialRenderer: function(partialName, state){
@@ -241,7 +241,7 @@ var core = {
 	 * Return a renderer function that evaluates to a string.
 	 * @param {String} mode
 	 * @param {can.stache.Expression} expression
-	 * @return {function(can.view.Scope,can.view.Options, can.view.renderer, can.view.renderer)}
+	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
 	 */
 	makeStringBranchRenderer: function(mode, expressionString){
 		var exprData = core.expression.parse(expressionString),

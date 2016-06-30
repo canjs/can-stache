@@ -3,9 +3,9 @@
 
 @signature `{{#default}}BLOCK{{/default}}`
 
-Renders the `BLOCK` if no [can.stache.helpers.case] blocks within the switch resolved.
+Renders the `BLOCK` if no [can-stache.helpers.case] blocks within the switch resolved.
 
-@param {can.stache} BLOCK a template to be rendered.
+@param {can-stache} BLOCK a template to be rendered.
 
 @return {DocumentFragment} A fragment, containing the rendered block.
 

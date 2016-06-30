@@ -54,7 +54,7 @@ fragment //-> <h1>Hello World</h1>
 document.body.appendChild(fragment)
 ``` 
 
-Render a template with observable data like [can.Map]s or [can.List]s and the HTML will update
+Render a template with observable data like [can-map]s or [can-list]s and the HTML will update
 when the observable data changes.
 
 ```
@@ -68,7 +68,7 @@ map.attr("subject","Earth");
 document.body.innerHTML //-> <h1>Hello Earth</h1>
 ``` 
 
-There's a whole lot of behavior that `can.stache` provides.  The following walks through
+There's a whole lot of behavior that `stache` provides.  The following walks through
 the most important stuff:
 
 - [can-stache.magicTagTypes] - The different tag types like `{{key}}` and `{{#key}}...{{/key}}`
@@ -78,7 +78,7 @@ the most important stuff:
 - [can-stache.Helpers] - The built in helpers and how to create your own.
 - [can-stache.Binding] - How live binding works.
 
-## Differences from can.mustache
+## Differences from [can-mustache]
 `stache` is largely compatable with [can-mustache].  There are three main differences:
 
  - Passes values in the scope to [can-component] with `{key}`.
@@ -86,7 +86,7 @@ the most important stuff:
  - [can-mustache.helpers.elementCallback Element callbacks] like `{{(el) -> CODE}}` are no longer supported.
 
 
-### Passing values in the scope to can.Components
+### Passing values in the scope to Components
 A [can-mustache] template passes values from the scope to a [can-component]
 by specifying the key of the value in the attribute directly.  For example:
 
@@ -155,7 +155,7 @@ jQuery, this can be done like:
 
 `can-mustache` supported [can-mustache.helpers.elementCallback element callbacks] like `{{(el) -> CODE}}`. These
 are not supported in `stache`.  Instead, create a helper that returns a function or register
-a [can.view.attr custom attribute].
+a [can-view-callbackr.attr custom attribute].
 
     stache.registerHelper("elementCallback", function(){
       return function(el){
