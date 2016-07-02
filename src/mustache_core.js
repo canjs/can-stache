@@ -180,12 +180,19 @@ var core = {
 	/**
 	 * @hide
 	 * Returns a renderer function that live binds a partial.
-	 * @param {String} partialName the name of the partial.
+	 * @param {String} expressionString
+	 * @param {Object} state The html state of where the expression was found.
 	 * @return {function(this:HTMLElement,can-view-scope,can.view.Options)} A renderer function
 	 * live binds a partial.
 	 */
-	makeLiveBindingPartialRenderer: function(partialName, state){
-		partialName = partialName.trim();
+	makeLiveBindingPartialRenderer: function(expressionString, state){
+		expressionString = expressionString.trim();
+		var exprData,
+				partialName = expressionString.split(/\s+/).shift();
+
+		if(partialName !== expressionString) {
+			exprData = core.expression.parse(expressionString);
+		}
 
 		return function(scope, options, parentSectionNodeList){
 			var nodeList = [this];
@@ -194,7 +201,19 @@ var core = {
 
 			var partialFrag = compute(function(){
 				var localPartialName = partialName;
-					// Look up partials in options first.
+				// If the second parameter of a partial is a custom context
+				if(exprData && exprData.argExprs.length === 1) {
+					var newContext = exprData.argExprs[0].value(scope, options)();
+					if(typeof newContext === "undefined") {
+						//!steal-remove-start
+						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
+							'partial ('+ partialName +') is not defined in the scope!');
+						//!steal-remove-end
+					}else{
+						scope = scope.add(newContext);
+					}
+				}
+				// Look up partials in options first.
 				var partial = options.attr("partials." + localPartialName), renderer;
 				if (partial) {
 					renderer = function() {

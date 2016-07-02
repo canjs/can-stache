@@ -4862,5 +4862,92 @@ function makeTest(name, doc, mutation) {
 		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
 	});
 
+	test("Partials with custom context", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("{{>dude dudes}}");
+
+		var data = new CanMap({
+			dudes: [
+				{ name: "austin" },
+				{ name: "justin" }
+			]
+		});
+		var dom = template(data,{
+			partials: {
+				dude: stache("{{#this}}<span>{{name}}</span>{{/this}}")
+			}
+		});
+		div.appendChild(dom);
+		var spans = div.getElementsByTagName('span');
+
+		equal(spans.length, 2, 'Got two dudes');
+		equal(innerHTML(spans[0]), 'austin', 'custom context inside');
+		equal(innerHTML(spans[1]), 'justin', 'custom context inside');
+	});
+
+	test("Partials with nested custom context and parent lookup", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("{{#data}}{{>dude dudes}}{{/data}}");
+
+		var dom = template({
+			data: new CanMap({
+				hello: "Hello",
+				dudes: [
+					{ name: "austin" },
+					{ name: "justin" }
+				]
+			})
+		},{
+			helpers: {
+				cap: function (name) {
+					return string.capitalize(name());
+				}
+			},
+			partials: {
+				dude: stache("{{#this}}<span>{{../hello}} {{name}}</span>{{/this}}")
+			}
+		});
+		div.appendChild(dom);
+		var spans = div.getElementsByTagName('span');
+
+		equal(spans.length, 2, 'Got two dudes');
+		equal(innerHTML(spans[0]), 'Hello austin', 'correct context');
+		equal(innerHTML(spans[1]), 'Hello justin', 'and parent lookup worked also');
+	});
+
+	test("Partials with custom context and helper", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("{{>dude dudes}}");
+
+		var data = new CanMap({
+			dudes: [
+				{ name: "austin" },
+				{ name: "justin" }
+			]
+		});
+		var dom = template(data,{
+			helpers: {
+				cap: function (name) {
+					return string.capitalize(name());
+				}
+			},
+			partials: {
+				dude: stache("{{#this}}<span>{{cap name}}</span>{{/this}}")
+			}
+		});
+		div.appendChild(dom);
+		var spans = div.getElementsByTagName('span');
+
+		equal(spans.length, 2, 'Got two dudes');
+		equal(innerHTML(spans[0]), 'Austin', 'correct context');
+		equal(innerHTML(spans[1]), 'Justin', 'and helpers worked also');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 }
