@@ -64,8 +64,8 @@ with data and local helpers.
   The text of a mustache template.
   
 
-- __returns__ <code>{renderer}</code>:
-  A renderer function that returns a live document fragment
+- __returns__ <code>{[renderer](#renderer-functionobject-object-data-helpers)(Object, Object, data, helpers)}</code>:
+  A [renderer](#renderer-functionobject-object-data-helpers) function that returns a live document fragment
   that can be inserted in the page.
   
 #### simpleHelper `{function(*..., can-stache.sectionOptions, arg..., options)}`
@@ -937,6 +937,7 @@ Changes the context within a block.
 1. __BLOCK__ <code>{[can-stache](#stachetemplate)}</code>:
   A template that is rendered
   with the context of the `key`'s value.
+  
     
 ## Contributing
 

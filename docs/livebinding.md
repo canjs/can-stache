@@ -20,12 +20,12 @@ In this example, we have a simple user welcome screen.
 		{{/messages}}
 	</p>
 
-	var data = new can.Map({
+	var data = new Map({
 		user: 'Tina Fey',
 		messages: 0
 	});
 
-	var template = can.view("#template", data);
+	var template = stache(document.querySelector("#template").innerHTML, data);
 
 The template evaluates the `messages` and adds the hooks for live binding automatically.
 Since we have no message it will render:
@@ -35,19 +35,19 @@ Since we have no message it will render:
 
 Now say we have a request that updates
 the `messages` attribute to have `5` messages.  We 
-call the [attr](ca-map.prototype.attr) method on the [can-map] to update
+call the [attr](can-map.prototype.attr) method on the [can-map] to update
 the attribute to the new value.
 
 	data.attr('message', 5)
 
 
-After [can.Map] receives this update, it will automatically
+After [can-map] receives this update, it will automatically
 update the paragraph tag to reflect the new value.
 
 	<p>You have 5 new message.</p>
 
 
-For more information visit the [can.Map] documentation.
+For more information visit the [can-map] documentation.
 
 ### Binding between components
 If you are looking for information on bindings between components like this:

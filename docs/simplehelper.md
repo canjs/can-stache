@@ -1,10 +1,10 @@
 @typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.simpleHelper simpleHelper
-@parent can.stache.types
+@parent can-stache.types
 
 @description A helper function passed to [can-stache.registerSimpleHelper].
 
 @param {...*} [arg] Arguments passed from the tag. After the helper
-name, any space seperated [can.stache.key keys], numbers or
+name, any space seperated [can-stache.key keys], numbers or
 strings are passed as arguments.
 
 The following template:
@@ -24,16 +24,16 @@ Will call a `madLib` helper with the following arguements.
         // number -> 4
     });
 
-Unlike [can.stache.helper] simple helpers will always pass the actual
+Unlike [can-stache.helper] simple helpers will always pass the actual
 value (instead of a compute).
 
-@param {can.stache.helperOptions} options An options object
+@param {can-stache.helperOptions} options An options object
 that gets populated with optional:
 
 - `fn` and `inverse` section rendering functions
 - a `hash` object of the maps passed to the helper
 
-@this {can.stache.context} The context the helper was
+@this {can-stache.context} The context the helper was
 called within.
 
 @return {String|function(HTMLElement)} The content to be inserted into
@@ -41,7 +41,7 @@ the template.
 
 @body
 
-can.stache.simpleHelper
+stache.simpleHelper
 
 ## Returning an element callback function
 

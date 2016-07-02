@@ -3,11 +3,11 @@
 
 
 @description A named reference to a value in the [can-view-scope scope] or 
-[can.view-scope.Options helper scope] in a template.
+[can-view-scope.Options helper scope] in a template.
 
 @option {String}
 
-A key specifies a value in the [can.view.Scope scope] or 
+A key specifies a value in the [can-view-scope scope] or 
 [can-view-scope.Options options] of a template being rendered. The
 key is used to look up a value in the scope.
 
@@ -25,8 +25,8 @@ the scope. Keys can look like:
  - `{{~key}}` - Pass a compute as the key's value instead of the value.
  - `{{*variable}}` - Reference a value in template scope.
  - `{{%key}}` - A special value that is added to scope. Examples:
-    - `{{%index}}` - The index of a value in an array or [can.List].
-    - `{{%key}}` - The property name of a value within an object or [can.Map].
+    - `{{%index}}` - The index of a value in an array or [can-list].
+    - `{{%key}}` - The property name of a value within an object or [can-map].
     - `{{%element}}` - The element an event was dispatched on.
     - `{{%event}}` - The event object.
     - `{{%viewModel}}` - The viewModel of the current element.
@@ -113,7 +113,7 @@ In general:
 
  - Functions are called to get their return value. (Use the AT operator `@` to prevent this).
  - Keys in helper expression arguments that find observable data return 
-   a [can.compute] that represents the value. 
+   a [can-compute.computed] that represents the value. 
  - Keys in other expressions return the value.
  - If no observable data is found, the key's value is returned in all expressions.
 
@@ -136,15 +136,15 @@ different data structures as a helper expression and in all other expressions.
    // Helper -> "value"
    // Other  -> "value"
 
-// A observable can.Map
-{some: new can.Map({key: "value"})}
-   // Helper -> can.compute("value")
+// A observable can-map
+{some: new Map({key: "value"})}
+   // Helper -> canCompute("value")
    // Other  -> "value"
 
-// A method on an observable can.Map that reads observables
-var Some = can.Map.extend({key: function(){ return this.attr("value")}})
+// A method on an observable can-map that reads observables
+var Some = Map.extend({key: function(){ return this.attr("value")}})
 {some: new Some({value: "value"})}
-   // Helper -> can.compute("value")
+   // Helper -> canCompute("value")
    // Other  -> "value"
 ```
 
@@ -233,12 +233,12 @@ different data structures:
 {some: function(){ return {key: "value"}}}
    //-> "value"
 
-// A observable can.Map
-{some: new can.Map({key: "value"})}
+// A observable can-map
+{some: new Map({key: "value"})}
    //-> "value"
 
-// A method on an observable can.Map that reads observables
-var Some = can.Map.extend({key: function(){ return this.attr("value")}})
+// A method on an observable can-map that reads observables
+var Some = Map.extend({key: function(){ return this.attr("value")}})
 {some: new Some({value: "value"})}
    //-> function(){ return this.attr("value")}
 ```
@@ -286,11 +286,11 @@ different data structures:
 {some: function(){ return {key: "value"}}}
    //-> "value"
 
-// A observable can.Map
+// A observable can-map
 {some: new Map({key: "value"})}
    //-> canCompute("value")
 
-// A method on an observable can.Map that reads observables
+// A method on an observable can-map that reads observables
 var Some = Map.extend({key: function(){ return this.attr("value")}})
 {some: new Some({value: "value"})}
    //-> canCompute(function(){ return this.attr("value")})
@@ -328,7 +328,7 @@ To work around this, an `localContext` helper could be created as follows:
 
 ```
 stache.regsiterHelper("localContext", function(options){
-  return options.fn(new can.Map());
+  return options.fn(new Map());
 });
 ```
 
@@ -351,7 +351,7 @@ other values.
 
 ### %index and %key
 
-When looping over an array or [can.List], you an use `%index` to write out
+When looping over an array or [can-list], you an use `%index` to write out
 the index of each property:
 
     {{#each task}}

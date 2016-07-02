@@ -11,26 +11,23 @@ output of the template.
 
  - A [can-stache.registerHelper registered helper].
  - A value within the current or parent
-   [can-stache.context context]. If the value is a function or [can.compute], the
+   [can-stache.context context]. If the value is a function or [can-compute.computed], the
    function's return value is used.
 
 @return {String|Function|*}
 
-After the key's value is found (and set to any function's return value),
-it is passed to [can.view.txt] as the result of a call to its `func`
-argument. There, if the value is a:
+If the value is a:
 
  - `null` or `undefined` - an empty string is inserted into the rendered template result.
  - `String` or `Number` - the value is inserted into the rendered template result.
- - `Function` - A [can.view.hook hookup] attribute or element is inserted so this function
-   will be called back with the DOM element after it is created.
+ - `Function` - A [can.view.hook hookup] attribute or element is inserted so this function will be called back with the DOM element after it is created.
 
 @body
 
 ## Use
 
 `{{key}}` insert data into the template. It most commonly references
-values within the current [can.stache.context context]. For example:
+values within the current [can-stache.context context]. For example:
 
 Rendering:
 

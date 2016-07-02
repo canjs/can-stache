@@ -9,7 +9,7 @@ Render the block of text if the key's value is falsey.
 context. If the value is a function or [can-compute.computed], the function's
 return value is used.
 
-@param {can.stache} BLOCK A template that is rendered
+@param {can-stache} BLOCK A template that is rendered
 if the `key`'s value is falsey.
 
 @body

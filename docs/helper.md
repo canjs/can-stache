@@ -1,11 +1,11 @@
-@typedef {function(this:can.stache.context,...*,can.stache.sectionOptions){}} can-stache.helper helper
+@typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.helper helper
 @parent can-stache.types 
 
 @description A helper function passed to [can-stache.registerHelper].
 
-@param {...*|can.compute} [arg] Arguments passed from the tag. After the helper
+@param {...*|can-compute} [arg] Arguments passed from the tag. After the helper
 name, any space seperated [can-stache.key keys], numbers or 
-strings are passed as arguments. [can.stache.key Keys] that 
+strings are passed as arguments. [can-stache.key Keys] that 
 read an observable value are passed as [can-compute.computed]'s.
 
 @param {can-stache.helperOptions} options An options object
@@ -48,7 +48,7 @@ tag. Whenever a [can-compute.computed] or function
 object is an argument for a helper, the original object is used 
 as the argument instead of the value that the function returns.
 
-If a [can-stache.key] represents a [can.Map] attribute,
+If a [can-stache.key] represents a [can-map] attribute,
 it is converted to a [can-compute.computed] getter/setter 
 function. This enables 2-way binding helpers.  
 
