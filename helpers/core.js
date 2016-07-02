@@ -292,7 +292,7 @@ var makeSimpleHelper = function(fn) {
 		});
 		return fn.apply(this, realArgs);
 	};
-}
+};
 
 module.exports = {
 	registerHelper: registerHelper,
