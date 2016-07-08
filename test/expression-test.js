@@ -4,6 +4,7 @@ var each = require('can-util/js/each/each');
 var Scope = require('can-view-scope');
 var canCompute = require('can-compute');
 var CanMap = require('can-map');
+var helpers = require('../helpers/converter');
 
 QUnit.module("can-stache/src/expression");
 
@@ -289,3 +290,95 @@ test("convertKeyToLookup", function(){
 	equal( expression.convertKeyToLookup("foo.bar"), "foo@bar" );
 
 });
+
+test("registerConverter helpers push and pull correct values", function () {
+
+	helpers.registerConverter('numberToHex', {
+		get: function(valCompute) {
+			return valCompute().toString(16)
+		}, set: function(val, valCompute) {
+			return valCompute(parseInt("0x" + val));
+		}
+	});
+
+	var data = new CanMap({
+		observeVal: 255
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("numberToHex(~observeVal)",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), 'ff', 'Converter called');
+	twoWayCompute('7f');
+	equal(data.attr("observeVal"), 127, 'push converter called');
+});
+
+test("registerConverter helpers push and pull multiple values", function () {
+
+	helpers.registerConverter('isInList', {
+		get: function(valCompute, list) {
+			return !!~list.indexOf(valCompute());
+		}, set: function(newVal, valCompute, list) {
+			if(!~list.indexOf(newVal)) {
+				list.push(newVal);
+			}
+		}
+	});
+
+	var data = new CanMap({
+		observeVal: 4,
+		list: [1,2,3]
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), false, 'Converter called');
+	twoWayCompute(5);
+	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
+});
+
+
+test("registerConverter helpers are chainable", function () {
+
+	helpers.registerConverter('numberToHex', {
+		get: function(valCompute) {
+			return valCompute().toString(16)
+		}, set: function(val, valCompute) {
+			return valCompute(parseInt("0x" + val));
+		}
+	});
+
+	helpers.registerConverter('upperCase', {
+		get: function(valCompute) {
+			return valCompute().toUpperCase();
+		}, set: function(val, valCompute) {
+			return valCompute(val.toLowerCase());
+		}
+	});
+
+
+	var data = new CanMap({
+		observeVal: 255
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), 'FF', 'Converter called');
+	twoWayCompute('7F');
+	equal(data.attr("observeVal"), 127, 'push converter called');
+});
+
