@@ -61,6 +61,40 @@ var getKeyComputeData = function (key, scope, readOptions) {
 //
 // These expression types return a value. They are assembled by `expression.parse`.
 
+// ### Bracket
+// For accessing properties using bracket notation like `foo[bar]`
+var Bracket = function (key, root) {
+	this.root = root;
+	this.key = key;
+};
+Bracket.prototype.value = function (scope) {
+	var prop = this.key;
+	var obj = this.root;
+
+	if (prop instanceof Literal) {
+		prop = prop.value();
+	} else if (prop instanceof Lookup) {
+		prop = lookupValue(prop.key, scope, {}, {});
+		prop = prop.value();
+	} else {
+		prop = prop.value(scope, {}, {})();
+	}
+
+	if (!obj) {
+		return lookupValue(prop, scope, {}, {}).value;
+	} else {
+		return compute(function() {
+			if (obj instanceof Lookup) {
+				obj = lookupValue(obj.key, scope, {}, {}).value();
+			} else {
+				obj = obj.value(scope, {}, {})();
+			}
+
+			return obj[prop];
+		});
+	}
+};
+
 // ### Literal
 // For inline static values like `{{"Hello World"}}`
 var Literal = function(value){
@@ -197,8 +231,6 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	});
 
 };
-
-
 
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
@@ -384,7 +416,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 // AT @NAME
 //
 var keyRegExp = /[\w\.\\\-_@\/\&%]+/,
-	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~)/g,
+	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\])/g,
 	literalRegExp = /^('.*?'|".*?"|[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
 
 var isTokenKey = function(token){
@@ -529,7 +561,7 @@ var expression = {
 	Helper: Helper,
 	HelperLookup: HelperLookup,
 	HelperScopeLookup: HelperScopeLookup,
-
+	Bracket: Bracket,
 
 	SetIdentifier: function(value){ this.value = value; },
 	tokenize: function(expression){
@@ -614,6 +646,11 @@ var expression = {
 
 
 			return new (options.methodRule(ast))(this.hydrateAst(ast.method, options, ast.type), args, hashes);
+		} else if (ast.type === "Bracket") {
+			return new Bracket(
+				this.hydrateAst(ast.children[0], options),
+				ast.root ? this.hydrateAst(ast.root, options) : undefined
+			);
 		}
 	},
 	ast: function(expression){
@@ -635,7 +672,7 @@ var expression = {
 			// Literal
 			if(literalRegExp.test( token )) {
 				convertToHelperIfTopIsLookup(stack);
-				stack.addTo(["Helper", "Call", "Hash"], {type: "Literal", value: utils.jsonParse( token )});
+				stack.addTo(["Helper", "Call", "Hash", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
 			}
 			// Hash
 			else if(nextToken === "=") {
@@ -680,7 +717,7 @@ var expression = {
 					// if two scopes, that means a helper
 					convertToHelperIfTopIsLookup(stack);
 
-					stack.addToAndPush(["Helper", "Call","Hash","Arg"], {type: "Lookup", key: token});
+					stack.addToAndPush(["Helper", "Call", "Hash", "Arg", "Bracket"], {type: "Lookup", key: token});
 				}
 
 			}
@@ -708,6 +745,19 @@ var expression = {
 			// End Call argument
 			else if(token === ",") {
 				stack.popUntil(["Call"]);
+			}
+			// Bracket
+			else if(token === "[") {
+				top = stack.top();
+				lastToken = stack.topLastChild();
+
+				if (lastToken && lastToken.type === "Call") {
+					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
+				} else if (top.type === "Lookup") {
+					stack.replaceTopAndPush({type: "Bracket", root: top});
+				} else {
+					stack.replaceTopAndPush({type: "Bracket"});
+				}
 			}
 		}
 		return stack.root.children[0];
