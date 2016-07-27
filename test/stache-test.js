@@ -4949,5 +4949,24 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(spans[1]), 'Justin', 'and helpers worked also');
 	});
 
+	test("Bracket expression", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ foo[bar] }}</p>");
+
+		var data = new CanMap({
+			bar: "name",
+			foo: {
+				name: "Kevin"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 }

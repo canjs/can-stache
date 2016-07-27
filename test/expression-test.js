@@ -289,3 +289,174 @@ test("convertKeyToLookup", function(){
 	equal( expression.convertKeyToLookup("foo.bar"), "foo@bar" );
 
 });
+
+test("expression.ast - [] operator", function(){
+  var ast = expression.ast("['propName']");
+
+	deepEqual(ast, {
+    type: "Bracket",
+    children: [{type: "Literal", value: "propName"}]
+  });
+
+  var ast2 = expression.ast("[propName]");
+
+	deepEqual(ast2, {
+    type: "Bracket",
+    children: [{type: "Lookup", key: "propName"}]
+  });
+
+	var ast3 = expression.ast("foo['bar']");
+
+	deepEqual(ast3, {
+    type: "Bracket",
+		root: {type: "Lookup", key: "foo"},
+    children: [{type: "Literal", value: "bar"}]
+  });
+
+	var ast3 = expression.ast("foo[bar]");
+
+	deepEqual(ast3, {
+    type: "Bracket",
+		root: {type: "Lookup", key: "foo"},
+    children: [{type: "Lookup", key: "bar"}]
+  });
+
+	var ast4 = expression.ast("foo()[bar]");
+
+	deepEqual(ast4, {
+		type: "Bracket",
+		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
+		children: [{type: "Lookup", key: "bar"}]
+	});
+});
+
+test("expression.parse - [] operator", function(){
+	var exprData = expression.parse("['propName']");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Literal('propName')
+		)
+	);
+
+	exprData = expression.parse("[propName]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('propName')
+		)
+	);
+
+	exprData = expression.parse("foo['bar']");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Literal('bar'),
+			new expression.Lookup('foo')
+		)
+	);
+
+	exprData = expression.parse("foo[bar]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('bar'),
+			new expression.Lookup('foo')
+		)
+	);
+
+	exprData = expression.parse("foo()[bar]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('bar'),
+			new expression.Call(
+				new expression.Lookup('@foo'),
+				[],
+				{}
+			)
+		)
+	);
+});
+
+test("Bracket expression", function(){
+	// ["bar"]
+	var expr = new expression.Bracket(
+		new expression.Literal("bar")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({bar: "name"})
+		)
+	);
+  equal(compute(), "name");
+
+	// [bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({bar: "name", name: "Kevin"})
+		)
+	);
+  equal(compute(), "Kevin");
+
+	// foo["bar"]
+	expr = new expression.Bracket(
+		new expression.Literal("bar"),
+		new expression.Lookup("foo")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: {bar: "name"}})
+		)
+	);
+  equal(compute(), "name");
+
+	// foo[bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar"),
+		new expression.Lookup("foo")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: {name: "Kevin"}, bar: "name"})
+		)
+	);
+  equal(compute(), "Kevin");
+
+	// foo()[bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar"),
+		new expression.Call(
+			new expression.Lookup("@foo"),
+			[],
+			{}
+		)
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
+		)
+	);
+  equal(compute(), "Kevin");
+
+	// foo()[bar()]
+	expr = new expression.Bracket(
+		new expression.Call(
+			new expression.Lookup("@bar"),
+			[],
+			{}
+		),
+		new expression.Call(
+			new expression.Lookup("@foo"),
+			[],
+			{}
+		)
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({
+				foo: function() { return {name: "Kevin"}; },
+				bar: function () { return "name"; }
+			})
+		)
+	);
+  equal(compute(), "Kevin");
+});
