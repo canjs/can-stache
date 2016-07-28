@@ -17,10 +17,10 @@
 
 @signature `stache(template)`
 
-Processes the template and returns a renderer function that renders the template
-with data and local helpers.
+Processes the template and returns a [can-stache.renderer renderer function].
+Use [steal-stache] to import template renderer functions with [http://stealjs.com StealJS].
 
-@param {String} template The text of a mustache template.
+@param {String} template The text of a stache template.
 
 @return {can-stache.renderer} A [can-stache.renderer renderer] function that returns a live document fragment
 that can be inserted in the page.
@@ -29,14 +29,14 @@ that can be inserted in the page.
 
 ## Use
 
-Stache templates are a [mustache](https://mustache.github.io/mustache.5.html) and [handlebars](http://handlebarsjs.com/) compatable 
+Stache templates are a [mustache](https://mustache.github.io/mustache.5.html) and [handlebars](http://handlebarsjs.com/) compatable
 syntax.  They are used to:
 
 - Convert data into HTML.
 - Update the HTML when observable data changes.
 - Provide custom elements and bindings.
 
-The following 
+The following
 creates a stache template, renders it with data, and inserts
 the result into the page:
 
@@ -48,11 +48,11 @@ var renderer = stache("<h1>Hello {{subject}}</h1>");
 // document fragment.
 var fragment = renderer({subject: "World"})
 
-// A document fragment is a collection of elements that can be 
+// A document fragment is a collection of elements that can be
 // used with jQuery or with normal DOM methods.
 fragment //-> <h1>Hello World</h1>
 document.body.appendChild(fragment)
-``` 
+```
 
 Render a template with observable data like [can-map]s or [can-list]s and the HTML will update
 when the observable data changes.
@@ -66,7 +66,7 @@ document.body.appendChild(fragment)
 map.attr("subject","Earth");
 
 document.body.innerHTML //-> <h1>Hello Earth</h1>
-``` 
+```
 
 There's a whole lot of behavior that `stache` provides.  The following walks through
 the most important stuff:
@@ -151,22 +151,11 @@ jQuery, this can be done like:
     template() //-> <h1>Hi There</h1>
 
 
-### Element callbacks are no longer supported
+### Element callbacks
 
-`can-mustache` supported [can-mustache.helpers.elementCallback element callbacks] like `{{(el) -> CODE}}`. These
-are not supported in `stache`.  Instead, create a helper that returns a function or register
-a [can-view-callbackr.attr custom attribute].
+Use [can-view-callbacks.attr can-view-callbacks.attr] or [can-view-callbacks.tag] to create
+custom element or attribute helpers.
 
-    stache.registerHelper("elementCallback", function(){
-      return function(el){
-        CODE
-      }
-    });
-
-    viewCallbacks.tag("element-callback", function(el){
+    canViewCallbacks.tag("element-callback", function(el){
       CODE
     })
-
-## Tags
-
-@api can-stache.tags
