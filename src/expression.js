@@ -165,7 +165,7 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 	var method = this.methodExpr.value(scope, helperScope);
 	// TODO: remove this hack
-	this.isHelper = this.methodExpr.isHelper;
+	var isHelper = this.isHelper = this.methodExpr.isHelper;
 
 	var hasHash = !isEmptyObject(this.hashExprs),
 		getArgs = this.args(scope, helperScope),
@@ -184,7 +184,7 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 				args.push(getHash());
 			}
 
-			if(helperOptions) {
+			if(isHelper && helperOptions) {
 				args.push(helperOptions);
 			}
 			if(arguments.length) {
@@ -208,7 +208,7 @@ var HelperLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperLookup.prototype.value = function(scope, helperOptions){
-	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.attr('.'), scope]});
+	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peak('.'), scope]});
 	return result.helper || result.value;
 };
 
@@ -220,7 +220,7 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.attr('.'), scope]}).value;
+	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peak('.'), scope]}).value;
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -267,7 +267,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		helper = mustacheHelpers.getHelper(methodKey, helperOptions);
 
 		// If a function is on top of the context, call that as a helper.
-		var context = scope.attr(".");
+		var context = scope.peak(".");
 		if(!helper && typeof context[methodKey] === "function") {
 			//!steal-remove-start
 			dev.warn('can-stache/src/expression.js: In 3.0, method "' + methodKey + '" will not be called as a helper, but as a method.');
@@ -282,7 +282,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// This way, we can get the initial value without "reading" the compute.
 		var computeData = getKeyComputeData(methodKey, scope, {
 			isArgument: false,
-			args: args && args.length ? args : [scope.attr('.'), scope]
+			args: args && args.length ? args : [scope.peak('.'), scope]
 		}),
 			compute = computeData.compute;
 
@@ -326,7 +326,7 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 		fn: function () {},
 		inverse: function () {}
 	},
-		context = scope.attr("."),
+		context = scope.peak("."),
 		args = this.args(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly),
 		hash = this.hash(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
