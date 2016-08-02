@@ -49,6 +49,16 @@ QUnit.test("routeUrl and routeCurrent", function(){
 		frag = template({});
 		QUnit.equal(frag.firstChild.nodeValue, "no", "route is not current");
 
+		template = stache("<a href=\"{{routeUrl page='recipe' id=5 true}}\"></a>");
+		frag = template({});
+
+		QUnit.equal( frag.firstChild.getAttribute("href"), "#!&page=recipe&id=5&foo=bar", "merge works helper");
+
+		template = stache("<a href=\"{{routeUrl(page='recipe' id=5,true)}}\"></a>");
+		frag = template({});
+
+		QUnit.equal( frag.firstChild.getAttribute("href"), "#!&page=recipe&id=5&foo=bar", "merge works call expression");
+
 		mockRoute.stop();
 		start();
 	},100);

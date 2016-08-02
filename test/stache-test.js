@@ -4960,6 +4960,27 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( lis[1].innerHTML, "2", "is 2");
 	});
 
+	if(window.console && window.console.log) {
+		test("log", function(){
+			var oldLog = console.log;
+			var calls = 0 ;
+			var FIRST = {},
+				SECOND = {};
+			console.log = function(first, second){
+				QUnit.equal(first, FIRST);
+				QUnit.equal(second, SECOND);
+			};
+			var template1 = stache("{{log first second}}"),
+				template2 = stache("{{ log(first, second) }}");
+
+
+			template1({first: FIRST, second: SECOND});
+			template2({first: FIRST, second: SECOND});
+			console.log = oldLog;
+		});
+	}
+
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

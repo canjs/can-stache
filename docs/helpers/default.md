@@ -3,13 +3,28 @@
 
 @signature `{{#default}}BLOCK{{/default}}`
 
-Renders the `BLOCK` if no [can-stache.helpers.case] blocks within the switch resolved.
+Renders `BLOCK` if no [can-stache.helpers.case] blocks within the [can-stache.helpers.switch] resolved.
 
-@param {can-stache} BLOCK a template to be rendered.
+```
+{{#switch user.type}}
+	{{#case "admin"}}
+		Pay
+	{{/case}}
+	{{#case "admin"}}
+		<button/>
+	{{/case}}
+	{{#default}}
+		Look at data
+	{{/default}}
+{{/switch}}
+```
 
-@return {DocumentFragment} A fragment, containing the rendered block.
+
+@param {can-stache.sectionRenderer} BLOCK a template to be rendered.
 
 @body
+
+## Use
 
 The `default` helper is contextual inside of a [can-stache.helpers.switch] block. It acts as a fall-through in case none of the [can-stache.helpers.case] helpers resolved.
 

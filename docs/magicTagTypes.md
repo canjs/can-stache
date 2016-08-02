@@ -6,8 +6,8 @@
 Rendering behavior is controlled with magic tags that look like `{{}}`.  There
 are two main forms of magic tags:
 
- - Insertion tags - insert their value into the result like `{{key}}` and `{{{key}}}`.
- - Section tags - optional render a sub-section like `{{#key}} ... {{/key}}`.
+ - Insertion tags - insert their value into the result like `{{expression}}` and `{{{expression}}}`.
+ - Section tags - optional render a sub-section like `{{#expression}} ... {{/expression}}`.
 
 Lets see the general behavior of each tag type:
 
@@ -17,7 +17,7 @@ Insertion tags render a value into result.
 
 #### [can-stache.tags.escaped]
 
-Inserts the escaped value of `key` into the result. This is your most common tag.
+Inserts the escaped value of `expression` into the result. This is your most common tag.
 
 ```
 Template:
@@ -32,7 +32,7 @@ Result:
 
 #### [can-stache.tags.unescaped]
 
-Inserts the unescaped value of `key` into the result.
+Inserts the unescaped value of `expression` into the result.
 
 ```
 Template:
@@ -84,11 +84,11 @@ Result:
 Section tags are passed a subsection and an optional inverse subsection. They
 optionally render the subsections and insert them into the result.
 
-#### [can-stache.tags.section {{#key}} ... {{/key}}]
+#### [can-stache.tags.section {{#expression}} ... {{/expression}}]
 
-Renders the subsection or inverse subsection depending on the value of key.
+Renders the subsection or inverse subsection depending on the value of expression.
 
-If `key` is truthy, renders the subsection:
+If `expression` is truthy, renders the subsection:
 
 ```
 Template:
@@ -101,7 +101,7 @@ Result:
 	<h1>Hello</h1>
 ```
 
-The subsection is rendered with the `key` value as the top of the scope:
+The subsection is rendered with the `expression` value as the top of the scope:
 
 ```
 Template:
@@ -115,7 +115,7 @@ Result:
 ```
 
 
-If `key` is falsey, renders the inverse subsection if present:
+If `expression` is falsey, renders the inverse subsection if present:
 
 ```
 Template:
@@ -128,7 +128,7 @@ Result:
 	<h1>Goodbye</h1>
 ```
 
-If `key` is array-like and its `length` is greater than 0, the subsection
+If `expression` is array-like and its `length` is greater than 0, the subsection
 is rendered with each item in the array as the top of the scope:
 
 ```
@@ -142,7 +142,7 @@ Result:
 	<p>2 4 8 16 </p>
 ```
 
-If `key` is array-like and its `length` is 0, the inverse subsection
+If `expression` is array-like and its `length` is 0, the inverse subsection
 is rendered:
 
 ```
@@ -156,7 +156,7 @@ Result:
 	<p>No items</p>
 ```
 
-#### [can-stache.tags.inverse {{^key}} ... {{/key}}]
+#### [can-stache.tags.inverse {{^expression}} ... {{/expression}}]
 
 The [can-stache.tags.inverse inverse] section does the opposite of the
 normal [can-stache.tags.section] tag.  That is, it renders

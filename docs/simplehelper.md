@@ -41,7 +41,6 @@ the template.
 
 @body
 
-stache.simpleHelper
 
 ## Returning an element callback function
 

@@ -25,7 +25,7 @@ Might call `method` with:
 {age: 5, first: "Justin", last: "Meyer"}
 ```
 
-In a [can-stache/expressions/helper, `Hash` expressions
+In a [can-stache/expressions/helper], `Hash` expressions
 add to the [can-stache.helperOptions]'s `hash` object with the specified `PROPERTY_NAME` properties
 and `EXPRESSION` values.
 

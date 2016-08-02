@@ -4,13 +4,19 @@ var route = require('can-route');
 var getLast = require('can-util/js/last/last');
 var stacheExpression = require('../src/expression');
 
-var looksLikeOptions = function(options){
-	return options && typeof options.fn === "function" && typeof options.inverse === "function";
-};
+var looksLikeOptions = helpers.looksLikeOptions;
 
 
 helpers.registerHelper('routeUrl',function(params, merge){
+	var finalParams,
+		finalMerge;
 	// check if called like a mustache helper
+	if(typeof params === "boolean") {
+		finalMerge = params;
+
+	}
+	debugger;
+
 	if(!params) {
 		params = {};
 	}

@@ -1,9 +1,15 @@
 @function can-stache.helpers.log {{log}}
 @parent can-stache.htags 9
 
-@signature `{{#log [message]}}`
+@signature `{{ log([EXPRESSION]) }}`
 
-Logs the context of the current block with an optional message.
+`console.log`s the current context or the result of the provided expressions.
 
-@param {*} message An optional message to log out in addition to the
-current context.
+```
+{{log}}
+{{ log(person.name, person.age)  }}
+```
+
+
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} [EXPRESSION]
+Arguments to `console.log`.  If none are provided, the current context (the top of the [can-view-scope]) will be logged.

@@ -1,4 +1,4 @@
-@function can-stache.tags.close {{/key}}
+@function can-stache.tags.close {{/expression}}
 @parent can-stache.tags 4
 
 @signature `{{/helperKeyOrMethod}}`

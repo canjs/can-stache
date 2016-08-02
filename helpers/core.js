@@ -16,6 +16,9 @@ var assign = require('can-util/js/assign/assign');
 
 var domData = require('can-util/dom/data/data');
 
+var looksLikeOptions = function(options){
+	return options && typeof options.fn === "function" && typeof options.inverse === "function";
+};
 
 var resolve = function (value) {
 	if (types.isListLike(value) && value.attr('length')) {
@@ -206,12 +209,21 @@ var helpers = {
 			return options.fn(ctx);
 		}
 	},
-	'log': function (expr, options) {
+	'log': function (options) {
+		// go through the arguments
+		var logs = [];
+		each(arguments, function(val){
+			if(!looksLikeOptions(val)) {
+				logs.push(val)
+			}
+		});
+
+
 		if (typeof console !== "undefined" && console.log) {
-			if (!options) {
-				console.log(expr.context);
+			if (!logs.length) {
+				console.log(options.context);
 			} else {
-				console.log(expr, options.context);
+				console.log.apply(console, logs);
 			}
 		}
 	},
@@ -310,5 +322,6 @@ module.exports = {
 		}
 	},
 	resolve: resolve,
-	resolveHash: resolveHash
+	resolveHash: resolveHash,
+	looksLikeOptions: looksLikeOptions
 };

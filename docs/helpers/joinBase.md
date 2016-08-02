@@ -1,13 +1,15 @@
-@function can-stache.helpers.joinBase {{joinBase args}}
+@function can-stache.helpers.joinBase {{joinBase expressions}}
 @parent can-stache.htags 16
 
-@signature `{{joinBase expr}}`
+@signature `{{joinBase [EXPRESSION...]}}`
 
 Return an application-relative url for a resource.
 
-@param {can-stache.expression} [expr...] An expression or key that references a value within the current or parent scope.
+```
+{{joinBase "hello/" name ".png"}}
+```
 
-@return {String} An application-relative url.
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} [EXPRESSION...] Expression or key arguments that reference a value within the current or parent scope.
 
 @body
 
