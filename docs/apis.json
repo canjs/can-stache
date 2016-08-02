@@ -4,12 +4,14 @@
 			"can-stache.simpleHelper",
 			"can-stache.helper",
 			"can-stache.helperOptions",
+			"can-stache.getterSetter",
 			"can-stache.key",
 			"can-stache.sectionRenderer"
 		]},
 		{"static": [
 			"can-stache.registerHelper",
 			"can-stache.registerSimpleHelper",
+			"can-stache.registerConverter",
 			"can-stache.safeString"
 		]},
 		{"tags": [
