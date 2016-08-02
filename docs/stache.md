@@ -3,9 +3,11 @@
 @release 2.1
 @group can-stache.pages 0 Pages
 @group can-stache.static 1 Methods
-@group can-stache.types 2 Types
-@group can-stache.tags 3 Basic Tags
-@group can-stache.htags 4 Helper Tags
+@group can-stache.tags 2 Tags
+@group can-stache/expressions 3 Expressions
+@group can-stache/keys 4 Key Operators
+@group can-stache.htags 5 Helpers
+@group can-stache.types 6 Types
 
 @link ../docco/view/stache/mustache_core.html docco
 @test can/view/stache/test/test.html
@@ -29,18 +31,19 @@ that can be inserted in the page.
 
 ## Use
 
-Stache templates are a [mustache](https://mustache.github.io/mustache.5.html) and [handlebars](http://handlebarsjs.com/) compatable
-syntax.  They are used to:
+Stache templates are a [mustache](https://mustache.github.io/mustache.5.html) and [handlebars](http://handlebarsjs.com/) compatible
+syntax.  Stache templates are used to:
 
 - Convert data into HTML.
 - Update the HTML when observable data changes.
-- Provide custom elements and bindings.
+- Enable [can-component custom elements] and [can-stache-bindings bindings].
 
 The following
 creates a stache template, renders it with data, and inserts
 the result into the page:
 
-```
+```js
+var stache = require("can-stache");
 // renderer is a "renderer function"
 var renderer = stache("<h1>Hello {{subject}}</h1>");
 
@@ -54,16 +57,19 @@ fragment //-> <h1>Hello World</h1>
 document.body.appendChild(fragment)
 ```
 
-Render a template with observable data like [can-map]s or [can-list]s and the HTML will update
-when the observable data changes.
+Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/map/map DefineList]s and the
+resulting HTML will update when the observable data changes.
 
-```
+```js
+var DefineMap = require("can-define/map/map");
+
+
 var renderer = stache("<h1>Hello {{subject}}</h1>");
-var map = new Map({subject: "World"});
+var map = new DefineMap({subject: "World"});
 var fragment = renderer(map)
 document.body.appendChild(fragment)
 
-map.attr("subject","Earth");
+map.subject = "Earth";
 
 document.body.innerHTML //-> <h1>Hello Earth</h1>
 ```
@@ -78,84 +84,14 @@ the most important stuff:
 - [can-stache.Helpers] - The built in helpers and how to create your own.
 - [can-stache.Binding] - How live binding works.
 
-## Differences from [can-mustache]
-`stache` is largely compatable with [can-mustache].  There are three main differences:
+## See also
 
- - Passes values in the scope to [can-component] with `{key}`.
- - [can-stache.sectionRenderer section renderers] return documentFragments.
- - [can-mustache.helpers.elementCallback Element callbacks] like `{{(el) -> CODE}}` are no longer supported.
+[can-view-scope] is used by `stache` internally to hold and lookup values.  This is similar to
+how JavaScript's closures hold variables, except you can use it programatically.
 
+[can-component] and [can-view-callbacks.tag can-view-callbacks.tag] allow you to define custom
+elements for use within a stache template.  [can-view-callbacks.attr can-view-callbacks.attr] allow
+you to define custom attributes.
 
-### Passing values in the scope to Components
-A [can-mustache] template passes values from the scope to a [can-component]
-by specifying the key of the value in the attribute directly.  For example:
-
-    Component.extend({
-      tag: "my-tag",
-      template: "<h1>{{greeting}}</h1>"
-    });
-    var template = mustache("<my-tag greeting='message'></my-tag>");
-
-    var frag = template({
-      message: "Hi"
-    });
-
-    frag //-> <my-tag greeting='message'><h1>Hi</h1></my-tag>
-
-With stache, you wrap the key with `{}`. For example:
-
-    Component.extend({
-      tag: "my-tag",
-      template: "<h1>{{greeting}}</h1>"
-    });
-    var template = stache("<my-tag greeting='{message}'></my-tag>");
-
-    var frag = template({
-      message: "Hi"
-    });
-
-    frag //-> <my-tag greeting='{message}'><h1>Hi</h1></my-tag>
-
-If the key was not wrapped, the template would render:
-
-    frag //-> <my-tag greeting='message'><h1>message</h1></my-tag>
-
-Because the attribute value would be passed as the value of `greeting`.
-
-### Section renderers return documentFragments
-
-A [can-mustache.sectionRenderer Mustache section renderer] called
-like `options.fn()` or `options.inverse()` would always return a String. For example,
-the following would wrap the `.fn` section in an `<h1>` tag:
-
-    mustache.registerHelper("wrapH1", function(options.fn()){
-       return "<h1>"+options.fn()+"</h1>";
-    });
-
-    var template = mustache("{{#wrapH1}}Hi There!{{/#wrapH1}}");
-    template() //-> <h1>Hi There</h1>
-
-`stache`'s [can-stache.sectionRenderer section renderers] return documentFragments when sections
-are not contained within an html element. This means the result of the previous helper would be:
-
-    <h1>[object DocumentFragment]</h1>
-
-Instead, helper functions should manipulate the document fragment into the desired response.  With
-jQuery, this can be done like:
-
-    stache.registerHelper("wrapH1", function(options.fn()){
-       return $("<h1>").append( options.fn() );
-    });
-
-    var template = stache("{{#wrapH1}}Hi There!{{/#wrapH1}}");
-    template() //-> <h1>Hi There</h1>
-
-
-### Element callbacks
-
-Use [can-view-callbacks.attr can-view-callbacks.attr] or [can-view-callbacks.tag] to create
-custom element or attribute helpers.
-
-    canViewCallbacks.tag("element-callback", function(el){
-      CODE
-    })
+[can-stache-bindings] sets up __element and bindings__ between a stache template's [can-view-scope],
+component [can-component.prototype.viewModel viewModels], or an element's attributes.

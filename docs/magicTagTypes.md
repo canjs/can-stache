@@ -1,13 +1,13 @@
 @page can-stache.magicTagTypes Magic Tag Types
 @parent can-stache.pages 0
 
-## Magic tag types
+@body
 
-Rendering behavior is controled with magic tags that look like `{{}}`.  There
+Rendering behavior is controlled with magic tags that look like `{{}}`.  There
 are two main forms of magic tags:
 
  - Insertion tags - insert their value into the result like `{{key}}` and `{{{key}}}`.
- - Section tags - optional render a sub-section like `{{#key}} ... {{/key}}`. 
+ - Section tags - optional render a sub-section like `{{#key}} ... {{/key}}`.
 
 Lets see the general behavior of each tag type:
 
@@ -45,24 +45,24 @@ Result:
 	<div><b>Justin</b></div>
 ```
 
-#### [can-stache.helpers.partial]
+#### [can-stache.tags.partial]
 
 Renders another template with the same context as the current context.
 
 ```
 var template = stache("<h1>{{>title}}</h1>");
-  
-	
+
+
 var frag = template(
 	{message: "Hello"},
 	{
 		partials: { title: 	stache("<blink>{{message}}</blink>”) }
 	});
-	
+
 	frag //-> <h1><blink>Hello</blink></h1>
 ```
 
-Other ways to load and reference partials are discussed [can-stache.helpers.partial here]. 
+Other ways to load and reference partials are discussed [can-stache.tags.partial here].
 
 #### [can-stache.tags.comment]
 
@@ -88,7 +88,7 @@ optionally render the subsections and insert them into the result.
 
 Renders the subsection or inverse subsection depending on the value of key.
 
-If `key` is truthy, renders the subsection: 
+If `key` is truthy, renders the subsection:
 
 ```
 Template:
@@ -115,7 +115,7 @@ Result:
 ```
 
 
-If `key` is falsey, renders the inverse subsection if present: 
+If `key` is falsey, renders the inverse subsection if present:
 
 ```
 Template:
@@ -160,7 +160,7 @@ Result:
 
 The [can-stache.tags.inverse inverse] section does the opposite of the
 normal [can-stache.tags.section] tag.  That is, it renders
-the subsection when [can-stache.tags.section] would render the inverse subsection 
+the subsection when [can-stache.tags.section] would render the inverse subsection
 and it renders the inverse subsection when [can-stache.tags.section] would
 render the subsection.
 
@@ -173,4 +173,4 @@ Data:
 
 Result:
 	<h1>Hello</h1>
-``` 
+```

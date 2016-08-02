@@ -1,25 +1,28 @@
-@function can-stache.tags.inverse {{^key}}
+@function can-stache.tags.inverse {{^expression}}
 @parent can-stache.tags 5
+@description Like [can-stache.tags.section], but renders
+the opposite subsection depending on the type of expression
+or the expression's return value.
 
-@signature `{{^key}}BLOCK{{/key}}`
+@signature `{{^EXPRESSION}}FN{{else}}INVERSE{{/key}}`
 
-Render blocks of text if the value of the key
-is falsey.  An inverted section syntax is similar to regular
-sections except it begins with a caret rather than a
-pound. If the value referenced is falsey, the section will render.
+Works just like [can-stache.tags.section], but renders `INVERSE`
+when it would have rendered the `FN` block and vice-versa.
 
-@param {can-stache.key} key A key that references a value within the current or parent
-[can-stache.context context]. If the value is a function or [can-compute.computed], the
-function's return value is used.
+For example:
 
-@return {String}
+```
+{{^ isOver18(person) }} Can't Vote {{/isOver18}}
+```
 
-Depending on the value's type, the following actions happen:
+Renders `Can't Vote` if `isOver18(person)` returns `falsey`.
 
-- A `truthy` value - the block is not rendered.
-- A `falsey` value - the block is rendered.
+@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression type. Behavior depends on the type of expression:
 
-The rendered result of the block or an empty string is returned.
+ - [can-stache/expressions/key-lookup] and [can-stache/expressions/call]s:
+   - renders `FN` with falsey values and empty lists.
+   - renders `INVERSE` with truthy values or each item in a list.
+ - [can-stache/expressions/helper]s: switch the `options.fn` and `options.inverse`.
 
 @body
 
@@ -54,4 +57,3 @@ Results in:
     <ul>
         <li>No friends.</li>
     </ul>
-

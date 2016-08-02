@@ -1,12 +1,32 @@
 @page can-stache.scopeAndContext Scope and Context
 @parent can-stache.pages 1
 
+@body
 
-## Scope and Contexts
+Every part of a stache template is rendered with a
+given [can-view-scope scope]. The scope is used to lookup
+values. A scope can contain multiple places to lookup values. Each of those
+places is called a `context`.  
 
-Every part of a stache template is rendered with a 
-given [can-view-scope scope]. The scope is used to lookup 
-values. A scope can contain multiple places to lookup values. 
+This is very similar to how `last` is looked up in the following JavaScript:
+
+```js
+var message = "Hello"
+function outer(){
+	var last = "Abril";
+
+	function inner(){
+		var first = "Alexis";
+		console.log(message + " "+ first + " " + last);
+	}
+	inner();
+}
+outer();
+```
+
+JavaScript looks for `last` looks in the `inner` context and then walks up the
+scope to the `outer` context to find a `last` variable.
+
 
 Lets look at what happens with the scope the following example:
 
@@ -24,15 +44,17 @@ Result:
 ```
 
 1. The template is rendered with `Data` as the only item in the scope. `scope:[Data]`
-2. `{{message}} is looked up within `Data`.
-3. `{{#person}}` adds the `person` object to the top of the scope. `scope:[Data,Data.person]`
+2. `{{message}}` is looked up within `Data`.
+3. `{{#person}}` adds the `person` context to the top of the scope. `scope:[Data,Data.person]`
 4. `{{first}}` is looked up in the scope.  It will be found on `Data.person`.
 5. `{{last}}` is looked up in the scope.  
    1. `last` is looked in `Data.person`, it's not found.
    2. `last` is looked up in `Data` and returned.
 6. `{{/person}}` removes `person` from the scope. `scope:[Data]`
 
-The scope used to lookup a value can be controlled by adding `../` or `./` before a 
+
+
+The context used to lookup a value can be controlled with adding `../` or `./` before a
 key. For instance, if we wanted to make sure `last` was only going to lookup on `person`,
 we could change the template to:
 
@@ -49,66 +71,8 @@ Result:
 	<h1>Hello Alexis </h1>
 ```
 
-[can-stache.tags.section Sections], Helpers, 
+[can-stache.tags.section Sections], Helpers,
 and [can-component custom elements] can modify the scope used to render a subsection.
 
-## Older
-
-
-When using [can-stache.Basics tags] in Stache, the `key` in `[can-stache.tags.escaped {{key}}]` 
-references a property on the current context object. The default context always points to the data 
-object initially passed to the template.
-
-Instead of simply referencing a key matching a property on the current context object, a full path can 
-be included instead. When a path is found, Stache will look for a matching property using the entire path:
-
-	Template:
-		{{person.name}}
-
-	Data:
-		{ 
-			person: {
-				name: "Austin"
-			}
-		}
-
-	Result:
-		Austin
-
-Additionally, the current context can be changed by using [can-stache.Sections sections]. Anytime a section 
-is opened, any tags inside of it will use that object as the local context for any key lookups:
-
-	Template:
-		{{#person}}
-			{{name}}
-		{{/person}}
-
-	Data:
-		{ 
-			person: {
-				name: "Austin"
-			}
-		}
-
-	Result:
-		Austin
-
-If the key used within a section is not found on the local context, Stache will look up the 
-stack of contexts until it finds a matching key:
-
-	Template:
-		{{#person}}
-			{{name}} is {{age}}
-		{{/person}}
-
-	Data:
-		{ 
-			person: {
-				name: "Austin"
-			}
-			age: 29
-		}
-
-	Result:
-		Austin is 29
-		
+[can-stache.key] modifiers  like `../` and `@key` can control the context and value that
+gets returned.

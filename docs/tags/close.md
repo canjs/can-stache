@@ -1,10 +1,8 @@
 @function can-stache.tags.close {{/key}}
 @parent can-stache.tags 4
 
-@signature `{{/key}}`
+@signature `{{/helperKeyOrMethod}}`
 
-Ends a [can-stache.tags.section {{#key}}] or [can-stache.tags.sectionHelper {{#helper}}]
-block.
+Ends a [can-stache.tags.section] block.
 
-@param {can-stache.key} [key] A key that matches the opening key or helper name. It's also
-possible to simply write `{{/}}` to end a block.
+@param {String} [helperKeyOrMethod] A name that matches the opening key, method or helper name. It's also possible to simply write `{{/}}` to end a block.

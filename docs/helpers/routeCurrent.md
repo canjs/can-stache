@@ -6,7 +6,7 @@ Returns if the hash values match the [can-route]'s current properties.
 @signature `{{#routeCurrent hashes}}SUBEXPRESSION{{/routeCurrent}}`
 
   Renders `SUBEXPRESSION` if the `hashes` passed to [can-route.current route.current] returns `true`.
-  Renders the [can-stache.helpers.else] expression if [can-route.current route.current] returns `false`.
+  Renders the [can-stache.helpers.else if [can-route.current route.current] returns `false`.
   
   @param {can-stache.expressions} hashes A hash expression like `page='edit' recipeId=id`.
 

@@ -4,14 +4,17 @@
 
 @signature `stache.registerHelper(name, helper)`
 
-The following template:
 
-```handlebars
-{{upper foo}}
-```
+Registers a helper function.
+Pass the name of the helper followed by the
+function to which stache should invoke. See [can-stache.Helpers] for more details on using helpers
+and [can-stache.registerSimpleHelper] to avoid converting computes;
 
 ```js
 stache.registerHelper("upper", function(str){
+	if(str.isComputed) {
+		str = str();
+	}
 	return str.toUpperCase();
 });
 ```
@@ -20,8 +23,3 @@ stache.registerHelper("upper", function(str){
 @param {can-stache.helper} helper The helper function.
 
 @body
-
-Registers a helper with the Mustache system.
-Pass the name of the helper followed by the
-function to which Mustache should invoke.
-These are run at runtime.

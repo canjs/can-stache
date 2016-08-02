@@ -1,26 +1,30 @@
 @page can-stache.Helpers Helpers
 @parent can-stache.pages 4
 
-# Helpers
+Helpers are functions that can be registered and called from within templates.  These functions
+are typically used to provide functionality that is more appropriate for
+the `view` than the `viewModel`.
 
-Helpers are functions that can be registered and called from within templates. While stache is 
-intended to be logic-less, helpers enable the execution of logic from within a stache template.
+Example custom helpers might include:
 
-Stache includes a number of built-in helpers, but custom helpers can be registered as well. 
-The majority of these built-in helpers have [can-stache.Basics basic tag] equivalents.
+ - Converting a raw `Date` to a more user friendly timestamp. `{{timestamp birthday}}`
+ - Internationalization. `{{i18n 'Hello'}}`
+ - Convert markdown into HTML. `{{markdown(comment)}}`
+
+Stache includes a number of built-in helpers, but custom helpers can be registered as well.
 
 ## Built-in Helpers
 
-The `[can-stache.tags.section {{#if key}}]` helper is used for **if** statements. The **if** helper is equivalent 
-to using a `[can-stache.tags.section {{#key}}]` section. If they key passed to the helper is **truthy**, the 
+The `[can-stache.tags.section {{#if key}}]` helper is used for **if** statements. The **if** helper is similar
+to using a `[can-stache.tags.section {{#key}}]` section. If they key passed to the helper is **truthy**, the
 section will be rendered.
 
-	Template: 
+	Template:
 		{{#if friends}}
 			I have friends!
 		{{/if}}
 
-	Data: 
+	Data:
 		{
 			friends: true
 		}
@@ -28,13 +32,12 @@ section will be rendered.
 	Result:
 		I have friends!
 
-When using the `[can-stache.helpers.if {{#if key}}]` helper, or any other helper for that matter, 
-the special `[can-stache.helpers.else {{else}}] helper becomes available. `{{else}}` is equivalent to 
-an [can-stache.helpers.inverse {{^key}}] inverse section (rendering **falsey** data), except that it 
-only uses a single tag and exists inside 
-a helper section.
+When using the `[can-stache.helpers.if {{#if key}}]` helper, or any other helper for that matter,
+the special `[can-stache.helpers.else {{else}}]` helper is available. `{{else}}` is equivalent to
+an [can-stache.tags.inverse {{^key}}] inverse section (renders if given **falsey** data), except that it
+only uses a single tag and exists inside a helper section.
 
-	Template: 
+	Template:
 		<ul>
 			{{#if friends}}
 				</li>{{name}}</li>
@@ -43,7 +46,7 @@ a helper section.
 			{{/if}}
 		</ul>
 
-	Data: 
+	Data:
 		{
 			friends: false
 		}
@@ -53,16 +56,16 @@ a helper section.
 			<li>No friends.</li>
 		</ul>
 
-The `[can-stache.helpers.unless {{#unless key}}]` helper is equivalent to using a 
-`[can-stache.helpers.inverse {{^key}}]` inverse section. If they key passed to the helper is **falsey**, the 
+The `[can-stache.helpers.unless {{#unless key}}]` helper is equivalent to using a
+`[can-stache.tags.inverse {{^key}}]` inverse section. If they key passed to the helper is **falsey**, the
 section will be rendered.
 
-	Template: 
+	Template:
 		{{#unless friends}}
 			You don't have any friends!
 		{{/unless}}
 
-	Data: 
+	Data:
 		{
 			friends: []
 		}
@@ -70,23 +73,23 @@ section will be rendered.
 	Result:
 		You don't have any friends!
 
-The `[can-stache.helpers.each {{#each key}}]` helper is equivalent to using a 
-`[can-stache.tags.section {{#key}}]` section for iterating an array. In this case, the entire array 
+The `[can-stache.helpers.each {{#each key}}]` helper is similar to using a
+`[can-stache.tags.section {{#key}}]` section for iterating an array. In this case, the entire array
 will be rendered using the inner text item by item.
 
-	Template: 
+	Template:
 		<ul>
 			{{#each friends}}
 				<li>{{name}}</li>
 			{{/each}}
 		</ul>
 
-	Data: 
-		{ 
-			friends: [ 
-				{ name: "Austin" }, 
-				{ name: "Justin" } 
-			] 
+	Data:
+		{
+			friends: [
+				{ name: "Austin" },
+				{ name: "Justin" }
+			]
 		}
 
 	Result:
@@ -95,20 +98,20 @@ will be rendered using the inner text item by item.
 			<li>Justin</li>
 		</ul>
 
-The `[can-stache.helpers.with {{#with key}}]` helper is equivalent to using a 
-`[can-stache.tags.section {{#key}}]` section for regular objects. The helper will change 
+The `[can-stache.helpers.with {{#with key}}]` helper is equivalent to using a
+`[can-stache.tags.section {{#key}}]` section for regular objects. The helper will change
 the current context so that all tags inside will look for keys on the local context first.
 
-	Template: 
+	Template:
 		<h1>Hi {{name}}</h1>
 		{{#with friend}}
 			<p>You have a new friend: {{name}}</p>
 		{{/with}}
 
-	Data: 
+	Data:
 		{
 			name: "Andy",
-			friend: { name: "Justin" } 
+			friend: { name: "Justin" }
 		}
 
 	Result:
@@ -118,7 +121,7 @@ the current context so that all tags inside will look for keys on the local cont
 When using the `[can-stache.helpers.is {{#is key1 key2}}]` helper you can simply compare
 key1 and key2. If the result of comparsion is **truthy**, the section will be rendered.
 
-	Template: 
+	Template:
 		<ul>
 		{{#is name 'Alex'}}
 			</li>Your name is {{name}}</li>
@@ -127,7 +130,7 @@ key1 and key2. If the result of comparsion is **truthy**, the section will be re
 		{{/is}}
 		</ul>
 
-	Data: 
+	Data:
 		{
 			name: 'John'
 		}
@@ -137,93 +140,113 @@ key1 and key2. If the result of comparsion is **truthy**, the section will be re
 			<li>Your name is not Alex!</li>
 		</ul>
 
-The `[can-stache.helpers.data {{data key}}]` helper is another special helper for data associations that 
-will save the current context on the active DOM element with [can.data].
-
-	Template:
-		<ul>
-			<li id="personli" {{data 'person'}}>{{name}}</li>
-		</ul>
-
-	Data:
-		{
-			name: 'Austin'
-		}
-
-	The data can be retrieved later with:
-		var nameObject = can.data(can.$('#personli'), 'person'); 
-
 ## Registering Helpers
 
-You can register your own global helper with the `[can-stache.registerHelper registerHelper]` method, or 
-a local helper (just accessible by the template being rendered) by passing in an object containing helper functions to [can.view].
+You can register your own global helper with the `[can-stache.registerSimpleHelper registerSimpleHelper]`
+`[can-stache.registerHelper registerHelper]` or
+ methods.
+
+`[can-stache.registerSimpleHelper registerSimpleHelper]` calls the registered helper function with
+values, while `[can-stache.registerHelper registerHelper]` calls the registered helper function with
+[can-compute.computed computes] if observable data is passed. `registerSimpleHelper` is
+easiser to use for basic helper functionality.
+
 
 Localization is a good example of a custom helper you might implement
-in your application. The below example takes a given key and 
-returns the localized value using 
+in your application. The below example takes a given key and
+returns the localized value using
 [jQuery Globalize](https://github.com/jquery/globalize).
 
-	stache.registerHelper('l10n', function(str, options){
-		return Globalize != undefined 
-			? Globalize.localize(str) 
+	stache.registerSimpleHelper('l10n', function(str, options){
+		return Globalize != undefined
+			? Globalize.localize(str)
 			: str;
 	});
 
-Or another way to do this:
-
-	can.view("//path/to/template.stache", data, {
-		l10n: function(str, options){
-			return Globalize != undefined 
-				? Globalize.localize(str) 
-				: str;
-		}
-	})
 
 In the template, invoke the helper by calling the helper
 name followed by any additional arguments.
-	
+
 	Template:
 		<span>{{l10n 'mystring'}}</span>
 
 	Result:
 		<span>my string localized</span>
 
-__Helpers with can-map attributes__
+### Helper Arguments
 
-If a Map attribute is passed as an argument to a helper, it is converted to a can.compute getter/setter function.  This is to allow creating 2-way binding type functionality between a can-map attribute and a form element. For example in your template:
+The type of arguments passed to a `registerHelper` function depends on how the helper was called and the values
+passed to the helper. In short, observables will be passed as [can-compute.computed compute] arguments
+in helper expressions.  In any other circumstance,  values will be passed.
 
-	<div>{{addPrefix name}}</div>
+Helpers can be called as either a [can-stache.expressions Call or Helper Expression]:
 
-Your helper would look like:
+ - Call expression - `{{myHelper(firstValue,secondValue)}}`
+ - Helper expression - `{{myHelper firstValue secondValue}}`
 
-	var item = new Map({name: "Brian"}),
-	    frag = can.view("#template", item, {
-	      addPrefix: function(name){
-	        return "Mr." + name()
-	      }
-	    });
+Helpers can also be called with observable values or non-observable values.
 
-Note we're calling `name()` in order to read its contents.
+Considering a helper like:
 
-__Multiple Arguments__
+```js
+stache.registerHelper("myHelper",function(value){ ... })
+```
 
-You can pass multiple arguments just by putting a space between
-that and the previous argument like so:
+The following details what `value` is depending on how the helper is called
+and the data passed.
 
-	{{helper 'cat' 'hat'}}
+#### Call expression with non-observable data
 
-	stache.registerHelper('helper', function(arg1, arg2, options){
-		// arg1 -> 'cat'
-		// arg2 -> 'hat'
-	});
+	Data:
+		{ name: 'John' }
 
-__Evaluating Helpers__
+	Template:
+		{{ myHelper(name) }}
+
+	value:
+		'John'
+
+#### Call expression with observable data
+
+	Data:
+		new DefineMap({ name: 'John' })
+
+	Template:
+		{{ myHelper(name) }}
+
+	value:
+		'John'
+
+#### Helper expression with non-observable data
+
+	Data:
+		{ name: 'John' }
+
+	Template:
+		{{ myHelper name }}
+
+	value:
+		'John'	    
+
+#### Helper expression with observable data
+
+	Data:
+		new DefineMap({ name: 'John' })
+
+	Template:
+		{{ myHelper name }}
+
+	value:
+		compute('John')
+
+
+### Evaluating Helpers
 
 If you want to use a helper with a [can-stache.Sections section], you need to call
-`options.fn(context)` in your return statement. This will return a 
+`options.fn(context)` in your return statement. This will return a
 string with the resulting evaluated [can-stache.Sections section].
 
-Similarly, you can call `options.inverse(context)` to evaluate the 
+Similarly, you can call `options.inverse(context)` to evaluate the
 template between an `{{else}}` tag and the closing tag.
 
 For example, when a route matches the string passed to our
@@ -238,16 +261,16 @@ routing helper it will show/hide the text.
 	{{#routing 'advanced'}}
 		You have applied the advanced filter.
 	{{/routing}}
-	
+
 __Advanced Helpers__
 
-Helpers can be passed normal objects, native objects like numbers and strings, 
-as well as a hash object. The hash object will be an object literal containing 
-all ending arguments using the `key=value` syntax. The hash object will be provided 
-to the helper as `options.hash`. Additionally, when using [can-stache.Sections section] with the helper, 
+Helpers can be passed normal objects, native objects like numbers and strings,
+as well as a hash object. The hash object will be an object literal containing
+all ending arguments using the `key=value` syntax. The hash object will be provided
+to the helper as `options.hash`. Additionally, when using [can-stache.Sections section] with the helper,
 you can set a custom context by passing the object instead of `this`.
 
-	stache.registerHelper('exercise', function(group, action, 
+	stache.registerHelper('exercise', function(group, action,
 											num, options){
 		if (group && group.length > 0 && action && num > 0) {
 			return options.fn({
@@ -269,17 +292,17 @@ you can set a custom context by passing the object instead of `this`.
 	{{else}}
 		We were lazy today.
 	{{/exercise}}
-	
+
 	{
 		pets: ['cat', 'dog', 'parrot'],
 		time: 'this morning'
 	}
-	
+
 This would output:
 
-	Along with the cat, dog, parrot, we walked around the block 
+	Along with the cat, dog, parrot, we walked around the block
 	3 times this morning.
-	
+
 Whereas an empty data object would output:
 
 	We were lazy today.
