@@ -13,7 +13,7 @@
     "url": "http://bitovi.com"
   },
   "scripts": {
-    "preversion": "npm run build",
+    "preversion": "npm test && npm run build",
     "version": "git commit -am \"Update dist for release\" && git checkout -b release && git add -f dist/",
     "postversion": "git push --tags && git checkout master && git branch -D release && git push",
     "testee": "testee test/test.html --browsers firefox",
