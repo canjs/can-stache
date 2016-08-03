@@ -50,9 +50,9 @@ var routeCurrent = function(){
 
 	if( args.optionsArg && !(args.optionsArg instanceof stacheExpression.Call) ) {
 		if( result ) {
-			return params.fn();
+			return args.optionsArg.fn();
 		} else {
-			return params.inverse();
+			return args.optionsArg.inverse();
 		}
 	} else {
 		return result;

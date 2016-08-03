@@ -50,10 +50,12 @@ QUnit.test("routeUrl and routeCurrent", function(){
 		QUnit.equal(frag.firstChild.nodeValue, "no", "route is not current");
 
 		template = stache("{{#routeCurrent(foo='bar', true)}}yes{{else}}no{{/routeCurrent}}");
-
 		frag = template({});
 		QUnit.equal(frag.firstChild.nodeValue, "yes", "route is somewhat current");
 
+		template = stache("{{#routeCurrent foo='bar' true}}yes{{else}}no{{/routeCurrent}}");
+		frag = template({});
+		QUnit.equal(frag.firstChild.nodeValue, "yes", "route is somewhat current");
 
 		template = stache("<a href=\"{{routeUrl page='recipes' id=6 true}}\"></a>");
 		frag = template({});
