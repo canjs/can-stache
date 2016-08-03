@@ -1,16 +1,17 @@
-@function can-stache.tags.unescaped {{{key}}}
+@function can-stache.tags.unescaped {{{expression}}}
 
 @parent can-stache.tags 1
 
-@description Insert the unescaped value of the [can-stache.key key] into the
+@description Insert the unescaped value of the expression into the
 output of the template.
 
-@signature `{{{key}}}`
+@signature `{{{EXPRESSION}}}`
 
-Behaves just like [can-stache.tags.escaped {{key}}] and [can-stache.helpers.helper {{helper}}] but does not
+Behaves just like [can-stache.tags.escaped] but does not
 escape the result.
 
-@param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or [can-compute.computed], the function's return value is used.
-@return {String|Function|*}
+```js
+<div> {{{ toMarkdown(content) }}} </div>
+```
 
+@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.

@@ -1,16 +1,21 @@
-@function can-stache.helpers.if {{#if key}}
+@function can-stache.helpers.if {{#if expression}}
 @parent can-stache.htags 2
-@signature `{{#if key}}BLOCK{{/if}}`
+@signature `{{#if EXPRESSION}}FN{{else}}INVERSE{{/if}}`
 
-Renders the `BLOCK` template within the current template.
+Renders `FN` if `EXPRESSION` is truthy or `INVERSE` if `EXPRESSION`
+is falsey. Both `FN` and `INVERSE` will be rendered with the
+current scope.
 
-@param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or [can-compute.computed], the function's return value is used.
+```
+{{#if person.isAwake() }} Hello {{/if}}
+```
 
-@param {can-stache} BLOCK A stache template.
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.
 
-@return {String} If the key's value is truthy, the `BLOCK` is rendered with the
-current context and its value is returned; otherwise, an empty string.
+@param {can-stache.sectionRenderer} FN A subsection that can be optionally rendered.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is falsey and [can-stache.helpers.else] is used.
 
 @body
 

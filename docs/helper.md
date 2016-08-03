@@ -1,86 +1,60 @@
-@typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.helper helper
-@parent can-stache.types 
+@typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.helper(arg,options) helper
+@parent can-stache.types
 
 @description A helper function passed to [can-stache.registerHelper].
 
-@param {...*|can-compute} [arg] Arguments passed from the tag. After the helper
-name, any space seperated [can-stache.key keys], numbers or 
-strings are passed as arguments. [can-stache.key Keys] that 
-read an observable value are passed as [can-compute.computed]'s.
+Given the arguments, returns the content that should be shown in the DOM
+or a function that will be called on the DOM element the helper was
+called on.
 
-@param {can-stache.helperOptions} options An options object
-that gets populated with optional:
+@param {*|can-compute} [...arg] Arguments passed from the tag. After the helper
+name, any space separated [can-stache.key keys], numbers or
+strings are passed as arguments. [can-stache.key Keys] that
+read an observable value in [can-stache/expressions/helpers] are passed as [can-compute.computed]s .
 
-- `fn` and `inverse` section rendering functions 
-- a `hash` object of the maps passed to the helper 
+@param {can-stache.helperOptions} [options] An options object
+that is an additional argument in `Helper` expressions that is populated with optional:
 
-@this {can-stache.context} The context the helper was 
+- `fn` and `inverse` section rendering functions
+- a `hash` object of the maps passed to the helper
+
+@this {can-stache.context} The context the helper was
 called within.
 
-@return {documentFragment|String|can.contentArray|function(HTMLElement)} The content to be inserted into
-the template.
+  @return {documentFragment|String|Array|function(Node)} The content to be inserted into the template or a callback function.  The content can be a:
+
+   - `documentFragment` like those returned by [can-stache.helperOptions].fn.
+   - `String` like `"Hello World"`
+   - `Array` of strings and nodes like `["Hello", document.createElement('div')]`
+
+  If a `function(Node)` is returned, it will be called back with an HTML Element or text node.  
+
+  If the helper is called on an element like:
+
+  ```
+  <div {{myHelper}}>
+  ```
+
+  ... the callback function will be called with the `div`.  
+
+  If the helper is called
+  outside of an element's tag like:
+
+  ```
+  <div> {{myHelper}} </div>
+  ```
+
+  ... the callback function will be called with a placeholder text node.  
+
 
 @body
-
-## Use
-
-The following template:
-
-    <p>{{madLib "Lebron James" verb 4}}</p>
-
-Rendered with
-
-    {verb: "swept"}
-
-Will call a `madLib` helper with the following arguements.
-
-    stache.registerHelper('madLib', 
-      function(subject, verb, number){
-        // subject -> "Lebron James"
-        // verb -> "swept"
-        // number -> 4
-    });
-    
-
-While keys are normally resolved as basic objects like strings or numbers, 
-there are special cases where they act differently than a normal 
-tag. Whenever a [can-compute.computed] or function 
-object is an argument for a helper, the original object is used 
-as the argument instead of the value that the function returns.
-
-If a [can-stache.key] represents a [can-map] attribute,
-it is converted to a [can-compute.computed] getter/setter 
-function. This enables 2-way binding helpers.  
-
-For example, the following helper two-way binds an input element's
-value to a [can-compute.computed]:
-
-    stache.registerHelper('value',function(value){
-        return function(el){
-          value.bind("change",function(ev, newVal){
-            el.value = newVal;
-          })
-          el.onchange = function(){
-            value(this.value);
-          }
-          el.value = value();
-        }
-    });
-    
-And used by the following template:
-
-    <input type="text" {{me.value name}}/>
-    
-And rendered with:
-    
-    {me: new Map({name: "Payal"})}
 
 
 ## Returning an element callback function
 
 If a helper returns a function, that function is called back after
-the template has been rendered into DOM elements. This can 
-be used to create stache tags that have rich behavior. 
+the template has been rendered into DOM elements. This can
+be used to create stache tags that have rich behavior.
 
 If the helper is called __within a tag__ like:
 
@@ -97,18 +71,14 @@ The returned function is called with the `<ul>` element:
 If the helper is called __between tags__ like:
 
     <ul>{{items}}</ul>
-    
-The returned function is called with a temporary element. The 
-following helper would be called with a temporary `<li>` element:
+
+The returned function is called with a temporary text node:
 
     stache.registerHelper("items",function(){
-      return function(li){
-        
+      return function(textNode){
+		  // do something, probably replace textNode
       }
     });
 
-The temporary element depends on the parent element. The default temporary element
-is a `<span>` element.
-
-
-
+While this form of helper is still supported, it's more common
+to create similar functionality with [can-component] or [can-view-callbacks].

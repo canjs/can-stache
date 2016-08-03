@@ -1,21 +1,36 @@
-@function can-stache.helpers.case {{#case expr}}
+@function can-stache.helpers.case {{#case expression}}
 @parent can-stache.htags 14
 
-@signature `{{#case expr}}BLOCK{{/case}}`
+@signature `{{#case EXPRESSION}}BLOCK{{/case}}`
 
-Renders the `BLOCK` when `expr` matches the `expr` provided in the parent [can-stache.helpers.switch].
+Renders the `BLOCK` when `EXPRESSION` matches the `EXPRESSION` provided in the parent [can-stache.helpers.switch].
 
-@param {can-stache.expression} expr An expression or key that references a value.
+```
+{{#switch user.type}}
+	{{#case "admin"}}
+		Pay
+	{{/case}}
+	{{#case "admin"}}
+		<button/>
+	{{/case}}
+	{{#default}}
+		Look at data
+	{{/default}}
+{{/switch}}
+```
 
-@param {can-stache} BLOCK a template that will render if the case clause resolves.
+@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An expression or key that references a value.
 
-@return {DocumentFragment} A fragment, possibly containing the rendered `BLOCK`.
+@param {can-stache.sectionRenderer} BLOCK A subsection that will be rendered if
+the case `EXPRESSION` matches the switch's `EXPRESSION`.
 
 @body
+
+## Use
 
 The `case` helper is contextual inside of a [can-stache.helpers.switch] block. The parent switch contains an `expr` that will be matched against the case `expr` and if they are equal the block will be returned.
 
 For more information on how `{{#case}}` is used check:
 
-- [can-stache.helpers.switch {{#switch expr}}]
-- [can-stache.helpers.default {{#default}}]
+- [can-stache.helpers.switch]
+- [can-stache.helpers.default]

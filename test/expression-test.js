@@ -4,6 +4,7 @@ var each = require('can-util/js/each/each');
 var Scope = require('can-view-scope');
 var canCompute = require('can-compute');
 var CanMap = require('can-map');
+var helpers = require('../helpers/converter');
 
 QUnit.module("can-stache/src/expression");
 
@@ -39,9 +40,14 @@ test("expression.ast - helper followed by hash", function(){
 		},
 		children: [
 			{
-				type: "Hash",
-				prop: "prop",
-				children: [{type: "Lookup", key: "own_prop"}]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "prop",
+						children: [{type: "Lookup", key: "own_prop"}]
+					}
+				]
 			}
 		]
 	});
@@ -49,7 +55,7 @@ test("expression.ast - helper followed by hash", function(){
 });
 
 test("expression.ast - everything", function(){
-	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
+	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var helperBCall = {
 		type: "Call",
@@ -58,15 +64,21 @@ test("expression.ast - everything", function(){
 			{type: "Literal", value: 1},
 			{type: "Lookup", key: "valueA"},
 			{
-				type: "Hash",
-				prop: "propA",
-				children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "valueB"} ]}]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "propA",
+						children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "valueB"} ]}]
+					},
+					{
+						type: "Hash",
+						prop: "propC",
+						children: [{type: "Literal", value: 2}]
+					}
+				]
 			},
-			{
-				type: "Hash",
-				prop: "propC",
-				children: [{type: "Literal", value: 2}]
-			}
+			{type: "Literal", value: 1}
 		]
 	};
 	var helperCCall = {
@@ -96,9 +108,14 @@ test("expression.ast - everything", function(){
 			{type: "Literal", value: 'def'},
 			{type: "Lookup", key: "nested@prop"},
 			{
-				type: "Hash",
-				prop: "outerPropA",
-				children: [helperCCall]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "outerPropA",
+						children: [helperCCall]
+					}
+				]
 			}
 		]
 	});
@@ -106,7 +123,7 @@ test("expression.ast - everything", function(){
 
 test("expression.parse - everything", function(){
 
-	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
+	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var oneExpr = new expression.Literal(1),
 		twoExpr = new expression.Literal(2),
@@ -120,13 +137,14 @@ test("expression.parse - everything", function(){
 		helperB = new expression.Lookup("@helperB"),
 		helperC = new expression.Lookup("@helperC");
 
+	var helperBHashArg = new expression.Hashes({
+		propA: new expression.Arg(valueB, {compute: true}),
+		propC: twoExpr
+	})
+
 	var callHelperB = new expression.Call(
 		helperB,
-		[oneExpr, valueA],
-		{
-			propA: new expression.Arg(valueB, {compute: true}),
-			propC: twoExpr
-		}
+		[oneExpr, valueA, helperBHashArg, oneExpr]
 	);
 
 	var callHelperBdotZed = new expression.ScopeLookup(".zed", callHelperB);
@@ -290,36 +308,37 @@ test("convertKeyToLookup", function(){
 
 });
 
+
 test("expression.ast - [] operator", function(){
-  var ast = expression.ast("['propName']");
+	var ast = expression.ast("['propName']");
 
 	deepEqual(ast, {
-    type: "Bracket",
-    children: [{type: "Literal", value: "propName"}]
-  });
+		type: "Bracket",
+		children: [{type: "Literal", value: "propName"}]
+	});
 
-  var ast2 = expression.ast("[propName]");
+	var ast2 = expression.ast("[propName]");
 
 	deepEqual(ast2, {
-    type: "Bracket",
-    children: [{type: "Lookup", key: "propName"}]
-  });
+    	type: "Bracket",
+    	children: [{type: "Lookup", key: "propName"}]
+	});
 
 	var ast3 = expression.ast("foo['bar']");
 
 	deepEqual(ast3, {
-    type: "Bracket",
-		root: {type: "Lookup", key: "foo"},
-    children: [{type: "Literal", value: "bar"}]
-  });
+	    type: "Bracket",
+			root: {type: "Lookup", key: "foo"},
+	    children: [{type: "Literal", value: "bar"}]
+	});
 
 	var ast3 = expression.ast("foo[bar]");
 
 	deepEqual(ast3, {
-    type: "Bracket",
-		root: {type: "Lookup", key: "foo"},
-    children: [{type: "Lookup", key: "bar"}]
-  });
+	    type: "Bracket",
+			root: {type: "Lookup", key: "foo"},
+	    children: [{type: "Lookup", key: "bar"}]
+	});
 
 	var ast4 = expression.ast("foo()[bar]");
 
@@ -384,7 +403,7 @@ test("Bracket expression", function(){
 			new CanMap({bar: "name"})
 		)
 	);
-  equal(compute(), "name");
+	equal(compute(), "name");
 
 	// [bar]
 	expr = new expression.Bracket(
@@ -395,7 +414,7 @@ test("Bracket expression", function(){
 			new CanMap({bar: "name", name: "Kevin"})
 		)
 	);
-  equal(compute(), "Kevin");
+	equal(compute(), "Kevin");
 
 	// foo["bar"]
 	expr = new expression.Bracket(
@@ -407,7 +426,7 @@ test("Bracket expression", function(){
 			new CanMap({foo: {bar: "name"}})
 		)
 	);
-  equal(compute(), "name");
+	equal(compute(), "name");
 
 	// foo[bar]
 	expr = new expression.Bracket(
@@ -419,7 +438,7 @@ test("Bracket expression", function(){
 			new CanMap({foo: {name: "Kevin"}, bar: "name"})
 		)
 	);
-  equal(compute(), "Kevin");
+	equal(compute(), "Kevin");
 
 	// foo()[bar]
 	expr = new expression.Bracket(
@@ -435,7 +454,7 @@ test("Bracket expression", function(){
 			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
 		)
 	);
-  equal(compute(), "Kevin");
+	equal(compute(), "Kevin");
 
 	// foo()[bar()]
 	expr = new expression.Bracket(
@@ -458,5 +477,96 @@ test("Bracket expression", function(){
 			})
 		)
 	);
-  equal(compute(), "Kevin");
+	equal(compute(), "Kevin");
+});
+
+test("registerConverter helpers push and pull correct values", function () {
+
+	helpers.registerConverter('numberToHex', {
+		get: function(valCompute) {
+			return valCompute().toString(16)
+		}, set: function(val, valCompute) {
+			return valCompute(parseInt("0x" + val));
+		}
+	});
+
+	var data = new CanMap({
+		observeVal: 255
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("numberToHex(~observeVal)",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), 'ff', 'Converter called');
+	twoWayCompute('7f');
+	equal(data.attr("observeVal"), 127, 'push converter called');
+});
+
+test("registerConverter helpers push and pull multiple values", function () {
+
+	helpers.registerConverter('isInList', {
+		get: function(valCompute, list) {
+			return !!~list.indexOf(valCompute());
+		}, set: function(newVal, valCompute, list) {
+			if(!~list.indexOf(newVal)) {
+				list.push(newVal);
+			}
+		}
+	});
+
+	var data = new CanMap({
+		observeVal: 4,
+		list: [1,2,3]
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), false, 'Converter called');
+	twoWayCompute(5);
+	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
+});
+
+
+test("registerConverter helpers are chainable", function () {
+
+	helpers.registerConverter('numberToHex', {
+		get: function(valCompute) {
+			return valCompute().toString(16)
+		}, set: function(val, valCompute) {
+			return valCompute(parseInt("0x" + val));
+		}
+	});
+
+	helpers.registerConverter('upperCase', {
+		get: function(valCompute) {
+			return valCompute().toUpperCase();
+		}, set: function(val, valCompute) {
+			return valCompute(val.toLowerCase());
+		}
+	});
+
+
+	var data = new CanMap({
+		observeVal: 255
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute(), 'FF', 'Converter called');
+	twoWayCompute('7F');
+	equal(data.attr("observeVal"), 127, 'push converter called');
 });

@@ -1,7 +1,7 @@
 @page can-stache.expressions Expressions
 @parent can-stache.pages 2
 
-In addition to different magic tag types, stache supports different expression 
+In addition to different magic tag types, stache supports different expression
 types.  These can be used in various combinations to call [can-stache.registerHelper helper methods]
 or [can-component::viewModel viewModel methods].  The following is an example of all the expressions
 combined:
@@ -53,13 +53,13 @@ Call, Helper, and Hash expressions:
 {{method( prop=hashValue )}}  Hash
 ```
 
-The value looked up by a KeyLookup depends on what the key looks like, and
+The value returned up by a KeyLookup depends on what the [can-stache.key] looks like, and
 what expression type the KeyLookup is within.
 
-For example, `{{method(~./key)}}` will call `method` with 
-the a compute that looks up the value of `key` only in the top of the [can-view-scope scope].
+For example, `{{method(~./key)}}` will call `method` with
+a [can-compute.computed compute] that looks up the value of `key` only in the top of the [can-view-scope scope].
 
-In general the rules are as follows:
+The rules are as follows:
 
  - __call expression arguments__ `{{method(key)}}` - values are passed.
  - __helper expression arguments__ `{{helper key}}` - computes are passed.
@@ -74,42 +74,46 @@ In general the rules are as follows:
 
 ## Hash expression
 
-A hash expression sepecifies a property value on an options object in a call expression
-and property value on the the hash object in a helper expression.
+A hash expression specifies a property value on a object argument in a call expression
+and property value on the the hash object in a helper expression's [can-stache.helperOptions] argument.
 
 For example, in a call expression:
 
 ```
 Template:
-	{{method(prop=key)}}
-
+	{{methodA(prop=key)}}
+    {{methodB(propX=key propY='literal', propZ=5)}}
 Data:
 	{
-	  method: function(arg){},
-	  key: canCompute("value")
+	  methodA: function(arg){},
+      methodB: function(arg1, arg2),
+	  key: compute("value")
 	}
 ```
 
-`method` will be called with `{prop: "value"}` as `arg`.
+ - `methodA` will be called with `{prop: "value"}` as `arg`.
+ - `methodB` will be called with `{propX: "value", propY: 'literal'}` as `arg1` and `{propZ: 5}` as `arg2`
 
 In a helper expression:
 
 ```
 Template:
-	{{method prop=key}}
-
+	{{methodA prop=key}}
+    {{methodB(propX=key propY='literal' propZ=5)}}
 Data:
 	{
-	  method: function(options){},
-	  key: canCompute("value")
+	  methodA: function(options){},
+      methodB: function(options){},
+	  key: compute("value")
 	}
 ```
 
-`method` will be called with `{prop: compute<"value">}` as `options.hash`.
+ - `methodA` will be called with `{prop: compute("value")}` as `options.hash`.
+ - `methodB` will be called with `{propX: "value", propY: 'literal', propZ: 5}` as `options.hash`.
 
 ## Call expression
 
-A call expression calls a function looked up in the [can-view-scope scope] followed by 
+A call expression calls a function looked up in the [can-view-scope scope] followed by
 the [can-view-scope.Options helpers scope]. It looks like:
 
 ```
@@ -152,7 +156,7 @@ Result:
 
 ## Helper expression
 
-A helpers expression calls a function looked up in the [can-view-scope.Options helpers scope] followed by 
+A helpers expression calls a function looked up in the [can-view-scope.Options helpers scope] followed by
 the [can-view-scope scope]. It looks like:
 
 ```
@@ -205,4 +209,3 @@ Helpers:
 Result:
 	<h1>Ages</h1>
 ```
-

@@ -30,23 +30,9 @@ var getBaseURL = require('can-util/js/base-url/base-url');
 
 var browserDoc = DOCUMENT();
 var mutationObserver = MUTATION_OBSERVER();
-var simpleDocument;
 
 makeTest('can/view/stache dom', browserDoc);
 makeTest('can/view/stache vdom', makeDocument());
-
-
-function makeIframe(src){
-	var iframe = document.createElement('iframe');
-	window.removeMyself = function(){
-		delete window.removeMyself;
-		document.body.removeChild(iframe);
-		start();
-	};
-
-	document.body.appendChild(iframe);
-	iframe.src = src;
-}
 
 // HELPERS
 function makeTest(name, doc, mutation) {
@@ -3526,7 +3512,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.attr(".").foo, "bar", "got scope");
+			equal(tagData.scope.peak(".").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 
@@ -3542,7 +3528,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.attr(".").foo, "bar", "got scope");
+			equal(tagData.scope.peak(".").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 
@@ -4572,7 +4558,7 @@ function makeTest(name, doc, mutation) {
 
 	test("%index content should be skipped by ../ (#1554)", function(){
 		var list = new CanList(["a","b"]);
-		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf .}}</li>{{/each}}');
+		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
 		var frag = tmpl({items: list});
 		equal(frag.lastChild.firstChild.nodeValue, "1", "read indexOf");
 	});
@@ -4627,11 +4613,13 @@ function makeTest(name, doc, mutation) {
 			itemRender: stache('{{name}}')
 		});
 
-		var renderer = stache('<div>{{#each items}}{{>itemRender}}{{/each}}</div>');
+		var renderer = stache('<div>{{#each items}}{{name}}{{/each}}</div>');
 
 		var frag = renderer(data);
 
 		data.attr('items.0.name', 'WORLD');
+		equal( innerHTML(frag.firstChild), "WORLD", "updated to world");
+
 
 		data.attr('items').splice(0, 0, {
 			name : 'HELLO'
@@ -4968,5 +4956,49 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
 	});
 
+	test("context is observable (#38)", function(){
+		var computes = [];
+		stache.registerHelper("contextHelper", function(context){
+			QUnit.equal(typeof context, "function","got a compute");
+			computes.push(context);
+			return context();
+		});
+		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
+		var items = new CanList(["one","two"]);
+
+		var frag = template(items);
+		var lis = frag.firstChild.getElementsByTagName("li");
+
+		items.attr(1,"TWO");
+		lis = frag.firstChild.getElementsByTagName("li");
+		//QUnit.equal(computes[1](), "TWO", "compute value is right");
+		QUnit.equal( lis[1].innerHTML, "TWO", "is TWO");
+
+		computes[1]("2");
+		lis = frag.firstChild.getElementsByTagName("li");
+		QUnit.equal( lis[1].innerHTML, "2", "is 2");
+	});
+
+	if(window.console && window.console.log) {
+		test("log", function(){
+			var oldLog = console.log;
+			var calls = 0 ;
+			var FIRST = {},
+				SECOND = {};
+			console.log = function(first, second){
+				QUnit.equal(first, FIRST);
+				QUnit.equal(second, SECOND);
+			};
+			var template1 = stache("{{log first second}}"),
+				template2 = stache("{{ log(first, second) }}");
+
+
+			template1({first: FIRST, second: SECOND});
+			template2({first: FIRST, second: SECOND});
+			console.log = oldLog;
+		});
+	}
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
+
 }

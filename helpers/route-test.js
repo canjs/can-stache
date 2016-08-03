@@ -40,7 +40,7 @@ QUnit.test("routeUrl and routeCurrent", function(){
 	frag = template({});
 	QUnit.equal(frag.firstChild.nodeValue, "yes", "route is current");
 
-	route.attr({"foo":"bar"});
+	route.attr({"foo":"bar", page: 'recipes'});
 
 	setTimeout(function(){
 
@@ -48,6 +48,22 @@ QUnit.test("routeUrl and routeCurrent", function(){
 
 		frag = template({});
 		QUnit.equal(frag.firstChild.nodeValue, "no", "route is not current");
+
+		template = stache("{{#routeCurrent(foo='bar', true)}}yes{{else}}no{{/routeCurrent}}");
+
+		frag = template({});
+		QUnit.equal(frag.firstChild.nodeValue, "yes", "route is somewhat current");
+
+
+		template = stache("<a href=\"{{routeUrl page='recipes' id=6 true}}\"></a>");
+		frag = template({});
+
+		QUnit.equal( frag.firstChild.getAttribute("href"), "#!&foo=bar&page=recipes&id=6", "merge works helper");
+
+		template = stache("<a href=\"{{routeUrl(page='recipe' id=5,true)}}\"></a>");
+		frag = template({});
+
+		QUnit.equal( frag.firstChild.getAttribute("href"), "#!&foo=bar&page=recipe&id=5", "merge works call expression");
 
 		mockRoute.stop();
 		start();
