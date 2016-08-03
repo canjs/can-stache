@@ -1,10 +1,10 @@
-@typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.simpleHelper simpleHelper
+@typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.simpleHelper(arg,options) simpleHelper
 @parent can-stache.types
 
 @description A helper function passed to [can-stache.registerSimpleHelper].
 
-@param {...*} [arg] Arguments passed from the tag. After the helper
-name, any space seperated [can-stache.key keys], numbers or
+@param {*} [...arg] Arguments passed from the tag. After the helper
+name, any space separated [can-stache.key keys], numbers or
 strings are passed as arguments.
 
 The following template:
@@ -41,7 +41,6 @@ the template.
 
 @body
 
-stache.simpleHelper
 
 ## Returning an element callback function
 
@@ -76,6 +75,3 @@ following helper would be called with a temporary `<li>` element:
 
 The temporary element depends on the parent element. The default temporary element
 is a `<span>` element.
-
-
-

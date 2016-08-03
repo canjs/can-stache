@@ -1,86 +1,61 @@
-@typedef {{fn:can-stache.sectionRenderer,inverse:can-stache.sectionRenderer,hash:Object}} can-stache.helperOptions helperOptions
-@parent can-stache.types 
+@typedef {Object} can-stache.helperOptions helperOptions
+@parent can-stache.types
 
-@description The options argument passed to a [can-stache.helper helper function].
+@description The options argument passed to a [can-stache.helper helper function]
+when called by a [can-stache/expressions/helper].
 
-@option {can-stache.sectionRenderer} [fn] Renders the "truthy" subsection 
-BLOCK.  `options.fn` is only available if the helper is called as a 
-[can-stache.tags.section section] or [can-stache.tags.inverse inverse section] like:
-`{{#helper}}` or `{{^helper}}.  The subsection BLOCK's 
+@type {Object}
 
-Available if the helper is called 
-as a section or inverse section. 
-[can-stache.helpers.sectionHelper section helper] is called.  Call `fn` to
-render the BLOCK with the specified `context`.
+When a [can-stache.helper helper function]
+is called by a [can-stache/expressions/helper], a `helperOptions`
+object is passed with the following properties:
 
-@option {can-stache.sectionRenderer} [inverse] Provided if a 
-[can-stache.helpers.sectionHelper section helper] is called 
-with [can-stache.helpers.else {{else}}].  Call `inverse` to
-render the INVERSE with the specified `context`.
+```
+stache.registerHelper("myHelper", function(helperOptions){
+  helperOptions.fn      //-> sectionRenderer(){}
+  helperOptions.inverse //-> sectionRenderer(){}
+  helperOptions.hash    //-> Object
+  helperOptions.context //-> *
+  helperOptions.scope   //-> Scope
+  helperOptions.option  //-> Scope.Options
+});
+```
 
-@option {Object.<String,*|String|Number>} hash An object containing all of the final 
-arguments listed as `name=value` pairs for the helper.
-	
-	{{helper arg1 arg2 name=value other=3 position="top"}}
+  @option {can-stache.sectionRenderer} [fn] Renders the "truthy" subsection
+  BLOCK.  `options.fn` is only available if the helper is called as a
+  [can-stache.tags.section] or [can-stache.tags.inverse]. Read about
+  [can-stache.helpers.sectionHelper section helpers] for more information.
 
-	options.hash = {
-		name: <context_lookup>.value,
+  @option {can-stache.sectionRenderer} [inverse] Renders the "falsey" subsection
+  INVERSE.  `options.inverse` is only available if the helper is called as a
+  [can-stache.tags.section] or [can-stache.tags.inverse] and [can-stache.helpers.else]
+  is used. Read about
+  [can-stache.helpers.sectionHelper section helpers] for more information.
+
+  @option {Object} hash An object containing all of the
+  [can-stache.expressions Hash expression] keys and values. For example:
+
+  ```
+  {{helper arg1 arg2 name=value other=3 position="top"}}
+  ```
+
+  might provide a `hash` like:
+
+  ```
+  {
+		name: compute("Mr. Pig"),
 		other: 3,
 		position: "top"
-	}
+  }
+  ```
 
-@option {*} context The current context the stache helper is called within.
+  @option {*} context The current context the stache helper is called within. Read
+  [can-stache.scopeAndContext] for more information.
 
-    
-    
-    var temp = stache(
-      "{{#person.name}}{{helper}}{{/person.name}}");
-    
-    var data = {person: {name: {first: "Justin"}}};
-    
-    stache.registerHelper("helper", function(options){
-    
-      options.context === data.person //-> true
-      
-    })
-    
-    
-    temp(data);
-    
-    
 
-@option {can-view-scope} scope An object that represents the current context and all parent 
-contexts.  It can be used to look up [can-stache.key key] values in the current scope.
+@option {can-view-scope} scope An object that represents the current context and all parent
+contexts. It can be used to look up [can-stache.key key] values in the current scope.
+Read [can-stache.scopeAndContext] and [can-view-scope] for more information.
 
-    var temp = stache(
-      "{{#person.name}}{{helper}}{{/person.name}}");
-    
-    var data = {person: {name: {first: "Justin"}}};
-    
-    stache.registerHelper("helper", function(options){
-    
-      options.scope.attr("first")   //-> "Justin"
-      options.scope.attr("person")  //-> data.person
-      
-    })
-    
-    
-    temp(data);
-
-@option {can-view-scope.Options} options An object that represents the local stache helpers.  It can be used to look 
-up [can-stache.key key] values
-
-    var temp = stache("{{#person.name}}{{helper}}{{/person.name}}");
-    
-    var data = {person: {name: "Justin"}};
-    
-    stache.registerHelper("helper", function(options){
-    
-      options.options.attr("helpers.specialHelper") //-> function
-      
-    })
-    
-    
-    temp(data, {
-      specialHelper: function(){ ... }
-    });
+@option {can-view-scope.Options} options It can be used to look up [can-stache.key key] values in the current options scope.
+Read [can-stache.scopeAndContext] and [can-view-scope.Options] for more information.

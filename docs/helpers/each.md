@@ -1,24 +1,61 @@
-@function can-stache.helpers.each {{#each key}}
+@function can-stache.helpers.each {{#each expression}}
 @parent can-stache.htags 5
 
-@signature `{{#each key}}BLOCK{{/each}}`
+@signature `{{#each EXPRESSION}}FN{{else}}INVERSE{{/each}}`
 
-Render the block of text for each item in key's value.
+Render `FN` for each item in `EXPRESSION`'s return value.  If `EXPRESSION`
+is falsey or an empty list, render `INVERSE`.
 
-@param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or [can-compute.computed], the function's
-return value is used.
+```
+{{#each todos}}
+  <li>{{name}}</li>
+{{else}}
+  <li>No todos, rest easy!</li>
+{{/each}}
+```
 
-If the value of the key is a [can-list], the resulting HTML is updated when the
-list changes. When a change in the list happens, only the minimum amount of DOM
-element changes occur.
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
+expression that typically returns a list like data structure.
 
-If the value of the key is a [can-map], the resulting HTML is updated whenever
-attributes are added or removed. When a change in the map happens, only
-the minimum amount of DOM element changes occur.
+If the value of the EXPRESSION is a [can-define/list/list] or [can-list], the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
+element changes occur.  The list itself can also change, and a [can-util/js/diff/diff]
+will be performed, which also will perform a minimal set of updates. The [can-stache/keys/special special %key key] is available within `FN`.
 
-@param {can-stache} BLOCK A template that is rendered for each item in
-the `key`'s value. The `BLOCK` is rendered with the context set to the item being rendered.
+If the value of the key is an object, `FN` will be
+called for each property on the object. The [can-stache/keys/special special %key key]
+is available within `FN`.
+
+@param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
+item in `EXPRESSION` or property value in `EXPRESSION`.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is falsey or an empty list or object.
+
+@signature `{{#each EXPRESSION as KEY}}FN{{else}}INVERSE{{/each}}`
+
+Like a normal `{{#each EXPRESSION}}`, but adds each item in `EXPRESSION` as
+`KEY` in `FN`'s [can-view-scope].
+
+```
+{{#each todos as todo}}
+    <li>{{todo.name}}</li>
+{{/each}}
+```
+
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
+expression that returns a list or object like data structure.
+
+@param {can-stache.key} key The name that:
+ - each item in `EXPRESSION`'s list, or
+ - each property value in `EXPRESSION`'s object
+should take on in `FN`.
+
+@param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
+item in `EXPRESSION` or property value in `EXPRESSION`.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is falsey or an empty list or object.
+
 
 @body
 
@@ -48,8 +85,7 @@ Renders:
 
 ## Object iteration
 
-As of 2.1, you can now iterate over properties of objects and attributes with
-the `each` helper. When iterating over [can-map] it will only iterate over the
+When iterating over [can-map] it will only iterate over the
 map's [can-map.keys] and none of the hidden properties of a Map. For example,
 
 The template:
@@ -73,21 +109,17 @@ Renders:
 
 ## Understanding when to use #each with lists
 
-{{#each key}} iteration will do basic diffing and aim to only update the DOM where the change occured. Whereas
-[can-stache.Sections Sections] iteration will re-render the entire section for any change in the list.
-[can-stache.Sections Sections] iteration is the prefered method to use when a list is replaced or changing significantly.
-When doing single list item changes frequently, {{#each key}} iteration is the faster choice.
+`{{#each key}}` iteration will do basic diffing and aim to only update the DOM where the change occurred. Whereas
+[can-stache.tags.section] default iteration will re-render the entire section for any change in the list.
+[can-stache.tags.section] iteration is the preferred method to use when a list is replaced or changing significantly.
+When doing single list item changes frequently, `{{#each expression}}` iteration is the faster choice.
 
-For example, assuming "list" is a [can-list] instance:
+For example, assuming "list" is a [can-define/list/list] instance:
 
-{{#if list}} will check for the truthy value of list. This is akin to checking for the truthy value of any JS object and will result to true, regardless of list contents or length.
+`{{#each list}}` and `{{#list}}` both iterate through an instance of [can-define/list/list], however we setup the bindings differently.
 
-{{#if list.length}} will check for the truthy value of the length attribute. If you have an empty list, the length will be 0, so the #if will result to false and no contents will be rendered. If there is a length >= 1, this will result to true and the contents of the #if will be rendered.
+`{{#each list}}` will setup bindings on every individual item being iterated through, while `{{#list}}` will not. This makes a difference in two scenarios:
 
-{{#each list}} and {{#list}} both iterate through an instance of [can-list], however we setup the bindings differently.
+1) You have a large list, with minimal updates planned after initial render. In this case, `{{#list}}` might be more advantageous as there will be a faster initial render. However, if any part of the list changes, the entire `{{#list}}` area will be re-processed.
 
-{{#each list}} will setup bindings on every individual item being iterated through, while {{#list}} will not. This makes a difference in two scenarios:
-
-1) You have a large list, with minimal updates planned after initial render. In this case, {{#list}} might be more advantageous as there will be a faster initial render. However, if any part of the list changes, the entire {{#list}} area will be re-processed.
-
-2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use {{#each list}}, even though it will be slower on initial render(we're setting up more bindings), you'll have faster updates as there are now many sections.
+2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use `{{#each list}}`, even though it will be slower on initial render(we're setting up more bindings), you'll have faster updates as there are now many sections.

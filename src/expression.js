@@ -61,6 +61,40 @@ var getKeyComputeData = function (key, scope, readOptions) {
 //
 // These expression types return a value. They are assembled by `expression.parse`.
 
+// ### Bracket
+// For accessing properties using bracket notation like `foo[bar]`
+var Bracket = function (key, root) {
+	this.root = root;
+	this.key = key;
+};
+Bracket.prototype.value = function (scope) {
+	var prop = this.key;
+	var obj = this.root;
+
+	if (prop instanceof Literal) {
+		prop = prop.value();
+	} else if (prop instanceof Lookup) {
+		prop = lookupValue(prop.key, scope, {}, {});
+		prop = prop.value();
+	} else {
+		prop = prop.value(scope, {}, {})();
+	}
+
+	if (!obj) {
+		return lookupValue(prop, scope, {}, {}).value;
+	} else {
+		return compute(function() {
+			if (obj instanceof Lookup) {
+				obj = lookupValue(obj.key, scope, {}, {}).value();
+			} else {
+				obj = obj.value(scope, {}, {})();
+			}
+
+			return obj[prop];
+		});
+	}
+};
+
 // ### Literal
 // For inline static values like `{{"Hello World"}}`
 var Literal = function(value){
@@ -110,17 +144,35 @@ Arg.prototype.value = function(){
 // A placeholder. This isn't actually used.
 var Hash = function(){ }; // jshint ignore:line
 
+var Hashes = function(hashes){
+	this.hashExprs = hashes;
+}
+Hashes.prototype.value = function(scope, helperOptions){
+	var hash = {};
+	for(var prop in this.hashExprs) {
+		var val = convertToArgExpression(this.hashExprs[prop]),
+			value = val.value.apply(val, arguments);
+
+		hash[prop] = {
+			call: value && value.isComputed && !val.modifiers.compute,
+			value: value
+		};
+	}
+	return compute(function(){
+		var finalHash = {};
+		for(var prop in hash) {
+			finalHash[prop] = hash[prop].call ? hash[prop].value() : hash[prop].value;
+		}
+		return finalHash;
+	});
+}
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
 // A call expression like `method(arg1, arg2)` that, by default,
 // calls `method` with non compute values.
-var Call = function(methodExpression, argExpressions, hashExpressions){
+var Call = function(methodExpression, argExpressions){
 	this.methodExpr = methodExpression;
 	this.argExprs = argExpressions.map(convertToArgExpression);
-	var hashExprs = this.hashExprs = {};
-	each(hashExpressions, function(expr, name){
-		hashExprs[name] = convertToArgExpression(expr);
-	});
 };
 Call.prototype.args = function(scope, helperOptions){
 	var args = [];
@@ -140,26 +192,6 @@ Call.prototype.args = function(scope, helperOptions){
 		return finalArgs;
 	};
 };
-Call.prototype.hash = function(scope, helperOptions){
-	var hash = {};
-	for(var prop in this.hashExprs) {
-		var val = this.hashExprs[prop],
-			value = val.value.apply(val, arguments);
-
-		hash[prop] = {
-			call: value && value.isComputed && !val.modifiers.compute,
-			value: value
-		};
-	}
-	return function(){
-		var finalHash = {};
-		for(var prop in hash) {
-			finalHash[prop] = hash[prop].call ? hash[prop].value() : hash[prop].value;
-		}
-		return finalHash;
-	};
-};
-
 
 Call.prototype.value = function(scope, helperScope, helperOptions){
 
@@ -167,9 +199,7 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	// TODO: remove this hack
 	var isHelper = this.isHelper = this.methodExpr.isHelper;
 
-	var hasHash = !isEmptyObject(this.hashExprs),
-		getArgs = this.args(scope, helperScope),
-		getHash = this.hash(scope, helperScope);
+	var getArgs = this.args(scope, helperScope);
 
 	return compute(function(newVal){
 		var func = method;
@@ -180,9 +210,6 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 			var args = getArgs();
 
 			// if fn/inverse is needed, add after this
-			if(hasHash) {
-				args.push(getHash());
-			}
 
 			if(isHelper && helperOptions) {
 				args.push(helperOptions);
@@ -197,8 +224,6 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	});
 
 };
-
-
 
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
@@ -384,7 +409,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 // AT @NAME
 //
 var keyRegExp = /[\w\.\\\-_@\/\&%]+/,
-	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~)/g,
+	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\])/g,
 	literalRegExp = /^('.*?'|".*?"|[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
 
 var isTokenKey = function(token){
@@ -423,8 +448,15 @@ assign(Stack.prototype,{
 			this.stack.pop();
 		}
 	},
+	first: function(types){
+		var curIndex = this.stack.length - 1;
+		while( curIndex > 0 && types.indexOf(this.stack[curIndex].type) === -1 ) {
+			curIndex--;
+		}
+		return this.stack[curIndex];
+	},
 	firstParent: function(types){
-		var curIndex = this.stack.length- 2;
+		var curIndex = this.stack.length - 2;
 		while( curIndex > 0 && types.indexOf(this.stack[curIndex].type) === -1 ) {
 			curIndex--;
 		}
@@ -442,6 +474,9 @@ assign(Stack.prototype,{
 	},
 	addToAndPush: function(types, type){
 		this.addTo(types, type);
+		this.stack.push(type);
+	},
+	push: function(type) {
 		this.stack.push(type);
 	},
 	topLastChild: function(){
@@ -525,11 +560,12 @@ var expression = {
 
 	Arg: Arg,
 	Hash: Hash,
+	Hashes: Hashes,
 	Call: Call,
 	Helper: Helper,
 	HelperLookup: HelperLookup,
 	HelperScopeLookup: HelperScopeLookup,
-
+	Bracket: Bracket,
 
 	SetIdentifier: function(value){ this.value = value; },
 	tokenize: function(expression){
@@ -594,9 +630,18 @@ var expression = {
 		}
 		else if(ast.type === "Arg") {
 			return new Arg(this.hydrateAst(ast.children[0], options, methodType, isArg),{compute: true});
-		} else if(ast.type === "Hash") {
+		}
+		else if(ast.type === "Hash") {
 			throw new Error("");
-		} else if(ast.type === "Call" || ast.type === "Helper") {
+		}
+		else if(ast.type === "Hashes") {
+			var hashes = {};
+			each(ast.children, function(hash){
+				hashes[hash.prop] = this.hydrateAst( hash.children[0], options, methodType, true );
+			}, this);
+			return new Hashes(hashes);
+		}
+		else if(ast.type === "Call" || ast.type === "Helper") {
 			//get all arguments and hashes
 			var hashes = {},
 				args = [],
@@ -604,8 +649,12 @@ var expression = {
 			if(children) {
 				for(var i = 0 ; i <children.length; i++) {
 					var child = children[i];
-					if(child.type === "Hash") {
-						hashes[child.prop] = this.hydrateAst( child.children[0], options, ast.type, true );
+					if(child.type === "Hashes" && ast.type === "Helper") {
+
+						each(child.children, function(hash){
+							hashes[hash.prop] = this.hydrateAst( hash.children[0], options, ast.type, true );
+						}, this);
+
 					} else {
 						args.push( this.hydrateAst(child, options, ast.type, true) );
 					}
@@ -614,6 +663,11 @@ var expression = {
 
 
 			return new (options.methodRule(ast))(this.hydrateAst(ast.method, options, ast.type), args, hashes);
+		} else if (ast.type === "Bracket") {
+			return new Bracket(
+				this.hydrateAst(ast.children[0], options),
+				ast.root ? this.hydrateAst(ast.root, options) : undefined
+			);
 		}
 	},
 	ast: function(expression){
@@ -635,7 +689,14 @@ var expression = {
 			// Literal
 			if(literalRegExp.test( token )) {
 				convertToHelperIfTopIsLookup(stack);
-				stack.addTo(["Helper", "Call", "Hash"], {type: "Literal", value: utils.jsonParse( token )});
+				// only add to hash if there's not already a child.
+				var firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
+				if(firstParent.type === "Hash" && (firstParent.children && firstParent.children.length > 0)) {
+					stack.addTo(["Helper", "Call", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
+				} else {
+					stack.addTo(["Helper", "Call", "Hash", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
+				}
+
 			}
 			// Hash
 			else if(nextToken === "=") {
@@ -644,7 +705,6 @@ var expression = {
 
 				// If top is a Lookup, we might need to convert to a helper.
 				if(top && top.type === "Lookup") {
-
 					// Check if current Lookup is part of a Call, Helper, or Hash
 					// If it happens to be first within a Call or Root, that means
 					// this is helper syntax.
@@ -660,8 +720,20 @@ var expression = {
 
 					}
 				}
-
-				stack.addToAndPush(["Helper", "Call"], {type: "Hash", prop: token});
+				var firstParent = stack.firstParent(["Call","Helper","Hashes"]);
+				// makes sure we are adding to Hashes if there already is one
+				// otherwise we create one.
+				var hash = {type: "Hash", prop: token}
+				if(firstParent.type === "Hashes") {
+					stack.addToAndPush(["Hashes"], hash);
+				} else {
+					var hash
+					stack.addToAndPush(["Helper", "Call"], {
+						type: "Hashes",
+						children: [hash]
+					});
+					stack.push(hash);
+				}
 				cursor.index++;
 
 			}
@@ -680,7 +752,7 @@ var expression = {
 					// if two scopes, that means a helper
 					convertToHelperIfTopIsLookup(stack);
 
-					stack.addToAndPush(["Helper", "Call","Hash","Arg"], {type: "Lookup", key: token});
+					stack.addToAndPush(["Helper", "Call", "Hash", "Arg", "Bracket"], {type: "Lookup", key: token});
 				}
 
 			}
@@ -708,6 +780,19 @@ var expression = {
 			// End Call argument
 			else if(token === ",") {
 				stack.popUntil(["Call"]);
+			}
+			// Bracket
+			else if(token === "[") {
+				top = stack.top();
+				lastToken = stack.topLastChild();
+
+				if (lastToken && lastToken.type === "Call") {
+					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
+				} else if (top.type === "Lookup") {
+					stack.replaceTopAndPush({type: "Bracket", root: top});
+				} else {
+					stack.replaceTopAndPush({type: "Bracket"});
+				}
 			}
 		}
 		return stack.root.children[0];

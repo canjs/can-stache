@@ -1,17 +1,37 @@
 @function can-stache.helpers.routeUrl {{routeUrl hashes}}
-@parent can-stache.htags 7
+@parent can-stache/helpers/route
 
 Returns a url using [can-route.url route.url].
 
-@signature `{{routeUrl hashes [,merge]}}`
+@signature `routeUrl( hashes... [,merge] )`
+
+Calls [can-route.url] with  `hashes` as it's `data` argument and an
+optional `merge`.
+
+This can be used on its own to create `<a>` `href`s like:
+
+```
+<a href="{{ routeUrl(page='todos' id=todo.id) }}">details</a>
+```
+
+Or in conjunction with other helpers:
+
+```
+{{makeLink "details" routeUrl(page='todos', true)}}
+```
+
+@signature `{{routeUrl [merge] hashes... }}`
 
 Passes the hashes to `route.url` and returns the result.
 
-@param {can-stache.expressions} hashes A hash expression like `page='edit' recipeId=id`.
+```
+<a href="{{routeUrl page='todos' id=todo.id}}">details</a>
+```
 
-@param {Boolean} [merge] Pass `true` to create a url that merges `hashes` into the 
-current [can-route] properties.  Passing the `merge` argument is only available 
-in [can-stache.expressions Call expressions] like `routeUrl(id=itemId, true)`.
+@param {Boolean} [merge] Pass `true` to create a url that merges `hashes` into the
+current [can-route] properties.  
+
+@param {can-stache/expressions/hash} [hashes...] A hash expression like `page='edit' recipeId=id`.
 
 @return {String} Returns the result of calling `route.url`.
 
@@ -47,10 +67,10 @@ lets you write a url that only changes specified properties:
 
 
 
-The following demo uses `routeUrl` and [can-stache.helpers.routeCurrent] to 
+The following demo uses `routeUrl` and [can-stache.helpers.routeCurrent] to
 create links that update [can-route]'s `page` attribute:
 
-@demo can/view/stache/doc/helpers/route-url.html
+@demo demos/can-stache/route-url.html
 
 It also writes out the current url like:
 
@@ -60,4 +80,3 @@ It also writes out the current url like:
 
 This calls `route.url({}, true)` which has the effect of writing out
 the current url.
-

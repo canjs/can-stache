@@ -3,36 +3,59 @@ var route = require('can-route');
 
 var getLast = require('can-util/js/last/last');
 var stacheExpression = require('../src/expression');
+var each = require("can-util/js/each/each");
 
-var looksLikeOptions = function(options){
-	return options && typeof options.fn === "function" && typeof options.inverse === "function";
+var looksLikeOptions = helpers.looksLikeOptions;
+
+var calculateArgs = function(){
+	var finalParams,
+		finalMerge,
+		optionsArg;
+
+	each(arguments, function(arg){
+		if(typeof arg === "boolean") {
+			finalMerge = arg;
+		} else if( arg && typeof arg === "object"  ) {
+			if(!looksLikeOptions(arg) ) {
+				finalParams = helpers.resolveHash(arg);
+			} else {
+				optionsArg = arg;
+			}
+		}
+	});
+
+	if(!finalParams && optionsArg) {
+		finalParams = helpers.resolveHash(optionsArg.hash);
+	}
+	return {
+		finalParams: finalParams || {},
+		finalMerge: finalMerge,
+		optionsArg: optionsArg
+	};
 };
 
 
-helpers.registerHelper('routeUrl',function(params, merge){
-	// check if called like a mustache helper
-	if(!params) {
-		params = {};
-	}
+// go through arguments ... if there's a boolean ... if there's a plain object
+helpers.registerHelper('routeUrl',function(){
+	var args = calculateArgs.apply(this, arguments);
 
-	if(typeof params.fn === "function" && typeof params.inverse === "function") {
-		params = helpers.resolveHash(params.hash);
-	}
-	return route.url(params, typeof merge === "boolean" ? merge : undefined);
+	return route.url(args.finalParams, typeof args.finalMerge === "boolean" ? args.finalMerge : undefined);
+
 });
 
-var routeCurrent = function(params){
-	// check if this a normal helper call
-	var last = getLast(arguments),
-		isOptions = last && looksLikeOptions(last);
-	if( last && isOptions && !(last.exprData instanceof stacheExpression.Call) ) {
-		if(route.current( helpers.resolveHash(params.hash || {}))) {
+var routeCurrent = function(){
+
+	var args = calculateArgs.apply(this, arguments);
+	var result = route.current( args.finalParams, typeof args.finalMerge === "boolean" ? args.finalMerge : undefined );
+
+	if( args.optionsArg && !(args.optionsArg instanceof stacheExpression.Call) ) {
+		if( result ) {
 			return params.fn();
 		} else {
 			return params.inverse();
 		}
 	} else {
-		return route.current(looksLikeOptions(params) ? {} : params || {});
+		return result;
 	}
 };
 routeCurrent.callAsMethod = true;

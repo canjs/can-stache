@@ -40,9 +40,14 @@ test("expression.ast - helper followed by hash", function(){
 		},
 		children: [
 			{
-				type: "Hash",
-				prop: "prop",
-				children: [{type: "Lookup", key: "own_prop"}]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "prop",
+						children: [{type: "Lookup", key: "own_prop"}]
+					}
+				]
 			}
 		]
 	});
@@ -50,7 +55,7 @@ test("expression.ast - helper followed by hash", function(){
 });
 
 test("expression.ast - everything", function(){
-	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
+	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var helperBCall = {
 		type: "Call",
@@ -59,15 +64,21 @@ test("expression.ast - everything", function(){
 			{type: "Literal", value: 1},
 			{type: "Lookup", key: "valueA"},
 			{
-				type: "Hash",
-				prop: "propA",
-				children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "valueB"} ]}]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "propA",
+						children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "valueB"} ]}]
+					},
+					{
+						type: "Hash",
+						prop: "propC",
+						children: [{type: "Literal", value: 2}]
+					}
+				]
 			},
-			{
-				type: "Hash",
-				prop: "propC",
-				children: [{type: "Literal", value: 2}]
-			}
+			{type: "Literal", value: 1}
 		]
 	};
 	var helperCCall = {
@@ -97,9 +108,14 @@ test("expression.ast - everything", function(){
 			{type: "Literal", value: 'def'},
 			{type: "Lookup", key: "nested@prop"},
 			{
-				type: "Hash",
-				prop: "outerPropA",
-				children: [helperCCall]
+				type: "Hashes",
+				children: [
+					{
+						type: "Hash",
+						prop: "outerPropA",
+						children: [helperCCall]
+					}
+				]
 			}
 		]
 	});
@@ -107,7 +123,7 @@ test("expression.ast - everything", function(){
 
 test("expression.parse - everything", function(){
 
-	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
+	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var oneExpr = new expression.Literal(1),
 		twoExpr = new expression.Literal(2),
@@ -121,13 +137,14 @@ test("expression.parse - everything", function(){
 		helperB = new expression.Lookup("@helperB"),
 		helperC = new expression.Lookup("@helperC");
 
+	var helperBHashArg = new expression.Hashes({
+		propA: new expression.Arg(valueB, {compute: true}),
+		propC: twoExpr
+	})
+
 	var callHelperB = new expression.Call(
 		helperB,
-		[oneExpr, valueA],
-		{
-			propA: new expression.Arg(valueB, {compute: true}),
-			propC: twoExpr
-		}
+		[oneExpr, valueA, helperBHashArg, oneExpr]
 	);
 
 	var callHelperBdotZed = new expression.ScopeLookup(".zed", callHelperB);
@@ -291,6 +308,178 @@ test("convertKeyToLookup", function(){
 
 });
 
+
+test("expression.ast - [] operator", function(){
+	var ast = expression.ast("['propName']");
+
+	deepEqual(ast, {
+		type: "Bracket",
+		children: [{type: "Literal", value: "propName"}]
+	});
+
+	var ast2 = expression.ast("[propName]");
+
+	deepEqual(ast2, {
+    	type: "Bracket",
+    	children: [{type: "Lookup", key: "propName"}]
+	});
+
+	var ast3 = expression.ast("foo['bar']");
+
+	deepEqual(ast3, {
+	    type: "Bracket",
+			root: {type: "Lookup", key: "foo"},
+	    children: [{type: "Literal", value: "bar"}]
+	});
+
+	var ast3 = expression.ast("foo[bar]");
+
+	deepEqual(ast3, {
+	    type: "Bracket",
+			root: {type: "Lookup", key: "foo"},
+	    children: [{type: "Lookup", key: "bar"}]
+	});
+
+	var ast4 = expression.ast("foo()[bar]");
+
+	deepEqual(ast4, {
+		type: "Bracket",
+		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
+		children: [{type: "Lookup", key: "bar"}]
+	});
+});
+
+test("expression.parse - [] operator", function(){
+	var exprData = expression.parse("['propName']");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Literal('propName')
+		)
+	);
+
+	exprData = expression.parse("[propName]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('propName')
+		)
+	);
+
+	exprData = expression.parse("foo['bar']");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Literal('bar'),
+			new expression.Lookup('foo')
+		)
+	);
+
+	exprData = expression.parse("foo[bar]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('bar'),
+			new expression.Lookup('foo')
+		)
+	);
+
+	exprData = expression.parse("foo()[bar]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Lookup('bar'),
+			new expression.Call(
+				new expression.Lookup('@foo'),
+				[],
+				{}
+			)
+		)
+	);
+});
+
+test("Bracket expression", function(){
+	// ["bar"]
+	var expr = new expression.Bracket(
+		new expression.Literal("bar")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({bar: "name"})
+		)
+	);
+	equal(compute(), "name");
+
+	// [bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({bar: "name", name: "Kevin"})
+		)
+	);
+	equal(compute(), "Kevin");
+
+	// foo["bar"]
+	expr = new expression.Bracket(
+		new expression.Literal("bar"),
+		new expression.Lookup("foo")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: {bar: "name"}})
+		)
+	);
+	equal(compute(), "name");
+
+	// foo[bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar"),
+		new expression.Lookup("foo")
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: {name: "Kevin"}, bar: "name"})
+		)
+	);
+	equal(compute(), "Kevin");
+
+	// foo()[bar]
+	expr = new expression.Bracket(
+		new expression.Lookup("bar"),
+		new expression.Call(
+			new expression.Lookup("@foo"),
+			[],
+			{}
+		)
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
+		)
+	);
+	equal(compute(), "Kevin");
+
+	// foo()[bar()]
+	expr = new expression.Bracket(
+		new expression.Call(
+			new expression.Lookup("@bar"),
+			[],
+			{}
+		),
+		new expression.Call(
+			new expression.Lookup("@foo"),
+			[],
+			{}
+		)
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({
+				foo: function() { return {name: "Kevin"}; },
+				bar: function () { return "name"; }
+			})
+		)
+	);
+	equal(compute(), "Kevin");
+});
+
 test("registerConverter helpers push and pull correct values", function () {
 
 	helpers.registerConverter('numberToHex', {
@@ -381,4 +570,3 @@ test("registerConverter helpers are chainable", function () {
 	twoWayCompute('7F');
 	equal(data.attr("observeVal"), 127, 'push converter called');
 });
-

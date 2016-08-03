@@ -1,17 +1,32 @@
-@function can-stache.helpers.switch {{#switch expr}}
+@function can-stache.helpers.switch {{#switch expression}}
 @parent can-stache.htags 13
 
-@signature `{{#switch expr}}BLOCK{{/switch}}`
+@signature `{{#switch EXPRESSION}}BLOCK{{/switch}}`
 
 Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.helpers.default] helpers.
 
-@param {can-stache.expression} expr An expression or key that references a value that will be switched on.
+```
+{{#switch user.type}}
+	{{#case "admin"}}
+		Pay
+	{{/case}}
+	{{#case "admin"}}
+		<button/>
+	{{/case}}
+	{{#default}}
+		Look at data
+	{{/default}}
+{{/switch}}
+```
 
-@param {can-stache} BLOCK a template that is rendered, uses [can-stache.helpers.case] and [can-stache.helpers.default] helpers to match `expr`.
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An expression or key that references a value that will be switched on.
 
-@return {DocumentFragment} A fragment containing the rendered `BLOCK`.
+@param {can-stache.sectionRenderer} BLOCK a template that is rendered, uses [can-stache.helpers.case] and [can-stache.helpers.default] helpers to match `EXPRESSION`.
+
 
 @body
+
+## Use
 
 The `switch` helper is used to render a block where one of several cases matches expr. It works just like a JavaScript switch.
 
@@ -31,4 +46,3 @@ The `switch` helper is used to render a block where one of several cases matches
 		{{/default}}
 
 	{{/switch}}
-

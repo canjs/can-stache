@@ -4937,6 +4937,25 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(spans[1]), 'Justin', 'and helpers worked also');
 	});
 
+	test("Bracket expression", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ foo[bar] }}</p>");
+
+		var data = new CanMap({
+			bar: "name",
+			foo: {
+				name: "Kevin"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
+	});
+
 	test("context is observable (#38)", function(){
 		var computes = [];
 		stache.registerHelper("contextHelper", function(context){
@@ -4959,6 +4978,26 @@ function makeTest(name, doc, mutation) {
 		lis = frag.firstChild.getElementsByTagName("li");
 		QUnit.equal( lis[1].innerHTML, "2", "is 2");
 	});
+
+	if(window.console && window.console.log) {
+		test("log", function(){
+			var oldLog = console.log;
+			var calls = 0 ;
+			var FIRST = {},
+				SECOND = {};
+			console.log = function(first, second){
+				QUnit.equal(first, FIRST);
+				QUnit.equal(second, SECOND);
+			};
+			var template1 = stache("{{log first second}}"),
+				template2 = stache("{{ log(first, second) }}");
+
+
+			template1({first: FIRST, second: SECOND});
+			template2({first: FIRST, second: SECOND});
+			console.log = oldLog;
+		});
+	}
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 

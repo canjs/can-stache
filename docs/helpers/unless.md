@@ -1,18 +1,26 @@
-@function can-stache.helpers.unless {{#unless key}}
+@function can-stache.helpers.unless {{#unless expression}}
 @parent can-stache.htags 4
 
-@signature `{{#unless key}}BLOCK{{/unless}}`
+@signature `{{#unless EXPRESSION}}FN{{else}}INVERSE{{/unless}}`
 
-Render the block of text if the key's value is falsey.
+Renders `FN` if `EXPRESSION` is falsey or `INVERSE` if `EXPRESSION`
+is truthy. Both `FN` and `INVERSE` will be rendered with the
+current scope.
 
-@param {can-stache.key} key A key that references a value within the current or parent
-context. If the value is a function or [can-compute.computed], the function's
-return value is used.
+```
+{{#unless person.isAwake() }} Shhhhh! {{/if}}
+```
 
-@param {can-stache} BLOCK A template that is rendered
-if the `key`'s value is falsey.
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.
+
+@param {can-stache.sectionRenderer} FN A subsection that can be optionally rendered.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is truthy and [can-stache.helpers.else] is used.
 
 @body
+
+## Use
 
 The `unless` helper evaluates the inverse of the value
 of the key and renders the block between the helper and the slash.
