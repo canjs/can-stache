@@ -645,11 +645,13 @@ var expression = {
 			//get all arguments and hashes
 			var hashes = {},
 				args = [],
-				children = ast.children;
+				children = ast.children,
+				ExpressionType = options.methodRule(ast);
 			if(children) {
 				for(var i = 0 ; i <children.length; i++) {
 					var child = children[i];
-					if(child.type === "Hashes" && ast.type === "Helper") {
+					if(child.type === "Hashes" && ast.type === "Helper" &&
+						!(ExpressionType === Call)) {
 
 						each(child.children, function(hash){
 							hashes[hash.prop] = this.hydrateAst( hash.children[0], options, ast.type, true );
@@ -662,7 +664,8 @@ var expression = {
 			}
 
 
-			return new (options.methodRule(ast))(this.hydrateAst(ast.method, options, ast.type), args, hashes);
+			return new ExpressionType(this.hydrateAst(ast.method, options, ast.type),
+																args, hashes);
 		} else if (ast.type === "Bracket") {
 			return new Bracket(
 				this.hydrateAst(ast.children[0], options),
