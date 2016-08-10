@@ -101,7 +101,7 @@ var core = {
 				exprData: exprData,
 				helpersScope: helperOptions
 			};
-			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer);
+			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 			value = exprData.value(scope, helperOptions, helperOptionArg);
 			if(exprData.isHelper) {
@@ -148,7 +148,7 @@ var core = {
 				fn: function () {},
 				inverse: function () {}
 			};
-			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer);
+			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
 				var finalValue;

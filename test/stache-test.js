@@ -4998,6 +4998,24 @@ function makeTest(name, doc, mutation) {
 			console.log = oldLog;
 		});
 	}
+	
+	test('Nested if-s inside a text section (#9)', function(assert){
+		var template = stache('<div class="{{#if sorting}}sort{{#if ascending}}-ascend{{/if}}{{/if}}"></div>');
+		
+		var vm = new CanMap({
+			sorting: true,
+			ascending: false
+		});
+		var frag = template(vm);
+		var className = frag.firstChild.className;
+		
+		assert.equal( className, 'sort');
+		
+		vm.attr('ascending', true);
+		className = frag.firstChild.className;
+		
+		assert.equal( className, 'sort-ascend');
+	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
