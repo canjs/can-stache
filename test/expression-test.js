@@ -178,6 +178,23 @@ test("expression.parse - everything", function(){
 	deepEqual( exprData, callHelperA, "full thing");
 });
 
+test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
+		 function(){
+
+	var exprData = expression.parse("withArgs content=content", {
+		lookupRule: "method",
+		methodRule: "call"
+	});
+
+	var valueContent = new expression.ScopeLookup("content");
+	var hashArg = new expression.Arg(new expression.Hashes({
+		content: valueContent
+	}));
+
+	equal(exprData.argExprs.length, 1, "there is one arg");
+	deepEqual(exprData.argExprs[0], hashArg, "correct hashes");
+});
+
 test("numeric expression.Literal", function(){
 	var exprData = expression.parse("3");
 
