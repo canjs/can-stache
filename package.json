@@ -62,7 +62,7 @@
     "can-view-target": "^3.0.0-pre.1"
   },
   "devDependencies": {
-    "can-define": "^0.7.15",
+    "can-define": "^0.7.17",
     "can-event": "^3.0.0-pre.2",
     "can-list": "^3.0.0-pre.6",
     "can-map": "^3.0.0-pre.2",
