@@ -349,7 +349,8 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 
 	var helperOptionArg = {
 		fn: function () {},
-		inverse: function () {}
+		inverse: function () {},
+		stringOnly: stringOnly
 	},
 		context = scope.peak("."),
 		args = this.args(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly),

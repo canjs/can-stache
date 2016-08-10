@@ -65,7 +65,7 @@ var helpers = {
 			}
 		}
 
-		if (types.isListLike(resolved)) {
+		if (types.isListLike(resolved) && !options.stringOnly) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
@@ -97,17 +97,19 @@ var helpers = {
 		var expr = resolved;
 
 		if ( !! expr && utils.isArrayLike(expr)) {
-			for (i = 0; i < expr.length; i++) {
+			var isMapLike = types.isMapLike(expr);
+			for (i = 0; i < (isMapLike ? expr.attr('length') : expr.length); i++) {
 				aliases = {
 					"%index": i,
 					"@index": i
 				};
+				var item = isMapLike ? expr.attr(i) : expr[i];
 
 				if (asVariable) {
-					aliases[asVariable] = expr[i];
+					aliases[asVariable] = item;
 				}
 
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[i])));
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
 			}
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
@@ -141,7 +143,7 @@ var helpers = {
 			}
 		}
 
-		return result;
+		return !options.stringOnly ? result : result.join('');
 	},
 	"@index": function(offset, options) {
 		if (!options) {
