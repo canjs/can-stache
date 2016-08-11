@@ -231,17 +231,13 @@ function makeTest(name, doc, mutation) {
 				number: i
 			}));
 		}
-		var stashed = stache("{{#each boxes}}"+
+		var stashed = stache(
 		"<div class='box-view'>"+
-		"<div class='box' id='box-{{number}}'  style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>"+
-		"{{content}}"+
+		"<div class='box' style='top: {{top}}px; left: {{left}}px;'>"+
 		"</div>"+
-		"</div>"+
-		"{{/each}}");
+		"</div>");
 
-		var frag = stashed({
-			boxes: boxes
-		});
+		var frag = stashed(boxes[0]);
 
 		//equal(frag.children.length, 2, "there are 2 childNodes");
 
@@ -4705,27 +4701,27 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Child bindings are called before the parent', function() {
-		var template = "{{#eq page 'foo'}}" +
-				"{{#eq action 'view'}} {{trace 'view foo'}} {{/eq}}" +
-				"{{#eq action 'edit'}} {{trace 'edit foo'}} {{/eq}}" +
+		var template = "{{#eq page 'todos'}}" +
+				"{{#eq action 'view'}} {{trace 'view todos'}} {{/eq}}" +
+				"{{#eq action 'edit'}} {{trace 'edit todos'}} {{/eq}}" +
 			"{{/eq}}" +
-			"{{#eq page 'bar'}}" +
-				"{{#eq action 'view'}} {{trace 'view bar'}} {{/eq}}" +
-				"{{#eq action 'edit'}} {{trace 'edit bar'}} {{/eq}}" +
+			"{{#eq page 'recipes'}}" +
+				"{{#eq action 'view'}} {{trace 'view recipes'}} {{/eq}}" +
+				"{{#eq action 'edit'}} {{trace 'edit recipes'}} {{/eq}}" +
 			"{{/eq}}";
 
 		var state = new CanMap({
 			action: 'view',
-			page: 'foo'
+			page: 'todos'
 		});
 		var counter = 0;
 
 		stache(template)(state, {
 			trace: function(value, options) {
 				if(counter === 0) {
-					equal(value, 'view foo');
+					equal(value, 'view todos');
 				} else if(counter === 1) {
-					equal(value, 'edit bar')
+					equal(value, 'edit recipes')
 				} else {
 					ok(false, 'Traced an unexpected template call');
 				}
@@ -4735,7 +4731,7 @@ function makeTest(name, doc, mutation) {
 
 		state.attr({
 			action: 'edit',
-			page: 'bar'
+			page: 'recipes'
 		});
 
 		equal(counter, 2, 'Counter incremented twice');
@@ -4982,7 +4978,6 @@ function makeTest(name, doc, mutation) {
 	if(window.console && window.console.log) {
 		test("log", function(){
 			var oldLog = console.log;
-			var calls = 0 ;
 			var FIRST = {},
 				SECOND = {};
 			console.log = function(first, second){
@@ -4998,22 +4993,22 @@ function makeTest(name, doc, mutation) {
 			console.log = oldLog;
 		});
 	}
-	
+
 	test('Nested if-s inside a text section (#9)', function(assert){
 		var template = stache('<div class="{{#if sorting}}sort{{#if ascending}}-ascend{{/if}}{{/if}}"></div>');
-		
+
 		var vm = new CanMap({
 			sorting: true,
 			ascending: false
 		});
 		var frag = template(vm);
 		var className = frag.firstChild.className;
-		
+
 		assert.equal( className, 'sort');
-		
+
 		vm.attr('ascending', true);
 		className = frag.firstChild.className;
-		
+
 		assert.equal( className, 'sort-ascend');
 	});
 

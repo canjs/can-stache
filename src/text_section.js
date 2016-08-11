@@ -1,16 +1,11 @@
-var target = require('can-view-target');
-var Scope = require('can-view-scope');
 var compute = require('can-compute');
 var live = require('can-view-live');
 
 var utils = require('./utils');
-var mustacheCore = require('./mustache_core');
 
-var getDocument = require("can-util/dom/document/document");
 var attr = require("can-util/dom/attr/attr");
 
 var assign = require('can-util/js/assign/assign');
-var last = require('can-util/js/last/last');
 
 var noop = function(){};
 
