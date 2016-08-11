@@ -70,5 +70,12 @@ module.exports = {
 		}
 		return observeObservables ?  convertedRenderer : Observation.ignore(convertedRenderer);
 	},
+	getItemsStringContent: function(items, isObserveList, helperOptions, options){
+		var txt = "";
+		for (var i = 0, len = isObserveList ? items.attr("length") : items.length; i < len; i++) {
+			txt += helperOptions.fn( isObserveList ? items.attr('' + i) : items[i], options);
+		}
+		return txt;
+	},
 	Options: Options
 };
