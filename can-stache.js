@@ -8,6 +8,7 @@ var TextSectionBuilder = require('./src/text_section');
 var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('../helpers/core');
 require('../helpers/converter');
+require('../helpers/route');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 
 var namespace = require('can-util/namespace');
