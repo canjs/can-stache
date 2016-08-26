@@ -35,3 +35,34 @@ test('Helper each inside a text section (attribute) (#8)', function(assert){
 
 	assert.equal( className, 'one two three ' );
 });
+
+test("Using #each on a DefineMap", function(assert){
+	var template = stache("{{#each obj}}{{%key}}{{.}}{{/each}}");
+
+	var VM = DefineMap.extend({ 
+		seal: false
+	}, {
+		foo: "string",
+		bar: "string"
+	});
+
+	var vm = new VM({
+		foo: "bar",
+		bar: "foo"
+	});
+
+	vm.set("baz", "qux");
+
+	var frag = template({ obj: vm });
+
+	var first = frag.firstChild,
+		second = first.nextSibling.nextSibling,
+		third = second.nextSibling.nextSibling;
+
+	assert.equal(first.nodeValue, "foo");
+	assert.equal(first.nextSibling.nodeValue, "bar");
+	assert.equal(second.nodeValue, "bar");
+	assert.equal(second.nextSibling.nodeValue, "foo");
+	assert.equal(third.nodeValue, "baz");
+	assert.equal(third.nextSibling.nodeValue, "qux");
+});
