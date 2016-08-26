@@ -12,6 +12,7 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
+var isIterable = require("can-util/js/is-iterable/is-iterable");
 
 
 var domData = require('can-util/dom/data/data');
@@ -111,7 +112,22 @@ var helpers = {
 
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
 			}
-		} else if (types.isMapLike(expr)) {
+		}
+		else if(isIterable(expr)) {
+			each(expr, function(value, key){
+				aliases = {
+					"%key": key
+				};
+
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+
+				result.push(options.fn(options.scope.add(aliases, { notContext: true}).add(value)));
+
+			});
+		}
+		else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
 			// listen to keys changing so we can livebind lists of attributes.
 
