@@ -1,5 +1,6 @@
 var Scope = require('can-view-scope');
 var compute = require('can-compute');
+var observeReader = require('can-observation/reader/');
 
 var utils = require('./utils');
 var mustacheHelpers = require('../helpers/core');
@@ -23,7 +24,8 @@ var getKeyComputeData = function (key, scope, readOptions) {
 	// Looks up a value in the scope and returns a compute if the value is
 	// observable and the value if not.
 	lookupValue = function(key, scope, helperOptions, readOptions){
-		var computeData = getKeyComputeData(key, scope, readOptions);
+		var prop = getValueOfComputeOrFunction(key);
+		var computeData = getKeyComputeData(prop, scope, readOptions);
 		// If there are no dependencies, just return the value.
 		if (!computeData.compute.computeInstance.hasDependencies) {
 			return {value: computeData.initialValue, computeData: computeData};
@@ -46,6 +48,29 @@ var getKeyComputeData = function (key, scope, readOptions) {
 			res.helper = helper && helper.fn;
 		}
 		return res;
+	},
+	// Looks up a value in the result of a Lookup or Call expression
+	lookupValueInResult = function(keyOrCompute, lookupOrCall, scope, helperOptions, readOptions) {
+		var result = lookupOrCall.value(scope, {}, {});
+
+		var c = compute(function() {
+			var key = getValueOfComputeOrFunction(keyOrCompute);
+			return observeReader.read(result, observeReader.reads(key)).value;
+		});
+
+		return { value: c };
+	},
+	// gets the value of a compute or function
+	getValueOfComputeOrFunction = function (computeOrFunction) {
+		if (typeof computeOrFunction.value === 'function') {
+			return computeOrFunction.value();
+		}
+
+		if (typeof computeOrFunction === 'function') {
+			return computeOrFunction();
+		}
+
+		return computeOrFunction;
 	},
 	// If not a Literal or an Arg, convert to an arg for caching.
 	convertToArgExpression = function(expr){
@@ -71,27 +96,16 @@ Bracket.prototype.value = function (scope) {
 	var prop = this.key;
 	var obj = this.root;
 
-	if (prop instanceof Literal) {
-		prop = prop.value();
-	} else if (prop instanceof Lookup) {
+	if (prop instanceof Lookup) {
 		prop = lookupValue(prop.key, scope, {}, {});
-		prop = prop.value();
-	} else {
-		prop = prop.value(scope, {}, {})();
+	} else if (prop instanceof Call) {
+		prop = prop.value(scope, {}, {});
 	}
 
 	if (!obj) {
 		return lookupValue(prop, scope, {}, {}).value;
 	} else {
-		return compute(function() {
-			if (obj instanceof Lookup) {
-				obj = lookupValue(obj.key, scope, {}, {}).value();
-			} else {
-				obj = obj.value(scope, {}, {})();
-			}
-
-			return obj[prop];
-		});
+		return lookupValueInResult(prop, obj, scope, {}, {}).value;
 	}
 };
 
@@ -112,7 +126,13 @@ var Lookup = function(key, root) {
 	this.rootExpr = root;
 };
 Lookup.prototype.value = function(scope, helperOptions){
-	var result = lookupValueOrHelper(this.key, scope, helperOptions);
+	var result = {};
+
+	if (this.rootExpr) {
+		result = lookupValueInResult(this.key, this.rootExpr, scope, {}, {});
+	} else {
+		result = lookupValueOrHelper(this.key, scope, helperOptions);
+	}
 	// TODO: remove this.  This is hacky.
 	this.isHelper = result.helper && !result.helper.callAsMethod;
 	return result.helper || result.value;
@@ -750,7 +770,7 @@ var expression = {
 					stack.replaceTopLastChildAndPush({
 						type: "Lookup",
 						root: lastToken,
-						key: token
+						key: token.slice(1) // remove leading `.`
 					});
 				} else {
 					// if two scopes, that means a helper

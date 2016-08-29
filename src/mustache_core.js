@@ -112,6 +112,11 @@ var core = {
 			if(exprData.isHelper) {
 				return value;
 			}
+		} else if (exprData instanceof expression.Lookup) {
+			value = exprData.value(scope);
+			if(exprData.isHelper) {
+				return value;
+			}
 		} else {
 			var readOptions = {
 				// will return a function instead of calling it.
@@ -312,7 +317,7 @@ var core = {
 
 		// Pre-process the expression.
 		var exprData = core.expression.parse(expressionString);
-		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket)) {
+		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 		// A branching renderer takes truthy and falsey renderer.
