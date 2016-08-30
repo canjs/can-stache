@@ -147,7 +147,7 @@ test("expression.parse - everything", function(){
 		[oneExpr, valueA, helperBHashArg, oneExpr]
 	);
 
-	var callHelperBdotZed = new expression.ScopeLookup(".zed", callHelperB);
+	var callHelperBdotZed = new expression.ScopeLookup("zed", callHelperB);
 
 	var callHelperC = new expression.Call(
 		helperC,
@@ -586,4 +586,36 @@ test("registerConverter helpers are chainable", function () {
 	equal(twoWayCompute(), 'FF', 'Converter called');
 	twoWayCompute('7F');
 	equal(data.attr("observeVal"), 127, 'push converter called');
+});
+
+test('foo().bar', function() {
+	// expression.ast
+	var ast4 = expression.ast("foo().bar");
+
+	deepEqual(ast4, {
+		type: "Lookup",
+		key: "bar",
+		root: {type: "Call", method: {key: "@foo", type: "Lookup" } }
+	});
+
+	// expression.parse
+	exprData = expression.parse("foo().bar");
+	deepEqual(exprData,
+		new expression.Lookup(
+			"bar",
+			new expression.Call( new expression.Lookup("@foo"), [], {} )
+		)
+	);
+
+	// expr.value
+	expr = new expression.Lookup(
+		"bar",
+		new expression.Call( new expression.Lookup("@foo"), [], {} )
+	);
+	var compute = expr.value(
+		new Scope(
+			new CanMap({foo: function() { return {bar: "Kevin"}; }})
+		)
+	);
+	equal(compute(), "Kevin");
 });

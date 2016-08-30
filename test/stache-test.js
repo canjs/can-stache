@@ -8,6 +8,7 @@ var QUnit = require('steal-qunit');
 var CanMap = require('can-map');
 var CanList = require('can-list');
 var canCompute = require('can-compute');
+var DefineMap = require('can-define/map/map');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
@@ -4942,7 +4943,8 @@ function makeTest(name, doc, mutation) {
 		var data = new CanMap({
 			bar: "name",
 			foo: {
-				name: "Kevin"
+				name: "Kevin",
+				fullName: "Kevin Phillips"
 			}
 		});
 		var dom = template(data);
@@ -4950,6 +4952,34 @@ function makeTest(name, doc, mutation) {
 		var p = div.getElementsByTagName('p');
 
 		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
+
+		data.attr('bar', 'fullName');
+
+		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for foo[bar]');
+	});
+
+	test("Bracket expression - DefineMap", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ foo[bar] }}</p>");
+
+		var data = new DefineMap({
+			bar: "name",
+			foo: {
+				name: "Kevin",
+				fullName: "Kevin Phillips"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
+
+		data.bar = 'fullName';
+
+		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for foo[bar]');
 	});
 
 	test("context is observable (#38)", function(){
@@ -5040,6 +5070,52 @@ function makeTest(name, doc, mutation) {
 		var frag = template({message: "Hello"});
 
 		assert.equal(frag.firstChild.nodeValue, "Hello");
+	});
+
+	test("foo().bar", function () {
+		var template = stache("<p>{{ person().name }}</p>");
+		var div = doc.createElement('div');
+
+		var data = new CanMap({
+			name: "Kevin",
+			person: function() {
+				return {
+					name: this.attr('name')
+				};
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'Kevin', 'correct value for person().name');
+
+		data.attr('name', 'Kevin Phillips');
+
+		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for person().name');
+	});
+
+	test("foo().bar - DefineMap", function () {
+		var template = stache("<p>{{ person().name }}</p>");
+		var div = doc.createElement('div');
+
+		var data = new DefineMap({
+			name: "Kevin",
+			person: function() {
+				return {
+					name: this.name
+				};
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'Kevin', 'correct value for person().name');
+
+		data.name = 'Kevin Phillips';
+
+		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for person().name');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
