@@ -11,7 +11,7 @@ require('../helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 
 var namespace = require('can-util/namespace');
-var getDocument = require('can-util/dom/document/document');
+var DOCUMENT = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var importer = require('can-util/js/import/import');
@@ -361,9 +361,9 @@ stache.async = function(source){
 	});
 };
 var templates = {};
-mustacheCore.getTemplateById = function(id){
+stache.from = mustacheCore.getTemplateById = function(id){
 	if(!templates[id]) {
-		var el = getDocument().getElementById(id);
+		var el = DOCUMENT().getElementById(id);
 		templates[id] = stache(el.innerHTML);
 	}
 	return templates[id];

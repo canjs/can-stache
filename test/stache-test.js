@@ -5011,7 +5011,7 @@ function makeTest(name, doc, mutation) {
 
 		assert.equal( className, 'sort-ascend');
 	});
-	
+
 	test('Helper each inside a text section (attribute) (#8)', function(assert){
 		var template = stache('<div class="{{#each list}}{{.}} {{/}}"></div>');
 
@@ -5027,6 +5027,19 @@ function makeTest(name, doc, mutation) {
 		className = frag.firstChild.className;
 
 		assert.equal( className, 'one two three ' );
+	});
+
+	test("stache.from works (#57)", function(assert){
+		var script = DOCUMENT().createElement("script");
+		script.type = "type/stache";
+		script.innerHTML = "{{message}}";
+
+		script.setAttribute("id", "some-template");
+		DOCUMENT().body.appendChild(script);
+		var template = stache.from("some-template");
+		var frag = template({message: "Hello"});
+
+		assert.equal(frag.firstChild.nodeValue, "Hello");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
