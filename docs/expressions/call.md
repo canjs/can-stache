@@ -41,7 +41,7 @@ Result:
 	<h1>Ages</h1>
 ```
 
-Call expression arguments are commma (,) seperated.  If a Hash expression is an argument,
+Call expression arguments are comma (,) separated.  If a Hash expression is an argument,
 an object with the hash properties and values will be passed. For example:
 
 ```

@@ -57,7 +57,7 @@ fragment //-> <h1>Hello World</h1>
 document.body.appendChild(fragment)
 ```
 
-Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/map/map DefineList]s and the
+Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/list/list DefineList]s and the
 resulting HTML will update when the observable data changes.
 
 ```js
@@ -87,11 +87,11 @@ the most important stuff:
 ## See also
 
 [can-view-scope] is used by `stache` internally to hold and lookup values.  This is similar to
-how JavaScript's closures hold variables, except you can use it programatically.
+how JavaScript's closures hold variables, except you can use it programmatically.
 
 [can-component] and [can-view-callbacks.tag can-view-callbacks.tag] allow you to define custom
 elements for use within a stache template.  [can-view-callbacks.attr can-view-callbacks.attr] allow
 you to define custom attributes.
 
 [can-stache-bindings] sets up __element and bindings__ between a stache template's [can-view-scope],
-component [can-component.prototype.viewModel viewModels], or an element's attributes.
+component [can-component.prototype.ViewModel viewModels], or an element's attributes.

@@ -30,7 +30,7 @@ the value of `propB` in `<component-b>`.
 ```
 
 Template variables are global to the template. Similar to JavaScript `var`
-variables, template variables do not have block leve scope.  The following
+variables, template variables do not have block level scope.  The following
 does not work:
 
 ```

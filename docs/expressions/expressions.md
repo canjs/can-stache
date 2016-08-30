@@ -3,7 +3,7 @@
 
 In addition to different magic tag types, stache supports different expression
 types.  These can be used in various combinations to call [can-stache.registerHelper helper methods]
-or [can-component::viewModel viewModel methods].  The following is an example of all the expressions
+or [can-component.prototype.ViewModel viewModel methods].  The following is an example of all the expressions
 combined:
 
 ```
@@ -31,7 +31,7 @@ They are usually passed as arguments to Call or Helper expressions like:
 
 ```
 {{pluralize "dog" 2}}
-{{task.filter("completed",true)}}
+{{task.filter("completed", true)}}
 ```
 
 ## KeyLookup expressions
@@ -44,7 +44,7 @@ can be the entire stache expression like:
 {{key}}
 ```
 
-Or they can makeup the method, helper, arguments and hash value parts of
+Or they can make up the method, helper, arguments, and hash value parts of
 Call, Helper, and Hash expressions:
 
 ```
@@ -118,7 +118,7 @@ the [can-view-scope.Options helpers scope]. It looks like:
 
 ```
 Template:
-	<h1>{{pluralize(type,ages.length)}}</h1>
+	<h1>{{pluralize(type, ages.length)}}</h1>
 
 Data:
 	{
@@ -133,7 +133,7 @@ Result:
 	<h1>Ages</h1>
 ```
 
-Call expression arguments are commma (,) seperated.  If a Hash expression is an argument,
+Call expression arguments are comma (,) separated.  If a Hash expression is an argument,
 an object with the hash properties and values will be passed. For example:
 
 ```
