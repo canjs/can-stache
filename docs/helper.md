@@ -10,7 +10,7 @@ called on.
 @param {*|can-compute} [...arg] Arguments passed from the tag. After the helper
 name, any space separated [can-stache.key keys], numbers or
 strings are passed as arguments. [can-stache.key Keys] that
-read an observable value in [can-stache/expressions/helpers] are passed as [can-compute.computed]s .
+read an observable value in [can-stache/expressions/helper helpers] are passed as [can-compute.computed]s .
 
 @param {can-stache.helperOptions} [options] An options object
 that is an additional argument in `Helper` expressions that is populated with optional:

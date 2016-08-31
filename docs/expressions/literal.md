@@ -34,6 +34,6 @@ Specifies a JavaScript `null`, `undefined`, `true`, or `false` value.
 Literal expressions are usually passed as arguments to [can-stache/expressions/call] or [can-stache/expressions/helper]s like:
 
 ```js
-{{task.filter("completed",true)}}
+{{task.filter("completed", true)}}
 {{pluralize "dog" 2}}
 ```

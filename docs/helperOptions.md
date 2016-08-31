@@ -24,13 +24,13 @@ stache.registerHelper("myHelper", function(helperOptions){
   @option {can-stache.sectionRenderer} [fn] Renders the "truthy" subsection
   BLOCK.  `options.fn` is only available if the helper is called as a
   [can-stache.tags.section] or [can-stache.tags.inverse]. Read about
-  [can-stache.helpers.sectionHelper section helpers] for more information.
+  [can-stache.sectionRenderer section renderer] for more information.
 
   @option {can-stache.sectionRenderer} [inverse] Renders the "falsey" subsection
   INVERSE.  `options.inverse` is only available if the helper is called as a
   [can-stache.tags.section] or [can-stache.tags.inverse] and [can-stache.helpers.else]
   is used. Read about
-  [can-stache.helpers.sectionHelper section helpers] for more information.
+  [can-stache.sectionRenderer section renderer] for more information.
 
   @option {Object} hash An object containing all of the
   [can-stache.expressions Hash expression] keys and values. For example:

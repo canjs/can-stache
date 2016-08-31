@@ -108,7 +108,7 @@ The `{{helper}}` syntax is used to call out to stache [can-stache.helper helper 
 that may contain more complex functionality. `helper` is a [can-stache.key key] that must match either:
 
  - a [can-stache.registerHelper registered helper function], or
- - a function in the current or parent [can-stache.context contexts]
+ - a function in the current or parent [can-stache.scopeAndContext contexts]
 
 The following example shows both cases.
 

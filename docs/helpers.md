@@ -181,7 +181,7 @@ in helper expressions.  In any other circumstance,  values will be passed.
 
 Helpers can be called as either a [can-stache.expressions Call or Helper Expression]:
 
- - Call expression - `{{myHelper(firstValue,secondValue)}}`
+ - Call expression - `{{myHelper(firstValue, secondValue)}}`
  - Helper expression - `{{myHelper firstValue secondValue}}`
 
 Helpers can also be called with observable values or non-observable values.
@@ -189,7 +189,7 @@ Helpers can also be called with observable values or non-observable values.
 Considering a helper like:
 
 ```js
-stache.registerHelper("myHelper",function(value){ ... })
+stache.registerHelper("myHelper", function(value){ ... })
 ```
 
 The following details what `value` is depending on how the helper is called

@@ -32,7 +32,7 @@ Lets look at what happens with the scope the following example:
 
 ```
 Template:
-	<h1>{{message}} {{#person}}{{first}}  {{last}}{{/person}}</h1>
+	<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
 
 Data:
 	{ person: {first: "Alexis"},
@@ -71,7 +71,7 @@ Result:
 	<h1>Hello Alexis </h1>
 ```
 
-[can-stache.tags.section Sections], Helpers,
+[can-stache.tags.section Sections], [can-stache.Helpers Helpers],
 and [can-component custom elements] can modify the scope used to render a subsection.
 
 [can-stache.key] modifiers  like `../` and `@key` can control the context and value that

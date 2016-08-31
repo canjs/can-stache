@@ -20,7 +20,7 @@ stache.registerHelper("myHelper", function(){
 
 @param {String} str A string you don't want to become escaped.
 @return {String} A string flagged by `stache` as safe, which will
-not become escaped, even if you use [can-stache.tags.unescaped].
+not become escaped, even if you use [can-stache.tags.escaped].
 
 @body
 
