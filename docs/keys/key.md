@@ -36,7 +36,7 @@ Looks up a value without reading intermediate properties.
 {{meta\\.data}}
 ```
 
-This is deprecated.  If you do have properties with dots in them, use:
+This is deprecated.  If you do have properties with dots in them, use a [can-stache/expressions/bracket Bracket Expression]:
 
 ```
 {{["meta.data"]}}
