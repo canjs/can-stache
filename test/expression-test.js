@@ -15,7 +15,7 @@ test("expression.tokenize", function(){
 
 	deepEqual(res, literals.split(" "));
 
-	var keys = "key foo.bar foo@bar %foo *foo foo/bar";
+	var keys = "key foo.bar foo@bar %foo *foo foo/bar foo:bar";
 	res = expression.tokenize(keys);
 	deepEqual(res, keys.split(" "));
 
