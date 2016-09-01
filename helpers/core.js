@@ -22,9 +22,7 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (types.isListLike(value) && value.attr('length')) {
-		return value;
-	} else if (isFunction(value)) {
+	if (isFunction(value)) {
 		return value();
 	} else {
 		return value;
