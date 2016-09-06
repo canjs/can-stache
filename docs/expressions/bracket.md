@@ -43,6 +43,21 @@ Result:
 	<h1>Kevin</h1>
 ```
 
+This can be useful for looking up values using keys containing non-alphabetic characters:
+
+```
+Template:
+	<h1>{{["person:name"]}}</h1>
+
+Data:
+	{
+		"person:name": "Kevin"
+	}
+
+Result:
+	<h1>Kevin</h1>
+```
+
 Bracket expressions can also be used to look up a value in the result of another expression:
 
 ```
