@@ -10,17 +10,18 @@ combined:
 {{helper key1 "string" method(key2, 1, prop1=key3) prop2=key4}}
 ```
 
-There are 5 expression types stache supports:
+There are 6 expression types stache supports:
 
- - Literal expression  like `{{"string"}}`
+ - Literal expressions like `{{"string"}}`
  - KeyLookup expressions like `{{key}}`
- - Hash expression like `{{prop=key}}`
+ - Hash expressions like `{{prop=key}}`
  - Call expressions like `{{method(arg)}}`
  - Helper expressions like `{{helper arg}}`
+ - Bracket expressions like `{{[key]}}`
 
 ## Literal expressions
 
-Literal expressions specify JS primitive values like:
+A [can-stache/expressions/literal] specifies JS primitive values like:
 
 - Strings `"strings"`
 - Numbers `5`
@@ -36,8 +37,8 @@ They are usually passed as arguments to Call or Helper expressions like:
 
 ## KeyLookup expressions
 
-A [can-stache.key KeyLookup expression] specifies a value in the [can-view-scope scope] or
-[can-view-scope.Options HelperOptions scope] that will be looked up.  KeyLookup expressions
+A [can-stache/expressions/key-lookup] specifies a value in the [can-view-scope scope] or
+[can-view-scope.Options HelperOptions scope] that will be looked up. KeyLookup expressions
 can be the entire stache expression like:
 
 ```
@@ -72,9 +73,9 @@ The rules are as follows:
  - __parent context__ `{{../key}}` - lookup the value in the parent context.
  - __context__ `{{.}}` - return the current context/top of the scope.
 
-## Hash expression
+## Hash expressions
 
-A hash expression specifies a property value on a object argument in a call expression
+A [can-stache/expressions/hash] specifies a property value on a object argument in a call expression
 and property value on the the hash object in a helper expression's [can-stache.helperOptions] argument.
 
 For example, in a call expression:
@@ -111,9 +112,9 @@ Data:
  - `methodA` will be called with `{prop: compute("value")}` as `options.hash`.
  - `methodB` will be called with `{propX: "value", propY: 'literal', propZ: 5}` as `options.hash`.
 
-## Call expression
+## Call expressions
 
-A call expression calls a function looked up in the [can-view-scope scope] followed by
+A [can-stache/expressions/call] calls a function looked up in the [can-view-scope scope] followed by
 the [can-view-scope.Options helpers scope]. It looks like:
 
 ```
@@ -154,9 +155,9 @@ Result:
 ```
 
 
-## Helper expression
+## Helper expressions
 
-A helpers expression calls a function looked up in the [can-view-scope.Options helpers scope] followed by
+A [can-stache/expressions/helper] calls a function looked up in the [can-view-scope.Options helpers scope] followed by
 the [can-view-scope scope]. It looks like:
 
 ```
@@ -208,4 +209,57 @@ Helpers:
 
 Result:
 	<h1>Ages</h1>
+```
+
+## Bracket expressions
+
+A [can-stache/expressions/bracket] can be used to look up a dynamic property in the [can-view-scope scope]. This looks like:
+
+```
+Template:
+	<h1>{{[key]}}</h1>
+
+Data:
+	{
+		key: "name",
+		name: "Kevin"
+	}
+
+Result:
+	<h1>Kevin</h1>
+```
+
+This can be useful for looking up values using keys containing non-alphabetic characters:
+
+```
+Template:
+	<h1>{{["person:name"]}}</h1>
+
+Data:
+	{
+		"person:name": "Kevin"
+	}
+
+Result:
+	<h1>Kevin</h1>
+```
+
+Bracket expressions can also be used to look up a value in the result of another expression:
+
+```
+Template:
+{{getPerson()[key]}}
+
+Data:
+	{
+		key: "name",
+		getPerson: function() {
+			return {
+				name: "Kevin"
+			};
+		}
+	}
+
+Result:
+	<h1>Kevin</h1>
 ```
