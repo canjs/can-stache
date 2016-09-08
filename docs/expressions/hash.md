@@ -66,7 +66,7 @@ Template:
 Data:
 	{
 	  methodA: function(arg){},
-      methodB: function(arg1, arg2),
+      methodB: function(arg1, arg2){},
 	  key: compute("value")
 	}
 ```
