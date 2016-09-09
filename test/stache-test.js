@@ -3933,7 +3933,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("reading alternate values on promises (#1572)", function(){
-		var promise = new Promise();
+		var promise = new Promise(function(resolve, reject){});
 		promise.myAltProp = "AltValue";
 
 		var template = stache("<div>{{d.myAltProp}}</div>");
