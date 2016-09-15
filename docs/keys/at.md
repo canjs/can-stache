@@ -10,7 +10,7 @@ if it's a function or a compute.
 Lookup a `key` value in the scope and return whatever is there.
 
 ```
-<paginator ($next)="@loadNext"/>
+<paginator {next}="@loadNext"/>
 ```
 
 @signature `key@prop`
