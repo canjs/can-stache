@@ -110,8 +110,7 @@ var helpers = {
 
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
 			}
-		}
-		else if(isIterable(expr)) {
+		} else if(isIterable(expr)) {
 			each(expr, function(value, key){
 				aliases = {
 					"%key": key
@@ -124,13 +123,13 @@ var helpers = {
 				result.push(options.fn(options.scope.add(aliases, { notContext: true}).add(value)));
 
 			});
-		}
-		else if (types.isMapLike(expr)) {
+		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
-			// listen to keys changing so we can livebind lists of attributes.
 
+			// listen to keys changing so we can livebind lists of attributes.
 			for (i = 0; i < keys.length; i++) {
 				key = keys[i];
+                var value = compute(expr, key);
 				aliases = {
 					"%key": key,
 					"@key": key
@@ -139,8 +138,7 @@ var helpers = {
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
 				}
-
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			}
 		} else if (expr instanceof Object) {
 			for (key in expr) {
