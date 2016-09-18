@@ -68,7 +68,7 @@
     "can-map": "^3.0.0-pre.9",
     "cssify": "^1.0.2",
     "bit-docs": "0.0.6",
-    "done-serve": "^0.2.0",
+    "done-serve": "^0.2.5",
     "donejs-cli": "^0.9.5",
     "generator-donejs": "^0.9.0",
     "jshint": "^2.9.1",
