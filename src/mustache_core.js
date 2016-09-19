@@ -32,12 +32,18 @@ var attr = require("can-util/dom/attr/attr");
 
 var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([^\}]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([^\}]*)\}\}\}?)/g,
 	// A helper for calling the truthy subsection for each item in a list and putting them in a document Fragment.
-	getItemsFragContent = function(items, isObserveList, helperOptions, options){
-		var frag = getDocument().createDocumentFragment();
-		for (var i = 0, len = items.length; i < len; i++) {
-			append(frag, helperOptions.fn( isObserveList ? items.attr('' + i) : items[i], options) );
-		}
-		return frag;
+	getItemsFragContent = function(items, helperOptions, scope) {
+        var result = [],
+            i = 0,
+            len = 0;
+        for (i = 0, len = items.length; i < len; i++) {
+            var aliases = {
+                "%index": i,
+                "@index": i
+            };
+            result.push(helperOptions.fn(scope.add(aliases, { notContext: true }).add(items[i])));
+        }
+        return result;
 	},
 	// Appends some content to a document fragment.  If the content is a string, it puts it in a TextNode.
 	append = function(frag, content){
@@ -170,8 +176,11 @@ var core = {
 					var isObserveList = types.isMapLike(finalValue);
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
-						return (stringOnly ? getItemsStringContent: getItemsFragContent  )
-							(finalValue, isObserveList, helperOptionArg, helperOptions );
+                        if (stringOnly) {
+                            return getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+                        } else {
+                            return getItemsFragContent(finalValue, helperOptionArg, scope);
+                        }
 					} else {
 						return helperOptionArg.inverse(scope, helperOptions);
 					}
