@@ -45,16 +45,16 @@ var resolveHash = function(hash){
 var helpers = {
 	"each": function(items) {
 		var args = [].slice.call(arguments),
-		    options = args.pop(),
-		    argsLen = args.length,
-		    argExprs = options.exprData.argExprs,
-		    resolved = resolve(items),
-		    asVariable,
-		    result = [],
-		    aliases,
-		    keys,
-		    key,
-		    i;
+			options = args.pop(),
+			argsLen = args.length,
+			argExprs = options.exprData.argExprs,
+			resolved = resolve(items),
+			asVariable,
+			result = [],
+			aliases,
+			keys,
+			key,
+			i;
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
 			asVariable = args[argsLen - 1];
@@ -96,8 +96,8 @@ var helpers = {
 		var expr = resolved;
 
 		if ( !! expr && utils.isArrayLike(expr)) {
-            var fragItems = utils.getItemsFragContent(expr, options, options.scope, asVariable);
-            Array.prototype.push.apply(result, fragItems);
+			var fragItems = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+			Array.prototype.push.apply(result, fragItems);
 		} else if(isIterable(expr)) {
 			each(expr, function(value, key){
 				aliases = {
@@ -117,7 +117,7 @@ var helpers = {
 			// listen to keys changing so we can livebind lists of attributes.
 			for (i = 0; i < keys.length; i++) {
 				key = keys[i];
-                var value = compute(expr, key);
+				var value = compute(expr, key);
 				aliases = {
 					"%key": key,
 					"@key": key

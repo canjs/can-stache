@@ -143,11 +143,11 @@ var core = {
 					var isObserveList = types.isMapLike(finalValue);
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
-                        if (stringOnly) {
-                            return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
-                        } else {
-                            return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
-                        }
+						if (stringOnly) {
+							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+						} else {
+							return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+						}
 					} else {
 						return helperOptionArg.inverse(scope, helperOptions);
 					}
