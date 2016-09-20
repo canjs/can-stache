@@ -96,20 +96,8 @@ var helpers = {
 		var expr = resolved;
 
 		if ( !! expr && utils.isArrayLike(expr)) {
-			var isMapLike = types.isMapLike(expr);
-			for (i = 0; i < (isMapLike ? expr.attr('length') : expr.length); i++) {
-				aliases = {
-					"%index": i,
-					"@index": i
-				};
-				var item = isMapLike ? expr.attr(i) : expr[i];
-
-				if (asVariable) {
-					aliases[asVariable] = item;
-				}
-
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
-			}
+            var fragItems = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+            Array.prototype.push.apply(result, fragItems);
 		} else if(isIterable(expr)) {
 			each(expr, function(value, key){
 				aliases = {
