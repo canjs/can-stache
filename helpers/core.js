@@ -45,16 +45,15 @@ var resolveHash = function(hash){
 var helpers = {
 	"each": function(items) {
 		var args = [].slice.call(arguments),
-		    options = args.pop(),
-		    argsLen = args.length,
-		    argExprs = options.exprData.argExprs,
-		    resolved = resolve(items),
-		    asVariable,
-		    result = [],
-		    aliases,
-		    keys,
-		    key,
-		    i;
+			options = args.pop(),
+			argsLen = args.length,
+			argExprs = options.exprData.argExprs,
+			resolved = resolve(items),
+			asVariable,
+			aliases,
+			keys,
+			key,
+			i;
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
 			asVariable = args[argsLen - 1];
@@ -93,69 +92,56 @@ var helpers = {
 			};
 		}
 
-		var expr = resolved;
+		var expr = resolved,
+			result;
 
 		if ( !! expr && utils.isArrayLike(expr)) {
-			var isMapLike = types.isMapLike(expr);
-			for (i = 0; i < (isMapLike ? expr.attr('length') : expr.length); i++) {
-				aliases = {
-					"%index": i,
-					"@index": i
-				};
-				var item = isMapLike ? expr.attr(i) : expr[i];
-
-				if (asVariable) {
-					aliases[asVariable] = item;
-				}
-
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
-			}
+			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+			return options.stringOnly ? result.join('') : result;
 		} else if(isIterable(expr)) {
+			result = [];
 			each(expr, function(value, key){
 				aliases = {
 					"%key": key
 				};
-
 				if (asVariable) {
 					aliases[asVariable] = value;
 				}
-
-				result.push(options.fn(options.scope.add(aliases, { notContext: true}).add(value)));
-
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});
+			return options.stringOnly ? result.join('') : result;
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
+			result = [];
 
 			// listen to keys changing so we can livebind lists of attributes.
 			for (i = 0; i < keys.length; i++) {
 				key = keys[i];
-                var value = compute(expr, key);
+				var value = compute(expr, key);
 				aliases = {
 					"%key": key,
 					"@key": key
 				};
-
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			}
+			return options.stringOnly ? result.join('') : result;
 		} else if (expr instanceof Object) {
+			result = [];
 			for (key in expr) {
 				aliases = {
 					"%key": key,
 					"@key": key
 				};
-
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
 				}
-
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}
+			return options.stringOnly ? result.join('') : result;
 		}
-
-		return !options.stringOnly ? result : result.join('');
 	},
 	"@index": function(offset, options) {
 		if (!options) {

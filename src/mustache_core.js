@@ -5,7 +5,6 @@
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
-var Scope = require('can-view-scope');
 var compute = require('can-compute');
 var Observation = require('can-observation');
 
@@ -13,7 +12,6 @@ var utils = require('./utils');
 var expression = require('./expression');
 
 var types = require("can-util/js/types/types");
-var getDocument = require("can-util/dom/document/document");
 var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
 
@@ -31,32 +29,7 @@ var attr = require("can-util/dom/attr/attr");
 // ## Helpers
 
 var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([^\}]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([^\}]*)\}\}\}?)/g,
-	// A helper for calling the truthy subsection for each item in a list and putting them in a document Fragment.
-	getItemsFragContent = function(items, isObserveList, helperOptions, options){
-		var frag = getDocument().createDocumentFragment();
-		for (var i = 0, len = items.length; i < len; i++) {
-			append(frag, helperOptions.fn( isObserveList ? items.attr('' + i) : items[i], options) );
-		}
-		return frag;
-	},
-	// Appends some content to a document fragment.  If the content is a string, it puts it in a TextNode.
-	append = function(frag, content){
-		if(content) {
-			frag.appendChild(typeof content === "string" ? frag.ownerDocument.createTextNode(content) : content);
-		}
-	},
-	// A helper for calling the truthy subsection for each item in a list and returning them in a string.
-	getItemsStringContent = function(items, isObserveList, helperOptions, options){
-		var txt = "";
-		for (var i = 0, len = items.length; i < len; i++) {
-			txt += helperOptions.fn( isObserveList ? items.attr('' + i) : items[i], options);
-		}
-		return txt;
-	},
 	k = function(){};
-
-
-
 
 
 var core = {
@@ -170,8 +143,11 @@ var core = {
 					var isObserveList = types.isMapLike(finalValue);
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
-						return (stringOnly ? getItemsStringContent: getItemsFragContent  )
-							(finalValue, isObserveList, helperOptionArg, helperOptions );
+						if (stringOnly) {
+							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+						} else {
+							return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+						}
 					} else {
 						return helperOptionArg.inverse(scope, helperOptions);
 					}
