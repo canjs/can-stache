@@ -2428,7 +2428,7 @@ function makeTest(name, doc, mutation) {
 			grid: grid
 		}, {
 			columnData: function (row, col) {
-				return row.attr(col.attr("prop"));
+				return row().attr(col().attr("prop"));
 			}
 		});
 

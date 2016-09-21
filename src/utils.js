@@ -1,6 +1,8 @@
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
 var observationReader = require('can-observation/reader/reader');
+var compute = require('can-compute');
+var types = require('can-util/js/types/types');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -74,10 +76,11 @@ module.exports = {
 	// Calls the truthy subsection for each item in a list and returning them in a string.
 	getItemsStringContent: function(items, isObserveList, helperOptions, options){
 		var txt = "",
-			len = observationReader.get(items, 'length');
+			len = observationReader.get(items, 'length'),
+			isObservable = types.isMapLike(items) || types.isListLike(items);
 
 		for (var i = 0; i < len; i++) {
-			var item = observationReader.get(items, '' + i);
+			var item = isObservable ? compute(items, '' + i) :items[i];
 			txt += helperOptions.fn(item, options);
 		}
 		return txt;
@@ -85,14 +88,15 @@ module.exports = {
 	// Calls the truthy subsection for each item in a list and returns them in a document Fragment.
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
-			len = observationReader.get(items, 'length');
+			len = observationReader.get(items, 'length'),
+			isObservable = types.isMapLike(items) || types.isListLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {
 				"%index": i,
 				"@index": i
 			};
-			var item = observationReader.get(items, '' + i);
+			var item = isObservable ? compute(items, '' + i) :items[i];
 
 			if (asVariable) {
 				aliases[asVariable] = item;
