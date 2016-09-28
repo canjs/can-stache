@@ -59,3 +59,11 @@ In an event binding, `%viewModel` references the view model of the current eleme
 ```
 <my-component (closed)="doSomething(%viewModel)"/>
 ```
+
+@signature `%arguments`
+
+In an event binding, `%arguments` will pass the default arguments for the event as an Array:
+
+```
+<input ($click)="doSomething(%arguments)"/>
+```
