@@ -62,7 +62,7 @@ In an event binding, `%viewModel` references the view model of the current eleme
 
 @signature `%arguments`
 
-In an event binding, `%arguments` will pass the default arguments for the event as an Array:
+In an event binding, `%arguments` references the arguments passed when the event was dispatched/triggered.
 
 ```
 <input ($click)="doSomething(%arguments)"/>
