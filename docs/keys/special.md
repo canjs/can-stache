@@ -35,6 +35,27 @@ Like `%index`, but provides the key value when looping through an object:
 {{/each}}
 ```
 
+@signature `%first`
+
+Is true for the first element when looping through a [can-define/list/list], [can-list], [can-define/map/map] or 
+[can-map]:
+
+```
+{{#each tasks}}
+   <li>Is first: {{%first}}</li>
+{{/each}}
+```
+
+@signature `%last`
+
+Is true for the last element when looping through a [can-define/list/list], [can-list], [can-define/map/map] or 
+[can-map]:
+
+```
+{{#each tasks}}
+   <li>Is last: {{%last}}</li>
+{{/each}}
+```
 
 @signature `%element`
 
