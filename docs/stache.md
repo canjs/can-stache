@@ -8,6 +8,7 @@
 @group can-stache/keys 4 Key Operators
 @group can-stache.htags 5 Helpers
 @group can-stache.types 6 Types
+@package ../package.json
 
 @link ../docco/view/stache/mustache_core.html docco
 @test can/view/stache/test/test.html
