@@ -48,7 +48,6 @@ var helpers = {
 		    options = args.pop(),
 		    argsLen = args.length,
 		    argExprs = options.exprData.argExprs,
-			keysLength, 
 		    resolved = resolve(items),
 		    asVariable,
 		    result = [],
@@ -97,15 +96,11 @@ var helpers = {
 		var expr = resolved;
 
 		if ( !! expr && utils.isArrayLike(expr)) {
-			var isMapLike = types.isMapLike(expr),
-				exprLength = isMapLike ? expr.attr('length') : expr.length;
-
-			for (i = 0; i < exprLength; i++) {
+			var isMapLike = types.isMapLike(expr);
+			for (i = 0; i < (isMapLike ? expr.attr('length') : expr.length); i++) {
 				aliases = {
 					"%index": i,
-					"@index": i,
-					"%first": i === 0,
-					"%last": i === (exprLength - 1),
+					"@index": i
 				};
 				var item = isMapLike ? expr.attr(i) : expr[i];
 
@@ -116,19 +111,10 @@ var helpers = {
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(item)));
 			}
 		} else if(isIterable(expr)) {
-			i = 0;
-			keysLength = 0;
-			each(expr, function (iterable) {
-				keysLength++;
-			});
-			
 			each(expr, function(value, key){
 				aliases = {
-					"%key": key,
-					"%first": i === 0,
-					"%last": i === (keysLength - 1)
+					"%key": key
 				};
-				i++;
 
 				if (asVariable) {
 					aliases[asVariable] = value;
@@ -139,17 +125,14 @@ var helpers = {
 			});
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
-			keysLength = keys.length;
 
 			// listen to keys changing so we can livebind lists of attributes.
-			for (i = 0; i < keysLength; i++) {
+			for (i = 0; i < keys.length; i++) {
 				key = keys[i];
                 var value = compute(expr, key);
 				aliases = {
 					"%key": key,
-					"@key": key,
-					"%first": i === 0,
-					"%last": i === (keysLength - 1)
+					"@key": key
 				};
 
 				if (asVariable) {
@@ -158,23 +141,11 @@ var helpers = {
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			}
 		} else if (expr instanceof Object) {
-			i = 0;
-			keysLength = 0;
-			// need to use for...in to determine the count of keys. Object.keys(obj) 
-			// isn't supported on IE versions < 9. Also, for...in ignores 
-			// enumerable properties in the prototype chain
-			for (key in expr) {
-				keysLength++;
-			}
-
 			for (key in expr) {
 				aliases = {
 					"%key": key,
-					"@key": key,
-					"%first": i === 0,
-					"%last": i === (keysLength - 1),
+					"@key": key
 				};
-				i++;
 
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
@@ -257,7 +228,7 @@ var helpers = {
 		var logs = [];
 		each(arguments, function(val){
 			if(!looksLikeOptions(val)) {
-				logs.push(val);
+				logs.push(val)
 			}
 		});
 
