@@ -5132,6 +5132,86 @@ function makeTest(name, doc, mutation) {
         equal(innerHTML(p[0]), 'bar-value', 'updated the value inside #each');
     });
 
+	test("Rendering keys of an object with #each and %first and %last (#61)", function () {
+		var template = stache("<ul>{{#each obj}}<li>{{%first}} {{.}} {{%last}}</li>{{/each}}</ul>"),
+			obj = {
+				foo: "string",
+				bar: 1,
+				baz: false
+			},
+			tpl = template({
+				obj: obj
+			}),
+			lis = tpl.firstChild.getElementsByTagName("li");
+
+		equal(lis.length, 3, "three lis");
+
+		equal(innerHTML(lis[0]), "true string false", "first key value pair rendered");
+		equal(innerHTML(lis[1]), "false 1 false", "second key value pair rendered");
+		equal(innerHTML(lis[2]), "false false true", "third key value pair rendered");
+	});
+
+	test("Live bound iteration of keys of a CanMap with #each and %first and %last (#61)", function () {
+		var template = stache("<ul>{{#each map}}<li>{{%first}} {{@key}} {{.}} {{%last}}</li>{{/each}}</ul>"),
+			map = new CanMap({
+				foo: "string",
+				bar: 1,
+				baz: false
+			}),
+			tpl = template({
+				map: map
+			}),
+			lis = tpl.firstChild.getElementsByTagName("li");
+
+		equal(lis.length, 3, "three lis");
+
+		equal(innerHTML(lis[0]), "true foo string false", "first key value pair rendered");
+		equal(innerHTML(lis[1]), "false bar 1 false", "second key value pair rendered");
+		equal(innerHTML(lis[2]), "false baz false true", "third key value pair rendered");
+
+		map.attr("qux", true);
+
+		lis = tpl.firstChild.getElementsByTagName("li");
+		equal(lis.length, 4, "four lis");
+
+		equal(innerHTML(lis[3]), "false qux true true", "fourth key value pair rendered");
+
+		map.removeAttr("foo");
+
+		lis = tpl.firstChild.getElementsByTagName("li");
+		equal(lis.length, 3, "three lis");
+
+		equal(innerHTML(lis[0]), "true bar 1 false", "new first key value pair rendered");
+		equal(innerHTML(lis[1]), "false baz false false", "new second key value pair rendered");
+		equal(innerHTML(lis[2]), "false qux true true", "new third key value pair rendered");
+	});
+
+	test("Passing %first and %last into helper as values (#61)", function () {
+		var template = stache("<ul>{{#each list}}<li>{{test %first %last}} {{.}}</li>{{/each}}</ul>"),
+			list = [0, 1, 2, 3],
+			tpl = template({
+				list: list
+			}, {
+				test: function (first, last) {
+					var result;
+					if (first) {
+						result = "first element";
+					} else if (last) {
+						result = "last element";
+					} else {
+						result = "other element";
+					}
+					return result;
+				}
+			}),
+			lis = tpl.firstChild.getElementsByTagName("li");
+
+		equal(innerHTML(lis[0]), "first element 0", "helper returns the correct result");
+		equal(innerHTML(lis[1]), "other element 1", "helper returns the correct result");
+		equal(innerHTML(lis[2]), "other element 2", "helper returns the correct result");
+		equal(innerHTML(lis[3]), "last element 3", "helper returns the correct result");
+	});	
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
