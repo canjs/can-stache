@@ -4586,7 +4586,14 @@ function makeTest(name, doc, mutation) {
 		var frag = template({foo: true});
 		equal(frag.firstChild.getAttribute("disabled"),"","disabled set");
 	});
-
+	
+	test("readonly as a custom attribute", function() {
+		var map = new DefineMap({
+			conditions: false
+		});
+		var frag = stache('<input {{^conditions}}readonly{{/conditions}} name="password" type="password" />')(map);
+		equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
+	});
 
 	test("keep @index working with multi-dimensional arrays (#2127)", function() {
 		var data = new CanMap({
