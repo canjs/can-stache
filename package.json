@@ -65,7 +65,7 @@
     "can-define": "^0.8.1",
     "can-event": "^3.0.0-pre.12",
     "can-list": "^3.0.0-pre.8",
-    "can-map": "^3.0.0-pre.9",
+    "can-map": "^3.0.0",
     "cssify": "^1.0.2",
     "bit-docs": "0.0.6",
     "done-serve": "^0.2.5",
