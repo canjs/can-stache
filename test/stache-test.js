@@ -5125,19 +5125,35 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for person().name');
 	});
 
-    test("each values update when replaced in a can map (#62)", function () {
-        var template = stache("{{#each this}}<p>{{.}}</p>{{/each}}");
-        var div = doc.createElement('div');
-        var vm = new CanMap({
-            foo: 'foo-value'
-        });
-        var dom = template(vm);
-        div.appendChild(dom);
+	test("each values update when replaced in a can map (#62)", function () {
+		var template = stache("{{#each this}}<p>{{.}}</p>{{/each}}");
+		var div = doc.createElement('div');
+		var vm = new CanMap({
+			foo: 'foo-value'
+		});
+		var dom = template(vm);
+		div.appendChild(dom);
 
-        vm.attr('foo', 'bar-value');
-        var p = div.getElementsByTagName('p');
-        equal(innerHTML(p[0]), 'bar-value', 'updated the value inside #each');
-    });
+		vm.attr('foo', 'bar-value');
+		var p = div.getElementsByTagName('p');
+		equal(innerHTML(p[0]), 'bar-value', 'updated the value inside #each');
+	});
+
+	test("Bracket expression as argument to Call expression", function () {
+		var template = stache("{{ foo([bar]) }}");
+		var div = doc.createElement('div');
+		var vm = new CanMap({
+			foo: function(key) {
+				return key + '!';
+			},
+			bar: 'name',
+			name: 'Kevin'
+		});
+		var dom = template(vm);
+		div.appendChild(dom);
+
+		equal(innerHTML(div), 'Kevin!', 'works');
+	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 

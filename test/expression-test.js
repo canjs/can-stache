@@ -489,7 +489,7 @@ test("Bracket expression", function(){
 			{}
 		)
 	);
-	var compute = expr.value(
+	compute = expr.value(
 		new Scope(
 			new CanMap({
 				foo: function() { return {name: "Kevin"}; },
@@ -498,6 +498,27 @@ test("Bracket expression", function(){
 		)
 	);
 	equal(compute(), "Kevin");
+
+	// foo([bar])
+	expr = new expression.Call(
+			new expression.Lookup('@foo'),
+			[
+				new expression.Bracket(
+					new expression.Lookup('bar')
+				)
+			],
+			{}
+	);
+	compute = expr.value(
+		new Scope(
+			new CanMap({
+				foo: function(val) { return val + '!'; },
+				bar: 'name',
+				name: 'Kevin'
+			})
+		)
+	);
+	equal(compute(), "Kevin!");
 });
 
 test("registerConverter helpers push and pull correct values", function () {

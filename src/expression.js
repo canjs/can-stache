@@ -818,6 +818,10 @@ var expression = {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup") {
 					stack.replaceTopAndPush({type: "Bracket", root: top});
+				} else if (top.type === "Call") {
+					stack.addToAndPush(["Call"], {
+						type: "Bracket"
+					});
 				} else {
 					stack.replaceTopAndPush({type: "Bracket"});
 				}
