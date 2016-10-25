@@ -76,7 +76,7 @@
     "steal-qunit": "^0.1.1",
     "steal-tools": "^0.16.5",
     "testee": "^0.2.4",
-    "can-vdom": "^0.0.5"
+    "can-vdom": "^3.0.0"
   },
   "bit-docs": {
     "dependencies": {
