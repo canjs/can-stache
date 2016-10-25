@@ -53,9 +53,13 @@ var getKeyComputeData = function (key, scope, readOptions) {
 	lookupValueInResult = function(keyOrCompute, lookupOrCall, scope, helperOptions, readOptions) {
 		var result = lookupOrCall.value(scope, {}, {});
 
-		var c = compute(function() {
+		var c = compute(function(newVal) {
 			var key = getValueOfComputeOrFunction(keyOrCompute);
-			return observeReader.read(result, observeReader.reads(key)).value;
+			if (arguments.length) {
+				observeReader.write(result, observeReader.reads(key), newVal);
+			} else {
+				return observeReader.get(result, key);
+			}
 		});
 
 		return { value: c };
