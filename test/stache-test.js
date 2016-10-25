@@ -4981,16 +4981,16 @@ function makeTest(name, doc, mutation) {
 		});
 		var dom = template(data);
 		div.appendChild(dom);
-		var p = div.getElementsByTagName('p');
+		var p = div.getElementsByTagName('p')[0];
 
-		equal(p[0].id, 'Kevin', 'correct value for foo[bar]');
-		equal(p[0].className, 'zulu', 'correct value for foo[\'bar:baz\']');
+		equal(getAttr(p, 'id'), 'Kevin', 'correct value for foo[bar]');
+		equal(getAttr(p, 'class'), 'zulu', 'correct value for foo[\'bar:baz\']');
 
 		data.attr('bar', 'fullName');
 		data.attr('foo.bar:baz', 'tango');
 
-		equal(p[0].id, 'Kevin Phillips', 'correct value for foo[bar]');
-		equal(p[0].className, 'tango', 'correct value for foo[\'bar:baz\']');
+		equal(getAttr(p, 'id'), 'Kevin Phillips', 'correct value for foo[bar]');
+		equal(getAttr(p, 'class'), 'tango', 'correct value for foo[\'bar:baz\']');
 	});
 
 	test("Bracket expression - DefineMap", function () {
