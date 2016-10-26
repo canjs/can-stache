@@ -4965,6 +4965,34 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for foo[bar]');
 	});
 
+	test("Bracket expression in attributes", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p id='{{ foo[bar] }}' class='{{ foo[\'bar:baz\'] }}'></p>");
+
+		var data = new CanMap({
+			bar: "name",
+			foo: {
+				"bar:baz": "zulu",
+				name: "Kevin",
+				fullName: "Kevin Phillips"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p')[0];
+
+		equal(getAttr(p, 'id'), 'Kevin', 'correct value for foo[bar]');
+		equal(getAttr(p, 'class'), 'zulu', 'correct value for foo[\'bar:baz\']');
+
+		data.attr('bar', 'fullName');
+		data.attr('foo.bar:baz', 'tango');
+
+		equal(getAttr(p, 'id'), 'Kevin Phillips', 'correct value for foo[bar]');
+		equal(getAttr(p, 'class'), 'tango', 'correct value for foo[\'bar:baz\']');
+	});
+
 	test("Bracket expression - DefineMap", function () {
 		var template;
 		var div = doc.createElement('div');

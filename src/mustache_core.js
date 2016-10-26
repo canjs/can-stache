@@ -90,6 +90,13 @@ var core = {
 			if(exprData.isHelper) {
 				return value;
 			}
+		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
+			// Brackets get wrapped in Helpers when used in attributes
+			// like `<p class="{{ foo[bar] }}" />`
+			value = exprData.methodExpr.value(scope);
+			if(exprData.isHelper) {
+				return value;
+			}
 		} else {
 			var readOptions = {
 				// will return a function instead of calling it.
