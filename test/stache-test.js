@@ -4965,6 +4965,27 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for foo[bar]');
 	});
 
+	test("Bracket expression as argument to helper", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{#if [bar]}}if{{else}}else{{/if}}</p>");
+
+		var data = new CanMap({
+			bar: "key",
+			key: false
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'else', 'correctly displays {{else}} section');
+
+		data.attr('key', true);
+
+		equal(innerHTML(p[0]), 'if', 'correctly displays {{#if}} section');
+	});
+
 	test("Bracket expression in attributes", function () {
 		var template;
 		var div = doc.createElement('div');
