@@ -9,7 +9,7 @@ are two main forms of magic tags:
  - Insertion tags - insert their value into the result like `{{expression}}` and `{{{expression}}}`.
  - Section tags - optional render a sub-section like `{{#expression}} ... {{/expression}}`.
 
-Lets see the general behavior of each tag type:
+Let’s see the general behavior of each tag type:
 
 ### Insertion Tags
 
@@ -17,7 +17,7 @@ Insertion tags render a value into result.
 
 #### [can-stache.tags.escaped]
 
-Inserts the escaped value of `expression` into the result. This is your most common tag.
+Inserts the escaped value of `expression` into the result. This is the most common tag.
 
 ```
 Template:
