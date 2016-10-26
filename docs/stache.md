@@ -16,7 +16,7 @@
 @download http://canjs.us/release/latest/can.stache.js
 
 
-@description Live binding Mustache and Handlebars-comptable templates.
+@description Live binding Mustache and Handlebars-compatible templates.
 
 @signature `stache(template)`
 
