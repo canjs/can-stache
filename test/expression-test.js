@@ -27,6 +27,10 @@ test("expression.tokenize", function(){
 	res = expression.tokenize(curly);
 	deepEqual(res, []);
 
+	var bracket = "[foo] bar [baz]";
+	res = expression.tokenize(bracket);
+	deepEqual(res, ["[", "foo", "]", "bar", " ", "[", "baz", "]"]);
+
 });
 
 test("expression.ast - helper followed by hash", function(){
@@ -327,42 +331,44 @@ test("convertKeyToLookup", function(){
 
 
 test("expression.ast - [] operator", function(){
-	var ast = expression.ast("['propName']");
-
-	deepEqual(ast, {
+	deepEqual(expression.ast("['propName']"), {
 		type: "Bracket",
 		children: [{type: "Literal", value: "propName"}]
 	});
 
-	var ast2 = expression.ast("[propName]");
-
-	deepEqual(ast2, {
+	deepEqual(expression.ast("[propName]"), {
     	type: "Bracket",
     	children: [{type: "Lookup", key: "propName"}]
 	});
 
-	var ast3 = expression.ast("foo['bar']");
-
-	deepEqual(ast3, {
+	deepEqual(expression.ast("foo['bar']"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Literal", value: "bar"}]
 	});
 
-	var ast3 = expression.ast("foo[bar]");
-
-	deepEqual(ast3, {
+	deepEqual(expression.ast("foo[bar]"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Lookup", key: "bar"}]
 	});
 
-	var ast4 = expression.ast("foo()[bar]");
-
-	deepEqual(ast4, {
+	deepEqual(expression.ast("foo()[bar]"), {
 		type: "Bracket",
 		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
 		children: [{type: "Lookup", key: "bar"}]
+	});
+
+	deepEqual(expression.ast("foo [bar]"), {
+		type: "Helper",
+		method: {
+			type: "Lookup",
+			key: "foo"
+		},
+		children: [{
+			type: "Bracket",
+			children: [{type: "Lookup", key: "bar"}]
+		}]
 	});
 });
 

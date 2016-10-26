@@ -434,7 +434,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 // AT @NAME
 //
 var keyRegExp = /[\w\.\\\-_@\/\&%]+/,
-	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\])/g,
+	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\]|\s*(?=\[))/g,
 	literalRegExp = /^('.*?'|".*?"|[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
 
 var isTokenKey = function(token){
@@ -787,7 +787,7 @@ var expression = {
 			// Arg
 			else if(token === "~") {
 				convertToHelperIfTopIsLookup(stack);
-				stack.addToAndPush(["Helper", "Call","Hash"], {type: "Arg", key: token});
+				stack.addToAndPush(["Helper", "Call", "Hash"], {type: "Arg", key: token});
 			}
 			// Call
 			else if(token === "(") {
@@ -822,9 +822,16 @@ var expression = {
 					stack.addToAndPush(["Call"], {
 						type: "Bracket"
 					});
+				} else if (top === " ") {
+					stack.popUntil(["Lookup"]);
+					convertToHelperIfTopIsLookup(stack);
+					stack.addToAndPush(["Helper", "Call", "Hash"], {type: "Bracket"});
 				} else {
 					stack.replaceTopAndPush({type: "Bracket"});
 				}
+			}
+			else if(token === " ") {
+				stack.push(token);
 			}
 		}
 		return stack.root.children[0];
