@@ -52,7 +52,7 @@
   "dependencies": {
     "can-compute": "^3.0.0",
     "can-observation": "^3.0.1",
-    "can-route": "^3.0.0-pre.19",
+    "can-route": "^3.0.2",
     "can-util": "^3.0.1",
     "can-view-callbacks": "^3.0.0",
     "can-view-live": "^3.0.0",
