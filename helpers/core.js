@@ -313,7 +313,7 @@ module.exports = {
 	},
 	getHelper: function(name, options){
 
-		var helper = options && options.get("helpers." + name,{proxyMethods: false});
+		var helper = options && options.get && options.get("helpers." + name,{proxyMethods: false});
 		if(!helper) {
 			helper = helpers[name];
 		}
