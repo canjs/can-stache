@@ -5204,6 +5204,22 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), 'Kevin!', 'works');
 	});
 
+	test("Bracket expression with undefined value", function() {
+		var template = stache("{{ place['place:name'] }}");
+		var div = doc.createElement('div');
+		var vm = new CanMap({
+			'place:name': 'foo'
+		});
+		var dom = template(vm);
+		div.appendChild(dom);
+
+		equal(innerHTML(div), '', 'empty');
+
+		vm.attr('place', { 'place:name': 'bar' });
+
+		equal(innerHTML(div), 'bar', 'updated');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
