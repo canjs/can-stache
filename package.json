@@ -51,18 +51,18 @@
   },
   "dependencies": {
     "can-compute": "^3.0.0",
-    "can-observation": "^3.0.1",
+    "can-observation": "^3.0.2",
     "can-route": "^3.0.0-pre.19",
     "can-util": "^3.0.1",
     "can-view-callbacks": "^3.0.0",
     "can-view-live": "^3.0.0",
     "can-view-nodelist": "^3.0.0",
     "can-view-parser": "^3.0.0",
-    "can-view-scope": "^3.0.0",
-    "can-view-target": "^3.0.0"
+    "can-view-scope": "^3.0.1",
+    "can-view-target": "^3.0.3"
   },
   "devDependencies": {
-    "can-define": "^1.0.1",
+    "can-define": "^1.0.3",
     "can-event": "^3.0.0-pre.12",
     "can-list": "^3.0.0-pre.8",
     "can-map": "^3.0.0-pre.9",
