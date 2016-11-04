@@ -53,7 +53,7 @@
     "can-compute": "^3.0.0",
     "can-observation": "^3.0.2",
     "can-route": "^3.0.0-pre.19",
-    "can-util": "^3.0.1",
+    "can-util": "^3.0.6",
     "can-view-callbacks": "^3.0.0",
     "can-view-live": "^3.0.0",
     "can-view-nodelist": "^3.0.0",
