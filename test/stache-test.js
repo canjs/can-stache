@@ -4002,7 +4002,7 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
 	});
-	if(doc.createElementNS) {
+	if(doc.createElementNS && System.env !== 'canjs-test') {
 		test("svg elements for (#1327)", function(){
 
 			var template = stache('<svg height="120" width="400">'+
