@@ -1,6 +1,6 @@
 var Scope = require('can-view-scope');
 var compute = require('can-compute');
-var observeReader = require('can-observation/reader/');
+var observeReader = require('can-observation/reader/reader');
 
 var utils = require('./utils');
 var mustacheHelpers = require('../helpers/core');
