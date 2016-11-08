@@ -721,6 +721,8 @@ var expression = {
 				var firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 				if(firstParent.type === "Hash" && (firstParent.children && firstParent.children.length > 0)) {
 					stack.addTo(["Helper", "Call", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
+				} else if(firstParent.type === "Bracket" && (firstParent.children && firstParent.children.length > 0)) {
+					stack.addTo(["Helper", "Call", "Hash"], {type: "Literal", value: utils.jsonParse( token )});
 				} else {
 					stack.addTo(["Helper", "Call", "Hash", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
 				}
@@ -768,6 +770,7 @@ var expression = {
 			// Lookup
 			else if(keyRegExp.test(token)) {
 				var lastToken = stack.topLastChild();
+				var firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 
 				// if we had `foo().bar`, we need to change to a Lookup that looks up from lastToken.
 				if(lastToken && lastToken.type === "Call" && isAddingToExpression(token)) {
@@ -776,6 +779,10 @@ var expression = {
 						root: lastToken,
 						key: token.slice(1) // remove leading `.`
 					});
+				} else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
+					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
+				} else if(stack.first(["Helper", "Call", "Hash"]).type === 'Helper') {
+					stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
 				} else {
 					// if two scopes, that means a helper
 					convertToHelperIfTopIsLookup(stack);

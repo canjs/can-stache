@@ -5220,6 +5220,43 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), 'bar', 'updated');
 	});
 
+	test("Bracket expression in multi-argument helpers (Literals)", function() {
+		var template = stache("{{#eq place['place:name'] 'foo' }}yes{{else}}no{{/eq}}");
+		var div = doc.createElement('div');
+		var vm = new CanMap({
+			place: {
+				'place:name': 'foo'
+			}
+		});
+		var dom = template(vm);
+		div.appendChild(dom);
+
+		equal(innerHTML(div), 'yes', 'initially true');
+
+		vm.attr('place.place:name', 'bar' );
+
+		equal(innerHTML(div), 'no', 'updated');
+	});
+
+	test("Bracket expression in multi-argument helpers (Lookups)", function() {
+		var template = stache("{{#eq place[foo] foo }}yes{{else}}no{{/eq}}");
+		var div = doc.createElement('div');
+		var vm = new CanMap({
+			place: {
+				'foo': 'foo'
+			},
+			foo: 'foo'
+		});
+		var dom = template(vm);
+		div.appendChild(dom);
+
+		equal(innerHTML(div), 'yes', 'initially true');
+
+		vm.attr('place.foo', 'bar' );
+
+		equal(innerHTML(div), 'no', 'updated');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
