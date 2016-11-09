@@ -4190,13 +4190,13 @@ function makeTest(name, doc, mutation) {
 
 	test("joinBase helper joins to the baseURL", function(){
 
-
+		var baseUrl = System.baseURL || getBaseURL();
 		var template = stache("{{joinBase 'hello/' name}}");
 		var map = new CanMap({ name: "world" });
 
 		var frag = template(map);
 
-		equal(frag.firstChild.nodeValue, joinURIs(getBaseURL(), "hello/world"), "joined from baseUrl");
+		equal(frag.firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
 
 	});
 
