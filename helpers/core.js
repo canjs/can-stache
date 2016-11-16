@@ -148,7 +148,7 @@ var helpers = {
 			options = offset;
 			offset = 0;
 		}
-		var index = options.scope.peak("@index");
+		var index = options.scope.peek("@index");
 		return ""+((isFunction(index) ? index() : index) + offset);
 	},
 	'if': function (expr, options) {
@@ -262,7 +262,7 @@ var helpers = {
 			return isFunction(value) ? value() : value;
 		}).join("");
 
-		var templateModule = options.helpers.peak("helpers.module");
+		var templateModule = options.helpers.peek("helpers.module");
 		var parentAddress = templateModule ? templateModule.uri: undefined;
 
 		var isRelative = moduleReference[0] === ".";

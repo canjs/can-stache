@@ -257,7 +257,7 @@ var HelperLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperLookup.prototype.value = function(scope, helperOptions){
-	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peak('.'), scope]});
+	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peek('.'), scope]});
 	return result.helper || result.value;
 };
 
@@ -269,7 +269,7 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peak('.'), scope]}).value;
+	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]}).value;
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -316,7 +316,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		helper = mustacheHelpers.getHelper(methodKey, helperOptions);
 
 		// If a function is on top of the context, call that as a helper.
-		var context = scope.peak(".");
+		var context = scope.peek(".");
 		if(!helper && typeof context[methodKey] === "function") {
 			//!steal-remove-start
 			dev.warn('can-stache/src/expression.js: In 3.0, method "' + methodKey + '" will not be called as a helper, but as a method.');
@@ -331,7 +331,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// This way, we can get the initial value without "reading" the compute.
 		var computeData = getKeyComputeData(methodKey, scope, {
 			isArgument: false,
-			args: args && args.length ? args : [scope.peak('.'), scope]
+			args: args && args.length ? args : [scope.peek('.'), scope]
 		}),
 			compute = computeData.compute;
 
@@ -376,7 +376,7 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 		inverse: function () {},
 		stringOnly: stringOnly
 	},
-		context = scope.peak("."),
+		context = scope.peek("."),
 		args = this.args(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly),
 		hash = this.hash(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
