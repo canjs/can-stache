@@ -3509,7 +3509,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.peak(".").foo, "bar", "got scope");
+			equal(tagData.scope.peek(".").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 
@@ -3525,7 +3525,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.peak(".").foo, "bar", "got scope");
+			equal(tagData.scope.peek(".").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 

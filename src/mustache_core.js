@@ -68,7 +68,7 @@ var core = {
 			helperOptionArg =  {
 				fn: function () {},
 				inverse: function () {},
-				context: scope.peak("."),
+				context: scope.peek("."),
 				scope: scope,
 				nodeList: nodeList,
 				exprData: exprData,
@@ -102,7 +102,7 @@ var core = {
 				// will return a function instead of calling it.
 				// allowing it to be turned into a compute if necessary.
 				isArgument: true,
-				args: [scope.peak('.'), scope],
+				args: [scope.peek('.'), scope],
 				asCompute: true
 			};
 			var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
@@ -207,7 +207,7 @@ var core = {
 					}
 				}
 				// Look up partials in options first.
-				var partial = options.peak("partials." + localPartialName), renderer;
+				var partial = options.peek("partials." + localPartialName), renderer;
 				if (partial) {
 					renderer = function() {
 						return partial.render ? partial.render(scope, options, nodeList)
