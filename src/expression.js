@@ -784,7 +784,8 @@ var expression = {
 				else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
 					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
 				}
-
+				// This is to make sure in a helper like `helper foo[bar] car` that
+				// car would not be added to the Bracket expression.
 				else if(stack.first(["Helper", "Call", "Hash","Arg"]).type === 'Helper') {
 					stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
 				}
