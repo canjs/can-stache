@@ -144,7 +144,7 @@ test("expression.parse - everything", function(){
 	var helperBHashArg = new expression.Hashes({
 		propA: new expression.Arg(valueB, {compute: true}),
 		propC: twoExpr
-	})
+	});
 
 	var callHelperB = new expression.Call(
 		helperB,
@@ -490,7 +490,7 @@ test("Bracket expression", function(){
 		new expression.Lookup("bar"),
 		new expression.Lookup("foo")
 	);
-	var state = new CanMap({foo: {name: "Kevin"}, bar: "name"})
+	var state = new CanMap({foo: {name: "Kevin"}, bar: "name"});
 	compute = expr.value(
 		new Scope(
 			state
@@ -565,7 +565,7 @@ test("registerConverter helpers push and pull correct values", function () {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
-			return valCompute().toString(16)
+			return valCompute().toString(16);
 		}, set: function(val, valCompute) {
 			return valCompute(parseInt("0x" + val));
 		}
@@ -621,7 +621,7 @@ test("registerConverter helpers are chainable", function () {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
-			return valCompute().toString(16)
+			return valCompute().toString(16);
 		}, set: function(val, valCompute) {
 			return valCompute(parseInt("0x" + val));
 		}
@@ -663,7 +663,7 @@ test('foo().bar', function() {
 	});
 
 	// expression.parse
-	exprData = expression.parse("foo().bar");
+	var exprData = expression.parse("foo().bar");
 	deepEqual(exprData,
 		new expression.Lookup(
 			"bar",
@@ -672,7 +672,7 @@ test('foo().bar', function() {
 	);
 
 	// expr.value
-	expr = new expression.Lookup(
+	var expr = new expression.Lookup(
 		"bar",
 		new expression.Call( new expression.Lookup("@foo"), [], {} )
 	);
@@ -682,4 +682,17 @@ test('foo().bar', function() {
 		)
 	);
 	equal(compute(), "Kevin");
+});
+
+test("Helper with a ~ key operator (#112)", function() {
+	var ast = expression.ast('each ~foo');
+
+	var expected = {
+		type: "Helper",
+		method: {type: "Lookup", key: "each"},
+		children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "foo"} ]}]
+	};
+
+	QUnit.deepEqual(ast, expected);
+
 });
