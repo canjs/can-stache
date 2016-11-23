@@ -1,4 +1,3 @@
-var Scope = require('can-view-scope');
 var compute = require('can-compute');
 var observeReader = require('can-observation/reader/reader');
 
@@ -647,6 +646,7 @@ var expression = {
 		return expr;
 	},
 	hydrateAst: function(ast, options, methodType, isArg){
+		var hashes;
 		if(ast.type === "Lookup") {
 			return new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType) );
 		}
@@ -660,7 +660,7 @@ var expression = {
 			throw new Error("");
 		}
 		else if(ast.type === "Hashes") {
-			var hashes = {};
+			hashes = {};
 			each(ast.children, function(hash){
 				hashes[hash.prop] = this.hydrateAst( hash.children[0], options, methodType, true );
 			}, this);
@@ -668,15 +668,15 @@ var expression = {
 		}
 		else if(ast.type === "Call" || ast.type === "Helper") {
 			//get all arguments and hashes
-			var hashes = {},
-				args = [],
+			hashes = {};
+			var args = [],
 				children = ast.children,
 				ExpressionType = options.methodRule(ast);
 			if(children) {
 				for(var i = 0 ; i <children.length; i++) {
 					var child = children[i];
 					if(child.type === "Hashes" && ast.type === "Helper" &&
-						!(ExpressionType === Call)) {
+						(ExpressionType !== Call)) {
 
 						each(child.children, function(hash){
 							hashes[hash.prop] = this.hydrateAst( hash.children[0], options, ast.type, true );
@@ -706,7 +706,9 @@ var expression = {
 	},
 	parseAst: function(tokens, cursor) {
 		var stack = new Stack(),
-			top;
+			top,
+			firstParent,
+			lastToken;
 
 		while(cursor.index < tokens.length) {
 			var token = tokens[cursor.index],
@@ -718,7 +720,7 @@ var expression = {
 			if(literalRegExp.test( token )) {
 				convertToHelperIfTopIsLookup(stack);
 				// only add to hash if there's not already a child.
-				var firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
+				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 				if(firstParent.type === "Hash" && (firstParent.children && firstParent.children.length > 0)) {
 					stack.addTo(["Helper", "Call", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
 				} else if(firstParent.type === "Bracket" && (firstParent.children && firstParent.children.length > 0)) {
@@ -738,7 +740,7 @@ var expression = {
 					// Check if current Lookup is part of a Call, Helper, or Hash
 					// If it happens to be first within a Call or Root, that means
 					// this is helper syntax.
-					var firstParent = stack.firstParent(["Call","Helper","Hash"]);
+					firstParent = stack.firstParent(["Call","Helper","Hash"]);
 					if(firstParent.type === "Call" || firstParent.type === "Root") {
 
 						stack.popUntil(["Call"]);
@@ -750,14 +752,13 @@ var expression = {
 
 					}
 				}
-				var firstParent = stack.firstParent(["Call","Helper","Hashes"]);
+				firstParent = stack.firstParent(["Call","Helper","Hashes"]);
 				// makes sure we are adding to Hashes if there already is one
 				// otherwise we create one.
 				var hash = {type: "Hash", prop: token};
 				if(firstParent.type === "Hashes") {
 					stack.addToAndPush(["Hashes"], hash);
 				} else {
-					var hash
 					stack.addToAndPush(["Helper", "Call"], {
 						type: "Hashes",
 						children: [hash]
@@ -769,8 +770,8 @@ var expression = {
 			}
 			// Lookup
 			else if(keyRegExp.test(token)) {
-				var lastToken = stack.topLastChild();
-				var firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
+				lastToken = stack.topLastChild();
+				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 
 				// if we had `foo().bar`, we need to change to a Lookup that looks up from lastToken.
 				if(lastToken && lastToken.type === "Call" && isAddingToExpression(token)) {
