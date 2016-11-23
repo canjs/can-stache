@@ -170,7 +170,7 @@ var Hash = function(){ }; // jshint ignore:line
 
 var Hashes = function(hashes){
 	this.hashExprs = hashes;
-}
+};
 Hashes.prototype.value = function(scope, helperOptions){
 	var hash = {};
 	for(var prop in this.hashExprs) {
@@ -189,7 +189,7 @@ Hashes.prototype.value = function(scope, helperOptions){
 		}
 		return finalHash;
 	});
-}
+};
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
 // A call expression like `method(arg1, arg2)` that, by default,
@@ -753,7 +753,7 @@ var expression = {
 				var firstParent = stack.firstParent(["Call","Helper","Hashes"]);
 				// makes sure we are adding to Hashes if there already is one
 				// otherwise we create one.
-				var hash = {type: "Hash", prop: token}
+				var hash = {type: "Hash", prop: token};
 				if(firstParent.type === "Hashes") {
 					stack.addToAndPush(["Hashes"], hash);
 				} else {
@@ -779,11 +779,15 @@ var expression = {
 						root: lastToken,
 						key: token.slice(1) // remove leading `.`
 					});
-				} else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
+				}
+				else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
 					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
-				} else if(stack.first(["Helper", "Call", "Hash"]).type === 'Helper') {
+				}
+
+				else if(stack.first(["Helper", "Call", "Hash","Arg"]).type === 'Helper') {
 					stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
-				} else {
+				}
+				else {
 					// if two scopes, that means a helper
 					convertToHelperIfTopIsLookup(stack);
 

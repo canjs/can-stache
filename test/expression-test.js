@@ -684,7 +684,15 @@ test('foo().bar', function() {
 	equal(compute(), "Kevin");
 });
 
-test("Helper with a ~ key operator", function() {
-	var exprData = expression.parse('each ~foo');
-	console.log(exprData);
+test("Helper with a ~ key operator (#112)", function() {
+	var ast = expression.ast('each ~foo');
+
+	var expected = {
+		type: "Helper",
+		method: {type: "Lookup", key: "each"},
+		children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "foo"} ]}]
+	};
+
+	QUnit.deepEqual(ast, expected);
+	
 });
