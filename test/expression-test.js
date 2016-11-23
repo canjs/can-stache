@@ -683,3 +683,8 @@ test('foo().bar', function() {
 	);
 	equal(compute(), "Kevin");
 });
+
+test("Helper with a ~ key operator", function() {
+	var exprData = expression.parse('each ~foo');
+	console.log(exprData);
+});
