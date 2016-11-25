@@ -52,6 +52,7 @@ var helpers = {
 			asVariable,
 			aliases,
 			keys,
+			keysLen, 
 			key,
 			i;
 
@@ -99,11 +100,19 @@ var helpers = {
 			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
 			return options.stringOnly ? result.join('') : result;
 		} else if(isIterable(expr)) {
+			i = 0;
+			keysLen = 0;
+			each(expr, function (iterable) {
+				keysLen++;
+			});
 			result = [];
 			each(expr, function(value, key){
 				aliases = {
-					"%key": key
+					"%key": key,
+					"%first": i === 0,
+					"%last": i === (keysLen - 1)
 				};
+				i++;
 				if (asVariable) {
 					aliases[asVariable] = value;
 				}
@@ -112,15 +121,18 @@ var helpers = {
 			return options.stringOnly ? result.join('') : result;
 		} else if (types.isMapLike(expr)) {
 			keys = expr.constructor.keys(expr);
+			keysLen = keys.length;			
 			result = [];
 
 			// listen to keys changing so we can livebind lists of attributes.
-			for (i = 0; i < keys.length; i++) {
+			for (i = 0; i < keysLen; i++) {
 				key = keys[i];
 				var value = compute(expr, key);
 				aliases = {
 					"%key": key,
-					"@key": key
+					"@key": key,
+					"%first": i === 0,
+					"%last": i === (keysLen - 1)
 				};
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
@@ -129,12 +141,23 @@ var helpers = {
 			}
 			return options.stringOnly ? result.join('') : result;
 		} else if (expr instanceof Object) {
+			i = 0;
+			keysLen = 0;
+			// need to use for...in to determine the count of keys. Object.keys(obj) 
+			// isn't supported on IE versions < 9. Also, for...in ignores 
+			// enumerable properties in the prototype chain
+			for (key in expr) {
+				keysLen++;
+			}
 			result = [];
 			for (key in expr) {
 				aliases = {
 					"%key": key,
-					"@key": key
+					"@key": key,
+					"%first": i === 0,
+					"%last": i === (keysLen - 1),
 				};
+				i++;
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
 				}
@@ -214,7 +237,7 @@ var helpers = {
 		var logs = [];
 		each(arguments, function(val){
 			if(!looksLikeOptions(val)) {
-				logs.push(val)
+				logs.push(val);
 			}
 		});
 

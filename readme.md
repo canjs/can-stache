@@ -275,6 +275,8 @@ the scope. Keys can look like:
  - `{{%key}}` - A special value that is added to scope. Examples:
     - `{{%index}}` - The index of a value in an array or [can.List].
     - `{{%key}}` - The property name of a value within an object or [can.Map].
+    - `{{%first}}` - True if the value is the first element in an array, [can.List], object or [can.Map]; false otherwise.
+    - `{{%last}}` - True if the value is the last element in an array, [can.List], object or [can.Map]; false otherwise.       
     - `{{%element}}` - The element an event was dispatched on.
     - `{{%event}}` - The event object.
     - `{{%viewModel}}` - The viewModel of the current element.
