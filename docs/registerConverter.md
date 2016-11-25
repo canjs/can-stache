@@ -1,5 +1,5 @@
 @function can-stache.registerConverter registerConverter
-@description Register a helper for bidirectional value conversion. Before creating your own converter, you may want to look at what’s provided by [can-stache-converters].
+@description Register a helper for bidirectional value conversion.
 @parent can-stache.static
 
 @signature `stache.registerConverter(converterName, getterSetter)`
@@ -41,6 +41,8 @@ stache.registerConverter("numberToString", {
 @body
 
 ## Use
+
+> __NOTE__: Before creating your own converter, you may want to look at what’s provided by [can-stache-converters].
 
 These helpers are useful for avoiding creating [can-define/map/map] getters and setters that do similar conversions on the view model.  Instead,
 a converter can keep your viewModels more ignorant of the demands of the
