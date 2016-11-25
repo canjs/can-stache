@@ -1,5 +1,5 @@
 @function can-stache.registerConverter registerConverter
-@description Register a helper for bidirectional value conversion.
+@description Register a helper for bidirectional value conversion. Before creating your own converter, you may want to look at what’s provided by [can-stache-converters].
 @parent can-stache.static
 
 @signature `stache.registerConverter(converterName, getterSetter)`
