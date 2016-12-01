@@ -2,11 +2,11 @@
 @parent can-stache/keys
 
 Pass a compute instead of a value if an observable is found within
-[can-stache/expressions/calls].
+[can-stache/expressions/call].
 
 @signature `~key`
 
-This makes non-helper expression arguments behave similar to helper
+This makes non-helper expression arguments behave similarly to helper
 expression arguments.
 
 ```
