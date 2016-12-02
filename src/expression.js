@@ -782,7 +782,7 @@ var expression = {
 					});
 				}
 				else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
-					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
+					stack.addTo(["Bracket"], {type: "Lookup", key: token});
 				}
 				// This is to make sure in a helper like `helper foo[bar] car` that
 				// car would not be added to the Bracket expression.
@@ -829,12 +829,10 @@ var expression = {
 
 				if (lastToken && lastToken.type === "Call") {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
-				} else if (top.type === "Lookup") {
+				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					stack.replaceTopAndPush({type: "Bracket", root: top});
 				} else if (top.type === "Call") {
-					stack.addToAndPush(["Call"], {
-						type: "Bracket"
-					});
+					stack.addToAndPush(["Call"], { type: "Bracket" });
 				} else if (top === " ") {
 					stack.popUntil(["Lookup"]);
 					convertToHelperIfTopIsLookup(stack);
