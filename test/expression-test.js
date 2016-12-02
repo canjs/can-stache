@@ -404,6 +404,16 @@ test("expression.ast - [] operator", function(){
 			key: "foo"
 		}]
 	});
+
+	deepEqual(expression.ast("foo[bar][baz]"), {
+		type: "Bracket",
+		root: {
+				type: "Bracket",
+				root: {type: "Lookup", key: "foo"},
+				children: [{type: "Lookup", key: "bar"}]
+		},
+		children: [{type: "Lookup", key: "baz"}]
+	});
 });
 
 test("expression.parse - [] operator", function(){

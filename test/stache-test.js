@@ -5257,6 +5257,41 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), 'no', 'updated');
 	});
 
+	test("Bracket expression followed by bracket expression", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ foo[bar][baz] }}</p>");
+
+		var data = new CanMap({
+			baz: 'first',
+			bar: 'name',
+			foo: {
+				name: {
+					first: 'K',
+					last: 'P'
+				},
+				fullName: {
+					first: 'Kevin',
+					last: 'Phillips'
+				}
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'K', 'correct value for foo[bar][baz]');
+
+		data.attr('bar', 'fullName');
+
+		equal(innerHTML(p[0]), 'Kevin', 'updated value for bar in foo[bar][baz]');
+
+		data.attr('baz', 'last');
+
+		equal(innerHTML(p[0]), 'Phillips', 'updated value for baz in foo[bar][baz]');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
