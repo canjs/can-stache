@@ -29,7 +29,7 @@ test("expression.tokenize", function(){
 
 	var bracket = "[foo] bar [baz]";
 	res = expression.tokenize(bracket);
-	deepEqual(res, ["[", "foo", "]", "bar", " ", "[", "baz", "]"]);
+	deepEqual(res, ["[", "foo", "]", " ", "bar", " ", "[", "baz", "]", " "]);
 
 });
 
@@ -421,44 +421,51 @@ test("expression.ast - [] operator", function(){
 				children: [{type: "Lookup", key: "bar"}]
 		},
 		children: [{type: "Lookup", key: "baz"}]
-	},
-	"foo[bar][baz] valid"
-	);
+	}, "foo[bar][baz] valid");
+
+	deepEqual(expression.ast("foo[bar].baz"), {
+		type: "Lookup",
+		key: "baz",
+		root: {
+			type: "Bracket",
+			root: {type: "Lookup", key: "foo"},
+			children: [{type: "Lookup", key: "bar"}]
+		}
+	}, "foo[bar].baz");
 });
 
 test("expression.parse - [] operator", function(){
-	var exprData = expression.parse("['propName']");
-	deepEqual(exprData,
+	deepEqual(expression.parse("['propName']"),
 		new expression.Bracket(
 			new expression.Literal('propName')
-		)
+		),
+		"['propName']"
 	);
 
-	exprData = expression.parse("[propName]");
-	deepEqual(exprData,
+	deepEqual(expression.parse("[propName]"),
 		new expression.Bracket(
 			new expression.Lookup('propName')
-		)
+		),
+		"[propName]"
 	);
 
-	exprData = expression.parse("foo['bar']");
-	deepEqual(exprData,
+	deepEqual(expression.parse("foo['bar']"),
 		new expression.Bracket(
 			new expression.Literal('bar'),
 			new expression.Lookup('foo')
-		)
+		),
+		"foo['bar']"
 	);
 
-	exprData = expression.parse("foo[bar]");
-	deepEqual(exprData,
+	deepEqual(expression.parse("foo[bar]"),
 		new expression.Bracket(
 			new expression.Lookup('bar'),
 			new expression.Lookup('foo')
-		)
+		),
+		"foo[bar]"
 	);
 
-	exprData = expression.parse("foo()[bar]");
-	deepEqual(exprData,
+	deepEqual(expression.parse("foo()[bar]"),
 		new expression.Bracket(
 			new expression.Lookup('bar'),
 			new expression.Call(
@@ -466,7 +473,8 @@ test("expression.parse - [] operator", function(){
 				[],
 				{}
 			)
-		)
+		),
+		"foo()[bar]"
 	);
 
 	exprData = expression.parse("foo[bar()]");
