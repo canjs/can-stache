@@ -605,7 +605,7 @@ var expression = {
 		var tokens = [];
 		(expression.trim() + ' ').replace(tokensRegExp, function (whole, arg) {
 			if (bracketSpaceRegExp.test(arg)) {
-				tokens.push(arg.slice(0, 1));
+				tokens.push(arg[0]);
 				tokens.push(arg.slice(1));
 			} else {
 				tokens.push(arg);
@@ -796,14 +796,19 @@ var expression = {
 					});
 				}
 				else if(firstParent.type === 'Bracket') {
+					// a Bracket expression without children means we have
+					// parsed `foo[` of an expression like `foo[bar]`
+					// so we know to add the Lookup as a child of the Bracket expression
 					if (!(firstParent.children && firstParent.children.length > 0)) {
 						stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
 					} else {
-						// This is to make sure in a helper like `helper foo[bar] car` that
-						// car would not be added to the Bracket expression.
+						// This `=== 'Helper` check is to make sure expressions
+						// like `helper foo[bar] car` are parsed as helpers
+						// instead of like `helper foo[bar].car`
 						if(stack.first(["Helper", "Call", "Hash", "Arg"]).type === 'Helper') {
 							stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
 						} else {
+							// This handles the `.baz` in expressions like `foo[bar].baz`
 							stack.replaceTopAndPush({
 								type: "Lookup",
 								key: token.slice(1),
