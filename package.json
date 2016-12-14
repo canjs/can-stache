@@ -63,7 +63,7 @@
     "jshint": "^2.9.1",
     "steal": "^0.16.0",
     "steal-benchmark": "^0.0.1",
-    "steal-qunit": "^0.1.1",
+    "steal-qunit": "^1.0.0",
     "steal-tools": "^0.16.5",
     "testee": "^0.3.0",
     "can-vdom": "^3.0.1"
