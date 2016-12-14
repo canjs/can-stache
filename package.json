@@ -40,7 +40,7 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-compute": "^3.0.0",
+    "can-compute": "^3.0.2",
     "can-observation": "^3.0.2",
     "can-route": "^3.0.0",
     "can-util": "^3.0.7",
