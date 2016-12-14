@@ -2,7 +2,7 @@ var Scope = require('can-view-scope');
 var Observation = require('can-observation');
 var observationReader = require('can-observation/reader/reader');
 var compute = require('can-compute');
-var types = require('can-util/js/types/types');
+var types = require('can-types');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
