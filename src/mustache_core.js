@@ -1,4 +1,3 @@
-// # can/view/stache/mustache_core.js
 //
 // This provides helper utilities for Mustache processing. Currently,
 // only stache uses these helpers.  Ideally, these utilities could be used
