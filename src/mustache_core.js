@@ -10,7 +10,7 @@ var Observation = require('can-observation');
 var utils = require('./utils');
 var expression = require('./expression');
 
-var types = require("can-util/js/types/types");
+var types = require("can-types");
 var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
 

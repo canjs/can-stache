@@ -10,7 +10,7 @@ var mustacheHelpers = require('./helpers/core');
 require('./helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 
-var namespace = require('can-util/namespace');
+var namespace = require('can-namespace');
 var DOCUMENT = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');

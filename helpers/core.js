@@ -4,7 +4,7 @@ var compute = require('can-compute');
 
 var utils = require('../src/utils');
 
-var types = require('can-util/js/types/types');
+var types = require('can-types');
 var isFunction = require('can-util/js/is-function/is-function');
 
 var getBaseURL = require('can-util/js/base-url/base-url');
