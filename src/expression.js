@@ -153,6 +153,10 @@ var ScopeLookup = function(key, root) {
 	Lookup.apply(this, arguments);
 };
 ScopeLookup.prototype.value = function(scope, helperOptions){
+	if (this.rootExpr) {
+		return lookupValueInResult(this.key, this.rootExpr, scope, {}, {}).value;
+	}
+
 	return lookupValue(this.key, scope, helperOptions).value;
 };
 
@@ -802,13 +806,12 @@ var expression = {
 					if (!(firstParent.children && firstParent.children.length > 0)) {
 						stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
 					} else {
-						// This `=== 'Helper` check is to make sure expressions
-						// like `helper foo[bar] car` are parsed as helpers
-						// instead of like `helper foo[bar].car`
-						if(stack.first(["Helper", "Call", "Hash", "Arg"]).type === 'Helper') {
+						// check if we are adding to a helper like `eq foo[bar] baz`
+						// but not at the `.baz` of `eq foo[bar].baz xyz`
+						if(stack.first(["Helper", "Call", "Hash", "Arg"]).type === 'Helper' && token[0] !== '.') {
 							stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
 						} else {
-							// This handles the `.baz` in expressions like `foo[bar].baz`
+							// otherwise, handle the `.baz` in expressions like `foo[bar].baz`
 							stack.replaceTopAndPush({
 								type: "Lookup",
 								key: token.slice(1),

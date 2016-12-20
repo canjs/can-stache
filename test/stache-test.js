@@ -5336,7 +5336,7 @@ function makeTest(name, doc, mutation) {
 		var template;
 		var div = doc.createElement('div');
 
-		template = stache("<p>{{ foo[bar].first }}</p>");
+		template = stache('<p>{{ foo[bar].first }}</p><p>{{#is foo[bar].first "K"}}short{{else}}long{{/is}}</p>');
 
 		var data = new CanMap({
 			baz: 'first',
@@ -5355,10 +5355,12 @@ function makeTest(name, doc, mutation) {
 		var p = div.getElementsByTagName('p');
 
 		equal(innerHTML(p[0]), 'K', 'correct value for foo[bar].first');
+		equal(innerHTML(p[1]), 'short', 'correct value for `is foo[bar].first "K"`');
 
 		data.attr('bar', 'fullName');
 
 		equal(innerHTML(p[0]), 'Kevin', 'updated value for foo[bar].first');
+		equal(innerHTML(p[1]), 'long', 'updated value for `is foo[bar].first "K"`');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

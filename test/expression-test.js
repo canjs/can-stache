@@ -432,6 +432,27 @@ test("expression.ast - [] operator", function(){
 			children: [{type: "Lookup", key: "bar"}]
 		}
 	}, "foo[bar].baz");
+
+	deepEqual(expression.ast("eq foo[bar].baz xyz"), {
+		type: "Helper",
+		method: {
+			type: "Lookup",
+			key: "eq"
+		},
+		children: [{
+			type: "Lookup",
+			key: "baz",
+			root: {
+				type: "Bracket",
+				root: {type: "Lookup", key: "foo"},
+				children: [{type: "Lookup", key: "bar"}]
+			}
+		},
+		{
+			type: "Lookup",
+			key: "xyz"
+		}]
+	}, "eq foo[bar].baz xyz");
 });
 
 test("expression.parse - [] operator", function(){
