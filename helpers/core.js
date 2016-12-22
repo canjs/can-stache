@@ -51,9 +51,7 @@ var helpers = {
 			resolved = resolve(items),
 			asVariable,
 			aliases,
-			keys,
-			key,
-			i;
+			key;
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
 			asVariable = args[argsLen - 1];
@@ -98,7 +96,8 @@ var helpers = {
 		if ( !! expr && utils.isArrayLike(expr)) {
 			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
 			return options.stringOnly ? result.join('') : result;
-		} else if(isIterable(expr)) {
+		}
+		else if(isIterable(expr)) {
 			result = [];
 			each(expr, function(value, key){
 				aliases = {
@@ -110,13 +109,11 @@ var helpers = {
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});
 			return options.stringOnly ? result.join('') : result;
-		} else if (types.isMapLike(expr)) {
-			keys = expr.constructor.keys(expr);
+		}
+		else if (types.isMapLike(expr)) {
 			result = [];
 
-			// listen to keys changing so we can livebind lists of attributes.
-			for (i = 0; i < keys.length; i++) {
-				key = keys[i];
+			(expr.forEach || expr.each).call(expr, function(val, key){
 				var value = compute(expr, key);
 				aliases = {
 					"%key": key,
@@ -126,9 +123,11 @@ var helpers = {
 					aliases[asVariable] = expr[key];
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
-			}
+			});
+
 			return options.stringOnly ? result.join('') : result;
-		} else if (expr instanceof Object) {
+		}
+		else if (expr instanceof Object) {
 			result = [];
 			for (key in expr) {
 				aliases = {
@@ -214,7 +213,7 @@ var helpers = {
 		var logs = [];
 		each(arguments, function(val){
 			if(!looksLikeOptions(val)) {
-				logs.push(val)
+				logs.push(val);
 			}
 		});
 
