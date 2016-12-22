@@ -39,7 +39,7 @@ test('Helper each inside a text section (attribute) (#8)', function(assert){
 test("Using #each on a DefineMap", function(assert){
 	var template = stache("{{#each obj}}{{%key}}{{.}}{{/each}}");
 
-	var VM = DefineMap.extend({ 
+	var VM = DefineMap.extend({
 		seal: false
 	}, {
 		foo: "string",
@@ -67,9 +67,9 @@ test("Using #each on a DefineMap", function(assert){
 	assert.equal(third.nextSibling.nodeValue, "qux");
 });
 
-test("{{%index}} and {{@index}} work with {{#key}} iteration", function () {
-	var template = stache('<p>{{#iter}}<span>{{@index}}</span>{{/iter}}</p> \
-	  					   <p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
+QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function () {
+	var template = stache('<p>{{#iter}}<span>{{@index}}</span>{{/iter}}</p> '+
+	  					   '<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
 	var div = document.createElement('div');
 	var dom = template({iter: new DefineList(['hey', 'there'])});
 	div.appendChild(dom);
@@ -79,4 +79,16 @@ test("{{%index}} and {{@index}} work with {{#key}} iteration", function () {
 	equal((span[1].innerHTML), '1', 'iteration for %index');
 	equal((span[2].innerHTML), '0', 'iteration for %index');
 	equal((span[3].innerHTML), '1', 'iteration for %index');
+});
+
+QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
+	var template = stache('<p>{{#each iter}}<span>{{%key}} {{.}}</span>{{/each}}</p>');
+	var div = document.createElement('div');
+
+	var dom = template({iter: new DefineMap({first: "justin", last: "meyer"})});
+	div.appendChild(dom);
+
+	var span = div.getElementsByTagName('span');
+	equal((span[0].innerHTML), 'first justin', 'first');
+	equal((span[1].innerHTML), 'last meyer', 'last');
 });
