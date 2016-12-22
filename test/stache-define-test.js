@@ -81,7 +81,7 @@ QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function ()
 	equal((span[3].innerHTML), '1', 'iteration for %index');
 });
 
-QUnit.test("iterate a DefineMap with {{#each}} (#125)", function(){
+QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
 	var template = stache('<p>{{#each iter}}<span>{{%key}} {{.}}</span>{{/each}}</p>');
 	var div = document.createElement('div');
 
