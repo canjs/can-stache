@@ -57,7 +57,8 @@ var getKeyComputeData = function (key, scope, readOptions) {
 			if (arguments.length) {
 				observeReader.write(result, observeReader.reads(key), newVal);
 			} else {
-				return observeReader.get(result, key);
+				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
+				return observeReader.get(result, key.toString());
 			}
 		});
 
@@ -71,6 +72,10 @@ var getKeyComputeData = function (key, scope, readOptions) {
 
 		if (typeof computeOrFunction === 'function') {
 			return computeOrFunction();
+		}
+
+		if (computeOrFunction.computeData != null && computeOrFunction.hasOwnProperty("value")) {
+			return computeOrFunction.value;
 		}
 
 		return computeOrFunction;
