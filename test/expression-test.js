@@ -334,30 +334,36 @@ test("expression.ast - [] operator", function(){
 	deepEqual(expression.ast("['propName']"), {
 		type: "Bracket",
 		children: [{type: "Literal", value: "propName"}]
-	});
+	}, "['propName'] valid");
 
 	deepEqual(expression.ast("[propName]"), {
     	type: "Bracket",
     	children: [{type: "Lookup", key: "propName"}]
-	});
+	}, "[propName] valid");
 
 	deepEqual(expression.ast("foo['bar']"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Literal", value: "bar"}]
-	});
+	}, "foo['bar'] valid");
 
 	deepEqual(expression.ast("foo[bar]"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Lookup", key: "bar"}]
-	});
+	}, "foo[bar] valid");
+
+	deepEqual(expression.ast("foo[bar()]"), {
+    type: "Bracket",
+		root: {type: "Lookup", key: "foo"},
+    children: [{type: "Call", method: {key: "@bar", type: "Lookup" }}]
+	}, "foo[bar()] valid");
 
 	deepEqual(expression.ast("foo()[bar]"), {
 		type: "Bracket",
 		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
 		children: [{type: "Lookup", key: "bar"}]
-	});
+	}, "foo()[bar] valid");
 
 	deepEqual(expression.ast("foo [bar]"), {
 		type: "Helper",
@@ -369,7 +375,7 @@ test("expression.ast - [] operator", function(){
 			type: "Bracket",
 			children: [{type: "Lookup", key: "bar"}]
 		}]
-	});
+	}, "foo [bar] valid");
 
 	deepEqual(expression.ast("eq foo['bar'] 'foo'"), {
 		type: "Helper",
@@ -386,7 +392,9 @@ test("expression.ast - [] operator", function(){
 			type: "Literal",
 			value: "foo"
 		}]
-	});
+	},
+	"eq foo['bar'] 'foo' valid"
+	);
 
 	deepEqual(expression.ast("eq foo[bar] foo"), {
 		type: "Helper",
@@ -403,7 +411,7 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "foo"
 		}]
-	});
+	}, "eq foo[bar] foo valid");
 
 	deepEqual(expression.ast("foo[bar][baz]"), {
 		type: "Bracket",
@@ -413,7 +421,9 @@ test("expression.ast - [] operator", function(){
 				children: [{type: "Lookup", key: "bar"}]
 		},
 		children: [{type: "Lookup", key: "baz"}]
-	});
+	},
+	"foo[bar][baz] valid"
+	);
 });
 
 test("expression.parse - [] operator", function(){
@@ -453,6 +463,34 @@ test("expression.parse - [] operator", function(){
 			new expression.Lookup('bar'),
 			new expression.Call(
 				new expression.Lookup('@foo'),
+				[],
+				{}
+			)
+		)
+	);
+
+	exprData = expression.parse("foo[bar()]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Call(
+				new expression.Lookup('@bar'),
+				[],
+				{}
+			),
+			new expression.Lookup('foo')
+		)
+	);
+
+	exprData = expression.parse("foo()[bar()]");
+	deepEqual(exprData,
+		new expression.Bracket(
+			new expression.Call(
+				new expression.Lookup("@bar"),
+				[],
+				{}
+			),
+			new expression.Call(
+				new expression.Lookup("@foo"),
 				[],
 				{}
 			)
@@ -522,6 +560,25 @@ test("Bracket expression", function(){
 	compute = expr.value(
 		new Scope(
 			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
+		)
+	);
+	equal(compute(), "Kevin");
+
+	// foo[bar()]
+	expr = new expression.Bracket(
+		new expression.Call(
+			new expression.Lookup('@bar'),
+			[],
+			{}
+		),
+		new expression.Lookup('foo')
+	);
+	compute = expr.value(
+		new Scope(
+			new CanMap({
+				foo: {name: "Kevin"},
+				bar: function () { return "name"; }
+			})
 		)
 	);
 	equal(compute(), "Kevin");

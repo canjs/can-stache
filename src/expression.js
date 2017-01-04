@@ -468,6 +468,9 @@ assign(Stack.prototype,{
 	},
 	popTo: function(types){
 		this.popUntil(types);
+		this.pop();
+	},
+	pop: function() {
 		if(!this.isRootTop()) {
 			this.stack.pop();
 		}
@@ -782,7 +785,7 @@ var expression = {
 					});
 				}
 				else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
-					stack.addTo(["Bracket"], {type: "Lookup", key: token});
+					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
 				}
 				// This is to make sure in a helper like `helper foo[bar] car` that
 				// car would not be added to the Bracket expression.
@@ -803,6 +806,7 @@ var expression = {
 				stack.addToAndPush(["Helper", "Call", "Hash"], {type: "Arg", key: token});
 			}
 			// Call
+			// foo[bar()]
 			else if(token === "(") {
 				top = stack.top();
 				if(top.type === "Lookup") {
@@ -840,6 +844,10 @@ var expression = {
 				} else {
 					stack.replaceTopAndPush({type: "Bracket"});
 				}
+			}
+			// End Bracket
+			else if(token === "]") {
+				stack.pop();
 			}
 			else if(token === " ") {
 				stack.push(token);
