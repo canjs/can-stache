@@ -58,7 +58,7 @@ var getKeyComputeData = function (key, scope, readOptions) {
 				observeReader.write(result, observeReader.reads(key), newVal);
 			} else {
 				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				return observeReader.get(result, key.toString());
+				return observeReader.get(result, "" + key);
 			}
 		});
 
