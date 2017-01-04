@@ -5321,7 +5321,13 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');
 
-		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo');
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (Map/List data)');
+
+		dom = template(data.attr());
+		div.appendChild(dom);
+		p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (plain object data)');
 	});
 
 
