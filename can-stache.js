@@ -52,8 +52,13 @@ function stache(template){
 			// we create a special TextSectionBuilder and add things to that
 			// when the element is done, we compile the text section and
 			// add it as a callback to `section`.
-			textContentOnly: null
+			textContentOnly: null,
 
+			// holds any attribute callbacks we find from the START of a tag until its END tag.
+			attributeCallbacks: [],
+
+			// A stack of `attributeCallbacks` that we are saving until the CLOSE tag.
+			attributeCallbacksStack: []
 		},
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
@@ -142,13 +147,33 @@ function stache(template){
 				children: [],
 				namespace: matchedNamespace || last(state.namespaceStack)
 			};
+			state.attributeCallbacks = [];
 		},
+		// <div attrs/>
 		end: function(tagName, unary){
 			var isCustomTag =  viewCallbacks.tag(tagName);
 
 			if(unary){
 				// If it's a custom tag with content, we need a section renderer.
 				section.add(state.node);
+
+				if(state.attributeCallbacks.length) {
+					if( !state.node.attributes ) {
+						state.node.attributes = [];
+					}
+					state.attributeCallbacks.forEach(function(attrData){
+						state.node.attributes.push(function(scope, options, nodeList){
+							attrData.callback(this,{
+								attributeName: attrData.attributeName,
+								scope: scope,
+								options: options,
+								nodeList: nodeList,
+								subtemplate: null,
+							});
+						});
+					});
+				}
+
 				if(isCustomTag) {
 					addAttributesCallback(state.node, function(scope, options, parentNodeList){
 						viewCallbacks.tagHandler(this,tagName, {
@@ -161,12 +186,16 @@ function stache(template){
 					});
 				}
 			} else {
+				var startSubSection = isCustomTag || state.attributeCallbacks.length;
+
 				section.push(state.node);
 
-				state.sectionElementStack.push( isCustomTag ? 'custom': tagName );
+				state.attributeCallbacksStack.push(state.attributeCallbacks);
+
+				state.sectionElementStack.push( startSubSection ? 'custom': tagName );
 
 				// If it's a custom tag with content, we need a section renderer.
-				if( isCustomTag ) {
+				if( startSubSection ) {
 					section.startSubSection();
 				} else if(textContentOnlyTag[tagName]) {
 					state.textContentOnly = new TextSectionBuilder();
@@ -185,9 +214,10 @@ function stache(template){
 			}
 
 			var isCustomTag = viewCallbacks.tag(tagName),
+				attributeWithRendererCallbacks = state.attributeCallbacksStack.pop(),
 				renderer;
 
-			if( isCustomTag ) {
+			if( isCustomTag || attributeWithRendererCallbacks.length ) {
 				renderer = section.endSubSectionAndReturnRenderer();
 			}
 			if(textContentOnlyTag[tagName]) {
@@ -196,6 +226,24 @@ function stache(template){
 			}
 
 			var oldNode = section.pop();
+
+			if(attributeWithRendererCallbacks.length) {
+				if( !oldNode.attributes ) {
+					oldNode.attributes = [];
+				}
+				attributeWithRendererCallbacks.forEach(function(attrData){
+					oldNode.attributes.push(function(scope, options, nodeList){
+						attrData.callback(this,{
+							attributeName: attrData.attributeName,
+							scope: scope,
+							options: options,
+							nodeList: nodeList,
+							subtemplate: renderer,
+						});
+					});
+				});
+			}
+
 			if( isCustomTag ) {
 				addAttributesCallback(oldNode, function(scope, options, parentNodeList){
 					viewCallbacks.tagHandler(this,tagName, {
@@ -233,18 +281,25 @@ function stache(template){
 
 				var attrCallback = viewCallbacks.attr(attrName);
 				if(attrCallback) {
-					if( !state.node.attributes ) {
-						state.node.attributes = [];
-					}
-					state.node.attributes.push(function(scope, options, nodeList){
-						attrCallback(this,{
-							attributeName: attrName,
-							scope: scope,
-							options: options,
-							nodeList: nodeList
+
+					if( viewCallbacks.attrMetadata(attrName).subtemplate ) {
+						state.attributeCallbacks.push({callback: attrCallback, attributeName: attrName});
+					} else {
+
+						if( !state.node.attributes ) {
+							state.node.attributes = [];
+						}
+						state.node.attributes.push(function(scope, options, nodeList){
+							attrCallback(this,{
+								attributeName: attrName,
+								scope: scope,
+								options: options,
+								nodeList: nodeList
+							});
 						});
-					});
+					}
 				}
+
 
 
 

@@ -4586,7 +4586,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template({foo: true});
 		equal(frag.firstChild.getAttribute("disabled"),"","disabled set");
 	});
-	
+
 	test("readonly as a custom attribute", function() {
 		var map = new DefineMap({
 			conditions: false
@@ -5291,6 +5291,45 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'Phillips', 'updated value for baz in foo[bar][baz]');
 	});
+
+	QUnit.test("make .attr(handler, true) callbacks get the subtemplate (#15)", function(){
+
+		expect(5);
+
+		viewCallbacks.attr("stache-attr-get-template", function(el, attrData){
+			QUnit.ok(attrData.scope instanceof Scope, "got scope");
+			QUnit.ok(attrData.options instanceof Scope, "got options");
+			QUnit.equal(attrData.attributeName, "stache-attr-get-template", "got attribute name");
+			QUnit.equal(typeof attrData.subtemplate, "function", "got a renderer");
+
+			el.appendChild( attrData.subtemplate(new Scope({message: "Hello"})  ) );
+
+		}, true);
+
+		var template = stache("<div stache-attr-get-template>{{message}} world</div>");
+
+		var frag = template({});
+
+		QUnit.equal( frag.firstChild.innerHTML, "Hello world", "updated content of element with subtemplate");
+	});
+
+	QUnit.test("make .attr(handler) render element content (#15)", function(){
+
+		expect(5);
+
+		viewCallbacks.attr("stache-attr-get-template", function(el, attrData){
+			QUnit.ok(attrData.scope instanceof Scope, "got scope");
+			QUnit.ok(attrData.options instanceof Scope, "got options");
+			QUnit.equal(attrData.attributeName, "stache-attr-get-template", "got attribute name");
+			QUnit.equal(typeof attrData.subtemplate, "undefined", "did not get a renderer");
+		});
+
+		var template = stache("<div stache-attr-get-template>{{message}} world</div>");
+
+		var frag = template({message: "Goodbye"});
+
+		QUnit.equal( frag.firstChild.innerHTML, "Goodbye world", "rendered normally");
+	})
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
