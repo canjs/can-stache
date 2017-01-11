@@ -153,6 +153,10 @@ var ScopeLookup = function(key, root) {
 	Lookup.apply(this, arguments);
 };
 ScopeLookup.prototype.value = function(scope, helperOptions){
+	if (this.rootExpr) {
+		return lookupValueInResult(this.key, this.rootExpr, scope, {}, {}).value;
+	}
+
 	return lookupValue(this.key, scope, helperOptions).value;
 };
 
@@ -438,7 +442,8 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 // AT @NAME
 //
 var keyRegExp = /[\w\.\\\-_@\/\&%]+/,
-	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\]|\s*(?=\[))/g,
+	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\]\s*|\s*(?=\[))/g,
+	bracketSpaceRegExp = /\]\s+/,
 	literalRegExp = /^('.*?'|".*?"|[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
 
 var isTokenKey = function(token){
@@ -603,7 +608,12 @@ var expression = {
 	tokenize: function(expression){
 		var tokens = [];
 		(expression.trim() + ' ').replace(tokensRegExp, function (whole, arg) {
-			tokens.push(arg);
+			if (bracketSpaceRegExp.test(arg)) {
+				tokens.push(arg[0]);
+				tokens.push(arg.slice(1));
+			} else {
+				tokens.push(arg);
+			}
 		});
 		return tokens;
 	},
@@ -789,13 +799,26 @@ var expression = {
 						key: token.slice(1) // remove leading `.`
 					});
 				}
-				else if(firstParent.type === 'Bracket' && !(firstParent.children && firstParent.children.length > 0)) {
-					stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
-				}
-				// This is to make sure in a helper like `helper foo[bar] car` that
-				// car would not be added to the Bracket expression.
-				else if(stack.first(["Helper", "Call", "Hash","Arg"]).type === 'Helper') {
-					stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
+				else if(firstParent.type === 'Bracket') {
+					// a Bracket expression without children means we have
+					// parsed `foo[` of an expression like `foo[bar]`
+					// so we know to add the Lookup as a child of the Bracket expression
+					if (!(firstParent.children && firstParent.children.length > 0)) {
+						stack.addToAndPush(["Bracket"], {type: "Lookup", key: token});
+					} else {
+						// check if we are adding to a helper like `eq foo[bar] baz`
+						// but not at the `.baz` of `eq foo[bar].baz xyz`
+						if(stack.first(["Helper", "Call", "Hash", "Arg"]).type === 'Helper' && token[0] !== '.') {
+							stack.addToAndPush(["Helper"], {type: "Lookup", key: token});
+						} else {
+							// otherwise, handle the `.baz` in expressions like `foo[bar].baz`
+							stack.replaceTopAndPush({
+								type: "Lookup",
+								key: token.slice(1),
+								root: firstParent
+							});
+						}
+					}
 				}
 				else {
 					// if two scopes, that means a helper

@@ -5332,6 +5332,36 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (plain object data)');
 	});
 
+	test("Bracket expression followed by Lookup expression", function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache('<p>{{ foo[bar].first }}</p><p>{{#is foo[bar].first "K"}}short{{else}}long{{/is}}</p>');
+
+		var data = new CanMap({
+			baz: 'first',
+			bar: 'name',
+			foo: {
+				name: {
+					first: 'K'
+				},
+				fullName: {
+					first: 'Kevin'
+				}
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'K', 'correct value for foo[bar].first');
+		equal(innerHTML(p[1]), 'short', 'correct value for `is foo[bar].first "K"`');
+
+		data.attr('bar', 'fullName');
+
+		equal(innerHTML(p[0]), 'Kevin', 'updated value for foo[bar].first');
+		equal(innerHTML(p[1]), 'long', 'updated value for `is foo[bar].first "K"`');
+	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
