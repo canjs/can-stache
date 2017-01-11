@@ -5323,6 +5323,8 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (Map/List data)');
 
+		div.innerHTML = '';
+
 		dom = template(data.attr());
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');

@@ -74,10 +74,6 @@ var getKeyComputeData = function (key, scope, readOptions) {
 			return computeOrFunction();
 		}
 
-		if (computeOrFunction.computeData != null && computeOrFunction.hasOwnProperty("value")) {
-			return computeOrFunction.value;
-		}
-
 		return computeOrFunction;
 	},
 	// If not a Literal or an Arg, convert to an arg for caching.
@@ -108,6 +104,10 @@ Bracket.prototype.value = function (scope) {
 		prop = lookupValue(prop.key, scope, {}, {});
 	} else if (prop instanceof Call) {
 		prop = prop.value(scope, {}, {});
+	}
+
+	if (prop.computeData != null && prop.hasOwnProperty("value")) {
+		prop = prop.value;
 	}
 
 	if (!obj) {
