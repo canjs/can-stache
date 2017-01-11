@@ -57,7 +57,7 @@
     "donejs-cli": "^0.9.5",
     "generator-donejs": "^0.9.6",
     "jshint": "^2.9.4",
-    "steal": "1.0.5",
+    "steal": "^1.0.5",
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.1",
