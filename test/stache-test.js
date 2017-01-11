@@ -5292,6 +5292,47 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Phillips', 'updated value for baz in foo[bar][baz]');
 	});
 
+	test("Bracket expression with numeric index", function () {
+		var template, dom, p;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ foo[0] }}</p>");
+
+		var data = new CanMap({
+			bar: [
+				'thud',
+				'jeek'
+			],
+			foo: [
+				'baz',
+				'quux'
+			]
+		});
+
+		dom = template(data);
+		div.appendChild(dom);
+		p = div.getElementsByTagName('p');
+		equal(innerHTML(p[0]), 'baz', 'correct value for foo[0]');
+
+		div.innerHTML = '';
+
+		template = stache("<p>{{#each foo}}{{ bar[%index] }}{{/each}}</p>")
+		dom = template(data);
+		div.appendChild(dom);
+		p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (Map/List data)');
+
+		div.innerHTML = '';
+
+		dom = template(data.attr());
+		div.appendChild(dom);
+		p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (plain object data)');
+	});
+
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
