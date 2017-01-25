@@ -270,9 +270,7 @@ var helpers = {
 			return joinURIs(parentAddress, moduleReference);
 		} else {
 			var baseURL = (typeof System !== "undefined" &&
-				(System.renderingLoader && System.renderingLoader.baseURL ||
-				System.baseURL)) ||
-				getBaseURL();
+				(System.renderingBaseURL || System.baseURL)) ||	getBaseURL();
 
 			// Make sure one of them has a needed /
 			if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
