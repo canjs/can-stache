@@ -126,7 +126,7 @@ Data:
 	  pluralize: function(type, count){
 	    return type+(count === 1 ? "" : "s")
 	  },
-	  todos: new List([22,32,42]),
+	  ages: new List([22,32,42]),
 	  type: "age"
 	}
 
@@ -146,7 +146,7 @@ Data:
 	  pluralize: function(options){
 	    return options.word+(options.count === 1 ? "" : "s")
 	  },
-	  todos: new List([22,32,42]),
+	  ages: new List([22,32,42]),
 	  type: "age"
 	}
 
