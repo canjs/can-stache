@@ -40,7 +40,9 @@ var getKeyComputeData = function (key, scope, readOptions) {
 		// If it doesn't look like a helper and there is no value, check helpers
 		// anyway. This is for when foo is a helper in `{{foo}}`.
 		if( res.computeData.initialValue === undefined ) {
-			if(key.charAt(0) === "@" && key !== "@index") {
+			// this check is for stache-converters
+			// a converter will use the @at-Key-Operator to get the function
+			if(key.charAt(0) === "@") {
 				key = key.substr(1);
 			}
 			var helper = mustacheHelpers.getHelper(key, helperOptions);
