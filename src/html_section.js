@@ -1,5 +1,6 @@
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
+var Observation = require('can-observation');
 
 var utils = require('./utils');
 var mustacheCore = require('./mustache_core');
@@ -68,8 +69,9 @@ assign(HTMLSectionBuilder.prototype,{
 	},
 	compile: function(){
 		var compiled = this.stack.pop().compile();
-
-		return function(scope, options, nodeList){
+		// ignore observations here.  the render fn
+		//  itself doesn't need to be observable.
+		return Observation.ignore(function(scope, options, nodeList){
 			if ( !(scope instanceof Scope) ) {
 				scope = Scope.refsScope().add(scope || {});
 			}
@@ -77,7 +79,7 @@ assign(HTMLSectionBuilder.prototype,{
 				options = new mustacheCore.Options(options || {});
 			}
 			return compiled.hydrate(scope, options, nodeList);
-		};
+		});
 	},
 	push: function(chars){
 		this.last().push(chars);
