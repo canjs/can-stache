@@ -5363,6 +5363,26 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[1]), 'long', 'updated value for `is foo[bar].first "K"`');
 	});
 
+	test("renderer itself is not observable", function() {
+		var first = canCompute("Justin"),
+			last = canCompute("Meyer");
+
+		var renderer = stache("{{first}} {{last}}");
+
+		var fullNameFrag = canCompute(function(){
+			return renderer({first: first, last: last});
+		});
+
+		fullNameFrag.on("change", function(){
+			QUnit.ok(false);
+		});
+
+		this.fixture.appendChild(fullNameFrag());
+
+		first("Josh");
+		equal(this.fixture.innerHTML, "Josh Meyer");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
