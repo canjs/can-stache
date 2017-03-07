@@ -15,6 +15,7 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
+var viewCallbacks = require('can-view-callbacks');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -4586,7 +4587,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template({foo: true});
 		equal(frag.firstChild.getAttribute("disabled"),"","disabled set");
 	});
-	
+
 	test("readonly as a custom attribute", function() {
 		var map = new DefineMap({
 			conditions: false
@@ -5381,6 +5382,10 @@ function makeTest(name, doc, mutation) {
 
 		first("Josh");
 		equal(this.fixture.innerHTML, "Josh Meyer");
+	});
+
+	QUnit.test("content is registered (#163)",function(){
+		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

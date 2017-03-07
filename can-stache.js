@@ -20,6 +20,13 @@ var importer = require('can-util/js/import/import');
 require('can-view-target');
 require('can-view-nodelist');
 
+
+// This was moved from the legacy view/scanner.js to here.
+// This makes sure content elements will be able to have a callback.
+viewCallbacks.tag("content", function(el, tagData) {
+	return tagData.scope;
+});
+
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
