@@ -55,7 +55,7 @@
     "bit-docs": "0.0.7",
     "done-serve": "^0.2.5",
     "donejs-cli": "^0.9.5",
-    "generator-donejs": "^0.9.6",
+    "generator-donejs": "^1.0.0",
     "jshint": "^2.9.4",
     "steal": "^1.0.5",
     "steal-benchmark": "^0.0.1",
