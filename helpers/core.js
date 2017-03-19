@@ -192,6 +192,17 @@ var helpers = {
 
 		return callFn() ? options.fn() : options.inverse();
 	},
+	'not': function() {
+		var args = arguments;
+		var options = args[arguments.length - 1];
+
+		args[args.length - 1] = assign(assign({}, options), {
+			fn: options.inverse,
+			inverse: options.fn
+		});
+
+		return helpers.is.apply(this, args);
+	},
 	'eq': function() {
 		return helpers.is.apply(this, arguments);
 	},

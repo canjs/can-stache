@@ -662,6 +662,36 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("Handlebars helper: not/else", function() {
+		var expected;
+		var t = {
+			template: '{{#not ducks tenDucks "10"}}Not 10 ducks{{else}}10 ducks{{/eq}}',
+			expected: "Not 10 ducks",
+			data: {
+				ducks: '9',
+				tenDucks: function() {
+					return '10'
+				}
+			},
+			liveData: new CanMap({
+				ducks: 9,
+				tenDucks: function() {
+					return '10'
+				}
+			})
+		};
+
+		expected = t.expected.replace(/&quot;/g, '&#34;').replace(/\r\n/g, '\n');
+		deepEqual(getText(t.template, t.data), expected);
+
+		deepEqual(getText(t.template, t.liveData), expected);
+
+		t.data.ducks = '10';
+
+		deepEqual(getText(t.template, t.data), '10 ducks');
+
+	});
+
 	test("Handlebars helper: unless", function () {
 		var t = {
 			template: "{{#unless missing}}Andy is missing!{{/unless}}" +
