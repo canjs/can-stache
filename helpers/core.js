@@ -206,6 +206,9 @@ var helpers = {
 	'eq': function() {
 		return helpers.is.apply(this, arguments);
 	},
+	'neq': function() {
+		return heleprs.not.apply(this, arguments);
+	},
 	'unless': function (expr, options) {
 		return helpers['if'].apply(this, [expr, assign(assign({}, options), {
 			fn: options.inverse,
