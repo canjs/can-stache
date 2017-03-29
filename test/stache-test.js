@@ -5388,11 +5388,35 @@ function makeTest(name, doc, mutation) {
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
-	test("warn on missmatched tag (canjs/canjs#1476)", function() {
-		stache("{{#if someCondition}}...{{/someCondition}}");
-		stache("{{^if}}...{{/each}}");
-		stache("{{#if someCondition}}...{{/}}");
-	});
+	if (System.env.indexOf('production') < 0) {
+		test("warn on missmatched tag (canjs/canjs#1476)", function() {
+			var count = 0;
+			var texts = [
+				"unexpected closing tag {{/foo}} expected {{/if}}",
+				"unexpected closing tag {{/foo}} expected {{/if}}",
+				"unexpected closing tag {{/foo}} expected {{/call}}"
+			];
+			expect(texts.length);
+
+			var _warn = canDev.warn;
+			canDev.warn = function(text) {
+				equal(text, texts[count++]);
+			};
+
+			// Fails
+			stache("{{#if someCondition}}...{{/foo}}");
+			stache("{{^if someCondition}}...{{/foo}}");
+			stache("{{#call()}}...{{/foo}}");
+
+			// Successes
+			stache("{{#if}}...{{/}}");
+			stache("{{#if someCondition}}...{{/if}}");
+			stache("{{^if someCondition}}...{{/if}}");
+			stache("{{#call()}}...{{/call}}");
+
+			canDev.warn = _warn;
+		});
+	}
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 

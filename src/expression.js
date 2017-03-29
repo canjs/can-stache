@@ -257,6 +257,10 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 };
 
+Call.prototype.closingTag = function() {
+	return this.methodExpr.key.slice(1);
+};
+
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
 // Any functions found prior to the last one are called with
@@ -430,6 +434,10 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	} else {
 		return computeValue;
 	}
+};
+
+Helper.prototype.closingTag = function() {
+	return this.methodExpr.key;
 };
 
 
