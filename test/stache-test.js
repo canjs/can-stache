@@ -5388,6 +5388,12 @@ function makeTest(name, doc, mutation) {
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
+	test("warn on missmatched tag (canjs/canjs#1476)", function() {
+		stache("{{#if someCondition}}...{{/someCondition}}");
+		stache("{{^if}}...{{/each}}");
+		stache("{{#if someCondition}}...{{/}}");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
