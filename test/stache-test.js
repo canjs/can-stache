@@ -5390,31 +5390,36 @@ function makeTest(name, doc, mutation) {
 
 	if (System.env.indexOf('production') < 0) {
 		test("warn on missmatched tag (canjs/canjs#1476)", function() {
-			var count = 0;
-			var texts = [
-				"unexpected closing tag {{/foo}} expected {{/if}}",
-				"unexpected closing tag {{/foo}} expected {{/if}}",
-				"unexpected closing tag {{/foo}} expected {{/call}}"
-			];
-			expect(texts.length);
+			var makeWarnChecks = function(input, texts) {
+				var count = 0;
+				var _warn = canDev.warn;
+				canDev.warn = function(text) {
+					equal(text, texts[count++]);
+				};
 
-			var _warn = canDev.warn;
-			canDev.warn = function(text) {
-				equal(text, texts[count++]);
+				stache(input);
+
+				equal(count, texts.length);
+
+				canDev.warn = _warn;
 			};
 
 			// Fails
-			stache("{{#if someCondition}}...{{/foo}}");
-			stache("{{^if someCondition}}...{{/foo}}");
-			stache("{{#call()}}...{{/foo}}");
+			makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{#call()}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/call}}"
+			]);
 
 			// Successes
-			stache("{{#if}}...{{/}}");
-			stache("{{#if someCondition}}...{{/if}}");
-			stache("{{^if someCondition}}...{{/if}}");
-			stache("{{#call()}}...{{/call}}");
-
-			canDev.warn = _warn;
+			makeWarnChecks("{{#if}}...{{/}}", []);
+			makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{#call()}}...{{/call}}", []);
 		});
 	}
 
