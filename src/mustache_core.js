@@ -329,10 +329,9 @@ var core = {
 			if(gotCompute) {
 				computeValue = evaluator;
 			} else {
-				console.log("MAKING COMPUTE");
 				computeValue = compute(evaluator, null, false);
 			}
-			
+
 			computeValue.computeInstance.setPrimaryDepth(nodeList.nesting);
 
 			// Bind on the computeValue to set the cached value. This helps performance

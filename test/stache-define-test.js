@@ -2,6 +2,7 @@ var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var DefineMap = require("can-define/map/map");
 var DefineList = require("can-define/list/list");
+var define = require("can-define");
 
 QUnit.module("can-stache with can-define");
 

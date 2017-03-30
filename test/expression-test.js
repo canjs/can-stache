@@ -498,7 +498,7 @@ test("expression.parse - [] operator", function(){
 		"foo()[bar]"
 	);
 
-	exprData = expression.parse("foo[bar()]");
+	var exprData = expression.parse("foo[bar()]");
 	deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(

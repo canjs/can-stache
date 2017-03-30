@@ -4441,7 +4441,7 @@ function makeTest(name, doc, mutation) {
 		var oldIs = stache.getHelper('is').fn;
 
 		stache.registerHelper('is', function() {
-			ok(true, 'comparator invoked');
+			ok(true, 'comparator invoked only once during setup');
 			return oldIs.apply(this, arguments);
 		});
 
@@ -4449,7 +4449,6 @@ function makeTest(name, doc, mutation) {
 		b = canCompute(0);
 
 		stache('{{eq a b}}')({ a: a, b: b });
-
 		canBatch.start();
 		a(1);
 		b(1);
