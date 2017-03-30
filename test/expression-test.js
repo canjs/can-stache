@@ -562,6 +562,18 @@ test("Bracket expression", function(){
 	);
 	equal(compute(), "name");
 
+	// foo["bar.baz"]
+	expr = new expression.Bracket(
+		new expression.Literal("bar.baz"),
+		new expression.Lookup("foo")
+	);
+	compute = expr.value(
+		new Scope(
+			new CanMap({foo: {"bar.baz": "name"}})
+		)
+	);
+	equal(compute(), "name");
+
 	// foo[bar]
 	expr = new expression.Bracket(
 		new expression.Lookup("bar"),
