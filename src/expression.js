@@ -101,13 +101,9 @@ Bracket.prototype.value = function (scope) {
 	var obj = this.root;
 
 	if (prop instanceof Lookup) {
-		prop = lookupValue(prop.key, scope, {}, {});
+		prop = lookupValue(prop.key, scope, {}, {}).value;
 	} else if (prop instanceof Call) {
 		prop = prop.value(scope, {}, {});
-	}
-
-	if (prop.computeData != null && prop.hasOwnProperty("value")) {
-		prop = prop.value;
 	}
 
 	if (!obj) {
