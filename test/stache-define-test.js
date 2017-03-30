@@ -92,3 +92,242 @@ QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
 	equal((span[0].innerHTML), 'first justin', 'first');
 	equal((span[1].innerHTML), 'last meyer', 'last');
 });
+
+QUnit.test("Stache with single property", function() {
+	var Typer = define.Constructor({
+		foo: {
+			type: 'string'
+		}
+	});
+
+	var template = stache('{{foo}}');
+	var t = new Typer({
+		foo: 'bar'
+	});
+	var frag = template(t);
+	equal(frag.firstChild.nodeValue, 'bar');
+	t.foo = "baz";
+	equal(frag.firstChild.nodeValue, 'baz');
+});
+
+QUnit.test("Stache with boolean property with {{#if}}", function() {
+	var nailedIt = 'Nailed it';
+	var Example = define.Constructor({
+		name: {
+			value: nailedIt
+		}
+	});
+
+	var NestedMap = define.Constructor({
+		isEnabled: {
+			value: true
+		},
+		test: {
+			Value: Example
+		},
+		examples: {
+			type: {
+				one: {
+					Value: Example
+				},
+				two: {
+					type: {
+						deep: {
+							Value: Example
+						}
+					},
+					Value: Object
+				}
+			},
+			Value: Object
+		}
+	});
+
+	var nested = new NestedMap();
+	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
+	var frag = template(nested);
+	equal(frag.firstChild.nodeValue, 'Enabled');
+});
+
+QUnit.test("stache with double property", function() {
+	var nailedIt = 'Nailed it';
+	var Example = define.Constructor({
+		name: {
+			value: nailedIt
+		}
+	});
+
+	var NestedMap = define.Constructor({
+		isEnabled: {
+			value: true
+		},
+		test: {
+			Value: Example
+		},
+		examples: {
+			type: {
+				one: {
+					Value: Example
+				},
+				two: {
+					type: {
+						deep: {
+							Value: Example
+						}
+					},
+					Value: Object
+				}
+			},
+			Value: Object
+		}
+	});
+
+	var nested = new NestedMap();
+	var template = stache('{{test.name}}');
+	var frag = template(nested);
+	equal(frag.firstChild.nodeValue, nailedIt);
+});
+
+QUnit.test("Stache with one nested property", function() {
+	var nailedIt = 'Nailed it';
+	var Example = define.Constructor({
+		name: {
+			value: nailedIt
+		}
+	});
+
+	var NestedMap = define.Constructor({
+		isEnabled: {
+			value: true
+		},
+		test: {
+			Value: Example
+		},
+		examples: {
+			type: {
+				one: {
+					Value: Example
+				},
+				two: {
+					type: {
+						deep: {
+							Value: Example
+						}
+					},
+					Value: Object
+				}
+			},
+			Value: Object
+		}
+	});
+
+	var nested = new NestedMap();
+	var template = stache('{{examples.one.name}}');
+	var frag = template(nested);
+	equal(frag.firstChild.nodeValue, nailedIt);
+});
+
+QUnit.test("Stache with two nested property", function() {
+	var nailedIt = 'Nailed it';
+	var Example = define.Constructor({
+		name: {
+			value: nailedIt
+		}
+	});
+
+	var NestedMap = define.Constructor({
+		isEnabled: {
+			value: true
+		},
+		test: {
+			Value: Example
+		},
+		examples: {
+			type: {
+				one: {
+					Value: Example
+				},
+				two: {
+					type: {
+						deep: {
+							Value: Example
+						}
+					},
+					Value: Object
+				}
+			},
+			Value: Object
+		}
+	});
+
+	var nested = new NestedMap();
+	var template = stache('{{examples.two.deep.name}}');
+	var frag = template(nested);
+	equal(frag.firstChild.nodeValue, nailedIt);
+});
+
+test('list.sort a list of DefineMaps', function(){
+
+	var Account = DefineMap.extend({
+		name: "string",
+		amount: "number",
+		slug: {
+			serialize: true,
+			get: function(){
+				return this.name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'');
+			}
+		}
+	});
+	Account.List = DefineList.extend({
+	  "*": Account,
+	  limit: "number",
+	  skip: "number",
+	  total: "number"
+	});
+
+	var accounts = new Account.List([
+		{
+			name: "Savings",
+			amount: 20.00
+		},
+		{
+			name: "Checking",
+			amount: 103.24
+		},
+		{
+			name: "Kids Savings",
+			amount: 48155.13
+		}
+	]);
+	accounts.limit = 3;
+
+	var template = stache('{{#each accounts}}{{name}},{{/each}}')({accounts: accounts});
+	equal(template.textContent, "Savings,Checking,Kids Savings,", "template rendered properly.");
+
+	accounts.sort(function(a, b){
+		if (a.name < b.name) {
+			return -1;
+		} else if (a.name > b.name){
+			return 1;
+		} else {
+			return 0;
+		}
+	});
+	equal(accounts.length, 3);
+	equal(template.textContent, "Checking,Kids Savings,Savings,", "template updated properly.");
+
+	// Try sorting in reverse on the dynamic `slug` property
+	accounts.sort(function(a, b){
+		if (a.slug < b.slug) {
+			return 1;
+		} else if (a.slug > b.slug){
+			return -1;
+		} else {
+			return 0;
+		}
+	});
+
+	equal(accounts.length, 3);
+	equal(accounts.limit, 3, "expandos still present after sorting/replacing.");
+	equal(template.textContent, "Savings,Kids Savings,Checking,", "template updated properly.");
+});

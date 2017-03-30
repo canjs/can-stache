@@ -9,6 +9,8 @@ var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var dev = require('can-util/js/dev/dev');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
+var canReflect = require("can-reflect");
+var canSymbol = require("can-symbol");
 // ## Helpers
 
 // Helper for getting a bound compute in the scope.
@@ -20,13 +22,21 @@ var getKeyComputeData = function (key, scope, readOptions) {
 
 		return data;
 	},
+	computeDataHasDependencies = function(computeData){
+		return computeData[canSymbol.for("can.valueHasDependencies")] ?
+			canReflect.valueHasDependencies(computeData) : computeData.compute.computeInstance.hasDependencies;
+	},
+	computeHasDependencies = function(compute){
+		return compute[canSymbol.for("can.valueHasDependencies")] ?
+			canReflect.valueHasDependencies(compute) : compute.computeInstance.hasDependencies;
+	},
 	// Looks up a value in the scope and returns a compute if the value is
 	// observable and the value if not.
 	lookupValue = function(key, scope, helperOptions, readOptions){
 		var prop = getValueOfComputeOrFunction(key);
 		var computeData = getKeyComputeData(prop, scope, readOptions);
 		// If there are no dependencies, just return the value.
-		if (!computeData.compute.computeInstance.hasDependencies) {
+		if (!computeDataHasDependencies(computeData)) {
 			return {value: computeData.initialValue, computeData: computeData};
 		} else {
 			return {value: computeData.compute, computeData: computeData};
@@ -347,7 +357,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 
 		// Set name to be the compute if the compute reads observables,
 		// or the value of the value of the compute if no observables are found.
-		if(computeData.compute.computeInstance.hasDependencies) {
+		if( computeDataHasDependencies( computeData ) ) {
 			value = compute;
 		} else {
 			value = initialValue;
@@ -425,7 +435,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 
 	compute.temporarilyBind(computeValue);
 
-	if (!computeValue.computeInstance.hasDependencies) {
+	if (!computeHasDependencies( computeValue ) ) {
 		return computeValue();
 	} else {
 		return computeValue;
