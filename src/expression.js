@@ -58,7 +58,8 @@ var getKeyComputeData = function (key, scope, readOptions) {
 				observeReader.write(result, observeReader.reads(key), newVal);
 			} else {
 				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				return observeReader.get(result, "" + key);
+				// also escape `.` so that things like ["bar.baz"] will work correctly
+				return observeReader.get(result, ("" + key).replace(".", "\\."));
 			}
 		});
 
@@ -101,13 +102,9 @@ Bracket.prototype.value = function (scope) {
 	var obj = this.root;
 
 	if (prop instanceof Lookup) {
-		prop = lookupValue(prop.key, scope, {}, {});
+		prop = lookupValue(prop.key, scope, {}, {}).value;
 	} else if (prop instanceof Call) {
 		prop = prop.value(scope, {}, {});
-	}
-
-	if (prop.computeData != null && prop.hasOwnProperty("value")) {
-		prop = prop.value;
 	}
 
 	if (!obj) {
