@@ -274,6 +274,12 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
+	if (this.key.charAt(0) === "@" && this.key !== "@index") {
+		return (function() {
+			return !!this.value;
+		}).bind(this);
+	}
+
 	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]}).value;
 };
 

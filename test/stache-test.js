@@ -5390,4 +5390,22 @@ function makeTest(name, doc, mutation) {
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
+	test("test", function() {
+		var data = {
+			func1: function() {
+				return "called";
+			},
+			func2: function() {
+				console.log('bam')
+				throw new Error("should not be called");
+			},
+			noop: undefined
+		};
+
+		equal(getText("{{func1}}", data), "called");
+		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
+		equal(getText("{{@func2}}", data), "function () { [native code] }");
+		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
+	});
+
 }
