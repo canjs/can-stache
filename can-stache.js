@@ -39,6 +39,7 @@ function stache(template){
 
 	// Remove line breaks according to mustache's specs.
 	if(typeof template === "string") {
+		template = mustacheCore.cleanWhitespaceControl(template);
 		template = mustacheCore.cleanLineEndings(template);
 	}
 
