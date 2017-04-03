@@ -5388,23 +5388,24 @@ function makeTest(name, doc, mutation) {
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
-	// PUT NEW TESTS RIGHT BEFORE THIS!
-
-	test("test", function() {
-		var data = {
+	test("@arg functions are not called (#172)", function() {
+		var data = new DefineMap({
 			func1: function() {
 				return "called";
 			},
 			func2: function() {
-				throw new Error("should not be called");
+				console.log("should not be called");
+				return true;
 			},
 			noop: undefined
-		};
+		});
 
 		equal(getText("{{func1}}", data), "called");
 		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
 		equal(getText("{{@func2}}", data).replace(' bound ', ' ').slice(0, 13), "function () {");
 		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
 	});
+
+	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
