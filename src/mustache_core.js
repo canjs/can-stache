@@ -332,6 +332,8 @@ var core = {
 				computeValue = compute(evaluator, null, false);
 			}
 
+			var isAt = expressionString.charAt(0) === "@" && expressionString !== "@index";
+
 			computeValue.computeInstance.setPrimaryDepth(nodeList.nesting);
 
 			// Bind on the computeValue to set the cached value. This helps performance
@@ -341,7 +343,7 @@ var core = {
 			var value = computeValue();
 
 			// If value is a function, it's a helper that returned a function.
-			if(typeof value === "function") {
+			if(!isAt && typeof value === "function") {
 
 				// A helper function should do it's own binding.  Similar to how
 				// we prevented this function's compute from being noticed by parent expressions,

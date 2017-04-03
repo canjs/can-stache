@@ -5394,7 +5394,7 @@ function makeTest(name, doc, mutation) {
 				return "called";
 			},
 			func2: function() {
-				console.log("should not be called");
+				ok(false, "this method should not be called.");
 				return true;
 			},
 			noop: undefined
@@ -5404,6 +5404,11 @@ function makeTest(name, doc, mutation) {
 		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
 		equal(getText("{{@func2}}", data).replace(' bound ', ' ').slice(0, 13), "function () {");
 		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
+
+		equal(getText("{{noop}}", data), "");
+		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
+		equal(getText("{{@noop}}", data), "");
+		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
