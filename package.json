@@ -61,7 +61,7 @@
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.1",
-    "testee": "^0.3.0",
+    "testee": "^0.4.0",
     "can-vdom": "^3.0.1"
   },
   "bit-docs": {
