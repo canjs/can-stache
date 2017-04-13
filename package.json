@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "can-define": "^1.0.5",
-    "can-event": "^3.0.1",
+    "can-event": "3.2.0",
     "can-list": "^3.0.1",
     "can-map": "^3.0.3",
     "bit-docs": "0.0.7",
