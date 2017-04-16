@@ -142,9 +142,7 @@ key1 and key2. If the result of comparsion is **truthy**, the section will be re
 
 ## Registering Helpers
 
-You can register your own global helper with the `[can-stache.registerSimpleHelper registerSimpleHelper]`
-`[can-stache.registerHelper registerHelper]` or
- methods.
+You can register your own global helper with the `[can-stache.registerSimpleHelper registerSimpleHelper]` or `[can-stache.registerHelper registerHelper]` methods.
 
 `[can-stache.registerSimpleHelper registerSimpleHelper]` calls the registered helper function with
 values, while `[can-stache.registerHelper registerHelper]` calls the registered helper function with
