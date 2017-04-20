@@ -27,7 +27,7 @@ var decodeHTML = typeof document !== "undefined" && (function(){
 //
 //     {{#if items}} {{#items}} X
 //
-// At the point X was being processed, there would be 2 HTMLSections in the
+// At the point X was being processed, their would be 2 HTMLSections in the
 // stack.  One for the content of `{{#if items}}` and the other for the
 // content of `{{#items}}`
 var HTMLSectionBuilder = function(){

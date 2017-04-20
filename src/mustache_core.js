@@ -260,23 +260,12 @@ var core = {
 			fullExpression = mode+expressionString;
 
 		// convert a lookup like `{{value}}` to still be called as a helper if necessary.
-<<<<<<< HEAD
 		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
-=======
-		if (!(exprData instanceof expression.Helper) &&
-			!(exprData instanceof expression.Call)
-		) {
-			exprData = new expression.Helper(exprData, [], {});
-		}
-
-		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
->>>>>>> edf54e5... refactor element stack, move closingTag logic to expression object (canjs/can-stache#13)
+		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
@@ -318,11 +307,7 @@ var core = {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-<<<<<<< HEAD
-		return function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
-=======
-		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
->>>>>>> edf54e5... refactor element stack, move closingTag logic to expression object (canjs/can-stache#13)
+		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
 
 			var nodeList = [this];
 			nodeList.expression = expressionString;

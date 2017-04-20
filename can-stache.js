@@ -61,8 +61,8 @@ function stache(template){
 			// when the element is done, we compile the text section and
 			// add it as a callback to `section`.
 			textContentOnly: null
-		},
 
+		},
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
 		// given section and modify the section to use that renderer.
@@ -89,7 +89,7 @@ function stache(template){
 
 					state.sectionElementStack.pop();
 				}
-			} else if (mode === "else") {
+			} else if(mode === "else") {
 
 				section.inverse();
 
@@ -131,16 +131,13 @@ function stache(template){
 							//!steal-remove-end
 						});
 					}
-
 				} else {
-
 					// Adds a renderer function that only updates text.
 					section.add( makeRenderer(null,stache, copyState({text: true}) ));
 				}
 
 			}
 		},
-
 		// Copys the state object for use in renderers.
 		copyState = function(overwrites){
 			var lastElement = state.sectionElementStack[state.sectionElementStack.length - 1];

@@ -2903,7 +2903,7 @@ function makeTest(name, doc, mutation) {
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
 			setTimeout(function () {
-				equal(data._bindings, 0, "there are no bindings");
+				equal(data.__bindEvents._lifecycleBindings, 0, "there are no bindings");
 				start();
 			}, 30);
 		},10);
