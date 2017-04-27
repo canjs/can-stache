@@ -22,7 +22,7 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (isFunction(value)) {
+	if (value && value.isComputed) {
 		return value();
 	} else {
 		return value;
@@ -154,7 +154,7 @@ var helpers = {
 		var value;
 		// if it's a function, wrap its value in a compute
 		// that will only change values from true to false
-		if (isFunction(expr)) {
+		if (expr && expr.isComputed) {
 			value = compute.truthy(expr)();
 		} else {
 			value = !! resolve(expr);
