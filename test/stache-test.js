@@ -5423,6 +5423,27 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
+	test("@arg functions are not called (#172)", function() {
+		var data = new DefineMap({
+			func1: function() {
+				return "called";
+			},
+			func2: function() {
+				ok(false, "this method should not be called.");
+				return true;
+			},
+			noop: undefined
+		});
+
+		equal(getText("{{func1}}", data), "called");
+		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
+		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
+
+		equal(getText("{{noop}}", data), "");
+		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
+		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

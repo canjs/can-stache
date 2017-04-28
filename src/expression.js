@@ -278,7 +278,11 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]}).value;
+	return lookupValue(this.key, scope, helperOptions, {
+		callMethodsOnObservables: true,
+		isArgument: true,
+		args: [ scope.peek('.'), scope ]
+	}).value;
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
