@@ -5388,6 +5388,41 @@ function makeTest(name, doc, mutation) {
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
+	if (System.env.indexOf('production') < 0) {
+		test("warn on missmatched tag (canjs/canjs#1476)", function() {
+			var makeWarnChecks = function(input, texts) {
+				var count = 0;
+				var _warn = canDev.warn;
+				canDev.warn = function(text) {
+					equal(text, texts[count++]);
+				};
+
+				stache(input);
+
+				equal(count, texts.length);
+
+				canDev.warn = _warn;
+			};
+
+			// Fails
+			makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{#call()}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/call}}"
+			]);
+
+			// Successes
+			makeWarnChecks("{{#if}}...{{/}}", []);
+			makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{#call()}}...{{/call}}", []);
+		});
+	}
+
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
 			func1: function() {
