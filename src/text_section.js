@@ -7,6 +7,9 @@ var attr = require("can-util/dom/attr/attr");
 
 var assign = require('can-util/js/assign/assign');
 
+var canReflect = require("can-reflect");
+var Observation = require("can-observation");
+
 var noop = function(){};
 
 var TextSectionBuilder = function(){
@@ -37,23 +40,24 @@ assign(TextSectionBuilder.prototype,{
 
 		return function(scope, options){
 
-			var computeValue = compute(function(){
+			var observation = new Observation(function(){
 				return renderer(scope, options);
-			}, null, false);
+			}, null, {isObservable: false});
 
-			computeValue.computeInstance.addEventListener("change", noop);
-			var value = computeValue();
-			if( computeValue.computeInstance.hasDependencies ) {
+			canReflect.onValue(observation, noop);
+
+			var value = canReflect.getValue(observation);
+			if( canReflect.valueHasDependencies( observation ) ) {
 				if(state.textContentOnly) {
 					live.text(this, computeValue);
 				}
 				else if(state.attr) {
-					live.attr(this, state.attr, computeValue);
+					live.attr(this, state.attr, observation);
 				}
 				else {
-					live.attrs(this, computeValue, scope, options);
+					live.attrs(this, observation, scope, options);
 				}
-				computeValue.computeInstance.removeEventListener("change", noop);
+				canReflect.offValue(observation, noop);
 			} else {
 				if(state.textContentOnly) {
 					this.nodeValue = value;

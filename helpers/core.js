@@ -13,6 +13,8 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
+var canSymbol = require("can-symbol");
+var canReflect = require("can-reflect");
 
 
 var domData = require('can-util/dom/data/data');
@@ -22,8 +24,9 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (isFunction(value)) {
-		return value();
+
+	if (value && value[canSymbol.for("can.getValue")]) {
+		return canReflect.getValue(value);
 	} else {
 		return value;
 	}
@@ -31,12 +34,7 @@ var resolve = function (value) {
 var resolveHash = function(hash){
 	var params = {};
 	for(var prop in hash) {
-		var value = hash[prop];
-		if(value && value.isComputed) {
-			params[prop] = value();
-		} else {
-			params[prop] = value;
-		}
+		params[prop] = resolve(hash[prop]);
 	}
 	return params;
 };
