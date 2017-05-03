@@ -50,48 +50,16 @@
     "can-view-target": "^3.1.0"
   },
   "devDependencies": {
-<<<<<<< f945832059ef41dcbc7ca4f6321dc6ce6a2f6747
     "can-define": "^1.3.0",
     "can-event": "^3.6.0",
     "can-list": "^3.2.0",
     "can-map": "^3.3.0",
     "can-vdom": "^3.1.0",
-=======
-    "can-define": "^1.0.5",
-    "can-event": "^3.0.1",
-    "can-list": "^3.0.1",
-    "can-map": "^3.0.3",
-    "bit-docs": "0.0.7",
-    "done-serve": "^1.2.0",
-    "donejs-cli": "^1.0.1",
-    "generator-donejs": "^1.0.5",
->>>>>>> chore(package): update dependencies
     "jshint": "^2.9.4",
     "steal": "^1.0.5",
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.1",
-<<<<<<< f945832059ef41dcbc7ca4f6321dc6ce6a2f6747
     "testee": "^0.7.0"
-=======
-    "testee": "^0.5.0",
-    "can-vdom": "^3.0.1"
-  },
-  "bit-docs": {
-    "dependencies": {
-      "bit-docs-glob-finder": "^0.0.5",
-      "bit-docs-dev": "^0.0.3",
-      "bit-docs-js": "^0.0.3",
-      "bit-docs-generate-readme": "^0.0.8"
-    },
-    "glob": {
-      "pattern": "**/*.{js,md}",
-      "ignore": "node_modules/**/*"
-    },
-    "readme": {
-      "apis": "./docs/apis.json"
-    },
-    "parent": "can-list"
->>>>>>> chore(package): update dependencies
   }
 }

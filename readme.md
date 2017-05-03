@@ -1,5 +1,7 @@
 # can-stache
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-stache.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/canjs/can-stache.png?branch=master)](https://travis-ci.org/canjs/can-stache)
 
 Live binding handlebars templates
