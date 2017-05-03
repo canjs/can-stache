@@ -5444,6 +5444,20 @@ function makeTest(name, doc, mutation) {
 		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
 	});
 
+	test("can-template works", function() {
+		var template = stache( '<my-email>' +
+			'<can-template name="subject"><h2>{{subject}}</h2></can-template>' +
+			'<can-template name="body">' +
+			'<input {$value}="body"/>' +
+			'</can-template>' +
+			'</my-email>');
+		var frag = template({});
+		QUnit.equal(frag.firstChild.childNodes.length, 0);
+		frag = template.templates.subject({subject: "Hello"});
+		QUnit.equal(frag.firstChild.nodeName, 'H2');
+		QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

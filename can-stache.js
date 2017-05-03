@@ -63,6 +63,9 @@ function stache(template){
 			textContentOnly: null
 
 		},
+
+		templates = {},
+
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
 		// given section and modify the section to use that renderer.
@@ -166,6 +169,9 @@ function stache(template){
 				state.namespaceStack.push(matchedNamespace);
 			}
 
+			// either add templates: {} here or check below and decorate
+			// walk up the stack/targetStack until you find the first node
+			// with a templates property, and add the popped renderer
 			state.node = {
 				tag: tagName,
 				children: [],
@@ -217,10 +223,16 @@ function stache(template){
 			}
 
 			var isCustomTag = viewCallbacks.tag(tagName),
+
 				renderer;
 
+
 			if( isCustomTag ) {
+
 				renderer = section.endSubSectionAndReturnRenderer();
+				// if(tagName === "can-template") {
+				// 	templates[tagName] = renderer;
+				// }
 			}
 			if(textContentOnlyTag[tagName]) {
 				section.last().add(state.textContentOnly.compile(copyState()));
@@ -229,15 +241,21 @@ function stache(template){
 
 			var oldNode = section.pop();
 			if( isCustomTag ) {
-				addAttributesCallback(oldNode, function(scope, options, parentNodeList){
-					viewCallbacks.tagHandler(this,tagName, {
-						scope: scope,
-						options: options,
-						subtemplate: renderer,
-						templateType: "stache",
-						parentNodeList: parentNodeList
+				if (tagName === "can-template") {
+					debugger;
+					section.removeCurrentNode();
+					templates[oldNode.attrs.name] = HTMLSectionBuilder.scopify(renderer);
+				} else {
+					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+						viewCallbacks.tagHandler(this,tagName, {
+							scope: scope,
+							options: options,
+							subtemplate: renderer,
+							templateType: "stache",
+							parentNodeList: parentNodeList
+						});
 					});
-				});
+				}
 			}
 			state.sectionElementStack.pop();
 		},
@@ -369,8 +387,9 @@ function stache(template){
 		},
 		done: function(){}
 	});
-
-	return section.compile();
+	var renderer = section.compile();
+	renderer.templates = templates;
+	return renderer;
 }
 
 // At this point, can.stache has been created

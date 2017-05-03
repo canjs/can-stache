@@ -34,6 +34,19 @@ var HTMLSectionBuilder = function(){
 	this.stack = [new HTMLSection()];
 };
 
+HTMLSectionBuilder.scopify = function(renderer) {
+		return Observation.ignore(function(scope, options, nodeList){
+			if ( !(scope instanceof Scope) ) {
+				scope = Scope.refsScope().add(scope || {});
+			}
+			if ( !(options instanceof mustacheCore.Options) ) {
+				options = new mustacheCore.Options(options || {});
+			}
+			return renderer(scope, options, nodeList);
+		});
+};
+
+
 assign(HTMLSectionBuilder.prototype,utils.mixins);
 
 assign(HTMLSectionBuilder.prototype,{
@@ -86,6 +99,9 @@ assign(HTMLSectionBuilder.prototype,{
 	},
 	pop: function(){
 		return this.last().pop();
+	},
+	removeCurrentNode: function() {
+		this.last().removeCurrentNode();
 	}
 });
 
@@ -135,6 +151,11 @@ assign(HTMLSection.prototype,{
 		}
 		this.targetStack = this.targetData = null;
 		return this.compiled;
+	},
+	removeCurrentNode: function() {
+		var children = this.children();
+		debugger;
+		return children.pop();
 	},
 	children: function(){
 		if(this.targetStack.length) {
