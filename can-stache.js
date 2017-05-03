@@ -200,7 +200,8 @@ function stache(template){
 
 				state.sectionElementStack.push({
 					type: isCustomTag ? "custom" : null,
-					tag: isCustomTag ? null : tagName
+					tag: isCustomTag ? null : tagName,
+					templates: {}
 				});
 
 				// If it's a custom tag with content, we need a section renderer.
@@ -242,17 +243,20 @@ function stache(template){
 			var oldNode = section.pop();
 			if( isCustomTag ) {
 				if (tagName === "can-template") {
-					debugger;
 					section.removeCurrentNode();
-					templates[oldNode.attrs.name] = HTMLSectionBuilder.scopify(renderer);
+
+					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
+					parent.templates[oldNode.attrs.name] = HTMLSectionBuilder.scopify(renderer);
 				} else {
+					var current = state.sectionElementStack[state.sectionElementStack.length - 1]
 					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
 							subtemplate: renderer,
 							templateType: "stache",
-							parentNodeList: parentNodeList
+							parentNodeList: parentNodeList,
+							templates: current.templates
 						});
 					});
 				}
@@ -387,9 +391,8 @@ function stache(template){
 		},
 		done: function(){}
 	});
-	var renderer = section.compile();
-	renderer.templates = templates;
-	return renderer;
+
+	return section.compile();
 }
 
 // At this point, can.stache has been created
