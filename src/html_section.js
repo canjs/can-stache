@@ -154,7 +154,6 @@ assign(HTMLSection.prototype,{
 	},
 	removeCurrentNode: function() {
 		var children = this.children();
-		debugger;
 		return children.pop();
 	},
 	children: function(){

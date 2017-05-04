@@ -64,8 +64,6 @@ function stache(template){
 
 		},
 
-		templates = {},
-
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
 		// given section and modify the section to use that renderer.
@@ -224,17 +222,12 @@ function stache(template){
 			}
 
 			var isCustomTag = viewCallbacks.tag(tagName),
-
 				renderer;
 
-
 			if( isCustomTag ) {
-
 				renderer = section.endSubSectionAndReturnRenderer();
-				// if(tagName === "can-template") {
-				// 	templates[tagName] = renderer;
-				// }
 			}
+
 			if(textContentOnlyTag[tagName]) {
 				section.last().add(state.textContentOnly.compile(copyState()));
 				state.textContentOnly = null;
@@ -243,12 +236,11 @@ function stache(template){
 			var oldNode = section.pop();
 			if( isCustomTag ) {
 				if (tagName === "can-template") {
-					section.removeCurrentNode();
-
 					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
 					parent.templates[oldNode.attrs.name] = HTMLSectionBuilder.scopify(renderer);
+					section.removeCurrentNode();
 				} else {
-					var current = state.sectionElementStack[state.sectionElementStack.length - 1]
+					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
 					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
