@@ -15,7 +15,6 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var viewCallbacks = require('can-view-callbacks');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -5445,17 +5444,48 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("can-template works", function() {
-		var template = stache( '<my-email>' +
-			'<can-template name="subject"><h2>{{subject}}</h2></can-template>' +
-			'<can-template name="body">' +
-			'<input {$value}="body"/>' +
-			'</can-template>' +
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H2');
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
 			'</my-email>');
+
 		var frag = template({});
 		QUnit.equal(frag.firstChild.childNodes.length, 0);
-		frag = template.templates.subject({subject: "Hello"});
-		QUnit.equal(frag.firstChild.nodeName, 'H2');
-		QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+	});
+
+	test("can-template works with multiple can-templates of the same name", function() {
+		var count = 2;
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H' + count++);
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
+			'</my-email>' +
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h3>{{subject}}</h3>' +
+				'</can-template>' +
+			'</my-email>');
+
+
+		var frag = template({});
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
