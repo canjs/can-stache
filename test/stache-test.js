@@ -5464,8 +5464,8 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("can-template works with multiple can-templates of the same name", function() {
-		var count = 2, frag;
-
+		var count = 2,
+			frag;
 
 		var template = stache(
 			'<my-email>' +
