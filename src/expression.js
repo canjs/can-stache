@@ -55,10 +55,11 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 				return scope.get(""+keyValue, readOptions);
 			}
 		});
+		compute.temporarilyBind(c);
 		return c;
 	},
 	getObservableValue_fromDynamicKey_fromObservable = function(key, root, helperOptions, readOptions){
-		return compute(function(newVal) {
+		var computeValue = compute(function(newVal) {
 			var keyValue = canReflect.getValue(key);
 			var rootValue = canReflect.getValue(root);
 			if (arguments.length) {
@@ -68,6 +69,8 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 				return observeReader.get(rootValue, "" + keyValue);
 			}
 		});
+		compute.temporarilyBind(computeValue);
+		return computeValue;
 	},
 	// If not a Literal or an Arg, convert to an arg for caching.
 	convertToArgExpression = function(expr){
@@ -244,7 +247,7 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 	var getArgs = this.args(scope, helperScope);
 
-	return compute(function(newVal){
+	var computeValue = compute(function(newVal){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
@@ -263,7 +266,8 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 		}
 
 	});
-
+	compute.temporarilyBind(computeValue);
+	return computeValue;
 };
 
 // ### HelperLookup
@@ -286,7 +290,7 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return getObservableValue_fromKey(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]});
+	return getObservableValue_fromKey(this.key, scope, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]});
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -448,7 +452,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	}
 
 	var fn = this.evaluator(helper, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-
+	
 	var computeValue = compute(fn);
 
 	compute.temporarilyBind(computeValue);

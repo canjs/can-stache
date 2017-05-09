@@ -129,7 +129,7 @@ var core = {
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
-
+				
 				if(typeof finalValue === "function") {
 					return finalValue;
 				}
@@ -184,7 +184,7 @@ var core = {
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
-					var newContext = exprData.argExprs[0].value(scope, options)();
+					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope, options) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
 						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
@@ -328,6 +328,8 @@ var core = {
 			} else {
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}
+
+
 
 			if(observable instanceof Observation) {
 				observable.compute._primaryDepth = nodeList.nesting;

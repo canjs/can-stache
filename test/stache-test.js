@@ -1113,7 +1113,7 @@ function makeTest(name, doc, mutation) {
 		ul.appendChild(compiled);
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
-
+		
 		obs.attr('items', [{
 			name: 'foo'
 		}]);
@@ -2768,7 +2768,7 @@ function makeTest(name, doc, mutation) {
 	// TODO: duplicate with %
 	test("Rendering live bound indicies with #each, @index and a simple CanList", function () {
 		var list = new CanList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list

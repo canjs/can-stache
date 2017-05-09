@@ -49,7 +49,7 @@ assign(TextSectionBuilder.prototype,{
 			var value = canReflect.getValue(observation);
 			if( canReflect.valueHasDependencies( observation ) ) {
 				if(state.textContentOnly) {
-					live.text(this, computeValue);
+					live.text(this, observation);
 				}
 				else if(state.attr) {
 					live.attr(this, state.attr, observation);
