@@ -254,7 +254,7 @@ var core = {
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
@@ -276,6 +276,10 @@ var core = {
 
 			return res == null ? "" : ""+res;
 		};
+
+		branchRenderer.exprData = exprData;
+
+		return branchRenderer;
 	},
 	// ## mustacheCore.makeLiveBindingBranchRenderer
 	// Return a renderer function that evaluates the mustache expression and
@@ -300,7 +304,7 @@ var core = {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
 
 			var nodeList = [this];
 			nodeList.expression = expressionString;
@@ -392,6 +396,10 @@ var core = {
 			// Unbind the compute.
 			canReflect.offValue(observable, k);
 		};
+
+		branchRenderer.exprData = exprData;
+
+		return branchRenderer;
 	},
 	// ## mustacheCore.splitModeFromExpression
 	// Returns the mustache mode split from the rest of the expression.

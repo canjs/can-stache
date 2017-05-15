@@ -52,7 +52,9 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 			if (arguments.length) {
 				scope.set(""+keyValue, newVal, readOptions);
 			} else {
-				return scope.get(""+keyValue, readOptions);
+				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
+				// also escape `.` so that things like ["bar.baz"] will work correctly
+				return scope.get(("" + keyValue).replace(".", "\\."), readOptions);
 			}
 		});
 		compute.temporarilyBind(c);
@@ -66,7 +68,8 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 				observeReader.write(rootValue, observeReader.reads(""+keyValue), newVal);
 			} else {
 				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				return observeReader.get(rootValue, "" + keyValue);
+				// also escape `.` so that things like ["bar.baz"] will work correctly
+				return observeReader.get(rootValue, ("" + keyValue).replace(".", "\\."));
 			}
 		});
 		compute.temporarilyBind(computeValue);
@@ -270,6 +273,10 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	return computeValue;
 };
 
+Call.prototype.closingTag = function() {
+	return this.methodExpr.key.slice(1);
+};
+
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
 // Any functions found prior to the last one are called with
@@ -462,6 +469,10 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	} else {
 		return computeValue;
 	}
+};
+
+Helper.prototype.closingTag = function() {
+	return this.methodExpr.key;
 };
 
 

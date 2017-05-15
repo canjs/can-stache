@@ -24,7 +24,6 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-
 	if (value && value[canSymbol.for("can.getValue")]) {
 		return canReflect.getValue(value);
 	} else {
@@ -152,7 +151,7 @@ var helpers = {
 		var value;
 		// if it's a function, wrap its value in a compute
 		// that will only change values from true to false
-		if (isFunction(expr)) {
+		if (expr && expr.isComputed) {
 			value = compute.truthy(expr)();
 		} else {
 			value = !! resolve(expr);
