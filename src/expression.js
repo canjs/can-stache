@@ -169,7 +169,7 @@ var ScopeLookup = function(key, root) {
 };
 ScopeLookup.prototype.value = function(scope, helperOptions){
 	if (this.rootExpr) {
-		return getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {}).value;
+		return getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {});
 	}
 
 	return getObservableValue_fromKey(this.key, scope, helperOptions);
