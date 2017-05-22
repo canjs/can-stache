@@ -13,6 +13,7 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
+var dev = require('can-util/js/dev/dev');
 
 
 var domData = require('can-util/dom/data/data');
@@ -285,6 +286,12 @@ var helpers = {
 helpers.eachOf = helpers.each;
 
 var registerHelper = function(name, callback){
+	//!steal-remove-start
+	if (helpers[name]) {
+		dev.warn('The helper ' + name + ' has already been registered.');
+	}
+	//!steal-remove-end
+
 	helpers[name] = callback;
 };
 
