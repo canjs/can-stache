@@ -165,6 +165,20 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
+
+		var oldWarn = canDev.warn;
+		canDev.warn = function() {
+			ok(true, "received warning");
+		};
+
+		stache.registerHelper('foobar', function() {});
+		stache.registerHelper('foobar', function() {});
+
+		canDev.warn = oldWarn;
+
+	});
+
 	/*test("attribute sections", function(){
 	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
 
