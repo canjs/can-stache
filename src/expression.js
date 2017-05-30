@@ -407,6 +407,10 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 		helpers: helperOptions
 	});
 
+	if (!truthyRenderer) {
+		delete helperOptionArg.fn;
+	}
+
 	args.push(helperOptionArg);
 	// Call the helper.
 	return function () {
