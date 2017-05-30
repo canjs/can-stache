@@ -37,7 +37,7 @@
     "can-compute": "^3.1.0-pre.2",
     "can-namespace": "1.0.0",
     "can-observation": "^3.2.0-pre.7",
-    "can-reflect": "0.0.2",
+    "can-reflect": "0.0.3",
     "can-route": "^3.1.0-pre.1",
     "can-symbol": "0.0.3",
     "can-types": "^1.0.1",
@@ -45,16 +45,17 @@
     "can-view-callbacks": "^3.0.7-pre.1",
     "can-view-live": "^3.1.0-pre.1",
     "can-view-nodelist": "^3.0.2",
-    "can-view-parser": "^3.0.6",
+    "can-view-parser": "^3.2.0",
     "can-view-scope": "^3.2.0-pre.6",
     "can-view-target": "^3.0.4"
   },
   "devDependencies": {
+    "bit-docs": "0.0.7",
     "can-define": "^1.2.0-pre.1",
     "can-event": "^3.1.2",
-    "can-list": "^3.1.0-pre.1",
-    "can-map": "^3.1.0-pre.2",
-    "bit-docs": "0.0.7",
+    "can-list": "^3.1.0-pre.5",
+    "can-map": "^3.1.0-pre.7",
+    "can-vdom": "^3.0.1",
     "done-serve": "^0.2.5",
     "donejs-cli": "^0.9.5",
     "generator-donejs": "^0.9.6",
@@ -63,8 +64,7 @@
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.1",
-    "testee": "^0.3.0",
-    "can-vdom": "^3.0.1"
+    "testee": "^0.3.0"
   },
   "bit-docs": {
     "dependencies": {
