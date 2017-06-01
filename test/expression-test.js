@@ -331,7 +331,7 @@ test("convertKeyToLookup", function(){
 
 
 test("expression.ast - [] operator", function(){
-	/*deepEqual(expression.ast("['propName']"), {
+	deepEqual(expression.ast("['propName']"), {
 		type: "Bracket",
 		children: [{type: "Literal", value: "propName"}]
 	}, "['propName'] valid");
@@ -411,7 +411,7 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "foo"
 		}]
-	}, "eq foo[bar] foo valid");*/
+	}, "eq foo[bar] foo valid");
 
 	deepEqual(expression.ast("foo[bar][baz]"), {
 		type: "Bracket",
@@ -423,7 +423,7 @@ test("expression.ast - [] operator", function(){
 		children: [{type: "Lookup", key: "baz"}]
 	}, "foo[bar][baz] valid");
 
-	/*deepEqual(expression.ast("foo[bar].baz"), {
+	deepEqual(expression.ast("foo[bar].baz"), {
 		type: "Lookup",
 		key: "baz",
 		root: {
@@ -452,7 +452,7 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "xyz"
 		}]
-	}, "eq foo[bar].baz xyz");*/
+	}, "eq foo[bar].baz xyz");
 });
 
 test("expression.parse - [] operator", function(){
