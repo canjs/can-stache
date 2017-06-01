@@ -165,6 +165,25 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("helperOptions.fn and helperOptions.inverse included with section helpers but not inline helpers", 4, function() {
+
+		var inlineHelper = stache("{{inlineHelper}} {{#sectionHelper}}section helper called{{/sectionHelper}}");
+
+		inlineHelper({}, {
+			inlineHelper: function (helperOptions) {
+				console.log('inline helper');
+				ok(helperOptions.fn === undefined);
+				ok(helperOptions.inverse() === undefined);
+			},
+			sectionHelper: function (helperOptions) {
+				console.log('section helper');
+				ok(helperOptions.fn() !== undefined);
+				ok(helperOptions.inverse() === undefined);
+			}
+		});
+
+	});
+
 	test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
 
 		var oldWarn = canDev.warn;
