@@ -4475,7 +4475,6 @@ function makeTest(name, doc, mutation) {
 		var list = new CanList(["a","b"]);
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
-		debugger;
 		list.replace([]);
 		var spans = frag.firstChild.getElementsByTagName("span");
 		var labels = frag.firstChild.getElementsByTagName("label");
@@ -5064,7 +5063,6 @@ function makeTest(name, doc, mutation) {
 		});
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
 		var items = new CanList(["one","two"]);
-debugger;
 		var frag = template(items);
 		var lis = frag.firstChild.getElementsByTagName("li");
 
