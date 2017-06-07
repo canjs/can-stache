@@ -35,7 +35,7 @@ assign(TextSectionBuilder.prototype,{
 
 		var renderer = this.stack[0].compile();
 
-		return function(scope, options){
+		return function(scope, options, nodeList){
 
 			var computeValue = compute(function(){
 				return renderer(scope, options);
@@ -48,7 +48,7 @@ assign(TextSectionBuilder.prototype,{
 					live.text(this, computeValue);
 				}
 				else if(state.attr) {
-					live.attr(this, state.attr, computeValue);
+					live.attr(this, state.attr, computeValue, nodeList);
 				}
 				else {
 					live.attrs(this, computeValue, scope, options);
