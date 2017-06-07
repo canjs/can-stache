@@ -67,18 +67,15 @@ test("Using #each on a DefineMap", function(assert){
 	assert.equal(third.nextSibling.nodeValue, "qux");
 });
 
-QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function () {
-	var template = stache('<p>{{#iter}}<span>{{@index}}</span>{{/iter}}</p> '+
-	  					   '<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
+QUnit.test("{{%index}} work with {{#key}} iteration", function () {
+	var template = stache('<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
 	var div = document.createElement('div');
 	var dom = template({iter: new DefineList(['hey', 'there'])});
 	div.appendChild(dom);
 
 	var span = div.getElementsByTagName('span');
-	equal((span[0].innerHTML), '0', 'iteration for @index');
+	equal((span[0].innerHTML), '0', 'iteration for %index');
 	equal((span[1].innerHTML), '1', 'iteration for %index');
-	equal((span[2].innerHTML), '0', 'iteration for %index');
-	equal((span[3].innerHTML), '1', 'iteration for %index');
 });
 
 QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){

@@ -93,8 +93,7 @@ module.exports = {
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {
-				"%index": i,
-				"@index": i
+				"%index": i
 			};
 			var item = isObservable ? compute(items, '' + i) :items[i];
 

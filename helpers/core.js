@@ -74,8 +74,7 @@ var helpers = {
 
 				var cb = function (item, index, parentNodeList) {
 					var aliases = {
-						"%index": index,
-						"@index": index
+						"%index": index
 					};
 
 					if (asVariable) {
@@ -117,8 +116,7 @@ var helpers = {
 			(expr.forEach || expr.each).call(expr, function(val, key){
 				var value = compute(expr, key);
 				aliases = {
-					"%key": key,
-					"@key": key
+					"%key": key
 				};
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
@@ -132,8 +130,7 @@ var helpers = {
 			result = [];
 			for (key in expr) {
 				aliases = {
-					"%key": key,
-					"@key": key
+					"%key": key
 				};
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
@@ -143,12 +140,12 @@ var helpers = {
 			return options.stringOnly ? result.join('') : result;
 		}
 	},
-	"@index": function(offset, options) {
+	"%index": function(offset, options) {
 		if (!options) {
 			options = offset;
 			offset = 0;
 		}
-		var index = options.scope.peek("@index");
+		var index = options.scope.peek("%index");
 		return ""+((isFunction(index) ? index() : index) + offset);
 	},
 	'if': function (expr, options) {

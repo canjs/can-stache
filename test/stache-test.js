@@ -2736,9 +2736,8 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	// TODO: duplicate with %
-	test("Rendering indicies of an array with @index", function () {
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+	test("Rendering indicies of an array with %index", function () {
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2750,9 +2749,9 @@ function makeTest(name, doc, mutation) {
 			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
 		}
 	});
-	// TODO: duplicate with %
-	test("Rendering indicies of an array with @index + offset (#1078)", function () {
-		var template = stache("<ul>{{#each list}}<li>{{@index 5}} {{.}}</li>{{/each}}</ul>");
+
+	test("Rendering indicies of an array with %index + offset (#1078)", function () {
+		var template = stache("<ul>{{#each list}}<li>{{%index 5}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2765,9 +2764,8 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	// TODO: duplicate with %
 	test("Passing indices into helpers as values", function () {
-		var template = stache("<ul>{{#each list}}<li>{{test @index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{test %index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2783,10 +2781,9 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	// TODO: duplicate with %
-	test("Rendering live bound indicies with #each, @index and a simple CanList", function () {
+	test("Rendering live bound indicies with #each, %index and a simple CanList", function () {
 		var list = new CanList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -2830,8 +2827,8 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), '2 e', "fifth item now the 3rd item");
 	});
 
-	test('Rendering keys of an object with #each and @key', function () {
-		var template = stache("<ul>{{#each obj}}<li>{{@key}} {{.}}</li>{{/each}}</ul>");
+	test('Rendering keys of an object with #each and %key', function () {
+		var template = stache("<ul>{{#each obj}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
 		var obj = {
 			foo: 'string',
 			bar: 1,
@@ -2850,9 +2847,9 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 	});
 
-	test('Live bound iteration of keys of a CanMap with #each and @key', function () {
+	test('Live bound iteration of keys of a CanMap with #each and %key', function () {
 		// delete stache._helpers.foo;
-		var template = stache("<ul>{{#each map}}<li>{{@key}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each map}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
 		var map = new CanMap({
 			foo: 'string',
 			bar: 1,
@@ -2970,9 +2967,9 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('@index is correctly calculated when there are identical elements in the array', function () {
+	test('%index is correctly calculated when there are identical elements in the array', function () {
 		var data = new CanList(['foo', 'bar', 'baz', 'qux', 'foo']);
-		var tmp = stache('{{#each data}}{{@index}} {{/each}}');
+		var tmp = stache('{{#each data}}{{%index}} {{/each}}');
 
 		var div = doc.createElement('div');
 		var frag = tmp({
@@ -3015,9 +3012,9 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple CanList when remove first item (#613)", function () {
+	test("Rendering live bound indicies with #each, %index and a simple CanList when remove first item (#613)", function () {
 		var list = new CanList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -3154,11 +3151,11 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('Rendering keys of an object with #each and @key in a Component', function () {
+	test('Rendering keys of an object with #each and %key in a Component', function () {
 
 		var template = stache("<ul>" +
 		"{{#each data}}" +
-		"<li>{{@key}} : {{.}}</li>" +
+		"<li>{{%key}} : {{.}}</li>" +
 		"{{/data}}" +
 		"</ul>");
 
@@ -3388,7 +3385,7 @@ function makeTest(name, doc, mutation) {
 		}, 10);
 	});
 
-	test("@index in partials loaded from script templates", function () {
+	test("%index in partials loaded from script templates", function () {
 
 		if (doc === window.document) {
 			// add template as script
@@ -4554,7 +4551,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple CanList (#2067)", function () {
+	test("Rendering live bound indicies with #each, %index and a simple CanList (#2067)", function () {
 		var list = new CanList([{value:'a'}, {value:'b'}, {value: 'c'}]);
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{value}}</li>{{/each}}</ul>");
 
@@ -4614,12 +4611,12 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
 	});
 
-	test("keep @index working with multi-dimensional arrays (#2127)", function() {
+	test("keep %index working with multi-dimensional arrays (#2127)", function() {
 		var data = new CanMap({
 			array2 : [['asd'], ['sdf']]
 		});
 
-		var template = stache('<div>{{#each array2}}<span>{{@index}}</span>{{/each}}</div>');
+		var template = stache('<div>{{#each array2}}<span>{{%index}}</span>{{/each}}</div>');
 
 		var frag = template(data);
 

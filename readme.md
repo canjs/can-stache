@@ -32,10 +32,10 @@ Live binding handlebars templates
       - <code>[{{#helper}}BLOCK{{else}}INVERSE{{/helper}}](#helperblockelseinversehelper)</code>
       - <code>[{{helper [args...] [hashProperty=hashValue...]}}](#helper-args-hashpropertyhashvalue)</code>
       - <code>[{{#if key}}BLOCK{{/if}}](#if-keyblockif)</code>
-      - <code>[{{@index [offset]}}](#index-offset)</code>
+      - <code>[{{%index [offset]}}](#index-offset)</code>
       - <code>[{{#is expr...}}BLOCK{{/is}}](#is-exprblockis)</code>
       - <code>[{{joinBase expr}}](#joinbase-expr)</code>
-      - <code>[{{@key}}](#key)</code>
+      - <code>[{{%key}}](#key)</code>
       - <code>[{{#log [message]}}](#log-message)</code>
       - <code>[{{#routeCurrent hashes}}SUBEXPRESSION{{/routeCurrent}}](#routecurrent-hashessubexpressionroutecurrent)</code>
       - <code>[routeCurrent([hashes])](#routecurrenthashes)</code>
@@ -649,7 +649,7 @@ Renders the `BLOCK` template within the current template.
   current context and its value is returned; otherwise, an empty string.
   
 
-#### <code>{{@index [offset]}}</code>
+#### <code>{{%index [offset]}}</code>
 
 
 Insert the index of an Array or [can-list] we are iterating on with [#each](can-stache.helpers.each)
@@ -692,7 +692,7 @@ Return an application-relative url for a resource.
   An application-relative url.
   
 
-#### <code>{{@key}}</code>
+#### <code>{{%key}}</code>
 
 
 Insert the property name of an Object or attribute name of a can.Map that we iterate over with [#each](can.stache.helpers.each)
