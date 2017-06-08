@@ -836,7 +836,7 @@ var expression = {
 				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 
 				// if we had `foo().bar`, we need to change to a Lookup that looks up from lastToken.
-				if(lastToken && lastToken.type === "Call" && isAddingToExpression(token)) {
+				if(lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket" ) && isAddingToExpression(token)) {
 					stack.replaceTopLastChildAndPush({
 						type: "Lookup",
 						root: lastToken,
@@ -903,7 +903,7 @@ var expression = {
 				top = stack.top();
 				lastToken = stack.topLastChild();
 
-				if (lastToken && lastToken.type === "Call") {
+				if (lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket"  )  ) {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					stack.replaceTopAndPush({type: "Bracket", root: top});
