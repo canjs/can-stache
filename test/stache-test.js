@@ -164,6 +164,24 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	if (System.env.indexOf('production') < 0) {
+
+		test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
+
+			var oldWarn = canDev.warn;
+			canDev.warn = function() {
+				ok(true, "received warning");
+			};
+
+			stache.registerHelper('foobar', function() {});
+			stache.registerHelper('foobar', function() {});
+
+			canDev.warn = oldWarn;
+
+		});
+
+	}
+
 	/*test("attribute sections", function(){
 	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
 
@@ -1112,7 +1130,7 @@ function makeTest(name, doc, mutation) {
 		ul.appendChild(compiled);
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
-
+		
 		obs.attr('items', [{
 			name: 'foo'
 		}]);
@@ -2767,7 +2785,7 @@ function makeTest(name, doc, mutation) {
 	// TODO: duplicate with %
 	test("Rendering live bound indicies with #each, @index and a simple CanList", function () {
 		var list = new CanList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -4440,7 +4458,7 @@ function makeTest(name, doc, mutation) {
 		var oldIs = stache.getHelper('is').fn;
 
 		stache.registerHelper('is', function() {
-			ok(true, 'comparator invoked');
+			ok(true, 'comparator invoked only once during setup');
 			return oldIs.apply(this, arguments);
 		});
 
@@ -4448,7 +4466,6 @@ function makeTest(name, doc, mutation) {
 		b = canCompute(0);
 
 		stache('{{eq a b}}')({ a: a, b: b });
-
 		canBatch.start();
 		a(1);
 		b(1);
@@ -4462,7 +4479,9 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
 		list.replace([]);
+		var spans = frag.firstChild.getElementsByTagName("span");
 		var labels = frag.firstChild.getElementsByTagName("label");
+		equal(spans.length, 0, "truthy case doesn't render");
 		equal(labels.length, 1, "empty case");
 	});
 
@@ -5047,7 +5066,6 @@ function makeTest(name, doc, mutation) {
 		});
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
 		var items = new CanList(["one","two"]);
-
 		var frag = template(items);
 		var lis = frag.firstChild.getElementsByTagName("li");
 

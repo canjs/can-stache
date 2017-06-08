@@ -13,6 +13,9 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
+var dev = require('can-util/js/dev/dev');
+var canSymbol = require("can-symbol");
+var canReflect = require("can-reflect");
 
 
 var domData = require('can-util/dom/data/data');
@@ -22,8 +25,8 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (value && value.isComputed) {
-		return value();
+	if (value && value[canSymbol.for("can.isValueLike")] && value[canSymbol.for("can.getValue")]) {
+		return canReflect.getValue(value);
 	} else {
 		return value;
 	}
@@ -31,12 +34,7 @@ var resolve = function (value) {
 var resolveHash = function(hash){
 	var params = {};
 	for(var prop in hash) {
-		var value = hash[prop];
-		if(value && value.isComputed) {
-			params[prop] = value();
-		} else {
-			params[prop] = value;
-		}
+		params[prop] = resolve(hash[prop]);
 	}
 	return params;
 };
@@ -285,6 +283,12 @@ var helpers = {
 helpers.eachOf = helpers.each;
 
 var registerHelper = function(name, callback){
+	//!steal-remove-start
+	if (helpers[name]) {
+		dev.warn('The helper ' + name + ' has already been registered.');
+	}
+	//!steal-remove-end
+
 	helpers[name] = callback;
 };
 

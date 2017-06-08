@@ -4,7 +4,9 @@ var each = require('can-util/js/each/each');
 var Scope = require('can-view-scope');
 var canCompute = require('can-compute');
 var CanMap = require('can-map');
+var CanList = require("can-list");
 var helpers = require('../helpers/converter');
+var canReflect = require("can-reflect");
 
 QUnit.module("can-stache/src/expression");
 
@@ -224,18 +226,19 @@ test("expression.Helper:value non-observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}),  {});
 
-	equal(result, "marshall thompson");
+	equal(expression.toComputeOrValue(result), "marshall thompson");
 });
 
 test("expression.Helper:value observable values", function(){
 	// {{fullName first 'thompson'}}
-
-	var scope = new Scope({
+	var obj = {
 		fullName: function(first, last){
+			QUnit.equal(this, obj, "this is right");
 			return first()+" "+last;
 		},
 		first: canCompute("marshall")
-	});
+	};
+	var scope = new Scope(obj);
 
 	var callFullName = new expression.Helper(
 		new expression.HelperLookup("fullName"),
@@ -287,13 +290,12 @@ test("methods don't update correctly (#1891)", function(){
 	var num2Expression = new expression.Lookup("num2");
 	var num2 = num2Expression.value( scope, new Scope({}), {asCompute: true} );
 
-	num2.bind("change", function(ev, newVal){
+	canReflect.onValue(num2,function(){});
 
-	});
 
 	map.runTest();
 
-	equal( num2(), 4, "num2 updated correctly");
+	equal( canReflect.getValue( num2 ) , 4, "num2 updated correctly");
 
 });
 
@@ -498,7 +500,7 @@ test("expression.parse - [] operator", function(){
 		"foo()[bar]"
 	);
 
-	exprData = expression.parse("foo[bar()]");
+	var exprData = expression.parse("foo[bar()]");
 	deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(
@@ -709,7 +711,7 @@ test("registerConverter helpers push and pull multiple values", function () {
 
 	var data = new CanMap({
 		observeVal: 4,
-		list: [1,2,3]
+		list: new CanList([1,2,3])
 	});
 	var scope = new Scope( data );
 	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
@@ -802,5 +804,58 @@ test("Helper with a ~ key operator (#112)", function() {
 	};
 
 	QUnit.deepEqual(ast, expected);
+
+});
+
+test("ast with [double][brackets] or [bracket].prop (#207)", function(){
+
+	var ast = expression.ast("test['foo'][0]");
+
+	var expected = {
+		type: "Bracket",
+		children: [{type: "Literal", value: 0}],
+		root: {
+			type: "Bracket",
+			children: [{type: "Literal", value: 'foo'}],
+			root: {type: "Lookup", key: "test"}
+		}
+	};
+
+	QUnit.deepEqual(ast, expected);
+
+	ast = expression.ast("test['foo'].zed");
+
+	expected = {
+		type: "Lookup",
+		key: "zed",
+		root: {
+			type: "Bracket",
+			children: [{type: "Literal", value: 'foo'}],
+			root: {type: "Lookup", key: "test"}
+		}
+	};
+
+
+	QUnit.deepEqual(ast, expected);
+
+	ast = expression.ast("test['foo'].zed['bar']");
+
+	expected = {
+		type: "Bracket",
+		children: [{type: "Literal", value: 'bar'}],
+		root: {
+			type: "Lookup",
+			key: "zed",
+			root: {
+				type: "Bracket",
+				children: [{type: "Literal", value: 'foo'}],
+				root: {type: "Lookup", key: "test"}
+			}
+		}
+	};
+
+
+	QUnit.deepEqual(ast, expected);
+
 
 });

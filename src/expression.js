@@ -9,73 +9,71 @@ var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var dev = require('can-util/js/dev/dev');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
+var canReflect = require("can-reflect");
+var canSymbol = require("can-symbol");
 // ## Helpers
 
 // Helper for getting a bound compute in the scope.
-var getKeyComputeData = function (key, scope, readOptions) {
+var getObservableValue_fromKey = function (key, scope, readOptions) {
 
 		var data = scope.computeData(key, readOptions);
 
-		compute.temporarilyBind(data.compute);
+		compute.temporarilyBind(data);
 
 		return data;
 	},
-	// Looks up a value in the scope and returns a compute if the value is
-	// observable and the value if not.
-	lookupValue = function(key, scope, helperOptions, readOptions){
-		var prop = getValueOfComputeOrFunction(key);
-		var computeData = getKeyComputeData(prop, scope, readOptions);
-		// If there are no dependencies, just return the value.
-		if (!computeData.compute.computeInstance.hasDependencies) {
-			return {value: computeData.initialValue, computeData: computeData};
-		} else {
-			return {value: computeData.compute, computeData: computeData};
-		}
+	computeHasDependencies = function(compute){
+		return compute[canSymbol.for("can.valueHasDependencies")] ?
+			canReflect.valueHasDependencies(compute) : compute.computeInstance.hasDependencies;
 	},
 	// Looks up a value in the scope, and if it is `undefined`, looks up
 	// the value as a helper.
 	lookupValueOrHelper = function(key, scope, helperOptions, readOptions){
-		var res = lookupValue(key, scope, helperOptions, readOptions);
+		var scopeKeyData = getObservableValue_fromKey(key, scope, readOptions);
 
+		var result = {value: scopeKeyData};
 		// If it doesn't look like a helper and there is no value, check helpers
 		// anyway. This is for when foo is a helper in `{{foo}}`.
-		if( res.computeData.initialValue === undefined ) {
+		if( scopeKeyData.initialValue === undefined ) {
 			if(key.charAt(0) === "@" && key !== "@index") {
 				key = key.substr(1);
 			}
 			var helper = mustacheHelpers.getHelper(key, helperOptions);
-			res.helper = helper && helper.fn;
+			result.helper = helper && helper.fn;
 		}
-		return res;
+		return result;
 	},
-	// Looks up a value in the result of a Lookup or Call expression
-	lookupValueInResult = function(keyOrCompute, lookupOrCall, scope, helperOptions, readOptions) {
-		var result = lookupOrCall.value(scope, {}, {});
+
+	// A dynamic key value to lookup from the scope
+	getObservableValue_fromDynamicKey = function(key, scope, helperOptions, readOptions){
 
 		var c = compute(function(newVal) {
-			var key = getValueOfComputeOrFunction(keyOrCompute);
+			var keyValue = canReflect.getValue(key);
 			if (arguments.length) {
-				observeReader.write(result, observeReader.reads(key), newVal);
+				scope.set(""+keyValue, newVal, readOptions);
 			} else {
 				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
 				// also escape `.` so that things like ["bar.baz"] will work correctly
-				return observeReader.get(result, ("" + key).replace(".", "\\."));
+				return scope.get(("" + keyValue).replace(".", "\\."), readOptions);
 			}
 		});
-
-		return { value: c };
+		compute.temporarilyBind(c);
+		return c;
 	},
-	// gets the value of a compute or function
-	getValueOfComputeOrFunction = function (computeOrFunction) {
-		if (typeof computeOrFunction.value === 'function') {
-			return computeOrFunction.value();
-		}
-
-		if (typeof computeOrFunction === 'function') {
-			return computeOrFunction();
-		}
-
-		return computeOrFunction;
+	getObservableValue_fromDynamicKey_fromObservable = function(key, root, helperOptions, readOptions){
+		var computeValue = compute(function(newVal) {
+			var keyValue = canReflect.getValue(key);
+			var rootValue = canReflect.getValue(root);
+			if (arguments.length) {
+				observeReader.write(rootValue, observeReader.reads(""+keyValue), newVal);
+			} else {
+				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
+				// also escape `.` so that things like ["bar.baz"] will work correctly
+				return observeReader.get(rootValue, ("" + keyValue).replace(".", "\\."));
+			}
+		});
+		compute.temporarilyBind(computeValue);
+		return computeValue;
 	},
 	// If not a Literal or an Arg, convert to an arg for caching.
 	convertToArgExpression = function(expr){
@@ -85,6 +83,35 @@ var getKeyComputeData = function (key, scope, readOptions) {
 			return expr;
 		}
 
+	},
+	toComputeOrValue = function(value) {
+		// convert to non observable value
+		if(canReflect.isObservableLike(value)) {
+			// we only want to do this for things that `should` have dependencies, but dont.
+
+			if(canReflect.valueHasDependencies(value) === false) {
+				return canReflect.getValue(value);
+			}
+			// if compute data
+			if(value.compute) {
+				return value.compute;
+			}
+		}
+		return value;
+	},
+	// try to make it a compute no matter what.  This is useful for
+	// ~ operator.
+	toCompute = function(value) {
+		if(value) {
+
+			if(value.isComputed) {
+				return value;
+			}
+			if(value.compute) {
+				return value.compute;
+			}
+		}
+		return value;
 	};
 
 // ## Expression Types
@@ -97,20 +124,12 @@ var Bracket = function (key, root) {
 	this.root = root;
 	this.key = key;
 };
-Bracket.prototype.value = function (scope) {
-	var prop = this.key;
-	var obj = this.root;
+Bracket.prototype.value = function (scope, helpers) {
 
-	if (prop instanceof Lookup) {
-		prop = lookupValue(prop.key, scope, {}, {}).value;
-	} else if (prop instanceof Call) {
-		prop = prop.value(scope, {}, {});
-	}
-
-	if (!obj) {
-		return lookupValue(prop, scope, {}, {}).value;
+	if(!this.root) {
+		return getObservableValue_fromDynamicKey(this.key.value(scope, helpers), scope, {}, {});
 	} else {
-		return lookupValueInResult(prop, obj, scope, {}, {}).value;
+		return getObservableValue_fromDynamicKey_fromObservable(this.key.value(scope, helpers), this.root.value(scope, helpers), scope, helpers, {});
 	}
 };
 
@@ -131,16 +150,15 @@ var Lookup = function(key, root) {
 	this.rootExpr = root;
 };
 Lookup.prototype.value = function(scope, helperOptions){
-	var result = {};
 
 	if (this.rootExpr) {
-		result = lookupValueInResult(this.key, this.rootExpr, scope, {}, {});
+		return getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {});
 	} else {
-		result = lookupValueOrHelper(this.key, scope, helperOptions);
+		// TODO: remove this.  This is hacky.
+		var result = lookupValueOrHelper(this.key, scope, helperOptions);
+		this.isHelper = result.helper && !result.helper.callAsMethod;
+		return result.helper || result.value;
 	}
-	// TODO: remove this.  This is hacky.
-	this.isHelper = result.helper && !result.helper.callAsMethod;
-	return result.helper || result.value;
 };
 
 // ### ScopeLookup
@@ -151,10 +169,10 @@ var ScopeLookup = function(key, root) {
 };
 ScopeLookup.prototype.value = function(scope, helperOptions){
 	if (this.rootExpr) {
-		return lookupValueInResult(this.key, this.rootExpr, scope, {}, {}).value;
+		return getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {});
 	}
 
-	return lookupValue(this.key, scope, helperOptions).value;
+	return getObservableValue_fromKey(this.key, scope, helperOptions);
 };
 
 // ### Arg
@@ -183,14 +201,15 @@ Hashes.prototype.value = function(scope, helperOptions){
 			value = val.value.apply(val, arguments);
 
 		hash[prop] = {
-			call: value && value.isComputed && !val.modifiers.compute,
+			call: !val.modifiers || !val.modifiers.compute,
 			value: value
 		};
 	}
+	// TODO: replace with Compute
 	return compute(function(){
 		var finalHash = {};
 		for(var prop in hash) {
-			finalHash[prop] = hash[prop].call ? hash[prop].value() : hash[prop].value;
+			finalHash[prop] = hash[prop].call ? canReflect.getValue( hash[prop].value ) : toComputeOrValue( hash[prop].value );
 		}
 		return finalHash;
 	});
@@ -209,14 +228,15 @@ Call.prototype.args = function(scope, helperOptions){
 		var arg = this.argExprs[i];
 		var value = arg.value.apply(arg, arguments);
 		args.push({
-			call: value && value.isComputed && !arg.modifiers.compute,
+			// always do getValue unless compute is false
+			call: !arg.modifiers || !arg.modifiers.compute,
 			value: value
 		});
 	}
 	return function(){
 		var finalArgs = [];
 		for(var i = 0, len = args.length; i < len; i++) {
-			finalArgs[i] = args[i].call ? args[i].value() : args[i].value;
+			finalArgs[i] = args[i].call ? canReflect.getValue( args[i].value ) : toCompute( args[i].value );
 		}
 		return finalArgs;
 	};
@@ -230,11 +250,9 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 	var getArgs = this.args(scope, helperScope);
 
-	return compute(function(newVal){
-		var func = method;
-		if(func && func.isComputed) {
-			func = func();
-		}
+	var computeValue = compute(function(newVal){
+		var func = canReflect.getValue( method );
+
 		if(typeof func === "function") {
 			var args = getArgs();
 
@@ -251,7 +269,8 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 		}
 
 	});
-
+	compute.temporarilyBind(computeValue);
+	return computeValue;
 };
 
 Call.prototype.closingTag = function() {
@@ -278,11 +297,7 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return lookupValue(this.key, scope, helperOptions, {
-		callMethodsOnObservables: true,
-		isArgument: true,
-		args: [ scope.peek('.'), scope ]
-	}).value;
+	return getObservableValue_fromKey(this.key, scope, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]});
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -295,7 +310,8 @@ Helper.prototype.args = function(scope, helperOptions){
 	var args = [];
 	for(var i = 0, len = this.argExprs.length; i < len; i++) {
 		var arg = this.argExprs[i];
-		args.push( arg.value.apply(arg, arguments) );
+		// TODO: once we know the helper, we should be able to avoid compute conversion
+		args.push( toComputeOrValue( arg.value.apply(arg, arguments) ) );
 	}
 	return args;
 };
@@ -303,7 +319,8 @@ Helper.prototype.hash = function(scope, helperOptions){
 	var hash = {};
 	for(var prop in this.hashExprs) {
 		var val = this.hashExprs[prop];
-		hash[prop] = val.value.apply(val, arguments);
+		// TODO: once we know the helper, we should be able to avoid compute conversion
+		hash[prop] = toComputeOrValue( val.value.apply(val, arguments) );
 	}
 	return hash;
 };
@@ -315,7 +332,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	//{{foo bar}}
 	var looksLikeAHelper = this.argExprs.length || !isEmptyObject(this.hashExprs),
 		helper,
-		value,
+		computeData,
 		// If a literal, this means it should be treated as a key. But helpers work this way for some reason.
 		// TODO: fix parsing so numbers will also be assumed to be keys.
 		methodKey = this.methodExpr instanceof Literal ?
@@ -328,21 +345,38 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// Try to find a registered helper.
 		helper = mustacheHelpers.getHelper(methodKey, helperOptions);
 
-		// If a function is on top of the context, call that as a helper.
-		var context = scope.peek(".");
-		if(!helper && typeof context[methodKey] === "function") {
-			//!steal-remove-start
-			dev.warn('can-stache/src/expression.js: In 3.0, method "' + methodKey + '" will not be called as a helper, but as a method.');
-			//!steal-remove-end
-			helper = {fn: context[methodKey]};
-		}
-
 	}
 	if(!helper) {
-		args = this.args(scope, helperOptions);
+		// Try to find a value or function
+		computeData = getObservableValue_fromKey(methodKey, scope, {
+			isArgument: true
+		});
+		// if it's a function ... we need another compute that represents
+		// the call to that function
+		if(typeof computeData.initialValue === "function") {
+			args = this.args(scope, helperOptions).map(toComputeOrValue);
+			// TODO: this should be an observation.
+			var functionResult = compute(function(){
+
+				return computeData.initialValue.apply(null, args);
+			});
+			// TODO: probably don't need to bind
+			compute.temporarilyBind(functionResult);
+			return {
+				value: functionResult
+			};
+		}
+		// if it's some other value ..
+		else if(typeof computeData.initialValue !== "undefined") {
+			// we will use that
+			return {value: computeData};
+		}
+		// else value is undefined
+
+		/*args = this.args(scope, helperOptions);
 		// Get info about the compute that represents this lookup.
 		// This way, we can get the initial value without "reading" the compute.
-		var computeData = getKeyComputeData(methodKey, scope, {
+		var computeData = getObservableValue_fromKey(methodKey, scope, {
 			isArgument: false,
 			args: args && args.length ? args : [scope.peek('.'), scope]
 		}),
@@ -352,11 +386,11 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 
 		// Set name to be the compute if the compute reads observables,
 		// or the value of the value of the compute if no observables are found.
-		if(computeData.compute.computeInstance.hasDependencies) {
+		if( computeDataHasDependencies( computeData ) ) {
 			value = compute;
 		} else {
 			value = initialValue;
-		}
+		}*/
 
 		// If it doesn't look like a helper and there is no value, check helpers
 		// anyway. This is for when foo is a helper in `{{foo}}`.
@@ -367,7 +401,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	}
 
 	//!steal-remove-start
-	if ( !helper && initialValue === undefined) {
+	if ( !helper ) {
 		if(looksLikeAHelper) {
 			dev.warn('can-stache/src/expression.js: Unable to find helper "' + methodKey + '".');
 		} else {
@@ -377,7 +411,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	//!steal-remove-end
 
 	return {
-		value: value,
+		value: computeData,
 		args: args,
 		helper: helper && helper.fn
 	};
@@ -425,12 +459,12 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	}
 
 	var fn = this.evaluator(helper, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-
+	
 	var computeValue = compute(fn);
 
 	compute.temporarilyBind(computeValue);
 
-	if (!computeValue.computeInstance.hasDependencies) {
+	if (!computeHasDependencies( computeValue ) ) {
 		return computeValue();
 	} else {
 		return computeValue;
@@ -599,6 +633,7 @@ var convertToHelperIfTopIsLookup = function(stack){
 };
 
 var expression = {
+	toComputeOrValue: toComputeOrValue,
 	convertKeyToLookup: convertKeyToLookup,
 	Literal: Literal,
 	Lookup: Lookup,
@@ -801,7 +836,7 @@ var expression = {
 				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 
 				// if we had `foo().bar`, we need to change to a Lookup that looks up from lastToken.
-				if(lastToken && lastToken.type === "Call" && isAddingToExpression(token)) {
+				if(lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket" ) && isAddingToExpression(token)) {
 					stack.replaceTopLastChildAndPush({
 						type: "Lookup",
 						root: lastToken,
@@ -868,7 +903,7 @@ var expression = {
 				top = stack.top();
 				lastToken = stack.topLastChild();
 
-				if (lastToken && lastToken.type === "Call") {
+				if (lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket"  )  ) {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					stack.replaceTopAndPush({type: "Bracket", root: top});
