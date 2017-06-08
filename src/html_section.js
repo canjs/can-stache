@@ -34,19 +34,6 @@ var HTMLSectionBuilder = function(){
 	this.stack = [new HTMLSection()];
 };
 
-HTMLSectionBuilder.scopify = function(renderer) {
-		return Observation.ignore(function(scope, options, nodeList){
-			if ( !(scope instanceof Scope) ) {
-				scope = Scope.refsScope().add(scope || {});
-			}
-			if ( !(options instanceof mustacheCore.Options) ) {
-				options = new mustacheCore.Options(options || {});
-			}
-			return renderer(scope, options, nodeList);
-		});
-};
-
-
 assign(HTMLSectionBuilder.prototype,utils.mixins);
 
 assign(HTMLSectionBuilder.prototype,{

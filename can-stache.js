@@ -9,6 +9,7 @@ var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('./helpers/core');
 require('./helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
+var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
 
 var dev = require('can-util/js/dev/dev');
 var namespace = require('can-namespace');
@@ -237,7 +238,7 @@ function stache(template){
 			if( isCustomTag ) {
 				if (tagName === "can-template") {
 					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
-					parent.templates[oldNode.attrs.name] = HTMLSectionBuilder.scopify(renderer);
+					parent.templates[oldNode.attrs.name] = makeRendererConvertScopes(renderer);
 					section.removeCurrentNode();
 				} else {
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
