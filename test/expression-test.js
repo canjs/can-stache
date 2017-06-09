@@ -567,19 +567,22 @@ test("Bracket expression", function(){
 		new expression.Literal("bar.baz"),
 		new expression.Lookup("foo")
 	);
+	var state = new CanMap({foo: {"bar.baz": "name"}});
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: {"bar.baz": "name"}})
+			state
 		)
 	);
 	equal(compute(), "name");
+	compute('Curtis');
+	equal(state.attr("foo.bar\.baz"), "Curtis");
 
 	// foo[bar]
 	expr = new expression.Bracket(
 		new expression.Lookup("bar"),
 		new expression.Lookup("foo")
 	);
-	var state = new CanMap({foo: {name: "Kevin"}, bar: "name"});
+	state = new CanMap({foo: {name: "Kevin"}, bar: "name"});
 	compute = expr.value(
 		new Scope(
 			state
