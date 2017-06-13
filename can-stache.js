@@ -9,6 +9,7 @@ var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('./helpers/core');
 require('./helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
+var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
 
 var dev = require('can-util/js/dev/dev');
 var namespace = require('can-namespace');
@@ -63,6 +64,7 @@ function stache(template){
 			textContentOnly: null
 
 		},
+
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
 		// given section and modify the section to use that renderer.
@@ -166,6 +168,9 @@ function stache(template){
 				state.namespaceStack.push(matchedNamespace);
 			}
 
+			// either add templates: {} here or check below and decorate
+			// walk up the stack/targetStack until you find the first node
+			// with a templates property, and add the popped renderer
 			state.node = {
 				tag: tagName,
 				children: [],
@@ -194,7 +199,8 @@ function stache(template){
 
 				state.sectionElementStack.push({
 					type: isCustomTag ? "custom" : null,
-					tag: isCustomTag ? null : tagName
+					tag: isCustomTag ? null : tagName,
+					templates: {}
 				});
 
 				// If it's a custom tag with content, we need a section renderer.
@@ -222,6 +228,7 @@ function stache(template){
 			if( isCustomTag ) {
 				renderer = section.endSubSectionAndReturnRenderer();
 			}
+
 			if(textContentOnlyTag[tagName]) {
 				section.last().add(state.textContentOnly.compile(copyState()));
 				state.textContentOnly = null;
@@ -229,15 +236,26 @@ function stache(template){
 
 			var oldNode = section.pop();
 			if( isCustomTag ) {
-				addAttributesCallback(oldNode, function(scope, options, parentNodeList){
-					viewCallbacks.tagHandler(this,tagName, {
-						scope: scope,
-						options: options,
-						subtemplate: renderer,
-						templateType: "stache",
-						parentNodeList: parentNodeList
+				if (tagName === "can-template") {
+					// If we find a can-template we want to go back 2 in the stack to get it's inner content
+					// rather than the <can-template> element itself
+					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
+					parent.templates[oldNode.attrs.name] = makeRendererConvertScopes(renderer);
+					section.removeCurrentNode();
+				} else {
+					// Get the last element in the stack
+					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
+					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+						viewCallbacks.tagHandler(this,tagName, {
+							scope: scope,
+							options: options,
+							subtemplate: renderer,
+							templateType: "stache",
+							parentNodeList: parentNodeList,
+							templates: current.templates
+						});
 					});
-				});
+				}
 			}
 			state.sectionElementStack.pop();
 		},

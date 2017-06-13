@@ -63,15 +63,20 @@ module.exports = {
 			// prevent binding on fn.
 			// If a non-scope value is passed, add that to the parent scope.
 			if (newScope !== undefined && !(newScope instanceof Scope)) {
-				newScope = parentScope.add(newScope);
+				if (parentScope) {
+					newScope = parentScope.add(newScope);
+				}
+				else {
+					newScope = Scope.refsScope().add(newScope || {});
+				}
 			}
 			if (newOptions !== undefined && !(newOptions instanceof Options)) {
 				newOptions = parentOptions.add(newOptions);
 			}
-			var result = rendererWithScope(newScope, newOptions || parentOptions, parentNodeList|| nodeList );
+			var result = rendererWithScope(newScope, newOptions || parentOptions, parentNodeList || nodeList );
 			return result;
 		};
-		return observeObservables ?  convertedRenderer : Observation.ignore(convertedRenderer);
+		return observeObservables ? convertedRenderer : Observation.ignore(convertedRenderer);
 	},
 	// Calls the truthy subsection for each item in a list and returning them in a string.
 	getItemsStringContent: function(items, isObserveList, helperOptions, options){

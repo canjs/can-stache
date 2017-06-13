@@ -15,7 +15,6 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var viewCallbacks = require('can-view-callbacks');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -5460,6 +5459,52 @@ function makeTest(name, doc, mutation) {
 		equal(getText("{{noop}}", data), "");
 		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
 		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
+	});
+
+	test("can-template works", function() {
+		var frag;
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
+			'</my-email>');
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H2');
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		frag = template({});
+	});
+
+	test("can-template works with multiple can-templates of the same name", function() {
+		var count = 2,
+			frag;
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
+			'</my-email>' +
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h3>{{subject}}</h3>' +
+				'</can-template>' +
+			'</my-email>');
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H' + count++);
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		frag = template({});
 	});
 
 	test("#each with arrays (#215)", function(){
