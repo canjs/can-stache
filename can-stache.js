@@ -237,10 +237,13 @@ function stache(template){
 			var oldNode = section.pop();
 			if( isCustomTag ) {
 				if (tagName === "can-template") {
+					// If we find a can-template we want to go back 2 in the stack to get it's inner content
+					// rather than the <can-template> element itself
 					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
 					parent.templates[oldNode.attrs.name] = makeRendererConvertScopes(renderer);
 					section.removeCurrentNode();
 				} else {
+					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
 					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
 						viewCallbacks.tagHandler(this,tagName, {
