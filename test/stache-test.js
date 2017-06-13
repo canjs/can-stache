@@ -165,6 +165,24 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	if (System.env.indexOf('production') < 0) {
+
+		test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
+
+			var oldWarn = canDev.warn;
+			canDev.warn = function() {
+				ok(true, "received warning");
+			};
+
+			stache.registerHelper('foobar', function() {});
+			stache.registerHelper('foobar', function() {});
+
+			canDev.warn = oldWarn;
+
+		});
+
+	}
+
 	/*test("attribute sections", function(){
 	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
 
@@ -2903,7 +2921,7 @@ function makeTest(name, doc, mutation) {
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
 			setTimeout(function () {
-				equal(data._bindings, 0, "there are no bindings");
+				equal(data.__bindEvents._lifecycleBindings, 0, "there are no bindings");
 				start();
 			}, 30);
 		},10);
@@ -5385,6 +5403,88 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("content is registered (#163)",function(){
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
+	});
+
+	if (System.env.indexOf('production') < 0) {
+		test("warn on missmatched tag (canjs/canjs#1476)", function() {
+			var makeWarnChecks = function(input, texts) {
+				var count = 0;
+				var _warn = canDev.warn;
+				canDev.warn = function(text) {
+					equal(text, texts[count++]);
+				};
+
+				stache(input);
+
+				equal(count, texts.length);
+
+				canDev.warn = _warn;
+			};
+
+			// Fails
+			makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/if}}"
+			]);
+			makeWarnChecks("{{#call()}}...{{/foo}}", [
+				"unexpected closing tag {{/foo}} expected {{/call}}"
+			]);
+
+			// Successes
+			makeWarnChecks("{{#if}}...{{/}}", []);
+			makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
+			makeWarnChecks("{{#call()}}...{{/call}}", []);
+		});
+	}
+
+	test("@arg functions are not called (#172)", function() {
+		var data = new DefineMap({
+			func1: function() {
+				return "called";
+			},
+			func2: function() {
+				ok(false, "this method should not be called.");
+				return true;
+			},
+			noop: undefined
+		});
+
+		equal(getText("{{func1}}", data), "called");
+		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
+		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
+
+		equal(getText("{{noop}}", data), "");
+		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
+		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
+	});
+
+	test("#each with arrays (#215)", function(){
+		var which = canCompute(false);
+		var a = {}, b = {}, c = {};
+
+		var list = canCompute(function(){
+		  return which() ? [a,b,c]: [a,c];
+		});
+
+		var template = stache("<ul>{{#each list}}<li/>{{/each}}</ul>");
+		var frag = template({list: list});
+
+		var ul = frag.firstChild;
+		var lis = ul.getElementsByTagName("li");
+		var aLI = lis[0],
+			cLI = lis[1];
+
+		which(true);
+
+		lis = ul.getElementsByTagName("li");
+		var aLI2 = lis[0],
+			cLI2 = lis[2];
+
+		QUnit.equal(aLI, aLI2, "a li was reused");
+		QUnit.equal(cLI, cLI2, "c li was reused");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

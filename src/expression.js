@@ -68,7 +68,8 @@ var getKeyComputeData = function (key, scope, readOptions) {
 				observeReader.write(result, observeReader.reads(key), newVal);
 			} else {
 				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				return observeReader.get(result, "" + key);
+				// also escape `.` so that things like ["bar.baz"] will work correctly
+				return observeReader.get(result, ("" + key).replace(".", "\\."));
 			}
 		});
 
@@ -111,13 +112,9 @@ Bracket.prototype.value = function (scope) {
 	var obj = this.root;
 
 	if (prop instanceof Lookup) {
-		prop = lookupValue(prop.key, scope, {}, {});
+		prop = lookupValue(prop.key, scope, {}, {}).value;
 	} else if (prop instanceof Call) {
 		prop = prop.value(scope, {}, {});
-	}
-
-	if (prop.computeData != null && prop.hasOwnProperty("value")) {
-		prop = prop.value;
 	}
 
 	if (!obj) {
@@ -267,6 +264,10 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 };
 
+Call.prototype.closingTag = function() {
+	return this.methodExpr.key.slice(1);
+};
+
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
 // Any functions found prior to the last one are called with
@@ -287,7 +288,11 @@ var HelperScopeLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
-	return lookupValue(this.key, scope, helperOptions, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]}).value;
+	return lookupValue(this.key, scope, helperOptions, {
+		callMethodsOnObservables: true,
+		isArgument: true,
+		args: [ scope.peek('.'), scope ]
+	}).value;
 };
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -440,6 +445,10 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	} else {
 		return computeValue;
 	}
+};
+
+Helper.prototype.closingTag = function() {
+	return this.methodExpr.key;
 };
 
 
@@ -802,7 +811,7 @@ var expression = {
 				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
 
 				// if we had `foo().bar`, we need to change to a Lookup that looks up from lastToken.
-				if(lastToken && lastToken.type === "Call" && isAddingToExpression(token)) {
+				if(lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket" ) && isAddingToExpression(token)) {
 					stack.replaceTopLastChildAndPush({
 						type: "Lookup",
 						root: lastToken,
@@ -869,7 +878,7 @@ var expression = {
 				top = stack.top();
 				lastToken = stack.topLastChild();
 
-				if (lastToken && lastToken.type === "Call") {
+				if (lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket"  )  ) {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					stack.replaceTopAndPush({type: "Bracket", root: top});

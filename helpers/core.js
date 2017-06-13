@@ -13,6 +13,7 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
+var dev = require('can-util/js/dev/dev');
 
 
 var domData = require('can-util/dom/data/data');
@@ -22,7 +23,7 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (isFunction(value)) {
+	if (value && value.isComputed) {
 		return value();
 	} else {
 		return value;
@@ -61,7 +62,10 @@ var helpers = {
 			}
 		}
 
-		if (types.isListLike(resolved) && !options.stringOnly) {
+		if ((
+				types.isListLike(resolved) ||
+				( utils.isArrayLike(resolved) && items.isComputed )
+			) && !options.stringOnly) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
@@ -154,7 +158,7 @@ var helpers = {
 		var value;
 		// if it's a function, wrap its value in a compute
 		// that will only change values from true to false
-		if (isFunction(expr)) {
+		if (expr && expr.isComputed) {
 			value = compute.truthy(expr)();
 		} else {
 			value = !! resolve(expr);
@@ -285,6 +289,12 @@ var helpers = {
 helpers.eachOf = helpers.each;
 
 var registerHelper = function(name, callback){
+	//!steal-remove-start
+	if (helpers[name]) {
+		dev.warn('The helper ' + name + ' has already been registered.');
+	}
+	//!steal-remove-end
+
 	helpers[name] = callback;
 };
 

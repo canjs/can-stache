@@ -10,6 +10,7 @@ var mustacheHelpers = require('./helpers/core');
 require('./helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 
+var dev = require('can-util/js/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
@@ -77,6 +78,15 @@ function stache(template){
 
 				section.endSection();
 				if(section instanceof HTMLSectionBuilder) {
+
+					//!steal-remove-start
+					var last = state.sectionElementStack[state.sectionElementStack.length - 1].tag;
+					if (stache !== "" && stache !== last) {
+						dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						// throw new Error("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+					}
+					//!steal-remove-end
+
 					state.sectionElementStack.pop();
 				}
 			} else if(mode === "else") {
@@ -104,10 +114,22 @@ function stache(template){
 
 				} else if(mode === "#" || mode === "^") {
 					// Adds a renderer function and starts a section.
-					section.startSection(makeRenderer(mode,stache, copyState()  ));
+					var renderer = makeRenderer(mode,stache, copyState()  );
+					section.startSection(renderer);
+
 					// If we are a directly nested section, count how many we are within
 					if(section instanceof HTMLSectionBuilder) {
-						state.sectionElementStack.push("section");
+						//!steal-remove-start
+						var tag = typeof renderer.exprData.closingTag === 'function' ?
+							renderer.exprData.closingTag() : '';
+						//!steal-remove-end
+
+						state.sectionElementStack.push({
+							type: "section",
+							//!steal-remove-start
+							tag: tag
+							//!steal-remove-end
+						});
 					}
 				} else {
 					// Adds a renderer function that only updates text.
@@ -124,7 +146,7 @@ function stache(template){
 				attr: state.attr && state.attr.name,
 				// <content> elements should be considered direclty nested
 				directlyNested: state.sectionElementStack.length ?
-					lastElement === "section" || lastElement === "custom": true,
+					lastElement.type === "section" || lastElement.type === "custom": true,
 				textContentOnly: !!state.textContentOnly
 			};
 			return overwrites ? assign(cur, overwrites) : cur;
@@ -170,7 +192,10 @@ function stache(template){
 			} else {
 				section.push(state.node);
 
-				state.sectionElementStack.push( isCustomTag ? 'custom': tagName );
+				state.sectionElementStack.push({
+					type: isCustomTag ? "custom" : null,
+					tag: isCustomTag ? null : tagName
+				});
 
 				// If it's a custom tag with content, we need a section renderer.
 				if( isCustomTag ) {
