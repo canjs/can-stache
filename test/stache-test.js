@@ -5507,6 +5507,32 @@ function makeTest(name, doc, mutation) {
 		frag = template({});
 	});
 
+	test("#each with arrays (#215)", function(){
+		var which = canCompute(false);
+		var a = {}, b = {}, c = {};
+
+		var list = canCompute(function(){
+		  return which() ? [a,b,c]: [a,c];
+		});
+
+		var template = stache("<ul>{{#each list}}<li/>{{/each}}</ul>");
+		var frag = template({list: list});
+
+		var ul = frag.firstChild;
+		var lis = ul.getElementsByTagName("li");
+		var aLI = lis[0],
+			cLI = lis[1];
+
+		which(true);
+
+		lis = ul.getElementsByTagName("li");
+		var aLI2 = lis[0],
+			cLI2 = lis[2];
+
+		QUnit.equal(aLI, aLI2, "a li was reused");
+		QUnit.equal(cLI, cLI2, "c li was reused");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
