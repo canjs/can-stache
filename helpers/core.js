@@ -59,7 +59,10 @@ var helpers = {
 			}
 		}
 
-		if (types.isListLike(resolved) && !options.stringOnly) {
+		if ((
+				types.isListLike(resolved) ||
+				( utils.isArrayLike(resolved) && items.isComputed )
+			) && !options.stringOnly) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
