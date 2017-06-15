@@ -2,7 +2,7 @@ var Scope = require('can-view-scope');
 var Observation = require('can-observation');
 var observationReader = require('can-observation/reader/reader');
 var compute = require('can-compute');
-var types = require('can-types');
+var canReflect = require('can-reflect');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -82,7 +82,7 @@ module.exports = {
 	getItemsStringContent: function(items, isObserveList, helperOptions, options){
 		var txt = "",
 			len = observationReader.get(items, 'length'),
-			isObservable = types.isMapLike(items) || types.isListLike(items);
+			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var item = isObservable ? compute(items, '' + i) :items[i];
@@ -94,7 +94,7 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = types.isMapLike(items) || types.isListLike(items);
+			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {

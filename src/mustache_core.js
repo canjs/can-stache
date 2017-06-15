@@ -6,11 +6,8 @@ var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var compute = require('can-compute');
 var Observation = require('can-observation');
-
 var utils = require('./utils');
 var expression = require('./expression');
-
-var types = require("can-types");
 var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
 var canSymbol = require("can-symbol");
@@ -135,7 +132,8 @@ var core = {
 				}
 				// If it's an array, render.
 				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {
-					var isObserveList = types.isMapLike(finalValue);
+					var isObserveList = canReflect.isObservableLike(finalValue) &&
+						canReflect.isListLike(finalValue);
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
 						if (stringOnly) {
