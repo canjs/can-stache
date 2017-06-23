@@ -1,19 +1,16 @@
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var compute = require('can-compute');
-
 var utils = require('../src/utils');
-
-var types = require('can-types');
 var isFunction = require('can-util/js/is-function/is-function');
-
 var getBaseURL = require('can-util/js/base-url/base-url');
 var joinURIs = require('can-util/js/join-uris/join-uris');
-
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
 var dev = require('can-util/js/dev/dev');
+var canSymbol = require("can-symbol");
+var canReflect = require("can-reflect");
 
 
 var domData = require('can-util/dom/data/data');
@@ -23,8 +20,8 @@ var looksLikeOptions = function(options){
 };
 
 var resolve = function (value) {
-	if (value && value.isComputed) {
-		return value();
+	if (value && value[canSymbol.for("can.isValueLike")] && value[canSymbol.for("can.getValue")]) {
+		return canReflect.getValue(value);
 	} else {
 		return value;
 	}
@@ -32,12 +29,7 @@ var resolve = function (value) {
 var resolveHash = function(hash){
 	var params = {};
 	for(var prop in hash) {
-		var value = hash[prop];
-		if(value && value.isComputed) {
-			params[prop] = value();
-		} else {
-			params[prop] = value;
-		}
+		params[prop] = resolve(hash[prop]);
 	}
 	return params;
 };
@@ -63,7 +55,7 @@ var helpers = {
 		}
 
 		if ((
-				types.isListLike(resolved) ||
+				canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
 				( utils.isArrayLike(resolved) && items.isComputed )
 			) && !options.stringOnly) {
 			return function(el){
@@ -113,8 +105,7 @@ var helpers = {
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});
 			return options.stringOnly ? result.join('') : result;
-		}
-		else if (types.isMapLike(expr)) {
+		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
 			result = [];
 
 			(expr.forEach || expr.each).call(expr, function(val, key){

@@ -15,7 +15,6 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var viewCallbacks = require('can-view-callbacks');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -1131,7 +1130,7 @@ function makeTest(name, doc, mutation) {
 		ul.appendChild(compiled);
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
-
+		
 		obs.attr('items', [{
 			name: 'foo'
 		}]);
@@ -2786,7 +2785,7 @@ function makeTest(name, doc, mutation) {
 	// TODO: duplicate with %
 	test("Rendering live bound indicies with #each, @index and a simple CanList", function () {
 		var list = new CanList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -4459,7 +4458,7 @@ function makeTest(name, doc, mutation) {
 		var oldIs = stache.getHelper('is').fn;
 
 		stache.registerHelper('is', function() {
-			ok(true, 'comparator invoked');
+			ok(true, 'comparator invoked only once during setup');
 			return oldIs.apply(this, arguments);
 		});
 
@@ -4467,7 +4466,6 @@ function makeTest(name, doc, mutation) {
 		b = canCompute(0);
 
 		stache('{{eq a b}}')({ a: a, b: b });
-
 		canBatch.start();
 		a(1);
 		b(1);
@@ -4481,7 +4479,9 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
 		list.replace([]);
+		var spans = frag.firstChild.getElementsByTagName("span");
 		var labels = frag.firstChild.getElementsByTagName("label");
+		equal(spans.length, 0, "truthy case doesn't render");
 		equal(labels.length, 1, "empty case");
 	});
 
@@ -5066,7 +5066,6 @@ function makeTest(name, doc, mutation) {
 		});
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
 		var items = new CanList(["one","two"]);
-
 		var frag = template(items);
 		var lis = frag.firstChild.getElementsByTagName("li");
 
@@ -5460,6 +5459,52 @@ function makeTest(name, doc, mutation) {
 		equal(getText("{{noop}}", data), "");
 		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
 		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
+	});
+
+	test("can-template works", function() {
+		var frag;
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
+			'</my-email>');
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H2');
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		frag = template({});
+	});
+
+	test("can-template works with multiple can-templates of the same name", function() {
+		var count = 2,
+			frag;
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h2>{{subject}}</h2>' +
+				'</can-template>' +
+			'</my-email>' +
+			'<my-email>' +
+				'<can-template name="subject">' +
+					'<h3>{{subject}}</h3>' +
+				'</can-template>' +
+			'</my-email>');
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			ok(tagData.templates, "has templates");
+			frag = tagData.templates.subject({subject: "Hello"})
+			QUnit.equal(frag.firstChild.nodeName, 'H' + count++);
+			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+		});
+
+		frag = template({});
 	});
 
 	test("#each with arrays (#215)", function(){

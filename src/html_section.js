@@ -86,6 +86,9 @@ assign(HTMLSectionBuilder.prototype,{
 	},
 	pop: function(){
 		return this.last().pop();
+	},
+	removeCurrentNode: function() {
+		this.last().removeCurrentNode();
 	}
 });
 
@@ -135,6 +138,10 @@ assign(HTMLSection.prototype,{
 		}
 		this.targetStack = this.targetData = null;
 		return this.compiled;
+	},
+	removeCurrentNode: function() {
+		var children = this.children();
+		return children.pop();
 	},
 	children: function(){
 		if(this.targetStack.length) {

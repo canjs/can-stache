@@ -2,7 +2,7 @@ var Scope = require('can-view-scope');
 var Observation = require('can-observation');
 var observationReader = require('can-observation/reader/reader');
 var compute = require('can-compute');
-var types = require('can-types');
+var canReflect = require('can-reflect');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -63,21 +63,26 @@ module.exports = {
 			// prevent binding on fn.
 			// If a non-scope value is passed, add that to the parent scope.
 			if (newScope !== undefined && !(newScope instanceof Scope)) {
-				newScope = parentScope.add(newScope);
+				if (parentScope) {
+					newScope = parentScope.add(newScope);
+				}
+				else {
+					newScope = Scope.refsScope().add(newScope || {});
+				}
 			}
 			if (newOptions !== undefined && !(newOptions instanceof Options)) {
 				newOptions = parentOptions.add(newOptions);
 			}
-			var result = rendererWithScope(newScope, newOptions || parentOptions, parentNodeList|| nodeList );
+			var result = rendererWithScope(newScope, newOptions || parentOptions, parentNodeList || nodeList );
 			return result;
 		};
-		return observeObservables ?  convertedRenderer : Observation.ignore(convertedRenderer);
+		return observeObservables ? convertedRenderer : Observation.ignore(convertedRenderer);
 	},
 	// Calls the truthy subsection for each item in a list and returning them in a string.
 	getItemsStringContent: function(items, isObserveList, helperOptions, options){
 		var txt = "",
 			len = observationReader.get(items, 'length'),
-			isObservable = types.isMapLike(items) || types.isListLike(items);
+			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var item = isObservable ? compute(items, '' + i) :items[i];
@@ -89,7 +94,7 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = types.isMapLike(items) || types.isListLike(items);
+			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {

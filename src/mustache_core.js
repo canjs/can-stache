@@ -6,13 +6,12 @@ var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var compute = require('can-compute');
 var Observation = require('can-observation');
-
 var utils = require('./utils');
 var expression = require('./expression');
-
-var types = require("can-types");
 var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
+var canSymbol = require("can-symbol");
+var canReflect = require("can-reflect");
 
 
 // ## Types
@@ -116,16 +115,7 @@ var core = {
 		// Return evaluators for no mode.
 		if(!mode) {
 			// If it's computed, return a function that just reads the compute.
-			if(value && value.isComputed) {
-				return value;
-			}
-			// Just return value as the value
-			else {
-
-				return function(){
-					return '' + (value != null ? value : '');
-				};
-			}
+			return value;
 		} else if( mode === "#" || mode === "^" ) {
 			// Setup renderers.
 			helperOptionArg = {
@@ -135,18 +125,15 @@ var core = {
 			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
-				var finalValue;
-				if (types.isCompute(value)) {
-					finalValue = value();
-				} else {
-					finalValue = value;
-				}
+				var finalValue = canReflect.getValue(value);
+				
 				if(typeof finalValue === "function") {
 					return finalValue;
 				}
 				// If it's an array, render.
 				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {
-					var isObserveList = types.isMapLike(finalValue);
+					var isObserveList = canReflect.isObservableLike(finalValue) &&
+						canReflect.isListLike(finalValue);
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
 						if (stringOnly) {
@@ -195,7 +182,7 @@ var core = {
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
-					var newContext = exprData.argExprs[0].value(scope, options)();
+					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope, options) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
 						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
@@ -274,9 +261,17 @@ var core = {
 					scope.__cache[fullExpression] = evaluator;
 				}
 			}
+			var gotObservableValue = evaluator[canSymbol.for("can.onValue")],
+				res;
 
 			// Run the evaluator and return the result.
-			var res = evaluator();
+			if(gotObservableValue) {
+				res = canReflect.getValue(evaluator);
+			} else {
+				res = evaluator();
+			}
+
+
 			return res == null ? "" : ""+res;
 		};
 
@@ -328,21 +323,29 @@ var core = {
 			// not re-evaluate. We prevent that by making sure this compute is ignored by
 			// everyone else.
 			//var compute = can.compute(evaluator, null, false);
-			var gotCompute = evaluator.isComputed,
-				computeValue;
-			if(gotCompute) {
-				computeValue = evaluator;
+			var gotObservableValue = evaluator[canSymbol.for("can.onValue")];
+			var observable;
+			if(gotObservableValue) {
+				observable = evaluator;
 			} else {
-				computeValue = compute(evaluator, null, false);
+				observable = new Observation(evaluator,null,{isObservable: false});
 			}
 
-			computeValue.computeInstance.setPrimaryDepth(nodeList.nesting);
+
+
+			if(observable instanceof Observation) {
+				observable.compute._primaryDepth = nodeList.nesting;
+			} else if(observable.computeInstance) {
+				observable.computeInstance.setPrimaryDepth(nodeList.nesting);
+			} else if(observable.observation) {
+				observable.observation.compute._primaryDepth = nodeList.nesting;
+			}
 
 			// Bind on the computeValue to set the cached value. This helps performance
 			// so live binding can read a cached value instead of re-calculating.
-			computeValue.computeInstance.bind("change", k);
+			canReflect.onValue(observable, k);
 
-			var value = computeValue();
+			var value = canReflect.getValue(observable);
 
 			// If value is a function, it's a helper that returned a function.
 			if(typeof value === "function") {
@@ -356,20 +359,20 @@ var core = {
 
 			}
 			// If the computeValue has observable dependencies, setup live binding.
-			else if(gotCompute || computeValue.computeInstance.hasDependencies ) {
+			else if( canReflect.valueHasDependencies(observable) ) {
 
 				// Depending on where the template is, setup live-binding differently.
 				if(state.attr) {
-					live.attr(this, state.attr, computeValue);
+					live.attr(this, state.attr, observable);
 				}
 				else if( state.tag )  {
-					live.attrs( this, computeValue );
+					live.attrs( this, observable );
 				}
 				else if(state.text && typeof value !== "object"){
-					live.text(this, computeValue, this.parentNode, nodeList);
+					live.text(this, observable, this.parentNode, nodeList);
 				}
 				else {
-					live.html(this, computeValue, this.parentNode, nodeList);
+					live.html(this, observable, this.parentNode, nodeList);
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
@@ -389,7 +392,7 @@ var core = {
 				}
 			}
 			// Unbind the compute.
-			computeValue.computeInstance.unbind("change", k);
+			canReflect.offValue(observable, k);
 		};
 
 		branchRenderer.exprData = exprData;
