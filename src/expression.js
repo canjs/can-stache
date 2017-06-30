@@ -1,5 +1,5 @@
 var compute = require('can-compute');
-var observeReader = require('can-observation/reader/reader');
+var observeReader = require('can-stache-key');
 
 var utils = require('./utils');
 var mustacheHelpers = require('../helpers/core');
