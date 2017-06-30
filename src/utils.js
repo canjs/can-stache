@@ -1,6 +1,6 @@
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
-var observationReader = require('can-observation/reader/reader');
+var observationReader = require('can-stache-key');
 var compute = require('can-compute');
 var canReflect = require('can-reflect');
 
