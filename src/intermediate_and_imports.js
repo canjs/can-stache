@@ -4,7 +4,10 @@ var parser = require('can-view-parser');
 
 module.exports = function(source){
 
-	var template = mustacheCore.cleanLineEndings(source);
+	var template = source;
+	template = mustacheCore.cleanWhitespaceControl(template);
+	template = mustacheCore.cleanLineEndings(template);
+
 	var imports = [],
 		dynamicImports = [],
 		ases = {},

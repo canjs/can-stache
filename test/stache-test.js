@@ -3,6 +3,7 @@ require('./expression-test');
 require('./stache-define-test');
 require('../helpers/route-test');
 var stache = require('can-stache');
+var core = require('can-stache/src/mustache_core');
 
 var QUnit = require('steal-qunit');
 var CanMap = require('can-map');
@@ -5405,6 +5406,32 @@ function makeTest(name, doc, mutation) {
 		QUnit.ok( viewCallbacks.tag("content"),"registered content" );
 	});
 
+	test("whitespace control (#60)", function() {
+		equal(core.cleanWhitespaceControl(
+			"<foo> {{-message-}} </foo>"),
+			"<foo>{{message}}</foo>");
+		equal(core.cleanWhitespaceControl(
+			"<foo> {{{-message-}}} </foo>"),
+			"<foo>{{{message}}}</foo>");
+		equal(core.cleanWhitespaceControl(
+			"<foo> {{- name -}} </foo><foo> {{{- name -}}} </foo>"),
+			"<foo>{{ name }}</foo><foo>{{{ name }}}</foo>");
+		equal(core.cleanWhitespaceControl(
+			"<foo> {{-#data-}} {{->list-}} {{-/data-}} </foo>"),
+			"<foo>{{#data}}{{>list}}{{/data}}</foo>");
+		equal(core.cleanWhitespaceControl(
+			"<foo>\n\t{{-! comment -}}\n</foo>"),
+			"<foo>{{! comment }}</foo>");
+
+		var div = doc.createElement('div');
+		div.appendChild(stache("<foo>\n\t{{-! comment -}}\n</foo>")());
+		equal(div.innerHTML, '<foo></foo>');
+
+		if (typeof div.querySelectorAll === 'function') {
+			equal(div.querySelectorAll(':empty').length, 1);
+		}
+	});
+
 	if (System.env.indexOf('production') < 0) {
 		test("warn on missmatched tag (canjs/canjs#1476)", function() {
 			var makeWarnChecks = function(input, texts) {
@@ -5459,6 +5486,7 @@ function makeTest(name, doc, mutation) {
 		equal(getText("{{noop}}", data), "");
 		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
 		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
+
 	});
 
 	test("can-template works", function() {

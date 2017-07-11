@@ -26,7 +26,8 @@ var canReflect = require("can-reflect");
 
 // ## Helpers
 
-var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([^\}]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([^\}]*)\}\}\}?)/g,
+var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g,
+	mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g,
 	k = function(){};
 
 
@@ -470,6 +471,40 @@ var core = {
 				// There is no mode, return special with spaces around it.
 				return spaceBefore+special+spaceAfter+(spaceBefore.length || matchIndex !== 0 ? returnBefore+"\n" : "");
 			}
+
+		});
+	},
+	// ## mustacheCore.cleanWhitespaceControl
+	// Removes whitespace according to the whitespace control.
+	/**
+	 * @hide
+	 * Prunes whitespace according to the whitespace control.
+	 * @param {String} template
+	 * @return {String}
+	 */
+	cleanWhitespaceControl: function(template) {
+
+		return template.replace(mustacheWhitespaceRegExp, function(
+			whole,
+			spaceBefore,
+			bracketBefore,
+			controlBefore,
+			expression,
+			controlAfter,
+			bracketAfter,
+			spaceAfter,
+			matchIndex
+		) {
+
+			if (controlBefore === '-') {
+				spaceBefore = '';
+			}
+
+			if (controlAfter === '-') {
+				spaceAfter = '';
+			}
+
+			return spaceBefore + bracketBefore + expression + bracketAfter + spaceAfter;
 
 		});
 	},
