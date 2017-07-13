@@ -8,10 +8,7 @@ var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
 	//
 	// This contains the local helpers, partials, and tags available to a template.
-	/**
-	 * @hide
-	 * The Options scope.
-	 */
+
 var Options = Scope.Options; // jshint ignore:line
 
 module.exports = {
