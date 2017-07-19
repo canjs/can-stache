@@ -55,7 +55,7 @@ The rules are as follows:
  - __hash value in [can-stache/expressions/helper]__ `{{method hash=key}}` - computes are set as property values.
  - __[can-stache/keys/special special operator]__ `{{%index}}` - lookup values in a special context provided by some helpers.
  - __[can-stache/keys/compute compute operator]__ `{{method(~key)}}` - pass a compute instead of a value.
- - __[can-stache/keys/special at operator]__ `{{method(@key}}` - pass a function instead of trying to read the value of the function.
+ - __[can-stache/keys/at at operator]__ `{{method(@key}}` - pass a function instead of trying to read the value of the function.
  - __[can-stache/keys/current current operator]__ `{{./key}}` - only lookup key at the top of the scope.
  - __[can-stache/keys/parent parent operator]__ `{{../key}}` - lookup the value in the parent context.
  - __[can-stache/keys/this context key]__ `{{this}}` - return the current context/top of the scope.
