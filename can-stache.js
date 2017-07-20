@@ -29,6 +29,7 @@ viewCallbacks.tag("content", function(el, tagData) {
 	return tagData.scope;
 });
 
+var wrappedAttrPattern = /[{(].*[)}]/;
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
@@ -282,7 +283,13 @@ function stache(template){
 				state.node.attrs[state.attr.name] =
 					state.attr.section ? state.attr.section.compile(copyState()) : state.attr.value;
 
+				weirdAttribute = !!wrappedAttrPattern.test(attrName);
 				var attrCallback = viewCallbacks.attr(attrName);
+
+				if (weirdAttribute && !attrCallback) {
+					dev.warn("unknown attribute binding " + attrName + ". Is can-stache-bindings imported?");
+				}
+
 				if(attrCallback) {
 					if( !state.node.attributes ) {
 						state.node.attributes = [];
@@ -296,8 +303,6 @@ function stache(template){
 						});
 					});
 				}
-
-
 
 				state.attr = null;
 			}
