@@ -4,7 +4,7 @@
 Return whatever value is at a key, regardless
 if it's a function or a compute.
 
-The default behavior in Stache lookups is to execute functions to get their return values when following a dotted path.  `@` before a token in a path `@A.B` prevents A from being called for its return value (so 'B' is evaluated from the properties of A itself). Likewise, `@` elsewhere in a path like `A@B` prevents B from being called for its return value and returns whatever B itself is on the return from A.
+The default behavior in Stache lookups is to execute functions to get their return values.  `@` before a token in a path `@A.B` prevents A from being called for its return value (so 'B' is evaluated from the properties of A itself). Likewise, `@` elsewhere in a path like `A@B` prevents B from being called for its return value and returns whatever B itself is on the return from A.
 
 @signature `@key`
 
@@ -41,7 +41,7 @@ different data structures:
 {some: {key: function(){ return "value"; }}}
    //-> function(){ return "value"; }
 
-// A non-observable JS object with intermeidate functions:
+// A non-observable JS object with intermediate functions:
 {some: function(){ return {key: "value"}}}
    //-> "value"
 
@@ -71,7 +71,7 @@ to have a non-undefined `key` value.
 The following illustrates what `@some.key` would return because `some` will not be executed if it's a function:
 
 ```
-// A non-observable JS object with intermeidate functions:
+// A non-observable JS object with intermediate functions:
 {some: function(){ return {key: "value"}}}
    //-> undefined
 
