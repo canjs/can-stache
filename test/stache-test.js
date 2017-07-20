@@ -5467,6 +5467,29 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
+	if (System.env.indexOf('production') < 0) {
+		test("warn on unknown attributes (canjs/can-stache#139)", function() {
+			var makeWarnChecks = function(input, texts) {
+				var count = 0;
+				var _warn = canDev.warn;
+				canDev.warn = function(text) {
+					equal(text, texts[count++]);
+				};
+
+				stache(input);
+
+				equal(count, texts.length);
+
+				canDev.warn = _warn;
+			};
+
+			// Fails
+			makeWarnChecks("<button ($weirdattribute)='showMessage()'>Click</button>", [
+				"unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?"
+			]);
+		});
+	}
+
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
 			func1: function() {

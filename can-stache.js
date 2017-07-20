@@ -29,6 +29,7 @@ viewCallbacks.tag("content", function(el, tagData) {
 	return tagData.scope;
 });
 
+var wrappedAttrPattern = /[{(].*[)}]/;
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
@@ -283,6 +284,14 @@ function stache(template){
 					state.attr.section ? state.attr.section.compile(copyState()) : state.attr.value;
 
 				var attrCallback = viewCallbacks.attr(attrName);
+
+				//!steal-remove-start
+				weirdAttribute = !!wrappedAttrPattern.test(attrName);
+				if (weirdAttribute && !attrCallback) {
+					dev.warn("unknown attribute binding " + attrName + ". Is can-stache-bindings imported?");
+				}
+				//!steal-remove-end
+
 				if(attrCallback) {
 					if( !state.node.attributes ) {
 						state.node.attributes = [];
@@ -296,8 +305,6 @@ function stache(template){
 						});
 					});
 				}
-
-
 
 				state.attr = null;
 			}
