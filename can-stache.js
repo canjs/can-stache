@@ -283,12 +283,14 @@ function stache(template){
 				state.node.attrs[state.attr.name] =
 					state.attr.section ? state.attr.section.compile(copyState()) : state.attr.value;
 
-				weirdAttribute = !!wrappedAttrPattern.test(attrName);
 				var attrCallback = viewCallbacks.attr(attrName);
 
+				//!steal-remove-start
+				weirdAttribute = !!wrappedAttrPattern.test(attrName);
 				if (weirdAttribute && !attrCallback) {
 					dev.warn("unknown attribute binding " + attrName + ". Is can-stache-bindings imported?");
 				}
+				//!steal-remove-end
 
 				if(attrCallback) {
 					if( !state.node.attributes ) {
