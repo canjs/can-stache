@@ -251,7 +251,7 @@ function stache(template){
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
-							subtemplate: renderer,
+							subtemplate: renderer  ? makeRendererConvertScopes(renderer) : renderer,
 							templateType: "stache",
 							parentNodeList: parentNodeList,
 							templates: current.templates

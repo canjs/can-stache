@@ -1131,7 +1131,7 @@ function makeTest(name, doc, mutation) {
 		ul.appendChild(compiled);
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
-		
+
 		obs.attr('items', [{
 			name: 'foo'
 		}]);
@@ -5582,6 +5582,25 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(aLI, aLI2, "a li was reused");
 		QUnit.equal(cLI, cLI2, "c li was reused");
+	});
+
+	test("Plain JS object scope works with subtemplate (#208)", function(){
+
+		expect(4);
+
+		viewCallbacks.tag("stache-tag", function(el, tagData){
+			ok(tagData.scope instanceof Scope, "got scope");
+			ok(tagData.options instanceof Scope, "got options");
+			equal(typeof tagData.subtemplate, "function", "got subtemplate");
+			var frag = tagData.subtemplate({last: "Meyer"}, tagData.options);
+
+			equal( innerHTML(frag.firstChild), "Meyer", "rendered right");
+		});
+
+		var template = stache("<stache-tag><span>{{last}}</span></stache-tag>")
+
+		template({});
+
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
