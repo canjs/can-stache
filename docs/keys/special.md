@@ -1,7 +1,7 @@
 @typedef {String} can-stache/keys/special %special
 @parent can-stache/keys
 
-[can-stache-bindings.can-EVENT Event bindings] and some helpers like [can-stache.helpers.each]
+[can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
 provide special values that start with `%` to prevent potential collisions with
 other values.  
 
