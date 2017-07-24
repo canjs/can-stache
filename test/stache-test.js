@@ -4,6 +4,7 @@ require('./stache-define-test');
 require('../helpers/route-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
+var clone = require('steal-clone');
 
 var QUnit = require('steal-qunit');
 var CanMap = require('can-map');
@@ -5468,27 +5469,25 @@ function makeTest(name, doc, mutation) {
 	}
 
 	if (System.env.indexOf('production') < 0) {
-		test("warn on unknown attributes (canjs/can-stache#139)", function() {
-			var makeWarnChecks = function(input, texts) {
-				var count = 0;
-				var _warn = canDev.warn;
-				canDev.warn = function(text) {
-					equal(text, texts[count++]);
-				};
-
-				stache(input);
-
-				equal(count, texts.length);
-
-				canDev.warn = _warn;
+		test("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
+			var done = assert.async();
+			var warn = function(text) {
+				equal(text, "unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?");
+				done();
 			};
-
-			// Fails
-			makeWarnChecks("<button ($weirdattribute)='showMessage()'>Click</button>", [
-				"unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?"
-			]);
+			clone({
+				'can-stache-bindings': {},
+				'can-util/js/dev/dev': {
+					warn: warn
+				}
+			})
+			.import('can-stache')
+			.then(function(stache) {
+				stache("<button ($weirdattribute)='showMessage()'>Click</button>");
+			});
 		});
 	}
+	
 
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
