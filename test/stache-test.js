@@ -2737,7 +2737,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	// TODO: duplicate with %
 	test("Rendering indicies of an array with @index", function () {
 		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
@@ -2751,7 +2750,24 @@ function makeTest(name, doc, mutation) {
 			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
 		}
 	});
-	// TODO: duplicate with %
+
+	test("Rendering indicies of an array with %index", function () {
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
+		var list = [0, 1, 2, 3];
+
+		var lis = template({
+			list: list
+		})
+			.firstChild.getElementsByTagName('li');
+
+		for (var i = 0; i < lis.length; i++) {
+			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
+		}
+	});
+
+	// per documentation at https://canjs.com/doc/can-stache/keys/special.html#_index
+	// prescribing a helper to deal with offset, %index no longer accepts an offset
+	// original issue: https://github.com/canjs/canjs/issues/1078
 	test("Rendering indicies of an array with @index + offset (#1078)", function () {
 		var template = stache("<ul>{{#each list}}<li>{{@index 5}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
@@ -2766,8 +2782,7 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	// TODO: duplicate with %
-	test("Passing indices into helpers as values", function () {
+	test("Passing indices (@index) into helpers as values", function () {
 		var template = stache("<ul>{{#each list}}<li>{{test @index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
@@ -2784,8 +2799,24 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	// TODO: duplicate with %
-	test("Rendering live bound indicies with #each, @index and a simple CanList", function () {
+	test("Passing indices (%index) into helpers as values", function () {
+		var template = stache("<ul>{{#each list}}<li>{{test %index}} {{.}}</li>{{/each}}</ul>");
+		var list = [0, 1, 2, 3];
+
+		var lis = template({
+			list: list
+		}, {
+			test: function(index) {
+				return ""+index;
+			}
+		}).firstChild.getElementsByTagName('li');
+
+		for (var i = 0; i < lis.length; i++) {
+			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
+		}
+	});
+
+	test("Rendering live bound indicies with #each, %index and a simple CanList", function () {
 		var list = new CanList(['a', 'b', 'c']);
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 

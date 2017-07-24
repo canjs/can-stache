@@ -82,6 +82,60 @@ QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function ()
 	equal((span[3].innerHTML), '1', 'iteration for %index');
 });
 
+// cf. https://github.com/canjs/can-stache/issues/180
+QUnit.test("Renders live bound `{{defineList[0]}}` and `{{defineList.0}}` data (#180)", function() {
+	var list = new DefineList([ 'zero' ]);
+	var renderer = stache('<div><span class="brackets">{{list[0]}}</span><span class="dot">{{list.0}}</span>');
+	//var html = renderer({ list: list });
+	var html = document.getElementById('qunit-fixture');
+	html.appendChild(renderer({ list: list }));
+
+	// should render:
+	// <div>
+	//   <span class="brackets">zero</span>
+	//   <span class="dot">zero</span>
+	// </div>
+	equal(html.querySelector('.brackets').textContent, 'zero', '{{list[0]}}');
+	equal(html.querySelector('.dot').textContent, 'zero', '{{list.0}}');
+
+	list.set(0, 'even');
+	equal(html.querySelector('.brackets').textContent, 'even', '{{list[0]}} set as list.set(0, even)');
+	equal(html.querySelector('.dot').textContent, 'even', '{{list.0}} set as list.set(0, even)');
+});
+
+QUnit.test("Renders #each live bound `defineList[%index]` data (#180)", function() {
+	var list = new DefineList([true, false, true]);
+	var renderer = stache('<form>{{#each list}}<input type="checkbox" value="{{%index}}" class="{{#if list[%index]}}selected{{/if}}" />{{/each}}</form>');
+	var html = renderer({ list: list });
+
+	// should render:
+	// <form>
+	//	 <input type="checkbox" value="0" class="selected" />
+	//	 <input type="checkbox" value="1" class />
+	//	 <input type="checkbox" value="2" class="selected" />
+	// </form>
+	equal(html.querySelectorAll('input').length, 3, 'three checkboxes');
+	equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
+	equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
+	equal(html.querySelector('[value="2"]').className, 'selected', 'third IS selected');
+
+	list.set(0, false);
+	list[1] = true;
+	list[2] = false;
+	list.push(true);
+	equal(html.querySelectorAll('input').length, 4, 'AFTER DATA CHANGES: four checkboxes');
+	equal(html.querySelector('[value="0"]').className, '', 'first NOT selected');
+	equal(html.querySelector('[value="1"]').className, 'selected', 'second IS selected');
+	equal(html.querySelector('[value="2"]').className, '', 'third NOT selected');
+	equal(html.querySelector('[value="3"]').className, 'selected', 'fourth IS selected');
+
+	list.shift();
+	list.pop();
+	equal(html.querySelectorAll('input').length, 2, 'AFTER DATA CHANGES: two checkboxes');
+	equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
+	equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
+});
+
 QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
 	var template = stache('<p>{{#each iter}}<span>{{%key}} {{.}}</span>{{/each}}</p>');
 	var div = document.createElement('div');
