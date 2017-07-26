@@ -65,8 +65,6 @@ var core = {
 
 		if(exprData instanceof expression.Call) {
 			helperOptionArg =  {
-				fn: function () {},
-				inverse: function () {},
 				context: scope.peek("."),
 				scope: scope,
 				nodeList: nodeList,
@@ -119,15 +117,12 @@ var core = {
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
 			// Setup renderers.
-			helperOptionArg = {
-				fn: function () {},
-				inverse: function () {}
-			};
+			helperOptionArg = {};
 			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
-				
+
 				if(typeof finalValue === "function") {
 					return finalValue;
 				}
