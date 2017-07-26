@@ -165,6 +165,34 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test('helpers used as section should have helperOptionArg.isSection set', function (assert) {
+		var done = assert.async();
+
+		stache.registerHelper('genericTestHelper', function (options) {
+			assert.equal(options.isSection, true, 'isSection should be true');
+			done();
+		});
+
+		var template = '<div>{{#genericTestHelper}}<span>Test</span>{{/genericTestHelper}}</div>';
+		var viewModel = {};
+
+		stache(template)(viewModel);
+	});
+
+	test('helpers used inline should have helperOptionArg.isSection unset', function (assert) {
+		var done = assert.async();
+
+		stache.registerHelper('genericTestHelper2', function (options) {
+			assert.equal(options.isSection, false, 'isSection should be false');
+			done();
+		});
+
+		var template = '<div>{{genericTestHelper2}}</div>';
+		var viewModel = {};
+
+		stache(template)(viewModel);
+	});
+
 	if (System.env.indexOf('production') < 0) {
 
 		test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
@@ -1131,7 +1159,7 @@ function makeTest(name, doc, mutation) {
 		ul.appendChild(compiled);
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
-		
+
 		obs.attr('items', [{
 			name: 'foo'
 		}]);

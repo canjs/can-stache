@@ -49,6 +49,9 @@ module.exports = {
 		if(falseyRenderer) {
 			helperOptions.inverse = this.makeRendererConvertScopes(falseyRenderer, scope, options, nodeList, isStringOnly);
 		}
+
+		var isSection = !!(truthyRenderer || falseyRenderer);
+		helperOptions.isSection = isSection;
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.
