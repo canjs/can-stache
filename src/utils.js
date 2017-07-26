@@ -10,6 +10,7 @@ var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// This contains the local helpers, partials, and tags available to a template.
 
 var Options = Scope.Options; // jshint ignore:line
+var noop = function () {};
 
 module.exports = {
 	// Returns if something looks like an array.  This works for can.List
@@ -42,16 +43,9 @@ module.exports = {
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
 	convertToScopes: function(helperOptions, scope, options, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
-		// overwrite fn and inverse to always convert to scopes
-		if(truthyRenderer) {
-			helperOptions.fn = this.makeRendererConvertScopes(truthyRenderer, scope, options, nodeList, isStringOnly);
-		}
-		if(falseyRenderer) {
-			helperOptions.inverse = this.makeRendererConvertScopes(falseyRenderer, scope, options, nodeList, isStringOnly);
-		}
-
-		var isSection = !!(truthyRenderer || falseyRenderer);
-		helperOptions.isSection = isSection;
+		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, options, nodeList, isStringOnly) : noop;
+		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, options, nodeList, isStringOnly) : noop;
+		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.

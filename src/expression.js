@@ -419,8 +419,6 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly){
 
 	var helperOptionArg = {
-		fn: function () {},
-		inverse: function () {},
 		stringOnly: stringOnly
 	},
 		context = scope.peek("."),
