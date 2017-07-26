@@ -428,7 +428,7 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 		hash = this.hash(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 	// Add additional data to be used by helper functions
-	utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+	utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 	assign(helperOptionArg, {
 		context: context,
@@ -459,7 +459,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 	}
 
 	var fn = this.evaluator(helper, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-	
+
 	var computeValue = compute(fn);
 
 	compute.temporarilyBind(computeValue);

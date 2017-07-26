@@ -292,13 +292,11 @@ var registerHelper = function(name, callback){
 var makeSimpleHelper = function(fn) {
 	return function() {
 		var realArgs = [];
-		each(arguments, function(val, i) {
-			if (i <= arguments.length) {
-				while (val && val.isComputed) {
-					val = val();
-				}
-				realArgs.push(val);
+		each(arguments, function(val) {
+			while (val && val.isComputed) {
+				val = val();
 			}
+			realArgs.push(val);
 		});
 		return fn.apply(this, realArgs);
 	};
