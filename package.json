@@ -34,6 +34,7 @@
     "donejs"
   ],
   "dependencies": {
+    "can-attribute-encoder": "^0.2.0",
     "can-compute": "^3.3.1",
     "can-namespace": "1.0.0",
     "can-observation": "^3.3.1",
@@ -45,7 +46,7 @@
     "can-view-callbacks": "^3.2.0",
     "can-view-live": "^3.2.0",
     "can-view-nodelist": "^3.1.0",
-    "can-view-parser": "^3.4.0",
+    "can-view-parser": "^3.5.0-pre.0",
     "can-view-scope": "^3.3.1",
     "can-view-target": "^3.1.0"
   },
