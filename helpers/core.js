@@ -11,7 +11,7 @@ var isIterable = require("can-util/js/is-iterable/is-iterable");
 var dev = require('can-util/js/dev/dev');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
-
+var debuggerHelper = require('./-debugger').helper;
 
 var domData = require('can-util/dom/data/data');
 
@@ -278,6 +278,7 @@ var helpers = {
 };
 
 helpers.eachOf = helpers.each;
+helpers.debugger = debuggerHelper;
 
 var registerHelper = function(name, callback){
 	//!steal-remove-start
