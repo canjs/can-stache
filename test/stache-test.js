@@ -2,6 +2,7 @@
 require('./expression-test');
 require('./stache-define-test');
 require('../helpers/route-test');
+require('../helpers/-debugger-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');
@@ -5546,7 +5547,7 @@ function makeTest(name, doc, mutation) {
 			});
 		});
 	}
-	
+
 
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
