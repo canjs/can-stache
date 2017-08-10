@@ -62,10 +62,12 @@ function debuggerHelper (left, right) {
 }
 
 module.exports = {
-	helper: debuggerHelper,
+	//!steal-remove-start
 	evaluateArgs: evaluateArgs,
 	resolveValue: resolveValue,
 
 	// used only for testing purposes
-	__testing: __testing
+	__testing: __testing,
+	//!steal-remove-end
+	helper: debuggerHelper
 };
