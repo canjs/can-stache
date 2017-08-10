@@ -1,5 +1,6 @@
 var canLog = require('can-util/js/log/log');
 function noop () {};
+var resolveValue = noop;
 var evaluateArgs = noop;
 
 //!steal-remove-start
@@ -10,7 +11,7 @@ var __testing = {
 	allowDebugger: true
 };
 
-function resolveValue (value) {
+resolveValue = function (value) {
 	if (value && value.isComputed) {
 		return value();
 	}
