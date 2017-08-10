@@ -1,13 +1,18 @@
 var canLog = require('can-util/js/log/log');
+function noop () {};
+var resolveValue = noop;
+var evaluateArgs = noop;
+var __testing = {}
+
 //!steal-remove-start
 var canReflect = require('can-reflect');
 var canSymbol = require('can-symbol');
 
-var __testing = {
+__testing = {
 	allowDebugger: true
 };
 
-function resolveValue (value) {
+resolveValue = function (value) {
 	if (value && value.isComputed) {
 		return value();
 	}
@@ -17,7 +22,7 @@ function resolveValue (value) {
 	return value;
 }
 
-function evaluateArgs (left, right) {
+evaluateArgs = function (left, right) {
 	switch (arguments.length) {
 		case 0: return true;
 		case 1: return !!resolveValue(left);
