@@ -2,12 +2,13 @@ var canLog = require('can-util/js/log/log');
 function noop () {};
 var resolveValue = noop;
 var evaluateArgs = noop;
+var __testing = {}
 
 //!steal-remove-start
 var canReflect = require('can-reflect');
 var canSymbol = require('can-symbol');
 
-var __testing = {
+__testing = {
 	allowDebugger: true
 };
 
