@@ -1,4 +1,7 @@
 var canLog = require('can-util/js/log/log');
+function noop () {};
+var evaluateArgs = noop;
+
 //!steal-remove-start
 var canReflect = require('can-reflect');
 var canSymbol = require('can-symbol');
@@ -17,7 +20,7 @@ function resolveValue (value) {
 	return value;
 }
 
-function evaluateArgs (left, right) {
+evaluateArgs = function (left, right) {
 	switch (arguments.length) {
 		case 0: return true;
 		case 1: return !!resolveValue(left);
