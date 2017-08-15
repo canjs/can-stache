@@ -23,6 +23,7 @@
 		"global": true,
 		"Promise": true
 	},
+	"esversion": 6,
 	"strict": false,
 	"curly": true,
 	"eqeqeq": true,

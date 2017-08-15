@@ -433,4 +433,6 @@ stache.registerPartial = function(id, partial) {
 	templates[id] = (typeof partial === "string" ? stache(partial) : partial);
 };
 
-module.exports = namespace.stache = stache;
+var namespacedStache = namespace.stache = stache;
+export default namespacedStache;
+module.exports = namespacedStache;
