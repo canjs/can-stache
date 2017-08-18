@@ -104,7 +104,6 @@ RESULT:
 
 Named Partials can also have a template block that references its own name in a [can-stache.tags.partial partial tag], which creates recursion. (So make sure you avoid infinite loops!)
 
-
 ```
 DATA:
   {
@@ -134,8 +133,8 @@ DATA:
 
 TEMPLATE:
   {{<recursive}}
-    <div>{{name}} <b>Type:</b> {{#if nodes.length}}Branch{{else}}Leaf{{/if}}</div>
-    {{#each nodes}}
+    <div>{{./name}} <b>Type:</b> {{#if ./nodes.length}}Branch{{else}}Leaf{{/if}}</div>
+    {{#each ./nodes}}
       {{>recursive .}}
     {{/each}}
   {{/recursive}}
@@ -149,3 +148,71 @@ RESULT:
   <div>Leaf in Branch <b>Type:</b> Leaf</div>
   <div>Leaf #2 in Root <b>Type:</b> Leaf</div>
 ```
+
+## Too Much Recursion
+
+When working with recursive named partials, be aware that by default, expressions will walk up the context chain if the property is not found in the current context.
+
+So if your data and template looks like this:
+
+```
+DATA:
+  {
+    yayRecursion: {
+      name: "Root",
+      nodes: [
+        {
+          name: "Branch #1 in Root",
+          nodes: [
+            {
+              name: "Problem Child",
+              nodes: undefined
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+TEMPLATE:
+  {{<recursive}}
+    <div>{{name}} <b>Type:</b> {{#if nodes.length}}Branch{{else}}Leaf{{/if}}</div>
+    {{#each nodes}}
+      {{>recursive}}
+    {{/each}}
+  {{/recursive}}
+
+  {{>recursive yayRecursion}}
+```
+
+then you'll be recursing on `nodes` and your output will be something like this:
+
+```html
+RESULT:
+  <div>Root <b>Type:</b> Branch</div>
+  <div>Branch #1 in Root <b>Type:</b> Leaf</div>
+  <div>Problem Child <b>Type:</b> Branch</div>
+  <div>Problem Child <b>Type:</b> Branch</div>
+  <div>Problem Child <b>Type:</b> Branch</div>
+  <div>Problem Child <b>Type:</b> Branch</div>
+  ...
+  <div>Problem Child <b>Type:</b> Branch</div>
+  (hangs from too much recursion)
+```
+
+This is because when it's rendering that Named Partial with "Problem Child" as the context, the template sees `nodes` here: `{{#each nodes}}`, then it checks the current context (Problem Child), doesn't find anything called `nodes`, then moves up the scope to its parent context to check for `nodes`. Since `nodes` is on the parent (and contains the Problem Child), it uses that for the #each and you're stuck in infinite recursion.
+
+To avoid that, it's best practice to always be specific about the context for your expressions within a Named Partial:
+
+```
+  {{<recursive}}
+    <div>{{./name}} <b>Type:</b> {{#if ./nodes.length}}Branch{{else}}Leaf{{/if}}</div>
+    {{#each ./nodes}}
+      {{>recursive .}}
+    {{/each}}
+  {{/recursive}}
+
+  {{>recursive yayRecursion}}
+```
+
+which prevents the default behavior for expressions to look up the context chain.
