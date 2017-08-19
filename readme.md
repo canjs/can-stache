@@ -6,15 +6,15 @@
 [![Travis build status](https://travis-ci.org/canjs/can-stache.svg?branch=master)](https://travis-ci.org/canjs/can-stache)
 [![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-stache.svg)](https://greenkeeper.io/)
 
-Live binding handlebars templates
+Live-binding Handlebars/Mustache–like templates.
 
 ## Documentation
 
-Read the [API docs on CanJS.com](https://canjs.com/doc/can-stache.html).
+Read the [can-stache API docs on CanJS.com](https://canjs.com/doc/can-stache.html).
 
 ## Changelog
 
-See the [latest releases on GitHub](https://github.com/canjs/can-stache/releases).
+See the [latest can-stache releases on GitHub](https://github.com/canjs/can-stache/releases).
 
 ## Contributing
 
