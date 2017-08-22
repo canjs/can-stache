@@ -5775,6 +5775,26 @@ function makeTest(name, doc, mutation) {
 		ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
 	});
 
+	if (System.env.indexOf('production') < 0) {
+		test("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
+			expect(5);
+			var expr = /unknown attribute binding/;
+			var warn = function(text) {
+				ok(expr.test(text));
+			};
+			clone({
+				'can-stache-bindings': {},
+				'can-util/js/dev/dev': {
+					warn: warn
+				}
+			})
+			.import('can-stache')
+			.then(function(stache) {
+				stache('<a on:click="theProp" value:to:on:click="theProp"  value:to="theProp" value:from="theProp" value:bind="theProp">a link</a>');
+			});
+		});
+	}
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

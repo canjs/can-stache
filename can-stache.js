@@ -31,6 +31,7 @@ viewCallbacks.tag("content", function(el, tagData) {
 });
 
 var wrappedAttrPattern = /[{(].*[)}]/;
+var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
@@ -296,7 +297,7 @@ function stache (template) {
 
 				//!steal-remove-start
 				var decodedAttrName = attributeEncoder.decode(attrName);
-				weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName);
+				weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
 				if (weirdAttribute && !attrCallback) {
 					dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
 				}
