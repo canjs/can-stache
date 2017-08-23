@@ -75,8 +75,17 @@ function stache(template){
 		makeRendererAndUpdateSection = function(section, mode, stache){
 
 			if(mode === ">") {
+				// If there is no stache we want to self-reference the template rather than 
+				// a registered partial
+				if (stache === "") {
+					// section.add(mustacheCore.makeLiveBindingPartialRenderer("", copyState()));
+					// Figure out how to rerender the stache with its own data 
+					// and add it to the section
+				}
 				// Partials use liveBindingPartialRenderers
-				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
+				else {
+					section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
+				}
 
 			} else if(mode === "/") {
 

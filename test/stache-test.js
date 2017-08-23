@@ -5661,6 +5661,28 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("Templates can refer to themselves with {{>}} (#159)", function() {
+		var Thing = DefineMap.extend({
+			hasThing: true
+		});
+		var thing1 = new Thing();
+		var thing2 = new Thing();
+
+		thing2.hasThing = false;
+
+		var renderer = stache(
+			"<span>" + 
+				"{{#if hasThing}}" + 
+					"{{>}}" + 
+				"{{/if}}" + 
+			"</span>"
+		);
+
+		var view = renderer(thing1);
+
+		equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
