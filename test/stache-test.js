@@ -2,6 +2,7 @@
 require('./expression-test');
 require('./stache-define-test');
 require('../helpers/route-test');
+require('../helpers/-debugger-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');
@@ -5546,7 +5547,7 @@ function makeTest(name, doc, mutation) {
 			});
 		});
 	}
-	
+
 
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
@@ -5660,6 +5661,139 @@ function makeTest(name, doc, mutation) {
 		template({});
 
 	});
+
+	test( "named partials don't render (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}bar{{/foo}}<div></div>" );
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.firstChild ), "" );
+	});
+
+	test( "named partials can be inserted (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>" );
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "bar" );
+	});
+
+	test( "named partials can be inserted with an initial scope (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<personPartial}}{{lname}}, {{fname}}{{/personPartial}} <span>Test:</span><div>{{>personPartial person}}</div>" );
+		var data = new CanMap({
+			person: {
+				fname: "Darryl",
+				lname: "Anka"
+			}
+		});
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "Anka, Darryl" );
+	});
+
+	test( "named partials work with live binding (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}{{.}}{{/foo}}<span>Test: {{nested.prop.test}}</span>{{#each greatJoy}}<div>{{>foo}}</div>{{/each}}" );
+		var data = new CanMap({
+			nested: {
+				prop: {
+					test: "works?"
+				}
+			},
+			greatJoy: [
+				"happy",
+				"thrilled",
+				"ecstatic"
+			]
+		});
+		var frag = renderer( data );
+		var div = doc.createElement( "div" );
+		div.appendChild( frag );
+
+		equal( innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works?", "Named partial property rendered" );
+		equal( div.getElementsByTagName( "div" ).length, 3, "Named partial list rendered");
+
+		data.attr( "nested.prop.test", "works!" );
+		equal( innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works!", "Named partial updates when attr is updated" );
+
+		data.attr( "greatJoy.0", "quite happy" );
+		equal( innerHTML( div.getElementsByTagName( "div" )[ 0 ] ), "quite happy", "Named partial list updates when list item attr is updated" );
+
+		data.attr( "greatJoy" ).push( "Nintendo Sixty-FOOOOOOOOOOUR" );
+		equal( div.getElementsByTagName( "div" ).length, 4, "Named partial list updates with new item" );
+	});
+
+	test('stache can accept an intermediate with a named partial (canjs/can-stache/issues/3)', function(){
+		var template = "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>";
+		var intermediate = parser( template, {}, true );
+
+		var renderer = stache(intermediate);
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "bar" );;
+	});
+
+	test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
+		var renderer = stache( "{{<foo}}<li>{{name}}<ul>{{#each descendants}}{{>foo}}{{/each}}</ul></li>{{/foo}} <ul>{{#with ychromosome}}{{>foo}}{{/with}}</ul>" );
+		var data = new CanMap({
+			ychromosome: {
+				name: "AJ",
+				descendants: [
+					{
+						name: "tim",
+						descendants: []
+					},
+					{
+						name: "joe",
+						descendants: [
+							{
+								name: "chad",
+								descendants: []
+							},
+							{
+								name: "goku",
+								descendants: [
+									{
+										name: "gohan",
+										descendants: []
+									}
+								]
+							}
+						]
+					},
+					{
+						name: "sam",
+						descendants: []
+					}
+				]
+			}
+		});
+		var frag = renderer( data );
+		var fraghtml = innerHTML( frag.lastChild );
+
+		equal( (fraghtml.match(/<li>/g) || []).length, 7 );
+		ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
+	});
+
+	if (System.env.indexOf('production') < 0) {
+		test("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
+			expect(5);
+			var expr = /unknown attribute binding/;
+			var warn = function(text) {
+				ok(expr.test(text));
+			};
+			clone({
+				'can-stache-bindings': {},
+				'can-util/js/dev/dev': {
+					warn: warn
+				}
+			})
+			.import('can-stache')
+			.then(function(stache) {
+				stache('<a on:click="theProp" value:to:on:click="theProp"  value:to="theProp" value:from="theProp" value:bind="theProp">a link</a>');
+			});
+		});
+	}
 
 	test("Templates can refer to themselves with {{>}} (#159)", function() {
 		var Thing = DefineMap.extend({

@@ -11,6 +11,7 @@ require('./helpers/converter');
 var getIntermediateAndImports = require('./src/intermediate_and_imports');
 var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
 
+var attributeEncoder = require('can-attribute-encoder');
 var dev = require('can-util/js/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-util/dom/document/document');
@@ -30,6 +31,7 @@ viewCallbacks.tag("content", function(el, tagData) {
 });
 
 var wrappedAttrPattern = /[{(].*[)}]/;
+var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
 var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
@@ -38,7 +40,8 @@ var namespaces = {
 },
 	textContentOnlyTag = {style: true, script: true};
 
-function stache(template){
+function stache (template) {
+	var inlinePartials = {};
 
 	// Remove line breaks according to mustache's specs.
 	if(typeof template === "string") {
@@ -89,7 +92,13 @@ function stache(template){
 
 			} else if(mode === "/") {
 
-				section.endSection();
+				var createdSection = section.last();
+				if ( createdSection.startedWith === "<" ) {
+					inlinePartials[ stache ] = section.endSubSectionAndReturnRenderer();
+					section.removeCurrentNode();
+				} else {
+					section.endSection();
+				}
 				if(section instanceof HTMLSectionBuilder) {
 
 					//!steal-remove-start
@@ -125,10 +134,11 @@ function stache(template){
 					// Adds a renderer function that just reads a value or calls a helper.
 					section.add( makeRenderer(null,stache, copyState() ));
 
-				} else if(mode === "#" || mode === "^") {
+				} else if(mode === "#" || mode === "^" || mode === "<") {
 					// Adds a renderer function and starts a section.
-					var renderer = makeRenderer(mode,stache, copyState()  );
+					var renderer = makeRenderer(mode, stache, copyState());
 					section.startSection(renderer);
+					section.last().startedWith = mode;
 
 					// If we are a directly nested section, count how many we are within
 					if(section instanceof HTMLSectionBuilder) {
@@ -295,9 +305,10 @@ function stache(template){
 				var attrCallback = viewCallbacks.attr(attrName);
 
 				//!steal-remove-start
-				weirdAttribute = !!wrappedAttrPattern.test(attrName);
+				var decodedAttrName = attributeEncoder.decode(attrName);
+				weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
 				if (weirdAttribute && !attrCallback) {
-					dev.warn("unknown attribute binding " + attrName + ". Is can-stache-bindings imported?");
+					dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
 				}
 				//!steal-remove-end
 
@@ -405,7 +416,15 @@ function stache(template){
 		done: function(){}
 	});
 
-	return section.compile();
+	var renderer = section.compile();
+	return HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
+		if( Object.keys( inlinePartials ).length ) {
+			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
+			assign( optionsScope.inlinePartials, inlinePartials );
+		}
+		return renderer.apply( this, arguments );
+	});
+	//return section.compile();
 }
 
 // At this point, can.stache has been created
@@ -413,10 +432,10 @@ assign(stache, mustacheHelpers);
 
 stache.safeString = function(text){
 	return {
-			toString: function () {
-				return text;
-			}
-		};
+		toString: function () {
+			return text;
+		}
+	};
 };
 stache.async = function(source){
 	var iAi = getIntermediateAndImports(source);
