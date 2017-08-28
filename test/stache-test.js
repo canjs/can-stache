@@ -5806,6 +5806,13 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
+	test("newline is a valid special tag white space", function() {
+		var renderer = stache('<div\n\t{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
+		var html = renderer({ hideIt: true });
+
+		QUnit.ok(html, "markup was generated");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
