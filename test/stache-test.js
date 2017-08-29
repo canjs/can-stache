@@ -5811,6 +5811,13 @@ function makeTest(name, doc, mutation) {
 		var html = renderer({ hideIt: true });
 
 		QUnit.ok(html, "markup was generated");
+
+		// almost the same, but no leading spaces before {{#unless
+		renderer = stache('<div\n{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
+		html = renderer({ hideIt: true });
+
+		QUnit.ok(html, "markup was generated");
+
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
