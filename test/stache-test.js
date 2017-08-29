@@ -5797,7 +5797,9 @@ function makeTest(name, doc, mutation) {
 
 	test("Templates can refer to themselves with {{>}} (#159)", function() {
 		var Thing = DefineMap.extend({
-			hasThing: true
+			hasThing: {
+				value: true
+			}
 		});
 		var thing1 = new Thing();
 		var thing2 = new Thing();
