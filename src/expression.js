@@ -776,22 +776,8 @@ var expression = {
 
 			cursor.index++;
 
-			// Literal
-			if(literalRegExp.test( token )) {
-				convertToHelperIfTopIsLookup(stack);
-				// only add to hash if there's not already a child.
-				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
-				if(firstParent.type === "Hash" && (firstParent.children && firstParent.children.length > 0)) {
-					stack.addTo(["Helper", "Call", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
-				} else if(firstParent.type === "Bracket" && (firstParent.children && firstParent.children.length > 0)) {
-					stack.addTo(["Helper", "Call", "Hash"], {type: "Literal", value: utils.jsonParse( token )});
-				} else {
-					stack.addTo(["Helper", "Call", "Hash", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
-				}
-
-			}
 			// Hash
-			else if(nextToken === "=") {
+			if(nextToken === "=") {
 				//convertToHelperIfTopIsLookup(stack);
 				top = stack.top();
 
@@ -826,6 +812,20 @@ var expression = {
 					stack.push(hash);
 				}
 				cursor.index++;
+
+			}
+			// Literal
+			else if(literalRegExp.test( token )) {
+				convertToHelperIfTopIsLookup(stack);
+				// only add to hash if there's not already a child.
+				firstParent = stack.first(["Helper", "Call", "Hash", "Bracket"]);
+				if(firstParent.type === "Hash" && (firstParent.children && firstParent.children.length > 0)) {
+					stack.addTo(["Helper", "Call", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
+				} else if(firstParent.type === "Bracket" && (firstParent.children && firstParent.children.length > 0)) {
+					stack.addTo(["Helper", "Call", "Hash"], {type: "Literal", value: utils.jsonParse( token )});
+				} else {
+					stack.addTo(["Helper", "Call", "Hash", "Bracket"], {type: "Literal", value: utils.jsonParse( token )});
+				}
 
 			}
 			// Lookup
