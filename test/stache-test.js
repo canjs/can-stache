@@ -5733,6 +5733,17 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML( frag.lastChild ), "bar" );;
 	});
 
+	test('named partials can reference each other (canjs/can-stache/issues/3)', function(){
+		var template = "{{<foo}}hello {{>bar}}{{/foo}} {{<bar}}world{{/bar}} <span>Test:</span><div>{{>foo}}</div>";
+		var intermediate = parser( template, {}, true );
+
+		var renderer = stache(intermediate);
+		var data = new CanMap( {} );
+		var frag = renderer( data );
+
+		equal( innerHTML( frag.lastChild ), "hello world" );;
+	});
+
 	test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<foo}}<li>{{name}}<ul>{{#each descendants}}{{>foo}}{{/each}}</ul></li>{{/foo}} <ul>{{#with ychromosome}}{{>foo}}{{/with}}</ul>" );
 		var data = new CanMap({
