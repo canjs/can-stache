@@ -26,7 +26,7 @@ var canReflect = require("can-reflect");
 
 // ## Helpers
 
-var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g,
+var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g,
 	mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g,
 	k = function(){};
 
@@ -458,10 +458,11 @@ var core = {
 			if(spaceLessSpecial || ">{".indexOf( modeAndExpression.mode) >= 0) {
 				return whole;
 			}  else if( "^#!/".indexOf(  modeAndExpression.mode ) >= 0 ) {
-
 				// Return the magic tag and a trailing linebreak if this did not
 				// start a new line and there was an end line.
-				return special+( matchIndex !== 0 && returnAfter.length ? returnBefore+"\n" :"");
+				// Add a normalized leading space, if there was any leading space, in case this abuts a tag name
+				spaceBefore = (returnBefore + spaceBefore) && " ";
+				return spaceBefore+special+( matchIndex !== 0 && returnAfter.length ? returnBefore+"\n" :"");
 
 
 			} else {

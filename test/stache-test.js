@@ -5806,6 +5806,19 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
+	test("newline is a valid special tag white space", function() {
+		var renderer = stache('<div\n\t{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
+		var html = renderer({ hideIt: true });
+
+		QUnit.ok(html, "markup was generated");
+
+		// almost the same, but no leading spaces before {{#unless
+		renderer = stache('<div\n{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
+		html = renderer({ hideIt: true });
+
+		QUnit.ok(html, "markup was generated");
+	});
+
 	test("numbers can be used as hash keys (#203)", function() {
 		stache.registerHelper("globalValue", function(prop, options) {
 			return prop + ":" + (options.hash[0] || options.hash.zero);
@@ -5825,8 +5838,6 @@ function makeTest(name, doc, mutation) {
 		fraghtml = innerHTML(frag.lastChild);
 
 		equal(fraghtml, "value:strung");
-
-
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
