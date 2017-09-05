@@ -5817,7 +5817,27 @@ function makeTest(name, doc, mutation) {
 		html = renderer({ hideIt: true });
 
 		QUnit.ok(html, "markup was generated");
+	});
 
+	test("numbers can be used as hash keys (#203)", function() {
+		stache.registerHelper("globalValue", function(prop, options) {
+			return prop + ":" + (options.hash[0] || options.hash.zero);
+		});
+
+		var renderer = stache("<p>{{globalValue 'value' 0='indexed'}}</p>");
+		var frag = renderer({});
+
+		var fraghtml = innerHTML(frag.lastChild);
+
+		equal(fraghtml, "value:indexed");
+
+		// sanity check -- exact same thing should work for string key here
+		renderer = stache("<p>{{globalValue 'value' zero='strung'}}</p>");
+		frag = renderer({});
+
+		fraghtml = innerHTML(frag.lastChild);
+
+		equal(fraghtml, "value:strung");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
