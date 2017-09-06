@@ -5804,6 +5804,22 @@ function makeTest(name, doc, mutation) {
 				stache('<a on:click="theProp" value:to:on:click="theProp"  value:to="theProp" value:from="theProp" value:bind="theProp">a link</a>');
 			});
 		});
+
+
+		test("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
+			var oldWarn = canDev.warn;
+			canDev.warn = function() {
+				QUnit.ok(false, "Should not have warned about matching tags");
+			};
+			stache(
+				'{{#games.getAvailableCourts(selectedRound)}}' +
+		   		'<option value="{{.}}">{{.}}</option>' +
+				'{{/games.getAvailableCourts}}'
+			);
+
+			QUnit.ok(true, "Need an assertion");
+			canDev.warn = oldWarn;
+		});
 	}
 
 	test("newline is a valid special tag white space", function() {
@@ -5843,3 +5859,4 @@ function makeTest(name, doc, mutation) {
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
+
