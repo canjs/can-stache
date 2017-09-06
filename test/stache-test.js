@@ -5926,6 +5926,41 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
 	});
 
+	test("Worm test", function() {
+		var viewModel = new DefineMap({
+			worm: {
+				name: "Earthworm Jim",
+				hasArms: false,
+				hasChild: true,
+				worm: {
+					name: "Grey Worm",
+					hasChild: true,
+					worm: {
+						name: "MyDoom",
+						hasChild: false
+					}
+				}
+			}
+		});
+
+		var renderer = stache(
+			"{{#worm}}" +
+				"<p>{{name}}</p>" +
+				"<p>{{hasArms}}</p>" +
+				"{{#if hasChild}}" +
+					"<div>" +
+						"{{>*self hasArms}}" +
+					"</div>" +
+				"{{/if}}" +
+			"{{/child}}"
+		);
+
+		var view = renderer(viewModel);
+		debugger;
+
+		ok(false);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

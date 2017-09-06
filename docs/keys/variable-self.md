@@ -1,5 +1,5 @@
 @typedef {String} can-stache/keys/variable/self *self
-@parent can-stache/keys/variable
+@parent can-stache/keys
 
 Used to reference the current template and recursively render it
 
@@ -9,9 +9,7 @@ The entirety of the current template is always stored as a [can-stache.tags.name
 
 ```
 <div>
-	{{#if hasChild}}
-		{{>*self}}
-	{{/if}}
+	{{>*self}}
 </div>
 ```
 
@@ -23,65 +21,90 @@ This can be used to recursively render a template given a stop condition.
 
 ```
 var viewModel = new DefineMap({
-	child: {
+	worm: {
+		name: "Earthworm Jim",
 		hasChild: true,
-		child: {
-			hasChild: false
+		worm: {
+			name: "Grey Worm",
+			hasChild: true,
+			worm: {
+				name: "MyDoom",
+				hasChild: false
+			}
 		}
 	}
 });
 
-var renderer = stache(
-	"{{#child}}" +  // Will use the current child for scope
-		"<span>" +
-			"{{#if hasChild}}" +
-				"{{>*self}}" +
-			"{{/if}}" +
-		"</span>" +
-	"{{/child}}"
-);
+var renderer = stache(`
+	{{#worm}}
+		<span>{{name}}</span>
+		{{#if hasChild}}
+			<div>
+				{{>*self}}
+			</div>
+		{{/if}}
+	{{/child}}
+`);
 
 var view = renderer(viewModel);
 ```
 
 The view variable will be the document fragment:
 ```
-<span>
-	<span></span>
-</span>
+<span>Earthworm Jim</span>
+<div>
+	<span>Grey Worm</span>
+	<div>
+		<span>MyDoom</span>
+	</div>
+</div>
 ```
 
 A template variable can be passed in
 
 ```
 var viewModel = new DefineMap({
-	child: {
+	worm: {
+		name: "Earthworm Jim",
 		hasChild: true,
-		someProp: 1,
-		child: {
-			hasChild: false,
+		worm: {
+			name: "Grey Worm",
+			hasChild: true,
+			worm: {
+				name: "MyDoom",
+				hasChild: false
+			}
 		}
 	}
 });
 
-var renderer = stache(
-	"{{#child}}" +  // Will use the current child for scope
-		"<span>" +
-			"{{#if hasChild}}" +
-				"{{someProp}}" +
-				"{{>*self someProp}}" +
-			"{{/if}}" +
-		"</span>" +
-	"{{/child}}"
-);
+var renderer = stache(`
+	{{#worm}}
+		<p>{{name}}</p>
+		<p>{{hasArms}}</p>
+		{{#if hasChild}}
+			<div>
+				{{>*self}}
+			</div>
+		{{/if}}
+	{{/child}}
+`);
 
 var view = renderer(viewModel);
 ```
 
 The view variable will be the document fragment:
 ```
-<span>
-	1
-	<span>1</span>
-</span>
+<p>Earthworm Jim</p>
+<p>false</p>
+<div>
+	<p>Grey Worm</p>
+	<p>false</p>
+	<div>
+		<p>MyDoom</p>
+		<p>false</p>
+	</div>
+</div>
 ```
+
+For a more detailed explaination of using partials recursively see [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion]

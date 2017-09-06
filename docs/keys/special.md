@@ -3,7 +3,7 @@
 
 [can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
 provide special values that start with `%` to prevent potential collisions with
-other values.  
+other values. Special values should not be confused with [can-stache/keys/variable template variables] like [can-stache/keys/variable/self *self]
 
 @signature `%index`
 
