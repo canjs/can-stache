@@ -17,7 +17,7 @@ omitted up to the next tag, magic tag, or non-whitespace character. It also work
 
 ### Basic Usage
 
-```js
+```html
 <div>
 	{{-#if user.isMarried-}}
 		Mrs
@@ -29,13 +29,13 @@ omitted up to the next tag, magic tag, or non-whitespace character. It also work
 
 would render as:
 
-```js
+```html
 <div>{{#if user.isMarried}}Mrs{{else}}Miss{{/if}}</div>
 ```
 
 and
 
-```js
+```html
 <div>
 	{{{- toMarkdown(content) -}}}
 </div>
@@ -43,7 +43,7 @@ and
 
 would render as:
 
-```js
+```html
 <div>{{{ toMarkdown(content) }}}</div>
 ```
 
@@ -51,7 +51,7 @@ would render as:
 
 One use case is to remove spaces around span elements.
 
-```js
+```html
 <div>
 	<span>
 		{{-#if user.isMarried-}}
@@ -66,7 +66,7 @@ One use case is to remove spaces around span elements.
 
 would render as:
 
-```js
+```html
 <div>
 	<span>{{#if user.isMarried}}Mrs.{{else}}Miss.{{/if}}</span>{{ user.name }}
 </div>
@@ -78,7 +78,7 @@ Another would be to assure that empty elements are able to match the `:empty`
 css pseudo-class (the whitespace that would be otherwise present prevents this),
 while still being cleanly formatted for human consumption.
 
-```js
+```html
 <div>
 	{{-! output the users name }}
 	{{-#if user.name}}
@@ -89,7 +89,7 @@ while still being cleanly formatted for human consumption.
 
 would render as:
 
-```js
+```html
 <div>{{-! output the users name }}{{-#if user.name}}
 		{{ user.name }}
 	{{/if-}}</div>
