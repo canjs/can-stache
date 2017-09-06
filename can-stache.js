@@ -450,4 +450,6 @@ stache.registerPartial = function(id, partial) {
 	templates[id] = (typeof partial === "string" ? stache(partial) : partial);
 };
 
+// Some comment
+
 module.exports = namespace.stache = stache;
