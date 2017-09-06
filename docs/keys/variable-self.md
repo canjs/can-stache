@@ -17,36 +17,32 @@ The entirety of the current template is always stored as a [can-stache.tags.name
 
 ## Use
 
-This can be used to recursively render a template given a stop condition.
+This can be used to recursively render a template given a stop condition. 
+Note that we use a key expression to set local scope. Also note it is 
+a dot slash on the child key expression.
+The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
 ```
-var viewModel = new DefineMap({
-	worm: {
-		name: "Earthworm Jim",
-		hasChild: true,
-		worm: {
-			name: "Grey Worm",
-			hasChild: true,
-			worm: {
-				name: "MyDoom",
-				hasChild: false
-			}
+var grandpaWorm = new DefineMap({
+	name: "Earthworm Jim",
+	child: {
+		name: "Grey Worm",
+		child: {
+			name: "MyDoom"
 		}
 	}
 });
 
 var renderer = stache(`
-	{{#worm}}
-		<span>{{name}}</span>
-		{{#if hasChild}}
-			<div>
-				{{>*self}}
-			</div>
-		{{/if}}
+	<span>{{name}}</span>
+	{{#./child}}
+		<div>
+			{{>*self}}
+		</div>
 	{{/child}}
 `);
 
-var view = renderer(viewModel);
+var view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
@@ -63,34 +59,30 @@ The view variable will be the document fragment:
 A template variable can be passed in
 
 ```
-var viewModel = new DefineMap({
-	worm: {
+var grandpaWorm = new DefineMap({
+	child: {
 		name: "Earthworm Jim",
-		hasChild: true,
-		worm: {
+		hasArms: false,
+		child: {
 			name: "Grey Worm",
-			hasChild: true,
-			worm: {
-				name: "MyDoom",
-				hasChild: false
+			child: {
+				name: "MyDoom"
 			}
 		}
 	}
 });
 
 var renderer = stache(`
-	{{#worm}}
-		<p>{{name}}</p>
-		<p>{{hasArms}}</p>
-		{{#if hasChild}}
-			<div>
-				{{>*self}}
-			</div>
-		{{/if}}
+	<p>{{name}}</p>
+	<p>{{hasArms}}</p>
+	{{#./child}}
+		<div>
+			{{>*self}}
+		</div>
 	{{/child}}
 `);
 
-var view = renderer(viewModel);
+var view = renderer(granpaWorm);
 ```
 
 The view variable will be the document fragment:
