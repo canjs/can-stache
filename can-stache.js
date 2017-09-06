@@ -78,17 +78,8 @@ function stache (template) {
 		makeRendererAndUpdateSection = function(section, mode, stache){
 
 			if(mode === ">") {
-				// If there is no stache we want to self-reference the template rather than 
-				// a registered partial
-				if (stache === "") {
-					// section.add(mustacheCore.makeLiveBindingPartialRenderer("", copyState()));
-					// Figure out how to rerender the stache with its own data 
-					// and add it to the section
-				}
 				// Partials use liveBindingPartialRenderers
-				else {
-					section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
-				}
+				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
 
 			} else if(mode === "/") {
 
@@ -417,14 +408,15 @@ function stache (template) {
 	});
 
 	var renderer = section.compile();
-	return HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
+	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
 		if( Object.keys( inlinePartials ).length ) {
 			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
+		scope.set('*self', scopifiedRenderer);
 		return renderer.apply( this, arguments );
 	});
-	//return section.compile();
+	return scopifiedRenderer;
 }
 
 // At this point, can.stache has been created
