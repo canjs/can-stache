@@ -5976,6 +5976,27 @@ function makeTest(name, doc, mutation) {
 		equal(fraghtml, "value:strung");
 	});
 
+	test("Can assign multiple keys using with (#274)", function() {
+		var viewModel = new DefineMap({
+			person: {
+				first: "John",
+				last: "Gardner"
+			}
+		});
+
+		var renderer = stache(
+			"{{#with first=person.first last=person.last}}" +
+				"<span>{{first}}</span>" +
+				"<span>{{last}}</span>" +
+			"{{/with}}"
+		);
+
+		var view = renderer(viewModel);
+
+		equal(view.children[0].firstChild.nodeValue, "John", "Got the first name");
+		equal(view.children[1].firstChild.nodeValue, "Gardner", "Got the last name");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
