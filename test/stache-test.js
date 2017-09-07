@@ -5730,7 +5730,7 @@ function makeTest(name, doc, mutation) {
 		var data = new CanMap( {} );
 		var frag = renderer( data );
 
-		equal( innerHTML( frag.lastChild ), "bar" );;
+		equal( innerHTML( frag.lastChild ), "bar" );
 	});
 
 	test('named partials can reference each other (canjs/can-stache/issues/3)', function(){
@@ -5741,7 +5741,7 @@ function makeTest(name, doc, mutation) {
 		var data = new CanMap( {} );
 		var frag = renderer( data );
 
-		equal( innerHTML( frag.lastChild ), "hello world" );;
+		equal( innerHTML( frag.lastChild ), "hello world" );
 	});
 
 	test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
@@ -5821,6 +5821,149 @@ function makeTest(name, doc, mutation) {
 			canDev.warn = oldWarn;
 		});
 	}
+
+	test('Bracket expression after `this` (canjs/can-stache/issues/173)', function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ this[bar] }}</p>");
+
+		var data = new CanMap({
+			bar: "name",
+			name: "James",
+			"name.full": "James Atherton"
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'James', 'correct value for this[bar]');
+
+		data.attr('bar', 'name.full');
+
+		equal(innerHTML(p[0]), 'James Atherton', 'updated bar value for this[bar]');
+
+		data.attr('name.full', 'Lunch time');
+
+		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for this[bar]');
+
+	});
+
+	test('Bracket expression with dot using DefineMap (canjs/can-stache/issues/173)', function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ this[bar] }}</p><p>{{ this['name.full'] }}</p>");
+
+		var data = new DefineMap({
+			bar: "name.full",
+			"name.full": "James Atherton"
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'James Atherton', 'correct value for this[bar]');
+		equal(innerHTML(p[1]), 'James Atherton', 'correct value for this["name.full"]');
+
+		data['name.full'] = 'Lunch time';
+
+		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for this[bar]');
+		equal(innerHTML(p[1]), 'Lunch time', 'updated `name.full` value for this["name.full"]');
+	});
+
+	test('Bracket expression after `.` with dot using DefineMap (canjs/can-stache/issues/173)', function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ .[bar] }}</p><p>{{ .['name.full'] }}</p>");
+
+		var data = new DefineMap({
+			bar: "name.full",
+			"name.full": "James Atherton"
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'James Atherton', 'correct value for .[bar]');
+		equal(innerHTML(p[1]), 'James Atherton', 'correct value for .["name.full"]');
+
+		data['name.full'] = 'Lunch time';
+
+		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for .[bar]');
+		equal(innerHTML(p[1]), 'Lunch time', 'updated `name.full` value for .["name.full"]');
+	});
+
+	test('Bracket expression by itself with dot using DefineMap (canjs/can-stache/issues/173)', function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ [bar] }}</p><p>{{ ['name.full'] }}</p><p>{{name.full}}</p>{{#with person}}<p>{{['name.full']}}</p>{{/with}}");
+
+		var data = new DefineMap({
+			bar: "name.full",
+			"name.full": "James Atherton",
+			name: {
+				full: "Yep yep"
+			},
+			person: {
+				"name.full": "Tim Tim"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'James Atherton', 'correct value for [bar]');
+		equal(innerHTML(p[1]), 'James Atherton', 'correct value for ["name.full"]');
+		equal(innerHTML(p[2]), 'Yep yep', 'correct value for name.full');
+		equal(innerHTML(p[3]), 'Tim Tim', 'correct value for ["name.full"] in a #with expression');
+
+		data['name.full'] = 'Lunch time';
+		data.name.full = 'Lunch time 2';
+		data.person["name.full"] = 'Lunch time 3';
+
+		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for [bar]');
+		equal(innerHTML(p[1]), 'Lunch time', 'updated `name.full` value for ["name.full"]');
+		equal(innerHTML(p[2]), 'Lunch time 2', 'updated value for name.full');
+		equal(innerHTML(p[3]), 'Lunch time 3', 'updated value for ["name.full"] in a #with expression');
+	});
+
+	test('Bracket expression by itself with dot using can.Map (canjs/can-stache/issues/173)', function () {
+		var template;
+		var div = doc.createElement('div');
+
+		template = stache("<p>{{ [bar] }}</p><p>{{ ['name.full'] }}</p><p>{{name2.full}}</p>{{#with person}}<p>{{['name.full']}}</p>{{/with}}");
+
+		var data = new CanMap({
+			bar: "name.full",
+			"name.full": "James Atherton",
+			name2: {
+				full: "Yep yep"
+			},
+			person: {
+				"name.full": "Tim Tim"
+			}
+		});
+		var dom = template(data);
+		div.appendChild(dom);
+		var p = div.getElementsByTagName('p');
+
+		equal(innerHTML(p[0]), 'James Atherton', 'correct value for [bar]');
+		equal(innerHTML(p[1]), 'James Atherton', 'correct value for ["name.full"]');
+		equal(innerHTML(p[2]), 'Yep yep', 'correct value for name.full');
+		equal(innerHTML(p[3]), 'Tim Tim', 'correct value for ["name.full"] in a #with expression');
+
+		data.attr('name.full', 'Lunch time');
+		data.attr("name2").attr("full", 'Lunch time 2');
+		data.attr("person").attr("name.full", 'Lunch time 3');
+
+		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for [bar]');
+		equal(innerHTML(p[1]), 'Lunch time', 'updated `name.full` value for ["name.full"]');
+		equal(innerHTML(p[2]), 'Lunch time 2', 'updated value for name.full');
+		equal(innerHTML(p[3]), 'Lunch time 3', 'updated value for ["name.full"] in a #with expression');
+	});
 
 	test("Templates can refer to themselves with {{>*self .}} (#159)", function() {
 		var thing = new DefineMap({
