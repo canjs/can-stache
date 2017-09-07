@@ -22,7 +22,7 @@ var makeDocument = require('can-vdom/make-document/make-document');
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
 var domMutate = require('can-util/dom/mutate/mutate');
-var DOCUMENT = require('can-util/dom/document/document');
+var DOCUMENT = require('can-globals/document/document');
 var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
 
 var canEach = require('can-util/js/each/each');
