@@ -890,7 +890,7 @@ var expression = {
 				top = stack.top();
 				if(top.type === "Lookup") {
 					//!steal-remove-start
-					//This line is just for matching stache brackets elsewhere,
+					//This line is just for matching stache magic tags elsewhere,
 					// because convertToAtLookup modifies the original key
 					canReflect.setKeyValue(top, canSymbol.for("can-stache.originalKey"), top.key);
 					//!steal-remove-end
