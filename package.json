@@ -40,7 +40,7 @@
     "can-route": "^3.2.0",
     "can-stache-key": "0.1.0",
     "can-symbol": "^1.0.0",
-    "can-util": "^3.9.5",
+    "can-util": "^3.10.6",
     "can-view-callbacks": "^3.2.0",
     "can-view-live": "^3.2.0",
     "can-view-nodelist": "^3.1.0",
