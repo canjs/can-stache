@@ -408,14 +408,15 @@ function stache (template) {
 	});
 
 	var renderer = section.compile();
-	return HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
+	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
 		if( Object.keys( inlinePartials ).length ) {
 			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
+		scope.set('*self', scopifiedRenderer);
 		return renderer.apply( this, arguments );
 	});
-	//return section.compile();
+	return scopifiedRenderer;
 }
 
 // At this point, can.stache has been created

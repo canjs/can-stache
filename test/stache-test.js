@@ -5806,6 +5806,126 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
+	test("Templates can refer to themselves with {{>*self .}} (#159)", function() {
+		var thing = new DefineMap({
+			child: {
+				hasThing: true,
+				child: {
+					hasThing: false,
+					child: {
+						hasThing: true
+					}
+				}
+			}
+		});
+		
+		var renderer = stache(
+			"{{#child}}" +
+				"<span>" +
+					"{{#if hasThing}}" +
+						"{{>*self .}}" +
+					"{{/if}}" +
+				"</span>" +
+			"{{/child}}"
+		);
+
+		var view = renderer(thing);
+
+		equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
+		equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
+	});
+
+	test("Self-referential templates assume 'this'", function() {
+		var thing = new DefineMap({
+			child: {
+				hasThing: true,
+				child: {
+					hasThing: false,
+					child: {
+						hasThing: true
+					}
+				}
+			}
+		});
+		
+		var renderer = stache(
+			"{{#child}}" +
+				"<span>" +
+					"{{#if hasThing}}" +
+						"{{>*self}}" +
+					"{{/if}}" +
+				"</span>" +
+			"{{/child}}"
+		);
+
+		var view = renderer(thing);
+
+		equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
+		equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
+	});
+
+	test("Self-referential templates work with partial templates", function() {
+		var thing = new DefineMap({
+			child: {
+				hasThing: true,
+				child: {
+					hasThing: false,
+					child: {
+						hasThing: true
+					}
+				}
+			}
+		});
+		
+		var renderer = stache(
+			"{{<somePartial}}" +
+				"foo" +
+			"{{/somePartial}}" +
+			"{{#child}}" +
+				"<span>" +
+					"{{#if hasThing}}" +
+						"{{>somePartial}}" +
+						"{{>*self}}" +
+					"{{/if}}" +
+				"</span>" +
+			"{{/child}}"
+		);
+
+		var view = renderer(thing);
+
+		equal(view.firstChild.firstChild.nodeValue, "foo", "Got the second span");
+	});
+
+	test("Self-referential templates can be given scope", function() {
+		var thing = new DefineMap({
+			child: {
+				someProp: 1,
+				hasThing: true,
+				child: {
+					hasThing: false,
+					child: {
+						hasThing: true
+					}
+				}
+			}
+		});
+		
+		var renderer = stache(
+			"{{#child}}" +
+				"<span>" +
+					"{{someProp}}" +
+					"{{#if hasThing}}" +
+						"{{>*self someProp}}" +
+					"{{/if}}" +
+				"</span>" +
+			"{{/child}}"
+		);
+
+		var view = renderer(thing);
+
+		equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
+	});
+	
 	test("newline is a valid special tag white space", function() {
 		var renderer = stache('<div\n\t{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
 		var html = renderer({ hideIt: true });
