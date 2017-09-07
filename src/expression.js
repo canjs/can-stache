@@ -274,7 +274,12 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 };
 
 Call.prototype.closingTag = function() {
-	return this.methodExpr.key.slice(1);
+	//!steal-remove-start
+	if(this.methodExpr[canSymbol.for('can-stache.originalKey')]) {
+		return this.methodExpr[canSymbol.for('can-stache.originalKey')];
+	}
+	//!steal-remove-end
+	return this.methodExpr.key;
 };
 
 // ### HelperLookup
@@ -708,7 +713,11 @@ var expression = {
 	hydrateAst: function(ast, options, methodType, isArg){
 		var hashes;
 		if(ast.type === "Lookup") {
-			return new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType) );
+			var lookup = new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType) );
+			//!steal-remove-start
+			canReflect.setKeyValue(lookup, canSymbol.for("can-stache.originalKey"), ast[canSymbol.for("can-stache.originalKey")]);
+			//!steal-remove-end
+			return lookup;
 		}
 		else if(ast.type === "Literal") {
 			return new Literal(ast.value);
@@ -880,6 +889,11 @@ var expression = {
 			else if(token === "(") {
 				top = stack.top();
 				if(top.type === "Lookup") {
+					//!steal-remove-start
+					//This line is just for matching stache magic tags elsewhere,
+					// because convertToAtLookup modifies the original key
+					canReflect.setKeyValue(top, canSymbol.for("can-stache.originalKey"), top.key);
+					//!steal-remove-end
 					stack.replaceTopAndPush({
 						type: "Call",
 						method: convertToAtLookup(top)
