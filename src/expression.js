@@ -43,33 +43,18 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 		}
 		return result;
 	},
-
-	// A dynamic key value to lookup from the scope
-	getObservableValue_fromDynamicKey = function(key, scope, helperOptions, readOptions){
-
-		var c = compute(function(newVal) {
-			var keyValue = canReflect.getValue(key);
-			if (arguments.length) {
-				scope.set(""+keyValue, newVal, readOptions);
-			} else {
-				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				// also escape `.` so that things like ["bar.baz"] will work correctly
-				return scope.get(("" + keyValue).replace(".", "\\."), readOptions);
-			}
-		});
-		compute.temporarilyBind(c);
-		return c;
-	},
-	getObservableValue_fromDynamicKey_fromObservable = function(key, root, helperOptions, readOptions){
+	getObservableValue_fromDynamicKey_fromObservable = function (key, root, helperOptions, readOptions) {
 		var computeValue = compute(function(newVal) {
 			var keyValue = canReflect.getValue(key);
 			var rootValue = canReflect.getValue(root);
+			// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
+			// also escape `.` so that things like ["bar.baz"] will work correctly
+			keyValue = ("" + keyValue).replace(".", "\\.");
+
 			if (arguments.length) {
-				observeReader.write(rootValue, observeReader.reads(""+keyValue), newVal);
+				observeReader.write(rootValue, observeReader.reads(keyValue), newVal);
 			} else {
-				// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-				// also escape `.` so that things like ["bar.baz"] will work correctly
-				return observeReader.get(rootValue, ("" + keyValue).replace(".", "\\."));
+				return observeReader.get(rootValue, keyValue);
 			}
 		});
 		compute.temporarilyBind(computeValue);
@@ -125,12 +110,8 @@ var Bracket = function (key, root) {
 	this.key = key;
 };
 Bracket.prototype.value = function (scope, helpers) {
-
-	if(!this.root) {
-		return getObservableValue_fromDynamicKey(this.key.value(scope, helpers), scope, {}, {});
-	} else {
-		return getObservableValue_fromDynamicKey_fromObservable(this.key.value(scope, helpers), this.root.value(scope, helpers), scope, helpers, {});
-	}
+	var root = this.root ? this.root.value(scope, helpers) : scope.peek('.');
+	return getObservableValue_fromDynamicKey_fromObservable(this.key.value(scope, helpers), root, scope, helpers, {});
 };
 
 // ### Literal
