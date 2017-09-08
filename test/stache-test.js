@@ -19,12 +19,12 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
+var globals = require('can-globals');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
 var domMutate = require('can-util/dom/mutate/mutate');
-var DOCUMENT = require('can-util/dom/document/document');
-var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
+var DOCUMENT = require('can-globals/document/document');
 
 var canEach = require('can-util/js/each/each');
 var canDev = require('can-log/dev/dev');
@@ -38,7 +38,7 @@ var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
 
 var browserDoc = DOCUMENT();
-var mutationObserver = MUTATION_OBSERVER();
+
 
 makeTest('can/view/stache dom', browserDoc);
 makeTest('can/view/stache vdom', makeDocument());
@@ -103,12 +103,12 @@ function makeTest(name, doc, mutation) {
 		setup: function(){
 			if(doc === window.document) {
 				DOCUMENT(null);
-				MUTATION_OBSERVER(mutationObserver);
+				globals.deleteKeyValue('MutationObserver');
 
 			} else {
 				oldDoc = window.document;
 				DOCUMENT(doc);
-				MUTATION_OBSERVER(null);
+				globals.setKeyValue('MutationObserver', null);
 			}
 
 
@@ -124,7 +124,7 @@ function makeTest(name, doc, mutation) {
 
 			setTimeout(function(){
 				DOCUMENT(window.document);
-				MUTATION_OBSERVER(mutationObserver);
+				globals.deleteKeyValue('MutationObserver');
 				start();
 			},1)
 		}
