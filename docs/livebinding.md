@@ -54,9 +54,9 @@ For more information visit the [can-define/map/map] documentation.
 
 If you are looking for information on bindings between components like this:
 ```
-(event)="key()" for event binding.
-{prop}="key" for one-way binding to a child.
-{^prop}="key" for one-way binding to a parent.
-{(prop)}="key" for two-way binding.
+on:event="key()" for event binding.
+prop:from="key" for one-way binding to a child.
+prop:to="key" for one-way binding to a parent.
+prop:bind="key" for two-way binding.
 ```
 See [can-stache-bindings].
