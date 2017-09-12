@@ -778,6 +778,19 @@ function makeTest(name, doc, mutation) {
 		var expected = t.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
 		deepEqual(getText(t.template,t.data), expected);
+
+		var v = {
+			template: "{{#with person}}{{name}}{{/with}}",
+			expected: "Andy",
+			data: {
+				person: null,
+				name: "Andy"
+			}
+		};
+
+		expected = v.expected.replace(/&quot;/g, '&#34;')
+			.replace(/\r\n/g, '\n');
+		deepEqual(getText(v.template,v.data), expected);
 	});
 
 
@@ -1614,8 +1627,8 @@ function makeTest(name, doc, mutation) {
 		var inv_staches = {
 			"else": "{{#if test}}if{{else}}else{{/if}}",
 			"not_not_if": "not_{{^if test}}not_{{/if}}if",
-			"not_each": "not_{{#each test}}_{{/each}}each",
-			"not_with": "not{{#with test}}_{{/with}}_with"
+			"not_each": "not_{{#each test}}_{{/each}}each"
+			//"not_with": "not{{#with test}}_{{/with}}_with" //{{#with}} *always* renders non-inverse block
 		};
 
 		for (result in inv_staches) {
