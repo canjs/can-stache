@@ -19,6 +19,22 @@ Renders `BLOCK` with the result of `EXPRESSION` added to the top of the [can-vie
 @param {can-stache.sectionRenderer} BLOCK A template that is rendered
 with the context of the `EXPRESSION`'s value.
 
+@signature `{{#with HASHES}}BLOCK{{/with}}`
+
+Renders `BLOCK` with the key-value pairs from a [can-stache/expressions/hash] added to the top of the [can-view-scope].
+
+```
+{{#with _street=person.address.street _city=person.address.city}}
+    Street: {{_street}}
+    City: {{_city}}
+{{/with}}
+```
+
+@param {can-stache/expressions/hash} HASHES Any number of hash keys and values
+
+@param {can-stache.sectionRenderer} BLOCK A template that is rendered
+with the hashes added to the context.
+
 @body
 
 ## Use
@@ -39,6 +55,23 @@ RESULT:
 	Street: 123 Evergreen
 	City: Springfield
 ```
+
+The new context can be a lookup expression, or a set of hashes which are taken together to be a new context.
+
+```
+TEMPLATE:
+	{{#with _street=person.address.street _city=person.address.city}}
+		Street: {{_street}}
+		City: {{_city}}
+	{{/with}}
+DATA:
+	{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
+
+RESULT:
+	Street: 123 Evergreen
+	City: Springfield
+```
+
 
 The difference between `{{#with}}` and the default [can-stache.tags.section]
 is that the subsection `BLOCK` is rendered no matter what:
