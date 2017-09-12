@@ -6128,16 +6128,32 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache(
-			"{{#with first=person.first last=person.last}}" +
-				"<span>{{first}}</span>" +
-				"<span>{{last}}</span>" +
+			"{{#with firstName=person.first lastName=person.last}}" +
+				"<span>{{firstName}}</span>" +
+				"<span>{{lastName}}</span>" +
 			"{{/with}}"
 		);
 
 		var view = renderer(viewModel);
 
-		equal(view.children[0].firstChild.nodeValue, "John", "Got the first name");
-		equal(view.children[1].firstChild.nodeValue, "Gardner", "Got the last name");
+		equal(view.firstChild.firstChild.nodeValue, "John", "Got the first name");
+		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Got the last name");
+
+		// second case: object AND hash values
+
+		renderer = stache(
+			"{{#with person firstName=person.first}}" +
+				"<span>{{firstName}}</span>" +
+				"<span>{{./last}}</span>" +
+			"{{/with}}"
+		);
+
+		view = renderer(viewModel);
+
+		equal(view.firstChild.firstChild.nodeValue, "John", "Got the first name");
+		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Got the last name");
+
+
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

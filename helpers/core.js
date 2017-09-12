@@ -198,9 +198,22 @@ var helpers = {
 	},
 	'with': function (expr, options) {
 		var ctx = expr;
-		expr = resolve(expr);
+		if(!options) {
+			// hash only.  Don't assume inverse based on lack of expr.
+			options = expr;
+			expr = true;
+			ctx = options.hash;
+		} else {
+			expr = resolve(expr);
+			if(options.hash) {
+				// presumably rare case of both a context object AND hash keys
+				ctx = options.scope.add(options.hash).add(ctx);
+			}
+		}
 		if ( !! expr) {
 			return options.fn(ctx);
+		} else {
+			return options.inverse(ctx);
 		}
 	},
 	'log': function (options) {
