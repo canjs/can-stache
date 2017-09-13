@@ -24,9 +24,9 @@ with the context of the `EXPRESSION`'s value.
 Renders `BLOCK` with the key-value pairs from a [can-stache/expressions/hash] added to the top of the [can-view-scope].
 
 ```
-{{#with _street=person.address.street _city=person.address.city}}
-    Street: {{_street}}
-    City: {{_city}}
+{{#with innerStreet=person.address.street innerCity=person.address.city}}
+    Street: {{innerStreet}}
+    City: {{innerCity}}
 {{/with}}
 ```
 
@@ -60,9 +60,9 @@ The new context can be a lookup expression, or a set of hashes which are taken t
 
 ```
 TEMPLATE:
-	{{#with _street=person.address.street _city=person.address.city}}
-		Street: {{_street}}
-		City: {{_city}}
+	{{#with innerStreet=person.address.street innerCity=person.address.city}}
+		Street: {{innerStreet}}
+		City: {{innerCity}}
 	{{/with}}
 DATA:
 	{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
