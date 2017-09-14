@@ -778,6 +778,19 @@ function makeTest(name, doc, mutation) {
 		var expected = t.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
 		deepEqual(getText(t.template,t.data), expected);
+
+		var v = {
+			template: "{{#with person}}{{name}}{{/with}}",
+			expected: "Andy",
+			data: {
+				person: null,
+				name: "Andy"
+			}
+		};
+
+		expected = v.expected.replace(/&quot;/g, '&#34;')
+			.replace(/\r\n/g, '\n');
+		deepEqual(getText(v.template,v.data), expected);
 	});
 
 
@@ -1614,8 +1627,8 @@ function makeTest(name, doc, mutation) {
 		var inv_staches = {
 			"else": "{{#if test}}if{{else}}else{{/if}}",
 			"not_not_if": "not_{{^if test}}not_{{/if}}if",
-			"not_each": "not_{{#each test}}_{{/each}}each",
-			"not_with": "not{{#with test}}_{{/with}}_with"
+			"not_each": "not_{{#each test}}_{{/each}}each"
+			//"not_with": "not{{#with test}}_{{/with}}_with" //{{#with}} *always* renders non-inverse block
 		};
 
 		for (result in inv_staches) {
@@ -6117,6 +6130,43 @@ function makeTest(name, doc, mutation) {
 		fraghtml = innerHTML(frag.lastChild);
 
 		equal(fraghtml, "value:strung");
+	});
+
+	test("Can assign multiple keys using with (#274)", function() {
+		var viewModel = new DefineMap({
+			person: {
+				first: "John",
+				last: "Gardner"
+			}
+		});
+
+		var renderer = stache(
+			"{{#with firstName=person.first lastName=person.last}}" +
+				"<span>{{firstName}}</span>" +
+				"<span>{{lastName}}</span>" +
+			"{{/with}}"
+		);
+
+		var view = renderer(viewModel);
+
+		equal(view.firstChild.firstChild.nodeValue, "John", "Got the first name");
+		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Got the last name");
+
+		// second case: object AND hash values
+
+		renderer = stache(
+			"{{#with person firstName=person.first}}" +
+				"<span>{{firstName}}</span>" +
+				"<span>{{./last}}</span>" +
+			"{{/with}}"
+		);
+
+		view = renderer(viewModel);
+
+		equal(view.firstChild.firstChild.nodeValue, "John", "Got the first name");
+		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Got the last name");
+
+
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

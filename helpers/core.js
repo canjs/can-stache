@@ -11,6 +11,7 @@ var isIterable = require("can-util/js/is-iterable/is-iterable");
 var dev = require('can-util/js/dev/dev');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
+var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 var debuggerHelper = require('./-debugger').helper;
 
 var domData = require('can-util/dom/data/data');
@@ -198,10 +199,20 @@ var helpers = {
 	},
 	'with': function (expr, options) {
 		var ctx = expr;
-		expr = resolve(expr);
-		if ( !! expr) {
-			return options.fn(ctx);
+		if(!options) {
+			// hash-only case if no current context expression
+			options = expr;
+			expr = true;
+			ctx = options.hash;
+		} else {
+			expr = resolve(expr);
+			if(options.hash && !isEmptyObject(options.hash)) {
+				// presumably rare case of both a context object AND hash keys
+				// Leaving it undocumented for now, but no reason not to support it.
+				ctx = options.scope.add(options.hash).add(ctx);
+			}
 		}
+		return options.fn(ctx || {});
 	},
 	'log': function (options) {
 		// go through the arguments
