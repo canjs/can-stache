@@ -18,6 +18,7 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
+var devHelpers = require('can-test-helpers/lib/dev');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -195,23 +196,22 @@ function makeTest(name, doc, mutation) {
 		stache(template)(viewModel);
 	});
 
-	if (System.env.indexOf('production') < 0) {
+	devHelpers.devOnlyTest("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
 
-		test("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
-
-			var oldWarn = canDev.warn;
-			canDev.warn = function() {
+		stache.registerHelper('foobar', function() {});
+		// have to do this after the first registration b/c if the dom and vdom tests run, "foobar"
+		//  will already have been registered.
+		var teardown = devHelpers.willWarn(/already been registered/, function(message, matched) {
+			if(matched) {
 				ok(true, "received warning");
-			};
-
-			stache.registerHelper('foobar', function() {});
-			stache.registerHelper('foobar', function() {});
-
-			canDev.warn = oldWarn;
-
+			}
 		});
 
-	}
+		stache.registerHelper('foobar', function() {});
+
+		QUnit.equal(teardown(), 1, "Exactly one warning called");
+
+	});
 
 	/*test("attribute sections", function(){
 	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
@@ -5506,60 +5506,62 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	if (System.env.indexOf('production') < 0) {
-		test("warn on missmatched tag (canjs/canjs#1476)", function() {
-			var makeWarnChecks = function(input, texts) {
-				var count = 0;
-				var _warn = canDev.warn;
-				canDev.warn = function(text) {
-					equal(text, texts[count++]);
-				};
-
-				stache(input);
-
-				equal(count, texts.length);
-
-				canDev.warn = _warn;
+	devHelpers.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
+		var makeWarnChecks = function(input, texts) {
+			var count = 0;
+			var _warn = canDev.warn;
+			canDev.warn = function(text) {
+				equal(text, texts[count++]);
 			};
 
-			// Fails
-			makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
-				"unexpected closing tag {{/foo}} expected {{/if}}"
-			]);
-			makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
-				"unexpected closing tag {{/foo}} expected {{/if}}"
-			]);
-			makeWarnChecks("{{#call()}}...{{/foo}}", [
-				"unexpected closing tag {{/foo}} expected {{/call}}"
-			]);
+			stache(input);
 
-			// Successes
-			makeWarnChecks("{{#if}}...{{/}}", []);
-			makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
-			makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
-			makeWarnChecks("{{#call()}}...{{/call}}", []);
-		});
-	}
+			equal(count, texts.length);
 
-	if (System.env.indexOf('production') < 0) {
-		test("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
-			var done = assert.async();
-			var warn = function(text) {
-				equal(text, "unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?");
-				done();
-			};
-			clone({
-				'can-stache-bindings': {},
-				'can-util/js/dev/dev': {
-					warn: warn
+			canDev.warn = _warn;
+		};
+
+		// Fails
+		makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
+			"unexpected closing tag {{/foo}} expected {{/if}}"
+		]);
+		makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
+			"unexpected closing tag {{/foo}} expected {{/if}}"
+		]);
+		makeWarnChecks("{{#call()}}...{{/foo}}", [
+			"unexpected closing tag {{/foo}} expected {{/call}}"
+		]);
+
+		// Successes
+		makeWarnChecks("{{#if}}...{{/}}", []);
+		makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
+		makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
+		makeWarnChecks("{{#call()}}...{{/call}}", []);
+	});
+
+	devHelpers.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
+		var done = assert.async();
+		var teardown = devHelpers.willWarn(
+			"unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?",
+			function(message, matched) {
+				if(matched) {
+					QUnit.ok(true, "warning logged");
+					teardown();
+					done();
 				}
-			})
-			.import('can-stache')
-			.then(function(stache) {
-				stache("<button ($weirdattribute)='showMessage()'>Click</button>");
-			});
+			}
+		);
+		clone({
+			'can-stache-bindings': {},
+			'can-util/js/dev/dev': {
+				warn: canDev.warn
+			}
+		})
+		.import('can-stache')
+		.then(function(stache) {
+			stache("<button ($weirdattribute)='showMessage()'>Click</button>");
 		});
-	}
+	});
 
 
 	test("@arg functions are not called (#172)", function() {
@@ -5799,41 +5801,43 @@ function makeTest(name, doc, mutation) {
 		ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
 	});
 
-	if (System.env.indexOf('production') < 0) {
-		test("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
-			expect(5);
-			var expr = /unknown attribute binding/;
-			var warn = function(text) {
-				ok(expr.test(text));
-			};
-			clone({
-				'can-stache-bindings': {},
-				'can-util/js/dev/dev': {
-					warn: warn
-				}
-			})
-			.import('can-stache')
-			.then(function(stache) {
-				stache('<a on:click="theProp" value:to:on:click="theProp"  value:to="theProp" value:from="theProp" value:bind="theProp">a link</a>');
-			});
+	devHelpers.devOnlyTest("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
+		stop();
+		expect(6);
+		var teardown = devHelpers.willWarn(/unknown attribute binding/, function(message, matched) {
+			if(matched) {
+				QUnit.ok(matched, message);
+			}
 		});
+		clone({
+			'can-stache-bindings': {},
+			'can-util/js/dev/dev': {
+				warn: canDev.warn
+			}
+		})
+		.import('can-stache')
+		.then(function(stache) {
+			stache('<a on:click="theProp" value:to:on:click="theProp"  value:to="theProp" value:from="theProp" value:bind="theProp">a link</a>');
+			QUnit.equal(teardown(), 5, "Every type of warning logged");
+			start();
+		});
+	});
 
 
-		test("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
-			var oldWarn = canDev.warn;
-			canDev.warn = function() {
+	devHelpers.devOnlyTest("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
+		var teardown = devHelpers.willWarn(/unexpected closing tag/, function(message, matched) {
+			if(matched) {
 				QUnit.ok(false, "Should not have warned about matching tags");
-			};
-			stache(
-				'{{#games.getAvailableCourts(selectedRound)}}' +
-		   		'<option value="{{.}}">{{.}}</option>' +
-				'{{/games.getAvailableCourts}}'
-			);
-
-			QUnit.ok(true, "Need an assertion");
-			canDev.warn = oldWarn;
+			}
 		});
-	}
+		stache(
+			'{{#games.getAvailableCourts(selectedRound)}}' +
+	   		'<option value="{{.}}">{{.}}</option>' +
+			'{{/games.getAvailableCourts}}'
+		);
+
+		QUnit.equal(teardown(), 0, "No warnings fired");
+	});
 
 	test('Bracket expression after `this` (canjs/can-stache/issues/173)', function () {
 		var template;
