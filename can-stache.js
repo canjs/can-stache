@@ -395,6 +395,12 @@ function stache (template) {
 				}
 			}
 			else {
+				//!steal-remove-start
+				if(mode !== "/" && state.sectionElementStack.length === 0) {
+					dev.warn("Stache tokens at the top level reduce rendering performance; {{" + text + "}} should be contained in an HTML element.");
+				}
+				//!steal-remove-end
+
 				makeRendererAndUpdateSection( state.textContentOnly || section, mode, expression );
 			}
 		},

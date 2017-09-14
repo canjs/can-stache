@@ -6173,6 +6173,19 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	devHelpers.devOnlyTest("Warn when the top level element is a Stache section without enclosing HTML (#202)", function() {
+		var regex = /top level.*performance/;
+		var teardown = devHelpers.willWarn(regex);
+		
+		stache("<p>{{#if foo}}<p>{{bar}}</p>{{/if}}</p>");  // from here down should not warn
+		stache("<p {{#if foo}}{{bar}}{{/if}}>{{baz}}</p>");
+		QUnit.equal(teardown(), 0, "Top-level warning was not called in inappropriate cases");
+
+		teardown = devHelpers.willWarn(regex);
+		stache("{{#if foo}}<p>{{bar}}</p>{{/if}}");  // this one should warn
+		QUnit.equal(teardown(), 1, "Top-level warning was called in appropriate case");
+	})
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
