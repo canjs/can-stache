@@ -3649,7 +3649,9 @@ function makeTest(name, doc, mutation) {
 				message = 'can-stache/src/expression.js: Unable to find helper "helpme".';
 
 			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
+				if(message === text){
+					equal(text, message, 'Got expected message logged.');
+				}
 			}
 
 			stache('<li>{{helpme name}}</li>')({
@@ -3664,7 +3666,9 @@ function makeTest(name, doc, mutation) {
 				message = 'can-stache/src/expression.js: Unable to find key or helper "user.name".';
 
 			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
+				if(text === message){
+					equal(text, message, 'Got expected message logged.');
+				}
 			}
 
 			stache('<li>{{user.name}}</li>')({
@@ -5544,8 +5548,11 @@ function makeTest(name, doc, mutation) {
 	if (System.env.indexOf('production') < 0) {
 		test("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
 			var done = assert.async();
+			var message = "unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?";
 			var warn = function(text) {
-				equal(text, "unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?");
+				if(message === text){
+					equal(text, message);
+				}
 				done();
 			};
 			clone({
@@ -5804,7 +5811,9 @@ function makeTest(name, doc, mutation) {
 			expect(5);
 			var expr = /unknown attribute binding/;
 			var warn = function(text) {
-				ok(expr.test(text));
+				if(expr.test(text)){
+					ok(expr.test(text));
+				}
 			};
 			clone({
 				'can-stache-bindings': {},
