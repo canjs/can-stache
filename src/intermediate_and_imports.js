@@ -15,15 +15,34 @@ module.exports = function(source){
 		inFrom = false,
 		inAs = false,
 		isUnary = false,
+		importIsDynamic = false,
 		currentAs = "",
 		currentFrom = "";
 
+	function processImport() {
+		if(currentAs) {
+			ases[currentAs] = currentFrom;
+			currentAs = "";
+		}
+		if(importIsDynamic) {
+			dynamicImports.push(currentFrom);
+		} else {
+			imports.push(currentFrom);
+		}
+	}
+
 	var intermediate = parser(template, {
 		start: function( tagName, unary ){
-			isUnary = unary;
 			if(tagName === "can-import") {
+				isUnary = unary;
+				importIsDynamic = false; // assume static import unless there is content (chars/tags/special).
+				inImport = true;
+			} else if(tagName === "can-dynamic-import") {
+				isUnary = unary;
+				importIsDynamic = true;
 				inImport = true;
 			} else if(inImport) {
+				importIsDynamic = true;  // found content inside can-import tag.
 				inImport = false;
 			}
 		},
@@ -43,28 +62,28 @@ module.exports = function(source){
 		},
 		attrValue: function( value ){
 			if(inFrom && inImport) {
-				imports.push(value);
-				if(!isUnary) {
-					dynamicImports.push(value);
-				}
 				currentFrom = value;
 			} else if(inAs && inImport) {
 				currentAs = value;
 			}
 		},
 		end: function(tagName){
-			if(tagName === "can-import") {
-				// Set the as value to the from
-				if(currentAs) {
-					ases[currentAs] = currentFrom;
-					currentAs = "";
-				}
+			if((tagName === "can-import" || tagName === "can-dymamic-import") && isUnary) {
+				processImport();
 			}
 		},
 		close: function(tagName){
-			if(tagName === "can-import") {
-				imports.pop();
+			if((tagName === "can-import" || tagName === "can-dymamic-import")) {
+				processImport();
 			}
+		},
+		chars: function(text) {
+			if(text.trim().length > 0) {
+				importIsDynamic = true;
+			}
+		},
+		special: function(text) {
+			importIsDynamic = true;
 		}
 	}, true);
 
