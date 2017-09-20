@@ -18,7 +18,7 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var devHelpers = require('can-test-helpers/lib/dev');
+var testHelpers = require('can-test-helpers');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -196,12 +196,12 @@ function makeTest(name, doc, mutation) {
 		stache(template)(viewModel);
 	});
 
-	devHelpers.devOnlyTest("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
+	testHelpers.dev.devOnlyTest("helpers warn on overwrite (canjs/can-stache-converters#24)", function () {
 
 		stache.registerHelper('foobar', function() {});
 		// have to do this after the first registration b/c if the dom and vdom tests run, "foobar"
 		//  will already have been registered.
-		var teardown = devHelpers.willWarn(/already been registered/, function(message, matched) {
+		var teardown = testHelpers.dev.willWarn(/already been registered/, function(message, matched) {
 			if(matched) {
 				ok(true, "received warning");
 			}
@@ -5506,7 +5506,7 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	devHelpers.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
+	testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
 		var makeWarnChecks = function(input, texts) {
 			var count = 0;
 			var _warn = canDev.warn;
@@ -5539,9 +5539,9 @@ function makeTest(name, doc, mutation) {
 		makeWarnChecks("{{#call()}}...{{/call}}", []);
 	});
 
-	devHelpers.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
+	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
 		var done = assert.async();
-		var teardown = devHelpers.willWarn(
+		var teardown = testHelpers.dev.willWarn(
 			"unknown attribute binding ($weirdattribute). Is can-stache-bindings imported?",
 			function(message, matched) {
 				if(matched) {
@@ -5801,10 +5801,10 @@ function makeTest(name, doc, mutation) {
 		ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
 	});
 
-	devHelpers.devOnlyTest("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
+	testHelpers.dev.devOnlyTest("warn when using on:, :to:on:, :to, :from or :bind without importing can-stache-bindings (#273)", function(assert) {
 		stop();
 		expect(6);
-		var teardown = devHelpers.willWarn(/unknown attribute binding/, function(message, matched) {
+		var teardown = testHelpers.dev.willWarn(/unknown attribute binding/, function(message, matched) {
 			if(matched) {
 				QUnit.ok(matched, message);
 			}
@@ -5824,8 +5824,8 @@ function makeTest(name, doc, mutation) {
 	});
 
 
-	devHelpers.devOnlyTest("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
-		var teardown = devHelpers.willWarn(/unexpected closing tag/, function(message, matched) {
+	testHelpers.dev.devOnlyTest("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/, function(message, matched) {
 			if(matched) {
 				QUnit.ok(false, "Should not have warned about matching tags");
 			}
