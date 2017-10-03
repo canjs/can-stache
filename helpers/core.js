@@ -38,21 +38,36 @@ var resolveHash = function(hash){
 
 var helpers = {
 	"each": function(items) {
+		// XXX
 		var args = [].slice.call(arguments),
 			options = args.pop(),
 			argsLen = args.length,
 			argExprs = options.exprData.argExprs,
+			hashExprs = options.exprData.hashExprs,
 			resolved = resolve(items),
 			asVariable,
+			hashOptions,
 			aliases,
 			key;
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
+			//!steal-remove-start
+			dev.warn('Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
+			//!steal-remove-end
+
 			asVariable = args[argsLen - 1];
 
 			if (typeof asVariable !== 'string') {
 				asVariable = argExprs[argsLen - 1].key;
 			}
+		}
+
+		// Check if using hash
+		if (!isEmptyObject(hashExprs)) {
+			hashOptions = {};
+			each(hashExprs, function (exprs, key) {
+				hashOptions[exprs.key] = key;
+			})
 		}
 
 		if ((
@@ -76,6 +91,15 @@ var helpers = {
 
 					if (asVariable) {
 						aliases[asVariable] = item;
+					}
+
+					if (!isEmptyObject(hashOptions)) {
+						if (hashOptions.value) {
+							aliases[hashOptions.value] = item;
+						}
+						if (hashOptions.index) {
+							aliases[hashOptions.index] = index;
+						}
 					}
 
 					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);

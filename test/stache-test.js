@@ -32,6 +32,7 @@ var string = require('can-util/js/string/string');
 var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var getBaseURL = require('can-util/js/base-url/base-url');
+var testHelpers = require('can-test-helpers');
 
 var browserDoc = DOCUMENT();
 var mutationObserver = MUTATION_OBSERVER();
@@ -5994,7 +5995,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6023,7 +6024,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6052,7 +6053,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{<somePartial}}" +
 				"foo" +
@@ -6085,7 +6086,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6101,7 +6102,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
 	});
-	
+
 	test("newline is a valid special tag white space", function() {
 		var renderer = stache('<div\n\t{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
 		var html = renderer({ hideIt: true });
@@ -6173,7 +6174,58 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("can assign hash using each #300", function () {
+		var viewModel = new DefineMap({
+			people: [{
+				first: "John",
+				last: "Gardner"
+			}, {
+				first: "Juan",
+				last: "Orozco"
+			}, {
+				first: "B",
+				last: "Rad"
+			}]
+		});
+
+		var renderer = stache(
+			"{{#each people person=value num=index}}" +
+				"<div class=\"person\" data-index=\"{{num}}\"><span>{{person.first}}</span>" +
+				"<span>{{person.last}}</span></div>" +
+			"{{/each}}"
+		);
+
+		var view = renderer(viewModel);
+
+		equal(view.lastChild.getAttribute('data-index'), "2", "Got the index");
+		equal(view.firstChild.nextSibling.firstChild.firstChild.nodeValue, "John", "Got aliased value");
+	});
+
+	test("using as keyword with each throws deprecation warning #300", function () {
+		var viewModel = new DefineMap({
+			people: [{
+				first: "John",
+				last: "Gardner"
+			}]
+		});
+
+		var checkWarnCall = testHelpers.dev.willWarn("Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
+			if (matched) {
+				ok(true, "Warning message properly set")
+			}
+		});
+
+		var renderer = stache(
+			"{{#each people as person}}" +
+				"<span>{{person.first}}</span>" +
+				"<span>{{person.last}}</span>" +
+			"{{/with}}"
+		);
+
+		var view = renderer(viewModel);
+		checkWarnCall();
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
-

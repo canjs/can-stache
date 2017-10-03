@@ -1,6 +1,8 @@
 @function can-stache.helpers.each {{#each expression}}
 @parent can-stache.htags 5
 
+@deprecated {4.0} The `as` keyword signature, `{{#each EXPRESSION as KEY}}FN{{else}}INVERSE{{/each}}`, is deprecated in favor of [can-stache/expressions/hash].
+
 @signature `{{#each EXPRESSION}}FN{{else}}INVERSE{{/each}}`
 
 Render `FN` for each item in `EXPRESSION`'s return value.  If `EXPRESSION`
@@ -14,7 +16,7 @@ is falsey or an empty list, render `INVERSE`.
 {{/each}}
 ```
 
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/hash} EXPRESSION An
 expression that typically returns a list like data structure.
 
 If the value of the EXPRESSION is a [can-define/list/list] or [can-list], the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
