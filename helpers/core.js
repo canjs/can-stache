@@ -38,7 +38,6 @@ var resolveHash = function(hash){
 
 var helpers = {
 	"each": function(items) {
-		// XXX
 		var args = [].slice.call(arguments),
 			options = args.pop(),
 			argsLen = args.length,
@@ -52,7 +51,7 @@ var helpers = {
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
 			//!steal-remove-start
-			dev.warn('Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
+			dev.warn('can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
 			//!steal-remove-end
 
 			asVariable = args[argsLen - 1];
@@ -91,6 +90,9 @@ var helpers = {
 
 					if (asVariable) {
 						aliases[asVariable] = item;
+						//!steal-remove-start
+						dev.warn('can-stache: Use `{{#each items item=value}}` instead of `{{#each items as item}}`.');
+						//!steal-remove-end
 					}
 
 					if (!isEmptyObject(hashOptions)) {
@@ -126,6 +128,18 @@ var helpers = {
 				};
 				if (asVariable) {
 					aliases[asVariable] = value;
+					//!steal-remove-start
+					dev.warn('can-stache: Use `{{#each items item=value itemKey=key}}` instead of `{{#each items as item}}`.');
+					//!steal-remove-end
+				}
+
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.key) {
+						aliases[hashOptions.key] = key;
+					}
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});

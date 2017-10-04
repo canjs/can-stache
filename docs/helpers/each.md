@@ -16,7 +16,7 @@ is falsey or an empty list, render `INVERSE`.
 {{/each}}
 ```
 
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/hash} EXPRESSION An
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
 expression that typically returns a list like data structure.
 
 If the value of the EXPRESSION is a [can-define/list/list] or [can-list], the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
@@ -26,6 +26,31 @@ will be performed, which also will perform a minimal set of updates. The [can-st
 If the value of the key is an object, `FN` will be
 called for each property on the object. The [can-stache/keys/special special %key key]
 is available within `FN`.
+
+@param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
+item in `EXPRESSION` or property value in `EXPRESSION`.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is falsey or an empty list or object.
+
+@signature `{{#each EXPRESSION HASH_EXPRESSION}}FN{{else}}INVERSE{{/each}}`
+
+Like a normal `{{#each EXPRESSION}}`, but uses [can-stache/expressions/hash] to
+add the current `value`, `key`, or `index` to the current scope.
+
+```
+{{#each todos todo=value num=index}}
+    <li data-index="{{num}}">{{todo.name}}</li>
+{{/each}}
+```
+
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
+expression that returns a list or object like data structure.
+
+@param {can-stache/expressions/hash} HASH_EXPRESSION A hash expression that aliases special properties for each iteration:
+- `value`: The current value
+- `key`: The key of the current object item
+- `index`: The index of the current array item
 
 @param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
 item in `EXPRESSION` or property value in `EXPRESSION`.

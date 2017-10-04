@@ -6209,7 +6209,12 @@ function makeTest(name, doc, mutation) {
 			}]
 		});
 
-		var checkWarnCall = testHelpers.dev.willWarn("Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
+		var checkFirstWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
+			if (matched) {
+				ok(true, "Warning message properly set")
+			}
+		});
+		var checkSecondWarnCall = testHelpers.dev.willWarn("can-stache: Use `{{#each items item=value}}` instead of `{{#each items as item}}`.", function (message, matched) {
 			if (matched) {
 				ok(true, "Warning message properly set")
 			}
@@ -6222,8 +6227,59 @@ function makeTest(name, doc, mutation) {
 			"{{/with}}"
 		);
 
+		renderer(viewModel);
+		checkFirstWarnCall();
+		checkSecondWarnCall();
+	});
+
+	test("can assign hash using each on an iterable map #300", function () {
+		var viewModel = new DefineMap({
+			flags: {
+				isJSCool: "yep",
+				canJS: "yep"
+			}
+		});
+
+		var renderer = stache(
+			"{{#each flags flagValue=value flagKey=key}}" +
+				"<span>{{flagKey}}: {{flagValue}}</span>" +
+			"{{/each}}"
+		);
+
 		var view = renderer(viewModel);
-		checkWarnCall();
+
+		equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
+		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
+	});
+
+	test("using each `as` on an iterable map throws deprecation warning #300", function () {
+		var viewModel = new DefineMap({
+			flags: {
+				isJSCool: "yep",
+				canJS: "yep"
+			}
+		});
+
+		var checkFirstWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
+			if (matched) {
+				ok(true, "Warning message properly set")
+			}
+		});
+		var checkSecondWarnCall = testHelpers.dev.willWarn("can-stache: Use `{{#each items item=value itemKey=key}}` instead of `{{#each items as item}}`.", function (message, matched) {
+			if (matched) {
+				ok(true, "Warning message properly set")
+			}
+		});
+
+		var renderer = stache(
+			"{{#each flags as flag}}" +
+				"<span>{{%key}}: {{flag}}</span>" +
+			"{{/each}}"
+		);
+
+		renderer(viewModel);
+		checkFirstWarnCall();
+		checkSecondWarnCall();
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
