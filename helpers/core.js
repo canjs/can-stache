@@ -50,15 +50,15 @@ var helpers = {
 			key;
 
 		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
-			//!steal-remove-start
-			dev.warn('can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
-			//!steal-remove-end
-
 			asVariable = args[argsLen - 1];
 
 			if (typeof asVariable !== 'string') {
 				asVariable = argExprs[argsLen - 1].key;
 			}
+			//!steal-remove-start
+			dev.warn('can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
+			dev.warn('can-stache: Do not use `{{#' + options.nodeList.expression + '}}`, instead use `{{#' + options.nodeList.expression.split(' ')[0] + ' ' + options.nodeList.expression.split(' ')[1] + ' ' + asVariable + '=value}}`');
+			//!steal-remove-end
 		}
 
 		// Check if using hash
@@ -90,9 +90,6 @@ var helpers = {
 
 					if (asVariable) {
 						aliases[asVariable] = item;
-						//!steal-remove-start
-						dev.warn('can-stache: Use `{{#each items item=value}}` instead of `{{#each items as item}}`.');
-						//!steal-remove-end
 					}
 
 					if (!isEmptyObject(hashOptions)) {
@@ -128,9 +125,6 @@ var helpers = {
 				};
 				if (asVariable) {
 					aliases[asVariable] = value;
-					//!steal-remove-start
-					dev.warn('can-stache: Use `{{#each items item=value itemKey=key}}` instead of `{{#each items as item}}`.');
-					//!steal-remove-end
 				}
 
 				if (!isEmptyObject(hashOptions)) {

@@ -6201,7 +6201,7 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.nextSibling.firstChild.firstChild.nodeValue, "John", "Got aliased value");
 	});
 
-	test("using as keyword with each throws deprecation warning #300", function () {
+	test("using as keyword with each throws deprecation warning with link to docs #300", function () {
 		var viewModel = new DefineMap({
 			people: [{
 				first: "John",
@@ -6209,14 +6209,9 @@ function makeTest(name, doc, mutation) {
 			}]
 		});
 
-		var checkFirstWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
+		var checkWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
 			if (matched) {
-				ok(true, "Warning message properly set")
-			}
-		});
-		var checkSecondWarnCall = testHelpers.dev.willWarn("can-stache: Use `{{#each items item=value}}` instead of `{{#each items as item}}`.", function (message, matched) {
-			if (matched) {
-				ok(true, "Warning message properly set")
+				ok(true, "First warning message properly set");
 			}
 		});
 
@@ -6228,8 +6223,32 @@ function makeTest(name, doc, mutation) {
 		);
 
 		renderer(viewModel);
-		checkFirstWarnCall();
-		checkSecondWarnCall();
+		checkWarnCall();
+	});
+
+	test("using as keyword with each throws deprecation warning helper #300", function () {
+		var viewModel = new DefineMap({
+			people: [{
+				first: "John",
+				last: "Gardner"
+			}]
+		});
+
+		var checkWarnCall = testHelpers.dev.willWarn("can-stache: Do not use `{{#each people as person}}`, instead use `{{#each people person=value}}`", function (message, matched) {
+			if (matched) {
+				ok(true, "Second warning message properly set");
+			}
+		});
+
+		var renderer = stache(
+			"{{#each people as person}}" +
+				"<span>{{person.first}}</span>" +
+				"<span>{{person.last}}</span>" +
+			"{{/with}}"
+		);
+
+		renderer(viewModel);
+		checkWarnCall();
 	});
 
 	test("can assign hash using each on an iterable map #300", function () {
@@ -6250,36 +6269,6 @@ function makeTest(name, doc, mutation) {
 
 		equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
 		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
-	});
-
-	test("using each `as` on an iterable map throws deprecation warning #300", function () {
-		var viewModel = new DefineMap({
-			flags: {
-				isJSCool: "yep",
-				canJS: "yep"
-			}
-		});
-
-		var checkFirstWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
-			if (matched) {
-				ok(true, "Warning message properly set")
-			}
-		});
-		var checkSecondWarnCall = testHelpers.dev.willWarn("can-stache: Use `{{#each items item=value itemKey=key}}` instead of `{{#each items as item}}`.", function (message, matched) {
-			if (matched) {
-				ok(true, "Warning message properly set")
-			}
-		});
-
-		var renderer = stache(
-			"{{#each flags as flag}}" +
-				"<span>{{%key}}: {{flag}}</span>" +
-			"{{/each}}"
-		);
-
-		renderer(viewModel);
-		checkFirstWarnCall();
-		checkSecondWarnCall();
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
