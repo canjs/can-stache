@@ -1,6 +1,8 @@
 @function can-stache.helpers.each {{#each expression}}
 @parent can-stache.htags 5
 
+@deprecated {4.0} The `as` keyword signature, `{{#each EXPRESSION as KEY}}FN{{else}}INVERSE{{/each}}`, is deprecated in favor of [can-stache/expressions/hash].
+
 @signature `{{#each EXPRESSION}}FN{{else}}INVERSE{{/each}}`
 
 Render `FN` for each item in `EXPRESSION`'s return value.  If `EXPRESSION`
@@ -24,6 +26,31 @@ will be performed, which also will perform a minimal set of updates. The [can-st
 If the value of the key is an object, `FN` will be
 called for each property on the object. The [can-stache/keys/special special %key key]
 is available within `FN`.
+
+@param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
+item in `EXPRESSION` or property value in `EXPRESSION`.
+
+@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
+if `EXPRESSION` is falsey or an empty list or object.
+
+@signature `{{#each EXPRESSION HASH_EXPRESSION}}FN{{else}}INVERSE{{/each}}`
+
+Like a normal `{{#each EXPRESSION}}`, but uses [can-stache/expressions/hash] to
+add the current `value`, `key`, or `index` to the current scope.
+
+```
+{{#each todos todo=value num=index}}
+    <li data-index="{{num}}">{{todo.name}}</li>
+{{/each}}
+```
+
+@param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
+expression that returns a list or object like data structure.
+
+@param {can-stache/expressions/hash} HASH_EXPRESSION A hash expression that aliases special properties for each iteration:
+- `value`: The current value
+- `key`: The key of the current object item
+- `index`: The index of the current array item
 
 @param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
 item in `EXPRESSION` or property value in `EXPRESSION`.
