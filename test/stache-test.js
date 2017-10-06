@@ -6271,6 +6271,12 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
 	});
 
+	test('check if <content> is already registred #165', function () {
+		var handler = function(tag, tagData){}
+		viewCallbacks.tag('content', handler);
+		equal(viewCallbacks.tag('content'), handler);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
