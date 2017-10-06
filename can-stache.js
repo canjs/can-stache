@@ -80,7 +80,7 @@ function stache (filename, template) {
 		// given section and modify the section to use that renderer.
 		// For example, if an HTMLSection is passed with mode `#` it knows to
 		// create a liveBindingBranchRenderer and pass that to section.add.
-		makeRendererAndUpdateSection = function(section, mode, stache){
+		makeRendererAndUpdateSection = function(section, mode, stache, lineNo){
 
 			if(mode === ">") {
 				// Partials use liveBindingPartialRenderers
@@ -95,16 +95,16 @@ function stache (filename, template) {
 				} else {
 					section.endSection();
 				}
-				if(section instanceof HTMLSectionBuilder) {
 
+				if(section instanceof HTMLSectionBuilder) {
 					//!steal-remove-start
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1].tag;
 					if (stache !== "" && stache !== last) {
 						if (filename) {
-							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} in " + filename);
+							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} in " + filename + " at line " + lineNo);
 						}
 						else {
-							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} at line " + lineNo);
 						}
 					}
 					//!steal-remove-end
@@ -237,7 +237,7 @@ function stache (filename, template) {
 			state.node =null;
 
 		},
-		close: function( tagName ) {
+		close: function(tagName) {
 			var matchedNamespace = namespaces[tagName];
 
 			if (matchedNamespace  ) {
@@ -338,10 +338,10 @@ function stache (filename, template) {
 				state.attr.value += value;
 			}
 		},
-		chars: function( text ) {
+		chars: function(text) {
 			(state.textContentOnly || section).add(text);
 		},
-		special: function( text ){
+		special: function(text, lineNo){
 
 			var firstAndText = mustacheCore.splitModeFromExpression(text, state),
 				mode = firstAndText.mode,
@@ -367,7 +367,7 @@ function stache (filename, template) {
 
 			if(state.node && state.node.section) {
 
-				makeRendererAndUpdateSection(state.node.section, mode, expression);
+				makeRendererAndUpdateSection(state.node.section, mode, expression, lineNo);
 
 				if(state.node.section.subSectionDepth() === 0){
 					state.node.attributes.push( state.node.section.compile(copyState()) );
@@ -384,7 +384,7 @@ function stache (filename, template) {
 						state.attr.section.add(state.attr.value);
 					}
 				}
-				makeRendererAndUpdateSection(state.attr.section, mode, expression );
+				makeRendererAndUpdateSection(state.attr.section, mode, expression, lineNo);
 
 			}
 			// `{{}}` in a tag like `<div {{}}>`
@@ -399,13 +399,13 @@ function stache (filename, template) {
 					if(!state.node.section) {
 						state.node.section = new TextSectionBuilder();
 					}
-					makeRendererAndUpdateSection(state.node.section, mode, expression );
+					makeRendererAndUpdateSection(state.node.section, mode, expression, lineNo);
 				} else {
 					throw new Error(mode+" is currently not supported within a tag.");
 				}
 			}
 			else {
-				makeRendererAndUpdateSection( state.textContentOnly || section, mode, expression );
+				makeRendererAndUpdateSection(state.textContentOnly || section, mode, expression, lineNo);
 			}
 		},
 		comment: function( text ) {
