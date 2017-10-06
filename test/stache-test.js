@@ -5514,7 +5514,7 @@ function makeTest(name, doc, mutation) {
 				equal(text, texts[count++]);
 			};
 
-			stache(input);
+			stache("filename.stache", input);
 
 			equal(count, texts.length);
 
@@ -5523,13 +5523,13 @@ function makeTest(name, doc, mutation) {
 
 		// Fails
 		makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
+			"unexpected closing tag {{/foo}} expected {{/if}} in filename.stache"
 		]);
 		makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
+			"unexpected closing tag {{/foo}} expected {{/if}} in filename.stache"
 		]);
 		makeWarnChecks("{{#call()}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/call}}"
+			"unexpected closing tag {{/foo}} expected {{/call}} in filename.stache"
 		]);
 
 		// Successes
@@ -5994,7 +5994,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6023,7 +6023,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6052,7 +6052,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{<somePartial}}" +
 				"foo" +
@@ -6085,7 +6085,7 @@ function makeTest(name, doc, mutation) {
 				}
 			}
 		});
-		
+
 		var renderer = stache(
 			"{{#child}}" +
 				"<span>" +
@@ -6101,7 +6101,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
 	});
-	
+
 	test("newline is a valid special tag white space", function() {
 		var renderer = stache('<div\n\t{{#unless ./hideIt}}\n\t\thidden\n\t{{/unless}}\n>peekaboo</div>');
 		var html = renderer({ hideIt: true });
@@ -6176,4 +6176,3 @@ function makeTest(name, doc, mutation) {
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
-

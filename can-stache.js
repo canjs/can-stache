@@ -40,7 +40,12 @@ var namespaces = {
 },
 	textContentOnlyTag = {style: true, script: true};
 
-function stache (template) {
+function stache (filename, template) {
+	if (arguments.length === 1) {
+		template = arguments[0];
+		filename = undefined;
+	}
+
 	var inlinePartials = {};
 
 	// Remove line breaks according to mustache's specs.
@@ -95,8 +100,12 @@ function stache (template) {
 					//!steal-remove-start
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1].tag;
 					if (stache !== "" && stache !== last) {
-						dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
-						// throw new Error("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						if (filename) {
+							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} in " + filename);
+						}
+						else {
+							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						}
 					}
 					//!steal-remove-end
 
@@ -172,7 +181,8 @@ function stache (template) {
 			node.attributes.unshift(callback);
 		};
 
-	parser(template,{
+	parser(template, {
+		filename: filename,
 		start: function(tagName, unary){
 			var matchedNamespace = namespaces[tagName];
 
