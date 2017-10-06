@@ -101,10 +101,10 @@ function stache (filename, template) {
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1].tag;
 					if (stache !== "" && stache !== last) {
 						if (filename) {
-							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} in " + filename + " at line " + lineNo);
+							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
 						}
 						else {
-							dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}} at line " + lineNo);
+							dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
 						}
 					}
 					//!steal-remove-end

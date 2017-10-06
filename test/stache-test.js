@@ -5523,13 +5523,13 @@ function makeTest(name, doc, mutation) {
 
 		// Fails
 		makeWarnChecks("{{#if someCondition}}\n...\n{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}} in filename.stache at line 3"
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
 		]);
 		makeWarnChecks("{{^if someCondition}}\n...\n{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}} in filename.stache at line 3"
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
 		]);
 		makeWarnChecks("{{#call()}}\n...\n{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/call}} in filename.stache at line 3"
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}"
 		]);
 
 		// Successes
