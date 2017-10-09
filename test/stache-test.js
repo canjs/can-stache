@@ -6272,9 +6272,25 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('check if <content> is already registred #165', function () {
-		var handler = function(tag, tagData){}
-		viewCallbacks.tag('content', handler);
-		equal(viewCallbacks.tag('content'), handler);
+		stop();
+		var teardown = testHelpers.dev.willWarn(/Custom tag: content is already defined/, function(message, matched) {
+			QUnit.notOk(matched, message);
+		});
+		var handler = function(tag, tagData){
+		}
+		viewCallbacks.tag("content", handler);
+		clone({
+			'can-stache-bindings': {},
+			'can-util/js/dev/dev': {
+				warn: canDev.warn
+			}
+		})
+		.import('can-stache')
+		.then(function(stache){
+			stache('<content>foo</content>');
+			QUnit.equal(teardown(), 0, "Warning was not logged");
+			start();
+		});
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
