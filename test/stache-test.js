@@ -5515,7 +5515,7 @@ function makeTest(name, doc, mutation) {
 				equal(text, texts[count++]);
 			};
 
-			stache(input);
+			stache("filename.stache", input);
 
 			equal(count, texts.length);
 
@@ -5523,14 +5523,14 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Fails
-		makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
+		makeWarnChecks("{{#if someCondition}}\n...\n{{/foo}}", [
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
 		]);
-		makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
+		makeWarnChecks("{{^if someCondition}}\n...\n{{/foo}}", [
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
 		]);
-		makeWarnChecks("{{#call()}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/call}}"
+		makeWarnChecks("{{#call()}}\n...\n{{/foo}}", [
+			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}"
 		]);
 
 		// Successes

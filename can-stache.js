@@ -40,7 +40,12 @@ var namespaces = {
 },
 	textContentOnlyTag = {style: true, script: true};
 
-function stache (template) {
+function stache (filename, template) {
+	if (arguments.length === 1) {
+		template = arguments[0];
+		filename = undefined;
+	}
+
 	var inlinePartials = {};
 
 	// Remove line breaks according to mustache's specs.
@@ -75,7 +80,7 @@ function stache (template) {
 		// given section and modify the section to use that renderer.
 		// For example, if an HTMLSection is passed with mode `#` it knows to
 		// create a liveBindingBranchRenderer and pass that to section.add.
-		makeRendererAndUpdateSection = function(section, mode, stache){
+		makeRendererAndUpdateSection = function(section, mode, stache, lineNo){
 
 			if(mode === ">") {
 				// Partials use liveBindingPartialRenderers
@@ -90,13 +95,17 @@ function stache (template) {
 				} else {
 					section.endSection();
 				}
-				if(section instanceof HTMLSectionBuilder) {
 
+				if(section instanceof HTMLSectionBuilder) {
 					//!steal-remove-start
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1].tag;
 					if (stache !== "" && stache !== last) {
-						dev.warn("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
-						// throw new Error("unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						if (filename) {
+							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						}
+						else {
+							dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last + "}}");
+						}
 					}
 					//!steal-remove-end
 
@@ -172,7 +181,8 @@ function stache (template) {
 			node.attributes.unshift(callback);
 		};
 
-	parser(template,{
+	parser(template, {
+		filename: filename,
 		start: function(tagName, unary){
 			var matchedNamespace = namespaces[tagName];
 
@@ -227,7 +237,7 @@ function stache (template) {
 			state.node =null;
 
 		},
-		close: function( tagName ) {
+		close: function(tagName) {
 			var matchedNamespace = namespaces[tagName];
 
 			if (matchedNamespace  ) {
@@ -328,10 +338,10 @@ function stache (template) {
 				state.attr.value += value;
 			}
 		},
-		chars: function( text ) {
+		chars: function(text) {
 			(state.textContentOnly || section).add(text);
 		},
-		special: function( text ){
+		special: function(text, lineNo){
 
 			var firstAndText = mustacheCore.splitModeFromExpression(text, state),
 				mode = firstAndText.mode,
@@ -357,7 +367,7 @@ function stache (template) {
 
 			if(state.node && state.node.section) {
 
-				makeRendererAndUpdateSection(state.node.section, mode, expression);
+				makeRendererAndUpdateSection(state.node.section, mode, expression, lineNo);
 
 				if(state.node.section.subSectionDepth() === 0){
 					state.node.attributes.push( state.node.section.compile(copyState()) );
@@ -374,7 +384,7 @@ function stache (template) {
 						state.attr.section.add(state.attr.value);
 					}
 				}
-				makeRendererAndUpdateSection(state.attr.section, mode, expression );
+				makeRendererAndUpdateSection(state.attr.section, mode, expression, lineNo);
 
 			}
 			// `{{}}` in a tag like `<div {{}}>`
@@ -389,13 +399,13 @@ function stache (template) {
 					if(!state.node.section) {
 						state.node.section = new TextSectionBuilder();
 					}
-					makeRendererAndUpdateSection(state.node.section, mode, expression );
+					makeRendererAndUpdateSection(state.node.section, mode, expression, lineNo);
 				} else {
 					throw new Error(mode+" is currently not supported within a tag.");
 				}
 			}
 			else {
-				makeRendererAndUpdateSection( state.textContentOnly || section, mode, expression );
+				makeRendererAndUpdateSection(state.textContentOnly || section, mode, expression, lineNo);
 			}
 		},
 		comment: function( text ) {
@@ -442,7 +452,7 @@ var templates = {};
 stache.from = mustacheCore.getTemplateById = function(id){
 	if(!templates[id]) {
 		var el = DOCUMENT().getElementById(id);
-		templates[id] = stache(el.innerHTML);
+		templates[id] = stache("#" + id, el.innerHTML);
 	}
 	return templates[id];
 };
