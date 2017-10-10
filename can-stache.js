@@ -452,7 +452,7 @@ var templates = {};
 stache.from = mustacheCore.getTemplateById = function(id){
 	if(!templates[id]) {
 		var el = DOCUMENT().getElementById(id);
-		templates[id] = stache(el.innerHTML);
+		templates[id] = stache("#" + id, el.innerHTML);
 	}
 	return templates[id];
 };
