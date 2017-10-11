@@ -30,7 +30,10 @@ var decodeHTML = typeof document !== "undefined" && (function(){
 // At the point X was being processed, there would be 2 HTMLSections in the
 // stack.  One for the content of `{{#if items}}` and the other for the
 // content of `{{#items}}`
-var HTMLSectionBuilder = function(){
+var HTMLSectionBuilder = function(filename){
+	if (filename) {
+		this.filename = filename;
+	}
 	this.stack = [new HTMLSection()];
 };
 

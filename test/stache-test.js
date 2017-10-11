@@ -18,7 +18,6 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var testHelpers = require('can-test-helpers');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -213,20 +212,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, "Exactly one warning called");
 
 	});
-
-	/*test("attribute sections", function(){
-	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
-
-	 var frag = stashed({
-	 top: 1,
-	 left: 2,
-	 color: 3
-	 });
-
-	 equal(frag.firstChild.style.top, "1px", "top works");
-	 equal(frag.firstChild.style.left, "2px", "left works");
-	 equal(frag.firstChild.style.backgroundColor.replace(/\s/g,""), "rgb(0,0,3)", "color works");
-	 });*/
 
 	test("attributes sections", function(){
 		var template = stache("<div {{attributes}}/>");
@@ -2375,7 +2360,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerHelper('rsvp', function (attendee, event) {
 			return attendee.name + ' is attending ' + event.name;
 		});
-		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/#attendee}}"),
+		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/attendee}}"),
 			data = {
 				attendee: {
 					name: 'Justin'
@@ -4111,7 +4096,6 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
-	// TODO fix from here
 	test('using #each when toggling between list and null', function() {
 		var state = new CanMap();
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
@@ -6290,6 +6274,93 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
+	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
+
+		stache("mystache.stache", "{{aFunction}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function is called");
+			}
+		});
+
+		QUnit.equal(teardown(), 1, "Warning was given");
+	});
+
+	testHelpers.dev.devOnlyTest("do not warn on explicit function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called automatically/);
+
+		stache("mystache.stache", "{{aFunction()}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function should be called");
+			}
+		});
+
+		QUnit.equal(teardown(), 0, "Warning should not be given");
+	});
+
+	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
+
+		var data = new DefineMap({
+			name: 'Justin',
+			age: 33,
+			children: [{
+				name: 'TBD'
+			}]
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 1, "Warning should be given");
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn on aliases created in #each or #with (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/is not in the current scope/);
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one" ],
+			itemsObject: { 2: "two", 3: "three" },
+			obj: { key: "4: four" }
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each itemsArray item=value num=index}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject item=value num=key}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#with objKey=obj.key}}" +
+					"<li>{{objKey}}</li>" +
+				"{{/with}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 0, "No warnings should be given");
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
