@@ -23,12 +23,13 @@ var importer = require('can-util/js/import/import');
 require('can-view-target');
 require('can-view-nodelist');
 
-
-// This was moved from the legacy view/scanner.js to here.
-// This makes sure content elements will be able to have a callback.
-viewCallbacks.tag("content", function(el, tagData) {
-	return tagData.scope;
-});
+if(!viewCallbacks.tag("content")) {
+	// This was moved from the legacy view/scanner.js to here.
+	// This makes sure content elements will be able to have a callback.
+	viewCallbacks.tag("content", function(el, tagData) {
+		return tagData.scope;
+	});
+}
 
 var wrappedAttrPattern = /[{(].*[)}]/;
 var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;

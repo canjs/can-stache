@@ -6271,6 +6271,25 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
 	});
 
+	test('check if <content> is already registred #165', function () {
+		stop();
+		viewCallbacks.tag("content", function() {});
+
+		var teardown = testHelpers.dev.willWarn(/Custom tag: content is already defined/, function(message, matched) {
+			QUnit.notOk(matched, message);
+		});
+
+		clone({
+			'can-view-callbacks': viewCallbacks
+		})
+		.import('can-stache')
+		.then(function(stache) {
+			stache('<content>foo</content>');
+			QUnit.equal(teardown(), 0, "Warning was not logged");
+			start();
+		});
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
