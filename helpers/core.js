@@ -1,6 +1,5 @@
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
-var compute = require('can-compute');
 var utils = require('../src/utils');
 var isFunction = require('can-util/js/is-function/is-function');
 var getBaseURL = require('can-util/js/base-url/base-url');
@@ -13,6 +12,9 @@ var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 var debuggerHelper = require('./-debugger').helper;
+var KeyObservable = require("../src/key-observable");
+var Observation = require("can-observation");
+var TruthyObservable = require("../src/truthy-observable");
 
 var domData = require('can-util/dom/data/data');
 
@@ -20,9 +22,12 @@ var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
 };
 
+var getValueSymbol = canSymbol.for("can.getValue"),
+	isValueLikeSymbol = canSymbol.for("can.isValueLike");
+
 var resolve = function (value) {
-	if (value && value[canSymbol.for("can.isValueLike")] && value[canSymbol.for("can.getValue")]) {
-		return canReflect.getValue(value);
+	if (value && value[isValueLikeSymbol] && value[getValueSymbol]) {
+		return value[getValueSymbol]();
 	} else {
 		return value;
 	}
@@ -140,9 +145,8 @@ var helpers = {
 			return options.stringOnly ? result.join('') : result;
 		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
 			result = [];
-
-			(expr.forEach || expr.each).call(expr, function(val, key){
-				var value = compute(expr, key);
+			canReflect.each(expr, function(val, key){
+				var value = new KeyObservable(expr, key);
 				aliases = {
 					"%key": key,
 					"@key": key
@@ -183,7 +187,7 @@ var helpers = {
 		// if it's a function, wrap its value in a compute
 		// that will only change values from true to false
 		if (expr && expr.isComputed) {
-			value = compute.truthy(expr)();
+			value = canReflect.getValue(new TruthyObservable(expr));
 		} else {
 			value = !! resolve(expr);
 		}
@@ -203,7 +207,7 @@ var helpers = {
 		}
 
 		var args = arguments;
-		var callFn = compute(function(){
+		var callFn = new Observation(function(){
 			for (var i = 0; i < args.length - 1; i++) {
 				curValue = resolve(args[i]);
 				curValue = isFunction(curValue) ? curValue() : curValue;
@@ -218,7 +222,7 @@ var helpers = {
 			return true;
 		});
 
-		return callFn() ? options.fn() : options.inverse();
+		return callFn.get() ? options.fn() : options.inverse();
 	},
 	'eq': function() {
 		return helpers.is.apply(this, arguments);

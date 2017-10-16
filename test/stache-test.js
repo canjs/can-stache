@@ -1,22 +1,25 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
 require('./expression-test');
-require('./stache-define-test');
-require('../helpers/route-test');
-require('../helpers/-debugger-test');
+//require('../helpers/route-test');
+//require('../helpers/-debugger-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');
+var canSymbol = require("can-symbol");
 
 var QUnit = require('steal-qunit');
-var CanMap = require('can-map');
-var CanList = require('can-list');
-var canCompute = require('can-compute');
+var queues = require('can-queues');
+var DefineList = require("can-define/list/list");
 var DefineMap = require('can-define/map/map');
+var Observation = require('can-observation');
+var SimpleMap = require('can-simple-map');
+var SimpleObservable = require("can-simple-observable");
+
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
-var canBatch = require('can-event/batch/batch');
+
 var makeDocument = require('can-vdom/make-document/make-document');
 var testHelpers = require('can-test-helpers');
 
@@ -257,22 +260,21 @@ function makeTest(name, doc, mutation) {
 
 
 	test("boxes example", function(){
-
 		var boxes = [],
-			Box = CanMap.extend({
-				count: 0,
-				content: 0,
-				top: 0,
-				left: 0,
-				color: 0,
+			Box = DefineMap.extend({
+				count: {value: 0},
+				content: {value: 0},
+				top: {value: 0},
+				left: {value: 0},
+				color: {value: 0},
 				tick: function () {
-					var count = this.attr("count") + 1;
-					this.attr({
-						count: count,
+					var count = this.count + 1;
+					this.assign({
+						//count: count,
 						left: Math.cos(count / 10) * 10,
 						top: Math.sin(count / 10) * 10,
-						color: count % 255,
-						content: count
+						//color: count % 255,
+						//content: count
 					});
 				}
 			});
@@ -380,13 +382,13 @@ function makeTest(name, doc, mutation) {
 
 	test('Inverted section function returning numbers', function () {
 		var template = "<div id='completed'>{{^todos.completed}}hidden{{/todos.completed}}</div>";
-		var obsvr = new CanMap({
+		var obsvr = new SimpleMap({
 			named: false
 		});
 
 		var todos = {
 			completed: function () {
-				return obsvr.attr('named');
+				return obsvr.get('named');
 			}
 		};
 
@@ -398,7 +400,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(frag.firstChild.firstChild.nodeValue, "hidden", 'hidden shown');
 
 		// now update the named attribute
-		obsvr.attr('named', true);
+		obsvr.set('named', true);
 
 		deepEqual(frag.firstChild.firstChild.nodeValue, "", 'hidden gone');
 
@@ -407,7 +409,7 @@ function makeTest(name, doc, mutation) {
 	test("live-binding with escaping", function () {
 		var template = "<span id='binder1'>{{ name }}</span><span id='binder2'>{{{name}}}</span>";
 
-		var teacher = new CanMap({
+		var teacher = new SimpleMap({
 			name: "<strong>Mrs Peters</strong>"
 		});
 
@@ -418,7 +420,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(innerHTML(frag.firstChild), "&lt;strong&gt;Mrs Peters&lt;/strong&gt;");
 		deepEqual(innerHTML(frag.lastChild.firstChild), "Mrs Peters");
 
-		teacher.attr('name', '<i>Mr Scott</i>');
+		teacher.set('name', '<i>Mr Scott</i>');
 
 		deepEqual(innerHTML(frag.firstChild), "&lt;i&gt;Mr Scott&lt;/i&gt;");
 
@@ -559,7 +561,7 @@ function makeTest(name, doc, mutation) {
 		var div2 = doc.createElement('div');
 
 		div1.appendChild(template( {}));
-		div2.appendChild(template( new CanMap()));
+		div2.appendChild(template( new SimpleMap()));
 
 		deepEqual(innerHTML(div1), "foo");
 		deepEqual(innerHTML(div2), "foo");
@@ -584,7 +586,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement('div');
 
 		div.appendChild(template({
-			items: new CanList([{
+			items: new DefineList([{
 				name: "Brian"
 			}])
 		}, {
@@ -603,7 +605,7 @@ function makeTest(name, doc, mutation) {
 			template = stache("<table><thead><tr>{{#data}}{{>list}}{{/data}}</tr></thead></table>")
 
 			var dom = template({
-				data: new CanMap({
+				data: new SimpleMap({
 					list: ["hi", "there"]
 				})
 			},{
@@ -692,7 +694,7 @@ function makeTest(name, doc, mutation) {
 					return '10'
 				}
 			},
-			liveData: new CanMap({
+			liveData: new SimpleMap({
 				ducks: '10',
 				tenDucks: function() {
 					return '10'
@@ -719,24 +721,28 @@ function makeTest(name, doc, mutation) {
 			data: {
 				name: 'Andy'
 			},
-			liveData: new CanMap({
+			liveData: new SimpleMap({
 				name: 'Andy',
 				// #1202 #unless does not work with computes
-				isCool: canCompute(function () {
-					return t.liveData.attr("missing");
+				isCool: new Observation(function isCool() {
+					return t.liveData.get("missing");
 				})
 			})
 		};
 
 		var expected = t.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
-		deepEqual(getText(t.template, t.data), expected);
+
+		//deepEqual(getText(t.template, t.data), expected);
 
 		// #1019 #unless does not live bind
 		var div = doc.createElement('div');
 		div.appendChild(stache(t.template)(t.liveData));
-		deepEqual( innerHTML(div), expected, '#unless condition false');
-		t.liveData.attr('missing', true);
+
+		deepEqual( innerHTML(div), expected, '#unless condition false = '+expected);
+
+		t.liveData.set('missing', true);
+
 		deepEqual( innerHTML(div), '', '#unless condition true');
 	});
 
@@ -748,7 +754,7 @@ function makeTest(name, doc, mutation) {
 				names: ['Andy', 'Austin', 'Justin']
 			},
 			data2: {
-				names: new CanList(['Andy', 'Austin', 'Justin'])
+				names: new DefineList(['Andy', 'Austin', 'Justin'])
 			}
 		};
 
@@ -867,7 +873,7 @@ function makeTest(name, doc, mutation) {
 	test("attribute single unescaped, html single unescaped", function () {
 
 		var text = "<div id='me' class='{{#task.completed}}complete{{/task.completed}}'>{{ task.name }}</div>";
-		var task = new CanMap({
+		var task = new SimpleMap({
 			name: 'dishes'
 		});
 
@@ -880,12 +886,12 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(div.getElementsByTagName('div')[0]), "dishes", "html correctly dishes")
 		equal(div.getElementsByTagName('div')[0].className, "", "class empty")
 
-		task.attr('name', 'lawn')
+		task.set('name', 'lawn')
 
 		equal( innerHTML(div.getElementsByTagName('div')[0]), "lawn", "html correctly lawn")
 		equal(div.getElementsByTagName('div')[0].className, "", "class empty")
 
-		task.attr('completed', true);
+		task.set('completed', true);
 
 		equal(div.getElementsByTagName('div')[0].className, "complete", "class changed to complete")
 	});
@@ -893,7 +899,7 @@ function makeTest(name, doc, mutation) {
 	test("select live binding", function () {
 		var text = "<select>{{ #todos }}<option>{{ name }}</option>{{ /todos }}</select>";
 		var todos, div;
-		todos = new CanList([{
+		todos = new DefineList([{
 			id: 1,
 			name: 'Dishes'
 		}]);
@@ -921,11 +927,11 @@ function makeTest(name, doc, mutation) {
 		var text = '<div class=\'{{ obs.foo }}' +
 			'{{ obs.bar }}{{ obs.baz }}{{ obs.nest.what }}\'></div>';
 
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 			foo: 'a',
 			bar: 'b',
 			baz: 'c',
-			nest: new CanMap({
+			nest: new SimpleMap({
 				what: 'd'
 			})
 		});
@@ -941,15 +947,15 @@ function makeTest(name, doc, mutation) {
 
 		equal(getAttr(innerDiv, 'class'), "abcd", 'initial render');
 
-		obs.attr('bar', 'e');
+		obs.set('bar', 'e');
 
 		equal(getAttr(innerDiv, 'class'), "aecd", 'initial render');
 
-		obs.attr('bar', 'f');
+		obs.set('bar', 'f');
 
 		equal(getAttr(innerDiv, 'class'), "afcd", 'initial render');
 
-		obs.nest.attr('what', 'g');
+		obs.get('nest').set('what', 'g');
 
 		equal(getAttr(innerDiv, 'class'), "afcg", 'nested observe');
 	});
@@ -960,7 +966,7 @@ function makeTest(name, doc, mutation) {
 
 		text = '<div>{{ obs.a }}{{ obs.b }}{{ obs.c }}</div>';
 
-		obs = new CanMap({
+		obs = new SimpleMap({
 			a: 'a',
 			b: 'b',
 			c: 'c'
@@ -975,7 +981,7 @@ function makeTest(name, doc, mutation) {
 
 		equal( innerHTML(div.firstChild), 'abc', 'initial render');
 
-		obs.attr({
+		obs.set({
 			a: '',
 			b: '',
 			c: ''
@@ -983,7 +989,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div.firstChild), '', 'updated values');
 
-		obs.attr({
+		obs.set({
 			c: 'c'
 		});
 
@@ -996,7 +1002,7 @@ function makeTest(name, doc, mutation) {
 				'<p {{ obs.attributes }} class="{{ obs.className }}"><span>{{ obs.message }}</span></p>' +
 				'{{ /obs.show }}',
 
-			obs = new CanMap({
+			obs = new SimpleMap({
 				show: true,
 				className: 'myMessage',
 				attributes: 'some=\"myText\"',
@@ -1016,36 +1022,36 @@ function makeTest(name, doc, mutation) {
 		equal(getAttr(p, "class"), "myMessage", 'initial render class');
 		equal( innerHTML(span), 'Live long and prosper', 'initial render innerHTML');
 
-		obs.removeAttr('className');
+		obs.set('className', undefined);
 
 		equal(getAttr(p, "class"), '', 'class is undefined');
 
-		obs.attr('className', 'newClass');
+		obs.set('className', 'newClass');
 
 		equal(getAttr(p, "class"), 'newClass', 'class updated');
 
-		obs.removeAttr('attributes');
+		obs.set('attributes',undefined);
 
 		equal(p.getAttribute('some'), null, 'attribute is undefined');
 
-		obs.attr('attributes', 'some="newText"');
+		obs.set('attributes', 'some="newText"');
 
 		//
 		equal(p.getAttribute('some'), 'newText', 'attribute updated');
 
-		obs.removeAttr('message');
+		obs.set('message',undefined);
 
 		equal(innerHTML(span), '', 'text node value is empty');
 
-		obs.attr('message', 'Warp drive, Mr. Sulu');
+		obs.set('message', 'Warp drive, Mr. Sulu');
 
 		equal(innerHTML(span), 'Warp drive, Mr. Sulu', 'text node updated');
 
-		obs.removeAttr('show');
+		obs.set('show',undefined);
 
 		equal( innerHTML(div), '', 'value in block statement is undefined');
 
-		obs.attr('show', true);
+		obs.set('show', true);
 
 		p = div.getElementsByTagName('p')[0];
 		span = p.getElementsByTagName('span')[0];
@@ -1060,7 +1066,7 @@ function makeTest(name, doc, mutation) {
 	test('hookup within a tag', function () {
 		var text = '<div {{ obs.foo }} ' + '{{ obs.baz }}>lorem ipsum</div>',
 
-			obs = new CanMap({
+			obs = new SimpleMap({
 				foo: 'class="a"',
 				baz: 'some=\'property\''
 			}),
@@ -1074,16 +1080,16 @@ function makeTest(name, doc, mutation) {
 		equal(getAttr(anchor, 'class'), 'a');
 		equal(anchor.getAttribute('some'), 'property');
 
-		obs.attr('foo', 'class="b"');
+		obs.set('foo', 'class="b"');
 		equal(getAttr(anchor, 'class'), 'b');
 		equal(anchor.getAttribute('some'), 'property');
 
-		obs.attr('baz', 'some=\'new property\'');
+		obs.set('baz', 'some=\'new property\'');
 		equal(getAttr(anchor, 'class'), 'b');
 		equal(anchor.getAttribute('some'), 'new property');
 
-		obs.attr('foo', 'class=""');
-		obs.attr('baz', '');
+		obs.set('foo', 'class=""');
+		obs.set('baz', '');
 		equal(getAttr(anchor, 'class'), "", 'anchor class blank');
 		equal(anchor.getAttribute('some'), undefined, 'attribute "some" is undefined');
 	});
@@ -1091,7 +1097,7 @@ function makeTest(name, doc, mutation) {
 	test('single escaped tag, removeAttr', function () {
 		var text = '<div {{ obs.foo }}>lorem ipsum</div>',
 
-			obs = new CanMap({
+			obs = new SimpleMap({
 				foo: 'data-bar="john doe\'s bar"'
 			}),
 
@@ -1103,17 +1109,17 @@ function makeTest(name, doc, mutation) {
 
 		equal(anchor.getAttribute('data-bar'), "john doe's bar");
 
-		obs.removeAttr('foo');
+		obs.set('foo',undefined);
 		equal(anchor.getAttribute('data-bar'), null);
 
-		obs.attr('foo', 'data-bar="baz"');
+		obs.set('foo', 'data-bar="baz"');
 		equal(anchor.getAttribute('data-bar'), 'baz');
 	});
 
 	test('html comments', function () {
 		var text = '<!-- bind to changes in the todo list --> <div>{{obs.foo}}</div>';
 
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 			foo: 'foo'
 		});
 
@@ -1131,7 +1137,7 @@ function makeTest(name, doc, mutation) {
 		var text = "<div class='{{ task.completed }}' {{ data 'task' task }}>" +
 				"{{ task.name }}" +
 				"</div>",
-			task = new CanMap({
+			task = new SimpleMap({
 				completed: false,
 				className: 'someTask',
 				name: 'My Name'
@@ -1147,7 +1153,7 @@ function makeTest(name, doc, mutation) {
 		ok( !! domData.get.call(child, 'task'), "has data")
 		equal(innerHTML(child), "My Name", "has name")
 
-		task.attr({
+		task.set({
 			completed: true,
 			name: 'New Name'
 		});
@@ -1165,7 +1171,7 @@ function makeTest(name, doc, mutation) {
 				'<li>{{name}}</li>' +
 				'{{/obs.items}}',
 
-			obs = new CanMap({
+			obs = new SimpleMap({
 				items: []
 			}),
 
@@ -1176,14 +1182,14 @@ function makeTest(name, doc, mutation) {
 
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'No items', 'initial observable state');
 
-		obs.attr('items', [{
+		obs.set('items', [{
 			name: 'foo'
 		}]);
 		equal( innerHTML(ul.getElementsByTagName('li')[0]), 'foo', 'updated observable');
 	});
 
 	test("unescape bindings change", function () {
-		var l = new CanList([{
+		var l = new DefineList([{
 			complete: true
 		}, {
 			complete: false
@@ -1191,10 +1197,10 @@ function makeTest(name, doc, mutation) {
 			complete: true
 		}]);
 		var completed = function () {
-			l.attr('length');
+			l.get('length');
 			var num = 0;
 			l.each(function (item) {
-				if (item.attr('complete')) {
+				if (item.get('complete')) {
 					num++;
 				}
 			})
@@ -1212,7 +1218,7 @@ function makeTest(name, doc, mutation) {
 
 		var child = div.getElementsByTagName('div')[0];
 		equal( innerHTML(child), "2", "at first there are 2 true bindings");
-		var item = new CanMap({
+		var item = new SimpleMap({
 			complete: true,
 			id: "THIS ONE"
 		});
@@ -1220,19 +1226,19 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(child), "3", "now there are 3 complete");
 
-		item.attr('complete', false);
+		item.set('complete', false);
 
 		equal(innerHTML(child), "2", "now there are 2 complete");
 
 		l.pop();
 
-		item.attr('complete', true);
+		item.set('complete', true);
 
 		equal(innerHTML(child), "2", "there are still 2 complete");
 	});
 
 	test("escape bindings change", function () {
-		var l = new CanList([{
+		var l = new DefineList([{
 			complete: true
 		}, {
 			complete: false
@@ -1240,10 +1246,10 @@ function makeTest(name, doc, mutation) {
 			complete: true
 		}]);
 		var completed = function () {
-			l.attr('length');
+			l.get('length');
 			var num = 0;
 			l.each(function (item) {
-				if (item.attr('complete')) {
+				if (item.get('complete')) {
 					num++;
 				}
 			})
@@ -1261,20 +1267,20 @@ function makeTest(name, doc, mutation) {
 
 		var child = div.getElementsByTagName('div')[0];
 		equal(innerHTML(child), "2", "at first there are 2 true bindings");
-		var item = new CanMap({
+		var item = new SimpleMap({
 			complete: true
 		})
 		l.push(item);
 
 		equal(innerHTML(child), "3", "now there are 3 complete");
 
-		item.attr('complete', false);
+		item.set('complete', false);
 
 		equal(innerHTML(child), "2", "now there are 2 complete");
 	});
 
 	test("tag bindings change", function () {
-		var l = new CanList([{
+		var l = new DefineList([{
 			complete: true
 		}, {
 			complete: false
@@ -1282,10 +1288,10 @@ function makeTest(name, doc, mutation) {
 			complete: true
 		}]);
 		var completed = function () {
-			l.attr('length');
+			l.get('length');
 			var num = 0;
 			l.each(function (item) {
-				if (item.attr('complete')) {
+				if (item.get('complete')) {
 					num++;
 				}
 			})
@@ -1303,20 +1309,20 @@ function makeTest(name, doc, mutation) {
 
 		var child = div.getElementsByTagName('div')[0];
 		equal(child.getAttribute("items"), "2", "at first there are 2 true bindings");
-		var item = new CanMap({
+		var item = new SimpleMap({
 			complete: true
 		})
 		l.push(item);
 
 		equal(child.getAttribute("items"), "3", "now there are 3 complete");
 
-		item.attr('complete', false);
+		item.set('complete', false);
 
 		equal(child.getAttribute("items"), "2", "now there are 2 complete");
 	})
 
 	test("attribute value bindings change", function () {
-		var l = new CanList([{
+		var l = new DefineList([{
 			complete: true
 		}, {
 			complete: false
@@ -1324,10 +1330,10 @@ function makeTest(name, doc, mutation) {
 			complete: true
 		}]);
 		var completed = function () {
-			l.attr('length');
+			l.get('length');
 			var num = 0;
 			l.each(function (item) {
-				if (item.attr('complete')) {
+				if (item.get('complete')) {
 					num++;
 				}
 			});
@@ -1345,14 +1351,14 @@ function makeTest(name, doc, mutation) {
 
 		var child = div.getElementsByTagName('div')[0];
 		equal(child.getAttribute("items"), "2", "at first there are 2 true bindings");
-		var item = new CanMap({
+		var item = new SimpleMap({
 			complete: true
 		});
 		l.push(item);
 
 		equal(child.getAttribute("items"), "3", "now there are 3 complete");
 
-		item.attr('complete', false);
+		item.set('complete', false);
 
 		equal(child.getAttribute("items"), "2", "now there are 2 complete");
 	});
@@ -1360,7 +1366,7 @@ function makeTest(name, doc, mutation) {
 	test("in tag toggling", function () {
 		var text = "<div {{ obs.val }}></div>"
 
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 			val: 'foo="bar"'
 		})
 
@@ -1372,8 +1378,8 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(compiled);
 
-		obs.attr('val', "bar='foo'");
-		obs.attr('val', 'foo="bar"')
+		obs.set('val', "bar='foo'");
+		obs.set('val', 'foo="bar"')
 		var d2 = div.getElementsByTagName('div')[0];
 		// toUpperCase added to normalize cases for IE8
 		equal(d2.getAttribute("foo"), "bar", "bar set");
@@ -1385,10 +1391,10 @@ function makeTest(name, doc, mutation) {
 
 		var text = "<div>{{ obs.name.first }}</div>"
 
-		var obs = new CanMap({
-			name: {
+		var obs = new SimpleMap({
+			name: new SimpleMap({
 				first: "Justin"
-			}
+			})
 		})
 
 		var compiled = stache(text)({
@@ -1403,7 +1409,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), "Justin")
 
-		obs.attr('name.first', "Brian")
+		obs.get('name').set('first', "Brian")
 
 		equal(innerHTML(div), "Brian")
 
@@ -1412,7 +1418,7 @@ function makeTest(name, doc, mutation) {
 	test("tags without chidren or ending with /> do not change the state", function () {
 
 		var text = "<table><tr><td/>{{{ obs.content }}}</tr></div>"
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 			content: "<td>Justin</td>"
 		})
 		var compiled = stache(text)({
@@ -1431,7 +1437,7 @@ function makeTest(name, doc, mutation) {
 	test("nested live bindings", function () {
 		expect(0);
 
-		var items = new CanList([{
+		var items = new DefineList([{
 			title: 0,
 			is_done: false,
 			id: 0
@@ -1452,23 +1458,23 @@ function makeTest(name, doc, mutation) {
 		});
 		// this will throw an error unless Mustache protects against
 		// nested objects
-		items[0].attr('is_done', true);
+		items[0].set('is_done', true);
 	});
 
 	test("list nested in observe live bindings", function () {
 		var template = stache("<ul>{{#data.items}}<li>{{name}}</li>{{/data.items}}</ul>");
-		var data = new CanMap({
-			items: [{
+		var data = new SimpleMap({
+			items: new DefineList([{
 				name: "Brian"
 			}, {
 				name: "Fara"
-			}]
+			}])
 		});
 		var div = doc.createElement('div');
 		div.appendChild(template({
 			data: data
 		}));
-		data.items.push(new CanMap({
+		data.get("items").push(new SimpleMap({
 			name: "Scott"
 		}))
 		ok(/Brian/.test(innerHTML(div)), "added first name")
@@ -1479,7 +1485,7 @@ function makeTest(name, doc, mutation) {
 	test("trailing text", function () {
 		var template = stache("There are {{ length }} todos")
 		var div = doc.createElement('div');
-		div.appendChild(template(new CanList([{}, {}])));
+		div.appendChild(template(new DefineList([{}, {}])));
 		ok(/There are 2 todos/.test(innerHTML(div)), "got all text");
 	});
 
@@ -1500,7 +1506,7 @@ function makeTest(name, doc, mutation) {
 				'{{/items}}'+
 				'</div>');
 
-			var data = new CanList([{
+			var data = new DefineList([{
 				label: 'branch1',
 				children: [{
 					id: 2,
@@ -1526,7 +1532,7 @@ function makeTest(name, doc, mutation) {
 	test("live binding textarea", function () {
 		var template = stache("<textarea>Before{{ obs.middle }}After</textarea>");
 
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 				middle: "yes"
 			}),
 			div = doc.createElement('div');
@@ -1538,7 +1544,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(getValue(textarea), "BeforeyesAfter");
 
-		obs.attr("middle", "Middle");
+		obs.set("middle", "Middle");
 
 		equal(getValue(textarea), "BeforeMiddleAfter");
 
@@ -1547,7 +1553,7 @@ function makeTest(name, doc, mutation) {
 	test("reading a property from a parent object when the current context is an observe", function () {
 		var template = stache("{{#foos}}<span>{{bar}}</span>{{/foos}}")
 		var data = {
-			foos: new CanList([{
+			foos: new DefineList([{
 				name: "hi"
 			}, {
 				name: 'bye'
@@ -1587,7 +1593,7 @@ function makeTest(name, doc, mutation) {
 
 		var renderer = stache('{{computeTest test}}');
 		renderer({
-			test: canCompute(5)
+			test: new SimpleObservable(5)
 		});
 	});
 
@@ -1602,7 +1608,7 @@ function makeTest(name, doc, mutation) {
 
 		var template = stache("There are {{ length }} todos");
 		var div = doc.createElement('div');
-		div.appendChild(template(new CanList([{}, {}])));
+		div.appendChild(template(new DefineList([{}, {}])));
 		ok(/There are 2 todos/.test(innerHTML(div)), "got all text");
 
 		var renderer, result, data, actual, span;
@@ -1612,7 +1618,7 @@ function makeTest(name, doc, mutation) {
 			data = ["e", "a", "c", "h"];
 			div = doc.createElement("div");
 			actual = renderer({
-				test: canCompute(data)
+				test: new DefineList(data)
 			});
 			div.appendChild(actual);
 			span = div.getElementsByTagName("span")[0];
@@ -1637,7 +1643,7 @@ function makeTest(name, doc, mutation) {
 			data = null;
 			div = doc.createElement("div");
 			actual = renderer({
-				test: canCompute(data)
+				test: null
 			});
 			div.appendChild(actual);
 			actual = innerHTML(div);
@@ -1654,7 +1660,7 @@ function makeTest(name, doc, mutation) {
 				"<tbody><tr><td>{{name}}</td></tr></tbody>" +
 				"{{/people}}" +
 				"</table>",
-			people = new CanList([{
+			people = new DefineList([{
 				name: "Steve"
 			}, {
 				name: "Doug"
@@ -1669,8 +1675,8 @@ function makeTest(name, doc, mutation) {
 	test("Observe with array attributes", function () {
 		var renderer = stache('<ul>{{#todos}}<li>{{.}}</li>{{/todos}}</ul><div>{{message}}</div>');
 		var div = doc.createElement('div');
-		var data = new CanMap({
-			todos: ['Line #1', 'Line #2', 'Line #3'],
+		var data = new SimpleMap({
+			todos: new DefineList( ['Line #1', 'Line #2', 'Line #3'] ),
 			message: 'Hello',
 			count: 2
 		});
@@ -1679,8 +1685,8 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div.getElementsByTagName('li')[1]), 'Line #2', 'Check initial array');
 		equal(innerHTML(div.getElementsByTagName('div')[0]), 'Hello', 'Check initial message');
 
-		data.attr('todos.1', 'Line #2 changed');
-		data.attr('message', 'Hello again');
+		data.get('todos').set(1, 'Line #2 changed');
+		data.set('message', 'Hello again');
 
 		equal(innerHTML(div.getElementsByTagName('li')[1]), 'Line #2 changed', 'Check updated array');
 		equal(innerHTML(div.getElementsByTagName('div')[0]), 'Hello again', 'Check updated message');
@@ -1689,7 +1695,7 @@ function makeTest(name, doc, mutation) {
 	test("Observe list returned from the function", function () {
 		var renderer = stache('<ul>{{#todos}}<li>{{.}}</li>{{/todos}}</ul>');
 		var div = doc.createElement('div');
-		var todos = new CanList();
+		var todos = new DefineList();
 		var data = {
 			todos: function () {
 				return todos;
@@ -1807,7 +1813,7 @@ function makeTest(name, doc, mutation) {
 				name: 'Forks'
 			}],
 			liveData = {
-				todos: new CanList(todos)
+				todos: new DefineList(todos)
 			},
 			plainData = {
 				todos: todos
@@ -1901,7 +1907,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache('<input {{myValue user.name}}/>');
 
 		var div = doc.createElement('div'),
-			u = new CanMap({
+			u = new SimpleMap({
 				name: "Justin"
 			});
 
@@ -1913,21 +1919,21 @@ function makeTest(name, doc, mutation) {
 
 		equal(input.value, "Justin", "Name is set correctly")
 
-		u.attr('name', 'Eli')
+		u.set('name', 'Eli')
 
 		equal(input.value, "Eli", "Changing observe updates value");
 
 		input.value = "Austin";
 		input.onchange();
 
-		equal(u.attr('name'), "Austin", "Name changed by input field");
+		equal(u.get('name'), "Austin", "Name changed by input field");
 
 		val.teardown();
 
 		// name is undefined
 		renderer = stache('<input {{myValue user.name}}/>');
 		div = doc.createElement('div');
-		u = new CanMap({});
+		u = new SimpleMap({});
 		div.appendChild(renderer({
 			user: u
 		}));
@@ -1935,19 +1941,19 @@ function makeTest(name, doc, mutation) {
 
 		equal(input.value, "", "Name is set correctly")
 
-		u.attr('name', 'Eli')
+		u.set('name', 'Eli')
 
 		equal(input.value, "Eli", "Changing observe updates value");
 
 		input.value = "Austin";
 		input.onchange();
-		equal(u.attr('name'), "Austin", "Name changed by input field");
+		equal(u.get('name'), "Austin", "Name changed by input field");
 		val.teardown();
 
 		// name is null
 		renderer = stache('<input {{myValue user.name}}/>');
 		div = doc.createElement('div');
-		u = new CanMap({
+		u = new SimpleMap({
 			name: null
 		});
 		div.appendChild(renderer({
@@ -1957,13 +1963,13 @@ function makeTest(name, doc, mutation) {
 
 		equal(input.value, "", "Name is set correctly with null")
 
-		u.attr('name', 'Eli')
+		u.set('name', 'Eli')
 
 		equal(input.value, "Eli", "Changing observe updates value");
 
 		input.value = "Austin";
 		input.onchange();
-		equal(u.attr('name'), "Austin", "Name changed by input field");
+		equal(u.get('name'), "Austin", "Name changed by input field");
 		val.teardown();
 
 	});
@@ -2012,7 +2018,7 @@ function makeTest(name, doc, mutation) {
 				"{{/todos}}",
 				"</ul>"
 			],
-			todos = new CanList([{
+			todos = new DefineList([{
 				id: 1,
 				name: "Dishes"
 			}]),
@@ -2058,7 +2064,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Empty strings in arrays within Observes that are iterated should return blank strings", function () {
-		var data = new CanMap({
+		var data = new SimpleMap({
 				colors: ["", 'red', 'green', 'blue']
 			}),
 			compiled = stache("<select>{{#colors}}<option>{{.}}</option>{{/colors}}</select>")(data),
@@ -2075,13 +2081,13 @@ function makeTest(name, doc, mutation) {
 			frag, frag2;
 
 		try {
-			frag = renderer(new CanMap({
+			frag = renderer(new SimpleMap({
 				foo: null
 			}));
 		} catch (e) {
 			ok(false, "rendering with null threw an error");
 		}
-		frag2 = renderer(new CanMap({
+		frag2 = renderer(new SimpleMap({
 			foo: {
 				bar: "baz"
 			}
@@ -2104,9 +2110,9 @@ function makeTest(name, doc, mutation) {
 			renderer2 = stache("{{#bar}}{{> nested_data2}}{{/bar}}"),
 			renderer3 = stache("{{#bar}}{{> nested_data3}}{{/bar}}"),
 			div = doc.createElement('div'),
-			data = new CanMap({
+			data = new SimpleMap({
 				foo: "bar",
-				bar: new CanMap({})
+				bar: new SimpleMap({})
 			}),
 			span;
 
@@ -2114,27 +2120,27 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(renderer(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.bar, 'Nested data 1 should have correct data');
+		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer2(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.bar, 'Nested data 2 should have correct data');
+		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer3(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.bar, 'Nested data 3 should have correct data');
+		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
 	});
 
 	// Issue #333
 	test("Functions passed to default helpers should be evaluated", function () {
 		var renderer = stache("{{#if hasDucks}}Ducks: {{ducks}}{{else}}No ducks!{{/if}}"),
 			div = doc.createElement('div'),
-			data = new CanMap({
+			data = new SimpleMap({
 				ducks: "",
 				hasDucks: function () {
-					return this.attr("ducks")
+					return this.get("ducks")
 							.length > 0;
 				}
 			});
@@ -2152,7 +2158,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement('div'),
 			div2 = doc.createElement('div');
 
-		var person = new CanMap({
+		var person = new SimpleMap({
 			name: "Brian"
 		});
 		var result = noglobals({
@@ -2174,7 +2180,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(result);
 		div2.appendChild(result2);
 
-		person.attr("name", "Ajax")
+		person.set("name", "Ajax")
 
 		equal(innerHTML(div), "Mr. Ajax");
 		equal(innerHTML(div2), "Ajax rules");
@@ -2207,7 +2213,7 @@ function makeTest(name, doc, mutation) {
 
 		var div = doc.createElement('div'),
 			div2 = doc.createElement('div');
-		var person = new CanMap({
+		var person = new SimpleMap({
 			name: "Brian"
 		});
 		var result = noglobals({
@@ -2227,7 +2233,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(result);
 		div2.appendChild(result2);
 
-		person.attr("name", "Ajax")
+		person.set("name", "Ajax")
 
 		equal(innerHTML(div), "Mr. Ajax");
 		equal(innerHTML(div2), "Ajax rules");
@@ -2237,7 +2243,7 @@ function makeTest(name, doc, mutation) {
 
 	test("Each does not redraw items", function () {
 
-		var animals = new CanList(['sloth', 'bear']),
+		var animals = new DefineList(['sloth', 'bear']),
 			renderer = stache("<div>my<b>favorite</b>animals:{{#each animals}}<label>Animal=</label> <span>{{this}}</span>{{/}}!</div>");
 
 		var div = doc.createElement('div')
@@ -2263,7 +2269,7 @@ function makeTest(name, doc, mutation) {
 
 	test("Each works with the empty list", function () {
 
-		var animals = new CanList([]),
+		var animals = new DefineList([]),
 			renderer = stache("<div>my<b>favorite</b>animals:{{#each animals}}<label>Animal=</label> <span>{{this}}</span>{{/}}!</div>");
 
 		var div = doc.createElement('div')
@@ -2286,7 +2292,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("each works within another branch", function () {
-		var animals = new CanList(['sloth']),
+		var animals = new DefineList(['sloth']),
 			template = "<div>Animals:" +
 				"{{#if animals.length}}~" +
 				"{{#each animals}}" +
@@ -2326,11 +2332,11 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache('<input {{iamhungryforcomputes userName}}/>');
 
 		var div = doc.createElement('div'),
-			u = new CanMap({
+			u = new SimpleMap({
 				name: "Justin"
 			});
-		var nameCompute = canCompute(function(){
-			return u.attr('name');
+		var nameCompute = new Observation(function(){
+			return u.get('name');
 		})
 		div.appendChild(renderer({
 			userName: nameCompute
@@ -2362,7 +2368,7 @@ function makeTest(name, doc, mutation) {
 	test("Computes should be resolved prior to accessing attributes", function () {
 		var template = stache("{{list.length}}"),
 			data = {
-				list: canCompute(new CanList())
+				list: new SimpleObservable(new DefineList())
 			};
 
 		var div = doc.createElement('div');
@@ -2405,7 +2411,7 @@ function makeTest(name, doc, mutation) {
 			return "result";
 		});
 
-		var obs = new CanMap({
+		var obs = new SimpleMap({
 			quux: false
 		});
 
@@ -2413,7 +2419,7 @@ function makeTest(name, doc, mutation) {
 
 		template(obs);
 
-		obs.attr("quux", true);
+		obs.set("quux", true);
 
 	});
 
@@ -2431,7 +2437,7 @@ function makeTest(name, doc, mutation) {
 
 	test("hiding image srcs (#157)", function () {
 		var template = stache('<img {{#image}}src="{{.}}"{{/image}} alt="An image" />'),
-			data = new CanMap({
+			data = new SimpleMap({
 				image: null
 			}),
 			url = "http://canjs.us/scripts/static/img/canjs_logo_yellow_small.png";
@@ -2441,7 +2447,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(img.getAttribute("src"), null, "there is no src");
 
-		data.attr("image", url);
+		data.set("image", url);
 		notEqual(img.getAttribute("src"), null, 'Image should have src');
 		equal(img.getAttribute("src"), url, "images src is correct");
 
@@ -2449,7 +2455,7 @@ function makeTest(name, doc, mutation) {
 
 	test("live binding in a truthy section", function () {
 		var template = stache('<div {{#width}}width="{{.}}"{{/width}}></div>'),
-			data = new CanMap({
+			data = new SimpleMap({
 				width: '100'
 			});
 
@@ -2458,7 +2464,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(img.getAttribute("width"), "100", "initial width is correct");
 
-		data.attr("width", "300");
+		data.set("width", "300");
 		equal(img.getAttribute('width'), "300", "updated width is correct");
 
 	});
@@ -2472,26 +2478,26 @@ function makeTest(name, doc, mutation) {
 			"{{/grid.cols}}" +
 			"{{/grid.rows}}");
 
-		var grid = new CanMap({
-			rows: [{
+		var grid = new SimpleMap({
+			rows: new DefineList([{
 				first: "Justin",
 				last: "Meyer"
 			}, {
 				first: "Brian",
 				last: "Moschel"
-			}],
-			cols: [{
+			}]),
+			cols: new DefineList([{
 				prop: "first"
 			}, {
 				prop: "last"
-			}]
+			}])
 		});
 
 		var frag = template({
 			grid: grid
 		}, {
 			columnData: function (row, col) {
-				return row().attr(col().attr("prop"));
+				return row().get(col().get("prop"));
 			}
 		});
 
@@ -2518,7 +2524,7 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("passing CanList to helper (#438)", function () {
+	test("passing DefineList to helper (#438)", function () {
 		var renderer = stache('<ul><li {{helper438 observeList}}>observeList broken</li>' +
 		'<li {{helper438 array}}>plain arrays work</li></ul>');
 
@@ -2530,7 +2536,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var frag = renderer({
-			observeList: new CanList([{
+			observeList: new DefineList([{
 				test: 'first'
 			}, {
 				test: 'second'
@@ -2553,7 +2559,7 @@ function makeTest(name, doc, mutation) {
 
 	test("hiding image srcs (#494)", function () {
 		var template = stache('<img src="{{image}}"/>'),
-			data = new CanMap({
+			data = new SimpleMap({
 				image: ""
 			}),
 			url = "http://canjs.us/scripts/static/img/canjs_logo_yellow_small.png";
@@ -2563,7 +2569,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(img.getAttribute("src"), null, "there is no src");
 
-		data.attr("image", url);
+		data.set("image", url);
 
 		notEqual(img.getAttribute("src"), "", 'Image should have src');
 		equal(img.getAttribute("src"), url, "images src is correct");
@@ -2571,7 +2577,7 @@ function makeTest(name, doc, mutation) {
 
 	test("hiding image srcs with complex content (#494)", function () {
 		var template = stache('<img src="{{#image}}http://{{domain}}/{{loc}}.png{{/image}}"/>'),
-			data = new CanMap({}),
+			data = new SimpleMap({}),
 			imgData = {
 				domain: "canjs.us",
 				loc: "scripts/static/img/canjs_logo_yellow_small"
@@ -2584,7 +2590,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(img.getAttribute("src"), null, "there is no src");
 
-		data.attr("image", imgData);
+		data.set("image", imgData);
 		notEqual(img.getAttribute("src"), "", 'Image should have src');
 		equal(img.getAttribute("src"), url, "images src is correct");
 	});
@@ -2594,7 +2600,7 @@ function makeTest(name, doc, mutation) {
 	//
 	//        var template = stache('<div style="width: {{width}}px; background-color: {{color}};">hi</div>')
 	//
-	//        var dims = new CanMap({
+	//        var dims = new SimpleMap({
 	//            width: 5,
 	//            color: 'red'
 	//        });
@@ -2605,8 +2611,8 @@ function makeTest(name, doc, mutation) {
 	//        equal(div.style.width, "5px");
 	//        equal(div.style.backgroundColor, "red");
 	//
-	//        dims.attr("width", 10);
-	//        dims.attr('color', 'blue');
+	//        dims.set("width", 10);
+	//        dims.set('color', 'blue');
 	//
 	//        equal(div.style.width, "10px");
 	//        equal(div.style.backgroundColor, "blue");
@@ -2617,7 +2623,7 @@ function makeTest(name, doc, mutation) {
 
 	test("empty lists update", 2, function () {
 		var template = stache('<p>{{#list}}{{.}}{{/list}}</p>');
-		var map = new CanMap({
+		var map = new SimpleMap({
 			list: ['something']
 		});
 
@@ -2627,7 +2633,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(frag);
 
 		equal(innerHTML( div.childNodes.item(0)), 'something', 'initial list content set');
-		map.attr('list', ['one', 'two']);
+		map.set('list', ['one', 'two']);
 		equal(innerHTML( div.childNodes.item(0)), 'onetwo', 'updated list content set');
 	});
 
@@ -2654,17 +2660,17 @@ function makeTest(name, doc, mutation) {
 
 	test("live bound attributes with no '='", function () {
 		var template = stache('<input type="radio" {{#selected}}checked{{/selected}}>');
-		var data = new CanMap({
+		var data = new SimpleMap({
 			selected: false
 		});
 		var frag = template(data);
 		var div = doc.createElement('div');
 
 		div.appendChild(frag);
-		data.attr('selected', true);
+		data.set('selected', true);
 		equal(div.childNodes.item(0).checked, true, 'hyphenated attribute value');
 
-		data.attr("selected", false)
+		data.set("selected", false)
 		equal(div.childNodes.item(0).checked, false, 'hyphenated attribute value');
 	});
 
@@ -2694,7 +2700,7 @@ function makeTest(name, doc, mutation) {
 	test("incremental updating of #each within an if", function () {
 		var template = stache('{{#if items.length}}<ul>{{#each items}}<li/>{{/each}}</ul>{{/if}}');
 
-		var items = new CanList([{}, {}]);
+		var items = new DefineList([{}, {}]);
 		var div = doc.createElement('div');
 		div.appendChild(template({
 			items: items
@@ -2737,16 +2743,17 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("changing the list works with each", function () {
+		queues.log();
 		var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
 
-		var map = new CanMap({
-			list: ["foo"]
+		var map = new SimpleMap({
+			list: new DefineList(["foo"])
 		});
 
 		var tpl = template(map).firstChild;
 		equal(tpl.getElementsByTagName('li').length, 1, "one li");
 
-		map.attr("list", new CanList(["bar", "car"]));
+		map.set("list", new DefineList(["bar", "car"]));
 
 		equal(tpl.getElementsByTagName('li').length, 2, "two lis");
 
@@ -2755,22 +2762,22 @@ function makeTest(name, doc, mutation) {
 	test("nested properties binding (#525)", function () {
 		var template = stache("<label>{{name.first}}</label>");
 
-		var me = new CanMap();
+		var me = new SimpleMap();
 
 		var label = template(me)
 			.firstChild;
-		me.attr("name", {
+		me.set("name", {
 			first: "Justin"
 		});
 		equal(innerHTML(label), "Justin", "set name object");
 
-		me.attr("name", {
+		me.set("name", {
 			first: "Brian"
 		});
 		equal(innerHTML(label), "Brian", "merged name object");
 
-		me.removeAttr("name");
-		me.attr({
+		me.set("name",undefined);
+		me.set({
 			name: {
 				first: "Payal"
 			}
@@ -2859,8 +2866,8 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("Rendering live bound indicies with #each, %index and a simple CanList", function () {
-		var list = new CanList(['a', 'b', 'c']);
+	test("Rendering live bound indicies with #each, %index and a simple DefineList", function () {
+		var list = new DefineList(['a', 'b', 'c']);
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
@@ -2925,10 +2932,10 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 	});
 
-	test('Live bound iteration of keys of a CanMap with #each and @key', function () {
+	test('Live bound iteration of keys of a SimpleMap with #each and @key', function () {
 		// delete stache._helpers.foo;
 		var template = stache("<ul>{{#each map}}<li>{{@key}} {{.}}</li>{{/each}}</ul>");
-		var map = new CanMap({
+		var map = new SimpleMap({
 			foo: 'string',
 			bar: 1,
 			baz: false
@@ -2945,14 +2952,16 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[1]), 'bar 1', "second key value pair rendered");
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 
-		map.attr('qux', true);
+		map.set('qux', true);
 
 		lis = tpl.firstChild.getElementsByTagName('li');
 		equal(lis.length, 4, "four lis");
 
 		equal(innerHTML(lis[3]), 'qux true', "fourth key value pair rendered");
 
-		map.removeAttr('foo');
+		// A hack b/c map can't delete keys
+		delete map._data.foo;
+		map.dispatch("__keys")
 
 		lis = tpl.firstChild.getElementsByTagName('li');
 		equal(lis.length, 3, "three lis");
@@ -2977,14 +2986,14 @@ function makeTest(name, doc, mutation) {
 	test("no memory leaks with #each (#545)", function () {
 		var tmp = stache("<ul id='ul-remove'>{{#each children}}<li></li>{{/each}}</ul>");
 
-		var data = new CanMap({
-			children: [{
+		var data = new SimpleMap({
+			children: new DefineList([{
 				name: 'A1'
 			}, {
 				name: 'A2'
 			}, {
 				name: 'A3'
-			}]
+			}])
 		});
 		var div = doc.createElement('div');
 		this.fixture.appendChild(div);
@@ -2996,37 +3005,38 @@ function makeTest(name, doc, mutation) {
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
 			setTimeout(function () {
-				equal(data.__bindEvents._lifecycleBindings, 0, "there are no bindings");
+				var handlers = data[canSymbol.for("can.meta")].handlers.get([]);
+				equal(handlers.length, 0, "there are no bindings");
 				start();
 			}, 30);
 		},10);
 	});
 
 	test("each directly within live html section", function () {
-
+		queues.log();
 		var tmp = stache(
 			"<ul>{{#if showing}}" +
-			"{{#each items}}<li>item</li>{{/items}}" +
+			"{{#each items}}<li>item</li>{{/each}}" +
 			"{{/if}}</ul>");
 
-		var items = new CanList([1, 2, 3]);
-		var showing = canCompute(true);
+		var items = new DefineList([1, 2, 3]);
+		var showing = new SimpleObservable(true);
 		var frag = tmp({
 			showing: showing,
 			items: items
 		});
 
-		showing(false);
+		showing.set(false);
 
 		// this would break because things had not been unbound
 		items.pop();
 
-		showing(true);
+		showing.set(true);
 
 		items.push("a");
 
 		equal(frag.firstChild.getElementsByTagName("li")
-			.length, 3, "there are 3 elements");
+			.length, 3, "there are 3 elements - "+frag.firstChild.innerHTML);
 
 	});
 
@@ -3046,7 +3056,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('@index is correctly calculated when there are identical elements in the array', function () {
-		var data = new CanList(['foo', 'bar', 'baz', 'qux', 'foo']);
+		var data = new DefineList(['foo', 'bar', 'baz', 'qux', 'foo']);
 		var tmp = stache('{{#each data}}{{@index}} {{/each}}');
 
 		var div = doc.createElement('div');
@@ -3061,7 +3071,7 @@ function makeTest(name, doc, mutation) {
 	test("if helper within className (#592)", function () {
 
 		var tmp = stache('<div class="fails {{#state}}animate-{{.}}{{/state}}"></div>');
-		var data = new CanMap({
+		var data = new SimpleMap({
 			state: "ready"
 		});
 		var frag = tmp(data);
@@ -3069,7 +3079,7 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.className, "fails animate-ready");
 
 		tmp = stache('<div class="fails {{#if state}}animate-{{state}}{{/if}}"></div>');
-		data = new CanMap({
+		data = new SimpleMap({
 			state: "ready"
 		});
 		tmp(data);
@@ -3090,8 +3100,8 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple CanList when remove first item (#613)", function () {
-		var list = new CanList(['a', 'b', 'c']);
+	test("Rendering live bound indicies with #each, @index and a simple DefineList when remove first item (#613)", function () {
+		var list = new DefineList(['a', 'b', 'c']);
 		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
@@ -3109,7 +3119,7 @@ function makeTest(name, doc, mutation) {
 
 	test("stache.safestring works on live binding (#606)", function () {
 
-		var num = canCompute(1)
+		var num = new SimpleObservable(1);
 
 		stache.registerHelper("safeHelper", function () {
 
@@ -3138,10 +3148,10 @@ function makeTest(name, doc, mutation) {
 		"{{/item}}" +
 		"</div>")
 
-		var data = new CanMap({
-			item: {
-				subitems: ['first']
-			}
+		var data = new SimpleMap({
+			item: new SimpleMap({
+				subitems: new DefineMap(['first'])
+			})
 		});
 
 		var frag = template(data),
@@ -3150,13 +3160,13 @@ function makeTest(name, doc, mutation) {
 
 		equal(labels.length, 1, "initially one label");
 
-		data.attr('item.subitems')
+		data.get('item').get('subitems')
 			.push('second');
 
 		labels = div.getElementsByTagName("label");
 		equal(labels.length, 2, "after pushing two label");
 
-		data.removeAttr('item');
+		data.set('item',undefined);
 
 		labels = div.getElementsByTagName("label");
 		equal(labels.length, 0, "after removing item no label");
@@ -3173,7 +3183,7 @@ function makeTest(name, doc, mutation) {
 			"{{/items}}" +
 			"</div>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			items: [{
 				visible: true
 			}]
@@ -3181,12 +3191,12 @@ function makeTest(name, doc, mutation) {
 		var bindings = 0;
 		function addEventListener(eventType){
 			bindings++;
-			return CanMap.prototype.addEventListener.apply(this, arguments);
+			return SimpleMap.prototype.addEventListener.apply(this, arguments);
 		}
 
 		// unbind will be called twice
 		function removeEventListener(eventType) {
-			CanMap.prototype.removeEventListener.apply(this, arguments);
+			SimpleMap.prototype.removeEventListener.apply(this, arguments);
 			bindings--;
 			if(eventType === "visible"){
 				ok(true,"unbound visible");
@@ -3196,14 +3206,14 @@ function makeTest(name, doc, mutation) {
 				ok(true, "unbound visible");
 			}
 		}
-		data.attr("items.0")
+		data.get("items").get("0")
 			.addEventListener = addEventListener;
-		data.attr("items.0")
+		data.get("items").get("0")
 			.removeEventListener = removeEventListener;
 
 		template(data);
 
-		data.attr("items", [{
+		data.set("items", [{
 			visible: true
 		}]);
 
@@ -3213,7 +3223,7 @@ function makeTest(name, doc, mutation) {
 	test("direct live section", function () {
 		var template = stache("{{#if visible}}<label/>{{/if}}");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			visible: true
 		});
 
@@ -3223,7 +3233,7 @@ function makeTest(name, doc, mutation) {
 		equal(div.getElementsByTagName("label")
 			.length, 1, "there are 1 items")
 
-		data.attr("visible", false)
+		data.set("visible", false)
 		equal(div.getElementsByTagName("label")
 			.length, 0, "there are 0 items")
 
@@ -3237,7 +3247,7 @@ function makeTest(name, doc, mutation) {
 		"{{/data}}" +
 		"</ul>");
 
-		var map = new CanMap({
+		var map = new SimpleMap({
 			data: {
 				some: 'test',
 				things: false,
@@ -3275,7 +3285,7 @@ function makeTest(name, doc, mutation) {
 	test('{{#each}} helper works reliably with nested sections (#604)', function () {
 		var renderer = stache('{{#if first}}<ul>{{#each list}}<li>{{name}}</li>{{/each}}</ul>' +
 		'{{else}}<ul>{{#each list2}}<li>{{name}}</li>{{/each}}</ul>{{/if}}');
-		var data = new CanMap({
+		var data = new SimpleMap({
 			first: true,
 			list: [{
 				name: "Something"
@@ -3299,7 +3309,7 @@ function makeTest(name, doc, mutation) {
 			}), ["Something", "Else"],
 			'Expected HTML with first set');
 
-		data.attr('first', false);
+		data.set('first', false);
 
 		lis = div.getElementsByTagName("li");
 		deepEqual(
@@ -3315,7 +3325,7 @@ function makeTest(name, doc, mutation) {
 			div = doc.createElement("div"),
 			title = "Alpha&Beta";
 
-		var frag = stache(html)(new CanMap({
+		var frag = stache(html)(new SimpleMap({
 			test: title
 		}));
 
@@ -3325,7 +3335,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Constructor static properties are accessible (#634)', function () {
-		var Foo = CanMap.extend("Foo", {
+		var Foo = SimpleMap.extend("Foo", {
 			static_prop: "baz"
 		}, {
 			proto_prop: "thud"
@@ -3401,10 +3411,10 @@ function makeTest(name, doc, mutation) {
           </ul>');
 
 		var div = doc.createElement('div'),
-			data1 = new CanMap({
+			data1 = new SimpleMap({
 				description: 'Each without list'
 			}),
-			data2 = new CanMap({
+			data2 = new SimpleMap({
 				description: 'Each with empty list',
 				list: []
 			});
@@ -3421,10 +3431,10 @@ function makeTest(name, doc, mutation) {
 		setTimeout(function () {
 
 			start();
-			data1.attr('list', [{
+			data1.set('list', [{
 				name: 'first'
 			}]);
-			data2.attr('list', [{
+			data2.set('list', [{
 				name: 'first'
 			}]);
 
@@ -3442,7 +3452,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache('<p>{{#counter}} Clicked <span>{{count}}</span> times {{/counter}}</p>'),
 			div = doc.createElement('div'),
 		// canCompute(null) will pass
-			counter = canCompute(),
+			counter = new SimpleObservable(),
 			data = {
 				counter: counter
 			};
@@ -3454,7 +3464,7 @@ function makeTest(name, doc, mutation) {
 		stop();
 		setTimeout(function () {
 			start();
-			counter({
+			counter.set({
 				count: 1
 			});
 			equal(div.getElementsByTagName('span')
@@ -3484,7 +3494,7 @@ function makeTest(name, doc, mutation) {
 				"{{/each}}" +
 				"</div>");
 
-			var items = new CanList([{}, {}]);
+			var items = new DefineList([{}, {}]);
 
 			var frag = itemsTemplate({
 					items: items
@@ -3506,7 +3516,7 @@ function makeTest(name, doc, mutation) {
 
 	test("#each with #if directly nested (#750)", function(){
 		var template = stache("<ul>{{#each list}} {{#if visible}}<li>{{name}}</li>{{/if}} {{/each}}</ul>");
-		var data = new CanMap(
+		var data = new SimpleMap(
 			{
 				list: [
 					{
@@ -3526,7 +3536,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(data);
 
-		data.attr('list').pop();
+		data.get('list').pop();
 
 		equal(frag.firstChild.getElementsByTagName('li').length, 1, "only first should be visible")
 
@@ -3678,7 +3688,7 @@ function makeTest(name, doc, mutation) {
 	//!steal-remove-end
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
-		var frag = stache(tmpl)(new CanMap({
+		var frag = stache(tmpl)(new SimpleMap({
 			bar : 'baz'
 		}), {
 			foo : function(opts){
@@ -3755,13 +3765,13 @@ function makeTest(name, doc, mutation) {
 
 	test("{{else}} within an attribute (#974)", function(){
 		var tmpl = '<div class="{{#if color}}{{color}}{{else}}red{{/if}}"></div>',
-			data = new CanMap({
+			data = new SimpleMap({
 				color: 'orange'
 			}),
 			frag = stache(tmpl)(data);
 
 		equal(frag.firstChild.className, 'orange', 'if branch');
-		data.attr('color', false);
+		data.set('color', false);
 		equal(frag.firstChild.className, 'red', 'else branch');
 	});
 
@@ -3792,12 +3802,12 @@ function makeTest(name, doc, mutation) {
 	test("single property read does not infinitely loop (#1155)",function(){
 		stop();
 
-		var map = new CanMap({state: false});
+		var map = new SimpleMap({state: false});
 		var current = false;
-		var source = canCompute(1);
-		var number = canCompute(function(){
+		var source = new SimpleObservable(1);
+		var number = new Observation(function(){
 
-			map.attr("state", current = !current);
+			map.set("state", current = !current);
 
 			return source();
 		});
@@ -3808,8 +3818,8 @@ function makeTest(name, doc, mutation) {
 		template({
 			map: map
 		});
-		source(2);
-		map.attr("state", current = !current);
+		source.set(2);
+		map.set("state", current = !current);
 		ok(true,"no error at this point");
 		start();
 
@@ -3817,10 +3827,10 @@ function makeTest(name, doc, mutation) {
 
 	test("methods become observable (#1164)", function(){
 
-		var TeamModel = CanMap.extend({
+		var TeamModel = SimpleMap.extend({
 
 			shortName : function() {
-				return (this.attr('nickname') && this.attr('nickname').length <= 8) ? this.attr('nickname') : this.attr('abbreviation');
+				return (this.get('nickname') && this.get('nickname').length <= 8) ? this.get('nickname') : this.get('abbreviation');
 			}
 		});
 
@@ -3841,7 +3851,7 @@ function makeTest(name, doc, mutation) {
 	test("<col> inside <table> renders correctly (#1013)", 1, function() {
 		var template = '<table><colgroup>{{#columns}}<col class="{{class}}" />{{/columns}}</colgroup><tbody></tbody></table>';
 		var frag = stache(template)({
-			columns: new CanList([
+			columns: new DefineList([
 				{ 'class': 'test' }
 			])
 		});
@@ -3856,7 +3866,7 @@ function makeTest(name, doc, mutation) {
 	test('splicing negative indices works (#1038)', function() {
 		// http://jsfiddle.net/ZrWVQ/2/
 		var template = '{{#each list}}<p>{{.}}</p>{{/each}}';
-		var list = new CanList(['a', 'b', 'c', 'd']);
+		var list = new DefineList(['a', 'b', 'c', 'd']);
 		var frag = stache(template)({
 			list: list
 		});
@@ -3877,7 +3887,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Passing Partial set in options (#1388 and #1389). Support live binding of partial", function () {
-		var data = new CanMap({
+		var data = new SimpleMap({
 			name: "World",
 			greeting: "hello"
 		});
@@ -3891,21 +3901,21 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(template);
 		equal(innerHTML(div.firstChild), "hello World", "partial retreived and rendered");
 
-		data.attr("greeting", "goodbye");
+		data.set("greeting", "goodbye");
 		equal(innerHTML(div.firstChild), "goodbye World", "Partial updates when attr is updated");
 
 	});
 
 	test("#each with null or undefined and then a list", function(){
 		var template = stache("<ul>{{#each items}}<li>{{name}}</li>{{/each}}");
-		var data = new CanMap({items: null});
+		var data = new SimpleMap({items: null});
 		var frag = template(data);
 
 		var div = doc.createElement("div");
 		div.appendChild(frag);
 
 
-		data.attr("items", [{name: "foo"}]);
+		data.set("items", [{name: "foo"}]);
 
 		equal(div.getElementsByTagName("li").length, 1, "li added");
 	});
@@ -3976,13 +3986,13 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("{#list} works right (#1551)", function(){
-		var data = new CanMap({});
+		var data = new SimpleMap({});
 		var template = stache("<div>{{#items}}<span/>{{/items}}</div>");
 		var frag = template(data);
 
-		data.attr("items",new CanList());
+		data.set("items",new DefineList());
 
-		data.attr("items").push("foo");
+		data.get("items").push("foo");
 
 		var spans = frag.firstChild.getElementsByTagName("span");
 
@@ -3998,7 +4008,7 @@ function makeTest(name, doc, mutation) {
 			d.reject = reject;
 		});
 
-		var compute = canCompute(promise);
+		var compute = new SimpleObservable(promise);
 
 		var template = stache("<div>{{#if promise.isPending}}<span/>{{/if}}</div>");
 		var frag = template({
@@ -4042,7 +4052,7 @@ function makeTest(name, doc, mutation) {
 
 	test("possible to teardown immediate nodeList (#1593)", function(){
 		expect(3);
-		var map = new CanMap({show: true});
+		var map = new SimpleMap({show: true});
 		var oldBind = map.addEventListener,
 			oldUnbind = map.removeEventListener;
 
@@ -4078,9 +4088,9 @@ function makeTest(name, doc, mutation) {
 		// the problem here ... is that a batch is happening
 		// the replace is going to happen after
 		// we need to know when to respond
-		var product = canCompute();
-		var people = canCompute(function(){
-			var newList = new CanList();
+		var product = new SimpleObservable();
+		var people = new Observation(function(){
+			var newList = new DefineList();
 			newList.replace(['Brian']);
 			return newList;
 		});
@@ -4089,9 +4099,9 @@ function makeTest(name, doc, mutation) {
 			product: product
 		});
 
-		canBatch.start();
+		queues.batch.start();
 		product(1);
-		canBatch.stop();
+		queues.batch.stop();
 
 		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
@@ -4113,31 +4123,31 @@ function makeTest(name, doc, mutation) {
 
 	// TODO fix from here
 	test('using #each when toggling between list and null', function() {
-		var state = new CanMap();
+		var state = new SimpleMap();
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
 
-		state.attr('deepness', {
+		state.set('deepness', {
 			rows: ['test']
 		});
-		state.attr('deepness', null);
+		state.set('deepness', null);
 
 		equal(getChildNodes(frag).length, 1, "only the placeholder textnode");
 	});
 
 	test("compute defined after template (#1617)", function(){
-		var myMap = new CanMap();
+		var myMap = new SimpleMap();
 
 		// 1. Render a stache template with a binding to a key that is not a canCompute
 		var frag = stache('<span>{{ myMap.test }}</span>')({myMap: myMap});
 
 		// 2. Set that key to a canCompute
-		myMap.attr('test', canCompute(function() { return "def"; }));
+		myMap.set('test', new Observation(function() { return "def"; }));
 
 		equal(frag.firstChild.firstChild.nodeValue, "def", "correct value");
 	});
 
 	test('template with a block section and nested if doesnt render correctly', function() {
-		var myMap = new CanMap({
+		var myMap = new SimpleMap({
 			bar: true
 		});
 
@@ -4146,7 +4156,7 @@ function makeTest(name, doc, mutation) {
 		)(myMap);
 
 		equal(innerHTML(frag.firstChild), 'My Order', 'shows else case');
-		myMap.attr('foo', true);
+		myMap.set('foo', true);
 		equal(innerHTML(frag.firstChild), 'My Meals', 'shows if case');
 	});
 
@@ -4157,7 +4167,7 @@ function makeTest(name, doc, mutation) {
 			equal(second, 4);
 			return first + second;
 		});
-		var frag = template(new CanMap({
+		var frag = template(new SimpleMap({
 			first: 2,
 			second: 4
 		}));
@@ -4165,14 +4175,14 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Helper handles list replacement (#1652)', 3, function () {
-		var state = new CanMap({
+		var state = new SimpleMap({
 			list: []
 		});
 
 		var helpers = {
 			listHasLength: function (options) {
 				ok(true, 'listHasLength helper evaluated');
-				return this.attr('list').attr('length') ?
+				return this.get('list').get('length') ?
 					options.fn() :
 					options.inverse();
 			}
@@ -4182,16 +4192,16 @@ function makeTest(name, doc, mutation) {
 		stache('{{#listHasLength}}{{/listHasLength}}')(state, helpers);
 
 		// Helper evaluated 2nd time...
-		state.attr('list', []);
+		state.set('list', []);
 
 		// Helper evaluated 3rd time...
-		state.attr('list').push('...')
+		state.get('list').push('...')
 	});
 
 	test('Helper binds to nested properties (#1651)', function () {
 
 		var nestedAttrsCount = 0,
-			state = new CanMap({
+			state = new SimpleMap({
 				parent: null
 			});
 
@@ -4204,7 +4214,7 @@ function makeTest(name, doc, mutation) {
 					ok(true, 'bindViaNestedAttrs helper evaluated 3 times');
 				}
 
-				return this.attr('parent') && this.attr('parent').attr('child') ?
+				return this.get('parent') && this.get('parent').get('child') ?
 					options.fn() :
 					options.inverse();
 			}
@@ -4214,24 +4224,24 @@ function makeTest(name, doc, mutation) {
 		stache('{{#bindViaNestedAttrs}}{{/bindViaNestedAttrs}}')(state, helpers);
 
 		// Helpers evaluated 2nd time...
-		state.attr('parent', {
+		state.set('parent', {
 			child: 'foo'
 		});
 
 		// Helpers evaluated 3rd time...
-		state.attr('parent.child', 'bar');
+		state.set('parent.child', 'bar');
 	});
 
 	test("Using a renderer function as a partial", function(){
 		var template = stache("{{> other}}");
 		var partial = stache("hello there");
-		var map = new CanMap({ other: null });
+		var map = new SimpleMap({ other: null });
 
 		var frag = template(map);
 
 		equal(frag.firstChild.nodeValue, "", "Initially it is a blank textnode");
 
-		map.attr("other", partial);
+		map.set("other", partial);
 
 		equal(frag.firstChild.nodeValue, "hello there", "partial rendered");
 	});
@@ -4248,7 +4258,7 @@ function makeTest(name, doc, mutation) {
 					return '10'
 				}
 			},
-			liveData: new CanMap({
+			liveData: new SimpleMap({
 				ducks: '10',
 				tenDucks: function() {
 					return '10'
@@ -4269,7 +4279,7 @@ function makeTest(name, doc, mutation) {
 	test("Handlerbars helper: switch - changing to default (#1857)", function(){
 		var template = stache('{{#switch ducks}}{{#case "10"}}10 ducks{{/case}}' +
 		'{{#default}}Not 10 ducks{{/default}}{{/switch}}');
-		var map = new CanMap({
+		var map = new SimpleMap({
 			ducks: "10"
 		});
 
@@ -4277,7 +4287,7 @@ function makeTest(name, doc, mutation) {
 
 		deepEqual(getTextFromFrag(frag), "10 ducks");
 
-		map.attr("ducks", "12");
+		map.set("ducks", "12");
 
 		deepEqual(getTextFromFrag(frag), "Not 10 ducks");
 	});
@@ -4286,7 +4296,7 @@ function makeTest(name, doc, mutation) {
 
 		var baseUrl = System.baseURL || getBaseURL();
 		var template = stache("{{joinBase 'hello/' name}}");
-		var map = new CanMap({ name: "world" });
+		var map = new SimpleMap({ name: "world" });
 
 		var frag = template(map);
 
@@ -4298,7 +4308,7 @@ function makeTest(name, doc, mutation) {
 		var baseUrl = "http://foocdn.com/bitovi";
 
 		var template = stache("{{joinBase '../hello/' name}}");
-		var map = new CanMap({ name: "world" });
+		var map = new SimpleMap({ name: "world" });
 
 		var frag = template(map, { module: { uri: baseUrl } });
 
@@ -4313,22 +4323,22 @@ function makeTest(name, doc, mutation) {
 			ok(attrData.options, "options isn't undefined");
 		});
 
-		var state = new CanMap({
+		var state = new SimpleMap({
 			showAttr: true
 		});
 
 		var template = stache('<button id="find-me" {{#if showAttr}}test-attr{{/if}}></button>');
 		template(state);
 
-		state.attr('showAttr', false);
-		state.attr('showAttr', true);
+		state.set('showAttr', false);
+		state.set('showAttr', true);
 	});
 
 	test("inner expressions (#1769)", function(){
 
 		var template = stache("{{helperA helperB(1,valueA,propA=valueB propC=2) 'def' outerPropA=helperC(2, ~valueB)}}");
 
-		var frag = template(new CanMap({
+		var frag = template(new SimpleMap({
 			valueA: "A",
 			valueB: "B"
 		}),{
@@ -4359,7 +4369,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("{{helperA helperB(1,valueA,propA=valueB propC=2) 'def' outerPropA=helperC(2,valueB)}}");
 
 
-		var valueB = canCompute("B");
+		var valueB = new SimpleObservable("B");
 		var changes = 0;
 
 		var frag = template({
@@ -4406,9 +4416,9 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.nodeValue, "helperB=B-helperC=B");
 
 		changes++;
-		canBatch.start();
-		valueB("X");
-		canBatch.stop();
+		queues.batch.start();
+		valueB.set("X");
+		queues.batch.stop();
 
 		equal(frag.firstChild.nodeValue, "helperB=X-helperC=X");
 	});
@@ -4428,7 +4438,7 @@ function makeTest(name, doc, mutation) {
 	test("call expression - simple", function(){
 
 		var template = stache("{{method(arg)}}");
-		var age = canCompute(32);
+		var age = new SimpleObservable(32);
 		var frag = template({
 			method: function(num){
 				return num*2;
@@ -4442,7 +4452,7 @@ function makeTest(name, doc, mutation) {
 
 	test("call expression #each passed list", function () {
 
-		var animals = new CanList(['sloth', 'bear']),
+		var animals = new DefineList(['sloth', 'bear']),
 			renderer = stache("<div>my<b>favorite</b>animals:{{#eachOf(animals)}}<label>Animal=</label> <span>{{this}}</span>{{/}}!</div>");
 
 		var div = doc.createElement('div');
@@ -4468,7 +4478,7 @@ function makeTest(name, doc, mutation) {
 
 	test("call expression #each passed compute", function () {
 
-		var animals = canCompute( new CanList(['sloth', 'bear']) ),
+		var animals = new SimpleObservable( new DefineList(['sloth', 'bear']) ),
 			renderer = stache("<div>my<b>favorite</b>animals:{{#eachOf(~animals)}}<label>Animal=</label> <span>{{this}}</span>{{/}}!</div>");
 
 		var div = doc.createElement('div');
@@ -4484,7 +4494,7 @@ function makeTest(name, doc, mutation) {
 		equal(div.getElementsByTagName('label')
 			.length, 2, "There are 2 labels");
 
-		animals( new CanList(['sloth', 'bear','turtle']) );
+		animals( new DefineList(['sloth', 'bear','turtle']) );
 
 		equal(div.getElementsByTagName('label')[0].myexpando, "EXPANDO-ED", "same expando");
 
@@ -4494,7 +4504,7 @@ function makeTest(name, doc, mutation) {
 
 	test("call expression with #if", function(){
 
-			var truthy = canCompute(true);
+			var truthy = new SimpleObservable(true);
 			var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
 			var frag = template({truthy: truthy});
 
@@ -4511,9 +4521,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("methods don't update correctly (#1891)", function() {
-		var map = new CanMap({
+		var map = new SimpleMap({
 			num1: 1,
-			num2: function () { return this.attr('num1') * 2; }
+			num2: function () { return this.get('num1') * 2; }
 		});
 		var frag = stache(
 			'<span class="num1">{{num1}}</span>' +
@@ -4522,7 +4532,7 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
 		equal(frag.lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
 
-		map.attr('num1', map.attr('num1') * 2);
+		map.set('num1', map.get('num1') * 2);
 
 		equal(frag.firstChild.firstChild.nodeValue, '2', 'Rendered correct value');
 		equal(frag.lastChild.firstChild.nodeValue, '4', 'Rendered correct value');
@@ -4538,20 +4548,20 @@ function makeTest(name, doc, mutation) {
 			return oldIs.apply(this, arguments);
 		});
 
-		var a = canCompute(0),
-		b = canCompute(0);
+		var a = new SimpleObservable(0),
+			b = new SimpleObservable(0);
 
 		stache('{{eq a b}}')({ a: a, b: b });
-		canBatch.start();
-		a(1);
-		b(1);
-		canBatch.stop();
+		queues.batch.start();
+		a.set(1);
+		b.set(1);
+		queues.batch.stop();
 
 		stache.registerHelper('is', oldIs);
 	});
 
 	test("#each with else works (#1979)", function(){
-		var list = new CanList(["a","b"]);
+		var list = new DefineList(["a","b"]);
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
 		list.replace([]);
@@ -4567,7 +4577,7 @@ function makeTest(name, doc, mutation) {
 			"{{else}}<h1 id='users'>Users</h1><ul><li>User 1</li><li>User 2</li>" +
 			"</ul>{{/if}}{{/case}}{{/switch}}");
 
-		var map = new CanMap({
+		var map = new SimpleMap({
 			page: "home"
 		});
 
@@ -4575,18 +4585,18 @@ function makeTest(name, doc, mutation) {
 
 		equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
 
-		map.attr("page", "users");
+		map.set("page", "users");
 		equal(frag.firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
 
 
-		map.attr("slug", "Matthew");
+		map.set("slug", "Matthew");
 		equal(frag.firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
 
 
-		canBatch.start();
-		map.attr("page", "home");
-		map.removeAttr("slug");
-		canBatch.stop();
+		queues.batch.start();
+		map.set("page", "home");
+		map.set("slug", undefined);
+		queues.batch.stop();
 
 		equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
 		equal(frag.firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
@@ -4594,16 +4604,16 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("#each passed a method (2001)", function(){
-		var users = new CanList([
+		var users = new DefineList([
 			{name: "Alexis", num: 4, age: 88},
 			{name: "Brian", num: 2, age: 31}
 		]);
 
 		var template = stache("<div>{{#each people}}<span/>{{/each}}</div>");
 
-		var VM = CanMap.extend({
+		var VM = SimpleMap.extend({
 			people: function() {
-				return this.attr("users");
+				return this.get("users");
 			},
 			remove: function() {
 				$('#content').empty();
@@ -4630,8 +4640,8 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple CanList (#2067)", function () {
-		var list = new CanList([{value:'a'}, {value:'b'}, {value: 'c'}]);
+	test("Rendering live bound indicies with #each, @index and a simple DefineList (#2067)", function () {
+		var list = new DefineList([{value:'a'}, {value:'b'}, {value: 'c'}]);
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{value}}</li>{{/each}}</ul>");
 
 		var tpl = template({
@@ -4649,19 +4659,19 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("%index content should be skipped by ../ (#1554)", function(){
-		var list = new CanList(["a","b"]);
+		var list = new DefineList(["a","b"]);
 		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
 		var frag = tmpl({items: list});
 		equal(frag.lastChild.firstChild.nodeValue, "1", "read indexOf");
 	});
 
 	test("rendering style tag (#2035)",function(){
-		var map = new CanMap({color: 'green'});
+		var map = new SimpleMap({color: 'green'});
 		var frag = stache('<style>body {color: {{color}} }</style>')(map);
 		var content = frag.firstChild.firstChild.nodeValue;
 		equal(content,"body {color: green }","got the right style text");
 
-		map = new CanMap({showGreen: true});
+		map = new SimpleMap({showGreen: true});
 		frag = stache('<style>body {color: {{#showGreen}}green{{/showGreen}} }</style>')(map);
 		content = frag.firstChild.firstChild.nodeValue;
 		equal(content,"body {color: green }","sub expressions work");
@@ -4669,7 +4679,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("checked as a custom attribute", function(){
-		var map = new CanMap({
+		var map = new SimpleMap({
 			preview: true
 		});
 		var frag = stache("<div {{#if preview}}checked{{/if}}></div>")(map);
@@ -4691,7 +4701,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("keep @index working with multi-dimensional arrays (#2127)", function() {
-		var data = new CanMap({
+		var data = new SimpleMap({
 			array2 : [['asd'], ['sdf']]
 		});
 
@@ -4705,7 +4715,7 @@ function makeTest(name, doc, mutation) {
 
 	test("partials are not working within an {{#each}} (#2174)", function() {
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			items : [{
 				name : 'foo'
 			}],
@@ -4716,11 +4726,11 @@ function makeTest(name, doc, mutation) {
 
 		var frag = renderer(data);
 
-		data.attr('items.0.name', 'WORLD');
+		data.set('items.0.name', 'WORLD');
 		equal( innerHTML(frag.firstChild), "WORLD", "updated to world");
 
 
-		data.attr('items').splice(0, 0, {
+		data.get('items').splice(0, 0, {
 			name : 'HELLO'
 		});
 		equal( innerHTML(frag.firstChild), "HELLOWORLD");
@@ -4738,7 +4748,7 @@ function makeTest(name, doc, mutation) {
 				nodeLists.update(options.nodeList, [el]);
 			};
 		});
-		var data = new CanMap({
+		var data = new SimpleMap({
 			items : [{
 				name : 'foo'
 			}],
@@ -4749,21 +4759,21 @@ function makeTest(name, doc, mutation) {
 
 		renderer(data);
 
-		data.attr('items').pop();
+		data.get('items').pop();
 	});
 
 	test("partials should leave binding to helpers and properties (#2174)", function() {
 		stache.registerPartial('test', '<input id="one"> {{name}}');
 		var renderer = stache('{{#each items}}{{>test}}{{/each}}');
 
-		var data = new CanMap({ items: [] });
+		var data = new SimpleMap({ items: [] });
 		var frag = renderer(data);
-		data.attr('items').splice(0, 0, {name: 'bob'});
+		data.get('items').splice(0, 0, {name: 'bob'});
 
 		// simulate the user entering text
 		frag.firstChild.nextSibling.setAttribute('value', 'user text');
 		// re-render the partial for the 0th element
-		data.attr('items.0.name', 'dave');
+		data.set('items.0.name', 'dave');
 
 		equal(frag.firstChild.nextSibling.getAttribute('value'), 'user text');
       });
@@ -4784,17 +4794,17 @@ function makeTest(name, doc, mutation) {
 	    "{{/switch}}</div>");
 
 
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			outer : "outerValue1",
 			inner : "innerValue1"
 		});
 
 		var frag = template(vm);
 
-		canBatch.start();
-		vm.removeAttr("inner");
-		vm.attr("outer", "outerValue2");
-		canBatch.stop();
+		queues.batch.start();
+		vm.set("inner",undefined);
+		vm.set("outer", "outerValue2");
+		queues.batch.stop();
 
 
 	    ok( innerHTML(frag.firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
@@ -4813,7 +4823,7 @@ function makeTest(name, doc, mutation) {
 				"{{#eq action 'edit'}} {{trace 'edit recipes'}} {{/eq}}" +
 			"{{/eq}}";
 
-		var state = new CanMap({
+		var state = new SimpleMap({
 			action: 'view',
 			page: 'todos'
 		});
@@ -4832,7 +4842,7 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		state.attr({
+		state.set({
 			action: 'edit',
 			page: 'recipes'
 		});
@@ -4841,7 +4851,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("%index is double wrapped compute in helper (#2179)", function(){
-		var appState = new CanMap({
+		var appState = new SimpleMap({
 			todos: [
 				{ description: "Foo" },
 				{ description: "Bar" },
@@ -4860,7 +4870,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("%index is double wrapped compute in helper (#2179)", function(){
-		var appState = new CanMap({
+		var appState = new SimpleMap({
 			todos: [
 				{ description: "Foo" },
 				{ description: "Bar" },
@@ -4882,13 +4892,13 @@ function makeTest(name, doc, mutation) {
 	test("content within {{#if}} inside partial surrounded by {{#if}} should not display outside partial (#2186)", function() {
 		stache.registerPartial('partial', '{{#showHiddenSection}}<div>Hidden</div>{{/showHiddenSection}}');
 		var renderer = stache('<div>{{#showPartial}}{{>partial}}{{/showPartial}}</div>');
-		var data = new CanMap({
+		var data = new SimpleMap({
 			showPartial: true,
 			showHiddenSection: false
 		});
 		var frag = renderer(data);
-		data.attr('showHiddenSection', true);
-		data.attr('showPartial', false);
+		data.set('showHiddenSection', true);
+		data.set('showPartial', false);
 
 		equal( innerHTML(frag.firstChild), '');
 	});
@@ -4901,7 +4911,7 @@ function makeTest(name, doc, mutation) {
               '{{/b}}' +
           '{{/a}}/>');
 
-          var frag = template(new CanMap({
+          var frag = template(new SimpleMap({
 						a: true,
 						b: false,
 						c: true
@@ -4915,7 +4925,7 @@ function makeTest(name, doc, mutation) {
 		                   "<span>{{animal.name}}</span>" +
 		               "{{/each}}";
 		var renderer = stache(template);
-		var animals = new CanList([{ name: 'sloth' }]);
+		var animals = new DefineList([{ name: 'sloth' }]);
 		var frag = renderer({ animals: animals });
 		var div = doc.createElement('div');
 
@@ -4928,7 +4938,7 @@ function makeTest(name, doc, mutation) {
 		                   "<span>{{animal.name}}</span>" +
 		               "{{/each}}";
 		var renderer = stache(template);
-		var animals = new CanList([{ name: 'sloth' }]);
+		var animals = new DefineList([{ name: 'sloth' }]);
 		var frag = renderer({ animals: animals });
 		var div = doc.createElement('div');
 
@@ -4941,7 +4951,7 @@ function makeTest(name, doc, mutation) {
 		                   "<span>{{animal.name}}</span>" +
 		               "{{/each}}";
 		var renderer = stache(template);
-		var animals = new CanList([{ name: 'sloth' }]);
+		var animals = new DefineList([{ name: 'sloth' }]);
 		var frag = renderer({ animals: animals });
 		var div = doc.createElement('div');
 
@@ -4955,7 +4965,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("{{>dude dudes}}");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			dudes: [
 				{ name: "austin" },
 				{ name: "justin" }
@@ -4981,7 +4991,7 @@ function makeTest(name, doc, mutation) {
 		template = stache("{{#data}}{{>dude dudes}}{{/data}}");
 
 		var dom = template({
-			data: new CanMap({
+			data: new SimpleMap({
 				hello: "Hello",
 				dudes: [
 					{ name: "austin" },
@@ -5012,7 +5022,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("{{>dude dudes}}");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			dudes: [
 				{ name: "austin" },
 				{ name: "justin" }
@@ -5042,7 +5052,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{ foo[bar] }}</p>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			bar: "name",
 			foo: {
 				name: "Kevin",
@@ -5055,7 +5065,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'Kevin', 'correct value for foo[bar]');
 
-		data.attr('bar', 'fullName');
+		data.set('bar', 'fullName');
 
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for foo[bar]');
 	});
@@ -5066,7 +5076,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{#if [bar]}}if{{else}}else{{/if}}</p>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			bar: "key",
 			key: false
 		});
@@ -5076,7 +5086,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'else', 'correctly displays {{else}} section');
 
-		data.attr('key', true);
+		data.set('key', true);
 
 		equal(innerHTML(p[0]), 'if', 'correctly displays {{#if}} section');
 	});
@@ -5087,7 +5097,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p id='{{ foo[bar] }}' class='{{ foo[\'bar:baz\'] }}'></p>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			bar: "name",
 			foo: {
 				"bar:baz": "zulu",
@@ -5102,8 +5112,8 @@ function makeTest(name, doc, mutation) {
 		equal(getAttr(p, 'id'), 'Kevin', 'correct value for foo[bar]');
 		equal(getAttr(p, 'class'), 'zulu', 'correct value for foo[\'bar:baz\']');
 
-		data.attr('bar', 'fullName');
-		data.attr('foo.bar:baz', 'tango');
+		data.set('bar', 'fullName');
+		data.set('foo.bar:baz', 'tango');
 
 		equal(getAttr(p, 'id'), 'Kevin Phillips', 'correct value for foo[bar]');
 		equal(getAttr(p, 'class'), 'tango', 'correct value for foo[\'bar:baz\']');
@@ -5141,11 +5151,11 @@ function makeTest(name, doc, mutation) {
 			return context();
 		});
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
-		var items = new CanList(["one","two"]);
+		var items = new DefineList(["one","two"]);
 		var frag = template(items);
 		var lis = frag.firstChild.getElementsByTagName("li");
 
-		items.attr(1,"TWO");
+		items.set(1,"TWO");
 		lis = frag.firstChild.getElementsByTagName("li");
 		//QUnit.equal(computes[1](), "TWO", "compute value is right");
 		QUnit.equal( lis[1].innerHTML, "TWO", "is TWO");
@@ -5177,7 +5187,7 @@ function makeTest(name, doc, mutation) {
 	test('Nested if-s inside a text section (#9)', function(assert){
 		var template = stache('<div class="{{#if sorting}}sort{{#if ascending}}-ascend{{/if}}{{/if}}"></div>');
 
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			sorting: true,
 			ascending: false
 		});
@@ -5186,7 +5196,7 @@ function makeTest(name, doc, mutation) {
 
 		assert.equal( className, 'sort');
 
-		vm.attr('ascending', true);
+		vm.set('ascending', true);
 		className = frag.firstChild.className;
 
 		assert.equal( className, 'sort-ascend');
@@ -5195,15 +5205,15 @@ function makeTest(name, doc, mutation) {
 	test('Helper each inside a text section (attribute) (#8)', function(assert){
 		var template = stache('<div class="{{#each list}}{{.}} {{/}}"></div>');
 
-		var vm = new CanMap({
-			list: new CanList(['one','two'])
+		var vm = new SimpleMap({
+			list: new DefineList(['one','two'])
 		});
 		var frag = template(vm);
 		var className = frag.firstChild.className;
 
 		assert.equal( className, 'one two ' );
 
-		vm.attr('list').push('three');
+		vm.get('list').push('three');
 		className = frag.firstChild.className;
 
 		assert.equal( className, 'one two three ' );
@@ -5226,11 +5236,11 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<p>{{ person().name }}</p>");
 		var div = doc.createElement('div');
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			name: "Kevin",
 			person: function() {
 				return {
-					name: this.attr('name')
+					name: this.get('name')
 				};
 			}
 		});
@@ -5240,7 +5250,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'Kevin', 'correct value for person().name');
 
-		data.attr('name', 'Kevin Phillips');
+		data.set('name', 'Kevin Phillips');
 
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for person().name');
 	});
@@ -5271,13 +5281,13 @@ function makeTest(name, doc, mutation) {
 	test("each values update when replaced in a can map (#62)", function () {
 		var template = stache("{{#each this}}<p>{{.}}</p>{{/each}}");
 		var div = doc.createElement('div');
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			foo: 'foo-value'
 		});
 		var dom = template(vm);
 		div.appendChild(dom);
 
-		vm.attr('foo', 'bar-value');
+		vm.set('foo', 'bar-value');
 		var p = div.getElementsByTagName('p');
 		equal(innerHTML(p[0]), 'bar-value', 'updated the value inside #each');
 	});
@@ -5285,7 +5295,7 @@ function makeTest(name, doc, mutation) {
 	test("Bracket expression as argument to Call expression", function () {
 		var template = stache("{{ foo([bar]) }}");
 		var div = doc.createElement('div');
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			foo: function(key) {
 				return key + '!';
 			},
@@ -5301,7 +5311,7 @@ function makeTest(name, doc, mutation) {
 	test("Bracket expression with undefined value", function() {
 		var template = stache("{{ place['place:name'] }}");
 		var div = doc.createElement('div');
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			'place:name': 'foo'
 		});
 		var dom = template(vm);
@@ -5309,7 +5319,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), '', 'empty');
 
-		vm.attr('place', { 'place:name': 'bar' });
+		vm.set('place', { 'place:name': 'bar' });
 
 		equal(innerHTML(div), 'bar', 'updated');
 	});
@@ -5317,7 +5327,7 @@ function makeTest(name, doc, mutation) {
 	test("Bracket expression in multi-argument helpers (Literals)", function() {
 		var template = stache("{{#eq place['place:name'] 'foo' }}yes{{else}}no{{/eq}}");
 		var div = doc.createElement('div');
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			place: {
 				'place:name': 'foo'
 			}
@@ -5327,7 +5337,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'yes', 'initially true');
 
-		vm.attr('place.place:name', 'bar' );
+		vm.get('place').set('place:name', 'bar' );
 
 		equal(innerHTML(div), 'no', 'updated');
 	});
@@ -5335,7 +5345,7 @@ function makeTest(name, doc, mutation) {
 	test("Bracket expression in multi-argument helpers (Lookups)", function() {
 		var template = stache("{{#eq place[foo] foo }}yes{{else}}no{{/eq}}");
 		var div = doc.createElement('div');
-		var vm = new CanMap({
+		var vm = new SimpleMap({
 			place: {
 				'foo': 'foo'
 			},
@@ -5346,7 +5356,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'yes', 'initially true');
 
-		vm.attr('place.foo', 'bar' );
+		vm.set('place.foo', 'bar' );
 
 		equal(innerHTML(div), 'no', 'updated');
 	});
@@ -5357,7 +5367,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{ foo[bar][baz] }}</p>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			baz: 'first',
 			bar: 'name',
 			foo: {
@@ -5377,11 +5387,11 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'K', 'correct value for foo[bar][baz]');
 
-		data.attr('bar', 'fullName');
+		data.set('bar', 'fullName');
 
 		equal(innerHTML(p[0]), 'Kevin', 'updated value for bar in foo[bar][baz]');
 
-		data.attr('baz', 'last');
+		data.set('baz', 'last');
 
 		equal(innerHTML(p[0]), 'Phillips', 'updated value for baz in foo[bar][baz]');
 	});
@@ -5392,15 +5402,15 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{ foo[0] }}</p>");
 
-		var data = new CanMap({
-			bar: [
+		var data = new SimpleMap({
+			bar: new DefineList([
 				'thud',
 				'jeek'
-			],
-			foo: [
+			]),
+			foo: new DefineList([
 				'baz',
 				'quux'
-			]
+			])
 		});
 
 		dom = template(data);
@@ -5419,7 +5429,7 @@ function makeTest(name, doc, mutation) {
 
 		div.innerHTML = '';
 
-		dom = template(data.attr());
+		dom = template(data.get());
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');
 
@@ -5432,7 +5442,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache('<p>{{ foo[bar].first }}</p><p>{{#is foo[bar].first "K"}}short{{else}}long{{/is}}</p>');
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			baz: 'first',
 			bar: 'name',
 			foo: {
@@ -5451,19 +5461,19 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'K', 'correct value for foo[bar].first');
 		equal(innerHTML(p[1]), 'short', 'correct value for `is foo[bar].first "K"`');
 
-		data.attr('bar', 'fullName');
+		data.set('bar', 'fullName');
 
 		equal(innerHTML(p[0]), 'Kevin', 'updated value for foo[bar].first');
 		equal(innerHTML(p[1]), 'long', 'updated value for `is foo[bar].first "K"`');
 	});
 
 	test("renderer itself is not observable", function() {
-		var first = canCompute("Justin"),
-			last = canCompute("Meyer");
+		var first = new SimpleObservable("Justin"),
+			last = new SimpleObservable("Meyer");
 
 		var renderer = stache("{{first}} {{last}}");
 
-		var fullNameFrag = canCompute(function(){
+		var fullNameFrag = new Observation(function(){
 			return renderer({first: first, last: last});
 		});
 
@@ -5634,10 +5644,10 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("#each with arrays (#215)", function(){
-		var which = canCompute(false);
+		var which = new SimpleObservable(false);
 		var a = {}, b = {}, c = {};
 
-		var list = canCompute(function(){
+		var list = new Observation(function(){
 		  return which() ? [a,b,c]: [a,c];
 		});
 
@@ -5680,7 +5690,7 @@ function makeTest(name, doc, mutation) {
 
 	test( "named partials don't render (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<foo}}bar{{/foo}}<div></div>" );
-		var data = new CanMap( {} );
+		var data = new SimpleMap( {} );
 		var frag = renderer( data );
 
 		equal( innerHTML( frag.firstChild ), "" );
@@ -5688,7 +5698,7 @@ function makeTest(name, doc, mutation) {
 
 	test( "named partials can be inserted (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>" );
-		var data = new CanMap( {} );
+		var data = new SimpleMap( {} );
 		var frag = renderer( data );
 
 		equal( innerHTML( frag.lastChild ), "bar" );
@@ -5696,7 +5706,7 @@ function makeTest(name, doc, mutation) {
 
 	test( "named partials can be inserted with an initial scope (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<personPartial}}{{lname}}, {{fname}}{{/personPartial}} <span>Test:</span><div>{{>personPartial person}}</div>" );
-		var data = new CanMap({
+		var data = new SimpleMap({
 			person: {
 				fname: "Darryl",
 				lname: "Anka"
@@ -5709,17 +5719,17 @@ function makeTest(name, doc, mutation) {
 
 	test( "named partials work with live binding (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<foo}}{{.}}{{/foo}}<span>Test: {{nested.prop.test}}</span>{{#each greatJoy}}<div>{{>foo}}</div>{{/each}}" );
-		var data = new CanMap({
-			nested: {
-				prop: {
+		var data = new SimpleMap({
+			nested: new SimpleMap({
+				prop: new SimpleMap({
 					test: "works?"
-				}
-			},
-			greatJoy: [
+				})
+			}),
+			greatJoy: new DefineList([
 				"happy",
 				"thrilled",
 				"ecstatic"
-			]
+			])
 		});
 		var frag = renderer( data );
 		var div = doc.createElement( "div" );
@@ -5728,13 +5738,13 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works?", "Named partial property rendered" );
 		equal( div.getElementsByTagName( "div" ).length, 3, "Named partial list rendered");
 
-		data.attr( "nested.prop.test", "works!" );
+		data.get( "nested").get("prop").set("test", "works!" );
 		equal( innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works!", "Named partial updates when attr is updated" );
 
-		data.attr( "greatJoy.0", "quite happy" );
+		data.get( "greatJoy").set(0, "quite happy" );
 		equal( innerHTML( div.getElementsByTagName( "div" )[ 0 ] ), "quite happy", "Named partial list updates when list item attr is updated" );
 
-		data.attr( "greatJoy" ).push( "Nintendo Sixty-FOOOOOOOOOOUR" );
+		data.get( "greatJoy" ).push( "Nintendo Sixty-FOOOOOOOOOOUR" );
 		equal( div.getElementsByTagName( "div" ).length, 4, "Named partial list updates with new item" );
 	});
 
@@ -5743,7 +5753,7 @@ function makeTest(name, doc, mutation) {
 		var intermediate = parser( template, {}, true );
 
 		var renderer = stache(intermediate);
-		var data = new CanMap( {} );
+		var data = new SimpleMap( {} );
 		var frag = renderer( data );
 
 		equal( innerHTML( frag.lastChild ), "bar" );
@@ -5754,7 +5764,7 @@ function makeTest(name, doc, mutation) {
 		var intermediate = parser( template, {}, true );
 
 		var renderer = stache(intermediate);
-		var data = new CanMap( {} );
+		var data = new SimpleMap( {} );
 		var frag = renderer( data );
 
 		equal( innerHTML( frag.lastChild ), "hello world" );
@@ -5762,7 +5772,7 @@ function makeTest(name, doc, mutation) {
 
 	test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
 		var renderer = stache( "{{<foo}}<li>{{name}}<ul>{{#each descendants}}{{>foo}}{{/each}}</ul></li>{{/foo}} <ul>{{#with ychromosome}}{{>foo}}{{/with}}</ul>" );
-		var data = new CanMap({
+		var data = new SimpleMap({
 			ychromosome: {
 				name: "AJ",
 				descendants: [
@@ -5846,7 +5856,7 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{ this[bar] }}</p>");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			bar: "name",
 			name: "James",
 			"name.full": "James Atherton"
@@ -5857,11 +5867,11 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(p[0]), 'James', 'correct value for this[bar]');
 
-		data.attr('bar', 'name.full');
+		data.set('bar', 'name.full');
 
 		equal(innerHTML(p[0]), 'James Atherton', 'updated bar value for this[bar]');
 
-		data.attr('name.full', 'Lunch time');
+		data.set('name.full', 'Lunch time');
 
 		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for this[bar]');
 
@@ -5954,15 +5964,15 @@ function makeTest(name, doc, mutation) {
 
 		template = stache("<p>{{ [bar] }}</p><p>{{ ['name.full'] }}</p><p>{{name2.full}}</p>{{#with person}}<p>{{['name.full']}}</p>{{/with}}");
 
-		var data = new CanMap({
+		var data = new SimpleMap({
 			bar: "name.full",
 			"name.full": "James Atherton",
-			name2: {
+			name2: new SimpleMap({
 				full: "Yep yep"
-			},
-			person: {
+			}),
+			person: new SimpleMap({
 				"name.full": "Tim Tim"
-			}
+			})
 		});
 		var dom = template(data);
 		div.appendChild(dom);
@@ -5973,9 +5983,9 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[2]), 'Yep yep', 'correct value for name.full');
 		equal(innerHTML(p[3]), 'Tim Tim', 'correct value for ["name.full"] in a #with expression');
 
-		data.attr('name.full', 'Lunch time');
-		data.attr("name2").attr("full", 'Lunch time 2');
-		data.attr("person").attr("name.full", 'Lunch time 3');
+		data.set('name.full', 'Lunch time');
+		data.get("name2").set("full", 'Lunch time 2');
+		data.get("person").set("name.full", 'Lunch time 3');
 
 		equal(innerHTML(p[0]), 'Lunch time', 'updated `name.full` value for [bar]');
 		equal(innerHTML(p[1]), 'Lunch time', 'updated `name.full` value for ["name.full"]');

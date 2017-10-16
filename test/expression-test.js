@@ -2,16 +2,17 @@ var expression = require('../src/expression');
 var QUnit = require('steal-qunit');
 var each = require('can-util/js/each/each');
 var Scope = require('can-view-scope');
-var canCompute = require('can-compute');
-var CanMap = require('can-map');
-var CanList = require("can-list");
 var helpers = require('../helpers/converter');
 var canReflect = require("can-reflect");
+var SimpleObservable = require('can-simple-observable');
+var SimpleMap = require('can-simple-map');
+var DefineList = require('can-define/list/list');
+var assign = require("can-util/js/assign/assign");
+var queues = require("can-queues");
 
 QUnit.module("can-stache/src/expression");
 
-
-test("expression.tokenize", function(){
+QUnit.test("expression.tokenize", function(){
 	var literals = "'quote' \"QUOTE\" 1 undefined null true false 0.1";
 	var res = expression.tokenize(literals);
 
@@ -236,7 +237,7 @@ test("expression.Helper:value observable values", function(){
 			QUnit.equal(this, obj, "this is right");
 			return first()+" "+last;
 		},
-		first: canCompute("marshall")
+		first: new SimpleObservable("marshall")
 	};
 	var scope = new Scope(obj);
 
@@ -248,11 +249,11 @@ test("expression.Helper:value observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}) );
 
-	equal(result(), "marshall thompson");
+	equal(result.get(), "marshall thompson");
 });
 
 test("methods can return values (#1887)", function(){
-	var MyMap = CanMap.extend({
+	var MyMap = SimpleMap.extend({
 		getSomething: function(arg){
 			return this.attr("foo") + arg();
 		}
@@ -270,20 +271,21 @@ test("methods can return values (#1887)", function(){
 
 	var result = callGetSomething.value(scope, new Scope({}), {asCompute: true});
 
-	equal(result(), 5);
+	equal(result.get(), 5);
 });
 
 test("methods don't update correctly (#1891)", function(){
-	var map = new CanMap({
-	  num: 1,
-	  num2: function () {
-	    return this.attr('num') * 2;
-	  },
-	  runTest: function () {
-	    this.attr('num', this.attr('num') * 2);
-	  }
+	var map = new SimpleMap({
+	  num: 1
 	});
-
+	assign(map,{
+  	  num2: function () {
+  	    return this.get('num') * 2;
+  	  },
+  	  runTest: function () {
+  	    this.attr('num', this.get('num') * 2);
+  	  }
+    });
 	var scope =
 		new Scope(map);
 
@@ -306,19 +308,19 @@ test("call expressions called with different scopes give different results (#179
 		doSomething: function(num){
 			return num*2;
 		},
-		number: canCompute(2)
+		number: new SimpleObservable(2)
 	}));
 
-	equal( res(), 4);
+	equal( res.get(), 4);
 
 	res = exprData.value(new Scope({
 		doSomething: function(num){
 			return num*3;
 		},
-		number: canCompute(4)
+		number: new SimpleObservable(4)
 	}));
 
-	equal( res(), 12);
+	equal( res.get(), 12);
 });
 
 test("convertKeyToLookup", function(){
@@ -536,10 +538,10 @@ test("Bracket expression", function(){
 	);
 	var compute = expr.value(
 		new Scope(
-			new CanMap({bar: "name"})
+			new SimpleMap({bar: "name"})
 		)
 	);
-	equal(compute(), "name");
+	equal(compute.get(), "name");
 
 	// [bar]
 	expr = new expression.Bracket(
@@ -547,10 +549,10 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({bar: "name", name: "Kevin"})
+			new SimpleMap({bar: "name", name: "Kevin"})
 		)
 	);
-	equal(compute(), "Kevin");
+	equal(compute.get(), "Kevin");
 
 	// foo["bar"]
 	expr = new expression.Bracket(
@@ -559,10 +561,10 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: {bar: "name"}})
+			new SimpleMap({foo: {bar: "name"}})
 		)
 	);
-	equal(compute(), "name");
+	equal(compute.get(), "name");
 
 	// foo["bar.baz"]
 	expr = new expression.Bracket(
@@ -571,25 +573,26 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: {"bar.baz": "name"}})
+			new SimpleMap({foo: {"bar.baz": "name"}})
 		)
 	);
-	equal(compute(), "name");
+	equal(compute.get(), "name",'foo["bar.baz"]');
 
 	// foo[bar]
 	expr = new expression.Bracket(
 		new expression.Lookup("bar"),
 		new expression.Lookup("foo")
 	);
-	var state = new CanMap({foo: {name: "Kevin"}, bar: "name"});
+	var state = new SimpleMap({foo: new SimpleMap({name: "Kevin"}), bar: "name"});
 	compute = expr.value(
 		new Scope(
 			state
 		)
 	);
-	equal(compute(), "Kevin");
-	compute("Curtis");
-	equal(state.attr("foo.name"), "Curtis");
+	equal(compute.get(), "Kevin", "foo[bar] get");
+
+	compute.set("Curtis");
+	equal(state.get("foo").get("name"), "Curtis");
 
 	// foo()[bar]
 	expr = new expression.Bracket(
@@ -602,10 +605,10 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
+			new SimpleMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
 		)
 	);
-	equal(compute(), "Kevin");
+	equal(compute.get(), "Kevin");
 
 	// foo[bar()]
 	expr = new expression.Bracket(
@@ -618,13 +621,13 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({
+			new SimpleMap({
 				foo: {name: "Kevin"},
 				bar: function () { return "name"; }
 			})
 		)
 	);
-	equal(compute(), "Kevin");
+	equal(compute.get(), "Kevin");
 
 	// foo()[bar()]
 	expr = new expression.Bracket(
@@ -641,13 +644,13 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({
+			new SimpleMap({
 				foo: function() { return {name: "Kevin"}; },
 				bar: function () { return "name"; }
 			})
 		)
 	);
-	equal(compute(), "Kevin");
+	equal(compute.get(), "Kevin");
 
 	// foo([bar])
 	expr = new expression.Call(
@@ -661,14 +664,14 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({
+			new SimpleMap({
 				foo: function(val) { return val + '!'; },
 				bar: 'name',
 				name: 'Kevin'
 			})
 		)
 	);
-	equal(compute(), "Kevin!");
+	equal(compute.get(), "Kevin!");
 });
 
 test("registerConverter helpers push and pull correct values", function () {
@@ -681,20 +684,21 @@ test("registerConverter helpers push and pull correct values", function () {
 		}
 	});
 
-	var data = new CanMap({
+	var data = new SimpleMap({
 		observeVal: 255
 	});
 	var scope = new Scope( data );
 	var parentExpression = expression.parse("numberToHex(~observeVal)",{baseMethodType: "Call"});
+
 	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
 	//twoWayCompute('34');
 
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute(), 'ff', 'Converter called');
-	twoWayCompute('7f');
-	equal(data.attr("observeVal"), 127, 'push converter called');
+	equal(twoWayCompute.get(), 'ff', 'Converter called');
+	twoWayCompute.set('7f');
+	equal(data.get("observeVal"), 127, 'push converter called');
 });
 
 test("registerConverter helpers push and pull multiple values", function () {
@@ -709,9 +713,9 @@ test("registerConverter helpers push and pull multiple values", function () {
 		}
 	});
 
-	var data = new CanMap({
+	var data = new SimpleMap({
 		observeVal: 4,
-		list: new CanList([1,2,3])
+		list: new DefineList([1,2,3])
 	});
 	var scope = new Scope( data );
 	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
@@ -721,8 +725,8 @@ test("registerConverter helpers push and pull multiple values", function () {
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute(), false, 'Converter called');
-	twoWayCompute(5);
+	equal(twoWayCompute.get(), false, 'Converter called');
+	twoWayCompute.set(5);
 	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
 
@@ -746,10 +750,11 @@ test("registerConverter helpers are chainable", function () {
 	});
 
 
-	var data = new CanMap({
+	var data = new SimpleMap({
 		observeVal: 255
 	});
 	var scope = new Scope( data );
+
 	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))",{baseMethodType: "Call"});
 	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
 	//twoWayCompute('34');
@@ -757,8 +762,8 @@ test("registerConverter helpers are chainable", function () {
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute(), 'FF', 'Converter called');
-	twoWayCompute('7F');
+	equal(twoWayCompute.get(), 'FF', 'Converter called');
+	twoWayCompute.set('7F');
 	equal(data.attr("observeVal"), 127, 'push converter called');
 });
 
@@ -788,10 +793,10 @@ test('foo().bar', function() {
 	);
 	var compute = expr.value(
 		new Scope(
-			new CanMap({foo: function() { return {bar: "Kevin"}; }})
+			new SimpleMap({foo: function() { return {bar: "Kevin"}; }})
 		)
 	);
-	equal(compute(), "Kevin");
+	equal(compute.get(), "Kevin");
 });
 
 test("Helper with a ~ key operator (#112)", function() {

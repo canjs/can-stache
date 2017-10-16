@@ -1,4 +1,3 @@
-var compute = require('can-compute');
 var live = require('can-view-live');
 
 var utils = require('./utils');
@@ -37,12 +36,22 @@ assign(TextSectionBuilder.prototype,{
 	compile: function(state){
 
 		var renderer = this.stack[0].compile();
+		//!steal-remove-start
+		Object.defineProperty(renderer,"name",{
+			value: "textSectionRenderer<"+state.tag+"."+state.attr+">"
+		});
+		//!steal-remove-end
 
 		return function(scope, options){
-
-			var observation = new Observation(function(){
+			function textSectionRender(){
 				return renderer(scope, options);
-			}, null, {isObservable: false});
+			}
+			//!steal-remove-start
+			Object.defineProperty(textSectionRender,"name",{
+				value: "textSectionRender<"+state.tag+"."+state.attr+">"
+			});
+			//!steal-remove-end
+			var observation = new Observation(textSectionRender, null, {isObservable: false});
 
 			canReflect.onValue(observation, noop);
 

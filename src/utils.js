@@ -1,8 +1,8 @@
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
 var observationReader = require('can-stache-key');
-var compute = require('can-compute');
 var canReflect = require('can-reflect');
+var KeyObservable = require("./key-observable");
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -79,7 +79,7 @@ module.exports = {
 			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
-			var item = isObservable ? compute(items, '' + i) :items[i];
+			var item = isObservable ? new KeyObservable(items, i) :items[i];
 			txt += helperOptions.fn(item, options);
 		}
 		return txt;
@@ -95,7 +95,7 @@ module.exports = {
 				"%index": i,
 				"@index": i
 			};
-			var item = isObservable ? compute(items, '' + i) :items[i];
+			var item = isObservable ? new KeyObservable(items, i) :items[i];
 
 			if (asVariable) {
 				aliases[asVariable] = item;

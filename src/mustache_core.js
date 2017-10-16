@@ -4,7 +4,7 @@
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
-var compute = require('can-compute');
+
 var Observation = require('can-observation');
 var utils = require('./utils');
 var expression = require('./expression');
@@ -174,7 +174,7 @@ var core = {
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
-			var partialFrag = compute(function(){
+			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
@@ -223,8 +223,7 @@ var core = {
 				var res = Observation.ignore(renderer)();
 				return frag(res);
 			});
-
-			partialFrag.computeInstance.setPrimaryDepth(nodeList.nesting);
+			canReflect.setPriority(partialFrag,nodeList.nesting );
 
 			live.html(this, partialFrag, this.parentNode, nodeList);
 		};
@@ -326,17 +325,16 @@ var core = {
 			if(gotObservableValue) {
 				observable = evaluator;
 			} else {
+				//!steal-remove-start
+				Object.defineProperty(evaluator,"name",{
+					value: "{{"+expressionString+"}}"
+				});
+				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}
 
-
-
-			if(observable instanceof Observation) {
-				observable.compute._primaryDepth = nodeList.nesting;
-			} else if(observable.computeInstance) {
-				observable.computeInstance.setPrimaryDepth(nodeList.nesting);
-			} else if(observable.observation) {
-				observable.observation.compute._primaryDepth = nodeList.nesting;
+			if(canReflect.setPriority(observable, nodeList.nesting) === false) {
+				throw new Error("can-stache unable to set priority on observable");
 			}
 
 			// Bind on the computeValue to set the cached value. This helps performance

@@ -1,4 +1,3 @@
-var compute = require('can-compute');
 var observeReader = require('can-stache-key');
 
 var utils = require('./utils');
@@ -11,6 +10,9 @@ var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
+var Observation = require("can-observation");
+var SetterObservable = require("can-simple-observable/setter/setter");
+var makeComputeLike = require("can-view-scope/make-compute-like");
 // ## Helpers
 
 // Helper for getting a bound compute in the scope.
@@ -18,7 +20,7 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 
 		var data = scope.computeData(key, readOptions);
 
-		compute.temporarilyBind(data);
+		Observation.temporarilyBind(data);
 
 		return data;
 	},
@@ -44,20 +46,15 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 		return result;
 	},
 	getObservableValue_fromDynamicKey_fromObservable = function (key, root, helperOptions, readOptions) {
-		var computeValue = compute(function(newVal) {
-			var keyValue = canReflect.getValue(key);
-			var rootValue = canReflect.getValue(root);
-			// Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
-			// also escape `.` so that things like ["bar.baz"] will work correctly
-			keyValue = ("" + keyValue).replace(".", "\\.");
-
-			if (arguments.length) {
-				observeReader.write(rootValue, observeReader.reads(keyValue), newVal);
-			} else {
-				return observeReader.get(rootValue, keyValue);
-			}
+		var getKey = function(){
+			return ("" + canReflect.getValue(key)).replace(".", "\\.")
+		};
+		var computeValue = new SetterObservable(function getDynamicKey() {
+			return observeReader.get( canReflect.getValue(root) , getKey());
+		}, function setDynamicKey(newVal){
+			observeReader.write(canReflect.getValue(root), observeReader.reads(getKey()), newVal);
 		});
-		compute.temporarilyBind(computeValue);
+		Observation.temporarilyBind(computeValue);
 		return computeValue;
 	},
 	// If not a Literal or an Arg, convert to an arg for caching.
@@ -73,13 +70,14 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 		// convert to non observable value
 		if(canReflect.isObservableLike(value)) {
 			// we only want to do this for things that `should` have dependencies, but dont.
-
 			if(canReflect.valueHasDependencies(value) === false) {
 				return canReflect.getValue(value);
 			}
 			// if compute data
 			if(value.compute) {
 				return value.compute;
+			} else {
+				return makeComputeLike(value);
 			}
 		}
 		return value;
@@ -94,6 +92,8 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 			}
 			if(value.compute) {
 				return value.compute;
+			} else {
+				return makeComputeLike(value);
 			}
 		}
 		return value;
@@ -187,7 +187,7 @@ Hashes.prototype.value = function(scope, helperOptions){
 		};
 	}
 	// TODO: replace with Compute
-	return compute(function(){
+	return new Observation(function(){
 		var finalHash = {};
 		for(var prop in hash) {
 			finalHash[prop] = hash[prop].call ? canReflect.getValue( hash[prop].value ) : toComputeOrValue( hash[prop].value );
@@ -231,7 +231,7 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 	var getArgs = this.args(scope, helperScope);
 
-	var computeValue = compute(function(newVal){
+	var computeFn = function(newVal){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
@@ -248,9 +248,10 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 
 			return func.apply(null, args);
 		}
+	};
 
-	});
-	compute.temporarilyBind(computeValue);
+	var computeValue = new SetterObservable(computeFn,computeFn);
+	Observation.temporarilyBind(computeValue);
 	return computeValue;
 };
 
@@ -342,12 +343,12 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		if(typeof computeData.initialValue === "function") {
 			args = this.args(scope, helperOptions).map(toComputeOrValue);
 			// TODO: this should be an observation.
-			var functionResult = compute(function(){
+			var functionResult = new Observation(function(){
 
 				return computeData.initialValue.apply(null, args);
 			});
 			// TODO: probably don't need to bind
-			compute.temporarilyBind(functionResult);
+			Observation.temporarilyBind(functionResult);
 			return {
 				value: functionResult
 			};
@@ -444,9 +445,9 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 
 	var fn = this.evaluator(helper, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
-	var computeValue = compute(fn);
+	var computeValue = new Observation(fn);
 
-	compute.temporarilyBind(computeValue);
+	Observation.temporarilyBind(computeValue);
 
 	if (!computeHasDependencies( computeValue ) ) {
 		return computeValue();
