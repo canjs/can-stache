@@ -92,8 +92,7 @@ module.exports = {
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {
-				"%index": i,
-				"@index": i
+				"%index": i
 			};
 			var item = isObservable ? new KeyObservable(items, i) :items[i];
 

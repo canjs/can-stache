@@ -37,7 +37,7 @@ var getObservableValue_fromKey = function (key, scope, readOptions) {
 		// If it doesn't look like a helper and there is no value, check helpers
 		// anyway. This is for when foo is a helper in `{{foo}}`.
 		if( scopeKeyData.initialValue === undefined ) {
-			if(key.charAt(0) === "@" && key !== "@index") {
+			if(key.charAt(0) === "@" ) {
 				key = key.substr(1);
 			}
 			var helper = mustacheHelpers.getHelper(key, helperOptions);

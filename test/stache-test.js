@@ -6,6 +6,7 @@ var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');
 var canSymbol = require("can-symbol");
+var canReflect = require("can-reflect");
 
 var QUnit = require('steal-qunit');
 var queues = require('can-queues');
@@ -2743,7 +2744,6 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("changing the list works with each", function () {
-		queues.log();
 		var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
 
 		var map = new SimpleMap({
@@ -2787,20 +2787,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering indicies of an array with @index", function () {
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
-		var list = [0, 1, 2, 3];
-
-		var lis = template({
-			list: list
-		})
-			.firstChild.getElementsByTagName('li');
-
-		for (var i = 0; i < lis.length; i++) {
-			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
-		}
-	});
-
 	test("Rendering indicies of an array with %index", function () {
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
@@ -2815,11 +2801,8 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	// per documentation at https://canjs.com/doc/can-stache/keys/special.html#_index
-	// prescribing a helper to deal with offset, %index no longer accepts an offset
-	// original issue: https://github.com/canjs/canjs/issues/1078
-	test("Rendering indicies of an array with @index + offset (#1078)", function () {
-		var template = stache("<ul>{{#each list}}<li>{{@index 5}} {{.}}</li>{{/each}}</ul>");
+	test("Rendering indicies of an array with %index + offset (#1078)", function () {
+		var template = stache("<ul>{{#each list}}<li>{{%index 5}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2832,24 +2815,7 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("Passing indices (@index) into helpers as values", function () {
-		var template = stache("<ul>{{#each list}}<li>{{test @index}} {{.}}</li>{{/each}}</ul>");
-		var list = [0, 1, 2, 3];
-
-		var lis = template({
-			list: list
-		}, {
-			test: function(index) {
-				return ""+index;
-			}
-		}).firstChild.getElementsByTagName('li');
-
-		for (var i = 0; i < lis.length; i++) {
-			equal(innerHTML(lis[i]), (i + ' ' + i), 'rendered index and value are correct');
-		}
-	});
-
-	test("Passing indices (%index) into helpers as values", function () {
+	test("Passing indices into helpers as values", function () {
 		var template = stache("<ul>{{#each list}}<li>{{test %index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
@@ -2912,8 +2878,8 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), '2 e', "fifth item now the 3rd item");
 	});
 
-	test('Rendering keys of an object with #each and @key', function () {
-		var template = stache("<ul>{{#each obj}}<li>{{@key}} {{.}}</li>{{/each}}</ul>");
+	test('Rendering keys of an object with #each and %key', function () {
+		var template = stache("<ul>{{#each obj}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
 		var obj = {
 			foo: 'string',
 			bar: 1,
@@ -2932,9 +2898,9 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 	});
 
-	test('Live bound iteration of keys of a SimpleMap with #each and @key', function () {
+	test('Live bound iteration of keys of a CanMap with #each and %key', function () {
 		// delete stache._helpers.foo;
-		var template = stache("<ul>{{#each map}}<li>{{@key}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each map}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
 		var map = new SimpleMap({
 			foo: 'string',
 			bar: 1,
@@ -3004,16 +2970,20 @@ function makeTest(name, doc, mutation) {
 		stop();
 		setTimeout(function(){
 			domMutate.removeChild.call(div, div.firstChild);
-			setTimeout(function () {
+			var check = function(){
 				var handlers = data[canSymbol.for("can.meta")].handlers.get([]);
-				equal(handlers.length, 0, "there are no bindings");
-				start();
-			}, 30);
+				if(handlers.length) {
+					setTimeout(check, 20);
+				} else {
+					QUnit.ok(true,"no handlers");
+					QUnit.start();
+				}
+			}
+			check();
 		},10);
 	});
 
 	test("each directly within live html section", function () {
-		queues.log();
 		var tmp = stache(
 			"<ul>{{#if showing}}" +
 			"{{#each items}}<li>item</li>{{/each}}" +
@@ -3055,9 +3025,9 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('@index is correctly calculated when there are identical elements in the array', function () {
+	test('%index is correctly calculated when there are identical elements in the array', function () {
 		var data = new DefineList(['foo', 'bar', 'baz', 'qux', 'foo']);
-		var tmp = stache('{{#each data}}{{@index}} {{/each}}');
+		var tmp = stache('{{#each data}}{{%index}} {{/each}}');
 
 		var div = doc.createElement('div');
 		var frag = tmp({
@@ -3100,9 +3070,9 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple DefineList when remove first item (#613)", function () {
+	test("Rendering live bound indicies with #each, %index and a simple CanList when remove first item (#613)", function () {
 		var list = new DefineList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{@index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -3124,7 +3094,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerHelper("safeHelper", function () {
 
 			return stache.safeString(
-				"<p>" + num() + "</p>"
+				"<p>" + num.get() + "</p>"
 			)
 
 		});
@@ -3150,7 +3120,7 @@ function makeTest(name, doc, mutation) {
 
 		var data = new SimpleMap({
 			item: new SimpleMap({
-				subitems: new DefineMap(['first'])
+				subitems: new DefineList(['first'])
 			})
 		});
 
@@ -3159,7 +3129,6 @@ function makeTest(name, doc, mutation) {
 			labels = div.getElementsByTagName("label");
 
 		equal(labels.length, 1, "initially one label");
-
 		data.get('item').get('subitems')
 			.push('second');
 
@@ -3184,40 +3153,32 @@ function makeTest(name, doc, mutation) {
 			"</div>");
 
 		var data = new SimpleMap({
-			items: [{
+			items: new DefineList([{
 				visible: true
-			}]
+			}])
 		});
-		var bindings = 0;
-		function addEventListener(eventType){
-			bindings++;
-			return SimpleMap.prototype.addEventListener.apply(this, arguments);
-		}
-
-		// unbind will be called twice
-		function removeEventListener(eventType) {
-			SimpleMap.prototype.removeEventListener.apply(this, arguments);
-			bindings--;
-			if(eventType === "visible"){
-				ok(true,"unbound visible");
-			}
-			if (bindings === 0) {
-				start();
-				ok(true, "unbound visible");
-			}
-		}
-		data.get("items").get("0")
-			.addEventListener = addEventListener;
-		data.get("items").get("0")
-			.removeEventListener = removeEventListener;
+		var meta = data.get("items")[canSymbol.for("can.meta")]
 
 		template(data);
+
+		QUnit.ok(meta.handlers.get([]).length, "there is one handler");
 
 		data.set("items", [{
 			visible: true
 		}]);
+		QUnit.stop();
+		var check = function(){
+			if(!meta.handlers.get([]).length) {
+				QUnit.ok(true, "there is no handler");
+				QUnit.start();
+			} else {
+				setTimeout(check,20);
+			}
+		};
+		check();
 
-		stop();
+
+
 	});
 
 	test("direct live section", function () {
@@ -3239,11 +3200,11 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('Rendering keys of an object with #each and @key in a Component', function () {
+	test('Rendering keys of an object with #each and %key in a Component', function () {
 
 		var template = stache("<ul>" +
 		"{{#each data}}" +
-		"<li>{{@key}} : {{.}}</li>" +
+		"<li>{{%key}} : {{.}}</li>" +
 		"{{/data}}" +
 		"</ul>");
 
@@ -3473,7 +3434,7 @@ function makeTest(name, doc, mutation) {
 		}, 10);
 	});
 
-	test("@index in partials loaded from script templates", function () {
+	test("%index in partials loaded from script templates", function () {
 
 		if (doc === window.document) {
 			// add template as script
@@ -3518,7 +3479,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<ul>{{#each list}} {{#if visible}}<li>{{name}}</li>{{/if}} {{/each}}</ul>");
 		var data = new SimpleMap(
 			{
-				list: [
+				list: new DefineList([
 					{
 						name: 'first',
 						visible: true
@@ -3531,7 +3492,7 @@ function makeTest(name, doc, mutation) {
 						name: 'third',
 						visible: true
 					}
-				]
+				])
 			});
 
 		var frag = template(data);
@@ -3809,9 +3770,9 @@ function makeTest(name, doc, mutation) {
 
 			map.set("state", current = !current);
 
-			return source();
+			return source.get();
 		});
-		number.bind("change",function(){});
+		canReflect.onValue(number,function(){});
 
 		var template = stache("<div>{{#if map.state}}<span>Hi</span>{{/if}}</div>")
 
@@ -4022,7 +3983,7 @@ function makeTest(name, doc, mutation) {
 			d2.resolve = resolve;
 			d2.reject = reject;
 		});
-		compute(promise2);
+		compute.set(promise2);
 
 		setTimeout(function(){
 			d2.resolve("foo");
@@ -4053,17 +4014,8 @@ function makeTest(name, doc, mutation) {
 	test("possible to teardown immediate nodeList (#1593)", function(){
 		expect(3);
 		var map = new SimpleMap({show: true});
-		var oldBind = map.addEventListener,
-			oldUnbind = map.removeEventListener;
 
-		map.addEventListener = function(){
-			ok(true, "bound", "bound");
-			return oldBind.apply(this, arguments);
-		};
-		map.removeEventListener = function(){
-			ok(true, "unbound", "unbound");
-			return oldUnbind.apply(this, arguments);
-		};
+
 
 		var template = stache("{{#if show}}<span/>TEXT{{/if}}");
 		var nodeList = nodeLists.register([], undefined, true);
@@ -4071,14 +4023,22 @@ function makeTest(name, doc, mutation) {
 		nodeLists.update(nodeList, getChildNodes(frag));
 
 		equal(nodeList.length, 1, "our nodeList has the nodeList of #if show");
+		var meta = map[canSymbol.for("can.meta")];
+		QUnit.ok(meta.handlers.get([]).length, "there is one handler");
 
 		nodeLists.unregister(nodeList);
 
 		// has to be async b/c of the temporary bind for performance
-		stop();
-		setTimeout(function(){
-			start();
-		},10);
+		QUnit.stop();
+		var check = function(){
+			if(!meta.handlers.get([]).length) {
+				QUnit.ok(true, "there is no handler");
+				QUnit.start();
+			} else {
+				setTimeout(check,20);
+			}
+		};
+		check();
 
 	});
 
@@ -4100,7 +4060,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		queues.batch.start();
-		product(1);
+		product.set(1);
 		queues.batch.stop();
 
 		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
@@ -4127,7 +4087,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
 
 		state.set('deepness', {
-			rows: ['test']
+			rows: new DefineList(['test'])
 		});
 		state.set('deepness', null);
 
@@ -4176,7 +4136,7 @@ function makeTest(name, doc, mutation) {
 
 	test('Helper handles list replacement (#1652)', 3, function () {
 		var state = new SimpleMap({
-			list: []
+			list: new DefineList([])
 		});
 
 		var helpers = {
@@ -4192,7 +4152,7 @@ function makeTest(name, doc, mutation) {
 		stache('{{#listHasLength}}{{/listHasLength}}')(state, helpers);
 
 		// Helper evaluated 2nd time...
-		state.set('list', []);
+		state.set('list', new DefineList([]));
 
 		// Helper evaluated 3rd time...
 		state.get('list').push('...')
@@ -4224,12 +4184,12 @@ function makeTest(name, doc, mutation) {
 		stache('{{#bindViaNestedAttrs}}{{/bindViaNestedAttrs}}')(state, helpers);
 
 		// Helpers evaluated 2nd time...
-		state.set('parent', {
+		state.set('parent', new SimpleMap({
 			child: 'foo'
-		});
+		}));
 
 		// Helpers evaluated 3rd time...
-		state.set('parent.child', 'bar');
+		state.get('parent').set('child', 'bar');
 	});
 
 	test("Using a renderer function as a partial", function(){
@@ -4494,7 +4454,7 @@ function makeTest(name, doc, mutation) {
 		equal(div.getElementsByTagName('label')
 			.length, 2, "There are 2 labels");
 
-		animals( new DefineList(['sloth', 'bear','turtle']) );
+		animals.set( new DefineList(['sloth', 'bear','turtle']) );
 
 		equal(div.getElementsByTagName('label')[0].myexpando, "EXPANDO-ED", "same expando");
 
@@ -4510,7 +4470,7 @@ function makeTest(name, doc, mutation) {
 
 			equal( frag.firstChild.nodeValue, "true", "set to true");
 
-			truthy(false);
+			truthy.set(false);
 
 			equal( frag.firstChild.nodeValue, "false", "set to false");
 		});
@@ -4640,7 +4600,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering live bound indicies with #each, @index and a simple DefineList (#2067)", function () {
+	test("Rendering live bound indicies with #each, %index and a simple CanList (#2067)", function () {
 		var list = new DefineList([{value:'a'}, {value:'b'}, {value: 'c'}]);
 		var template = stache("<ul>{{#each list}}<li>{{%index}} {{value}}</li>{{/each}}</ul>");
 
@@ -4700,12 +4660,12 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
 	});
 
-	test("keep @index working with multi-dimensional arrays (#2127)", function() {
+	test("keep %index working with multi-dimensional arrays (#2127)", function() {
 		var data = new SimpleMap({
 			array2 : [['asd'], ['sdf']]
 		});
 
-		var template = stache('<div>{{#each array2}}<span>{{@index}}</span>{{/each}}</div>');
+		var template = stache('<div>{{#each array2}}<span>{{%index}}</span>{{/each}}</div>');
 
 		var frag = template(data);
 
@@ -4716,9 +4676,9 @@ function makeTest(name, doc, mutation) {
 	test("partials are not working within an {{#each}} (#2174)", function() {
 
 		var data = new SimpleMap({
-			items : [{
+			items : new DefineList([{
 				name : 'foo'
-			}],
+			}]),
 			itemRender: stache('{{name}}')
 		});
 
@@ -4726,7 +4686,8 @@ function makeTest(name, doc, mutation) {
 
 		var frag = renderer(data);
 
-		data.set('items.0.name', 'WORLD');
+		data.get('items').get(0).set('name', 'WORLD');
+
 		equal( innerHTML(frag.firstChild), "WORLD", "updated to world");
 
 
@@ -4749,9 +4710,9 @@ function makeTest(name, doc, mutation) {
 			};
 		});
 		var data = new SimpleMap({
-			items : [{
+			items : new DefineList([{
 				name : 'foo'
-			}],
+			}]),
 			itemRender: stache('{{somethingCrazy name}}')
 		});
 
@@ -4766,7 +4727,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerPartial('test', '<input id="one"> {{name}}');
 		var renderer = stache('{{#each items}}{{>test}}{{/each}}');
 
-		var data = new SimpleMap({ items: [] });
+		var data = new SimpleMap({ items: new DefineList([]) });
 		var frag = renderer(data);
 		data.get('items').splice(0, 0, {name: 'bob'});
 
@@ -4815,8 +4776,8 @@ function makeTest(name, doc, mutation) {
 
 	test('Child bindings are called before the parent', function() {
 		var template = "{{#eq page 'todos'}}" +
-				"{{#eq action 'view'}} {{trace 'view todos'}} {{/eq}}" +
-				"{{#eq action 'edit'}} {{trace 'edit todos'}} {{/eq}}" +
+				"{{#eq action   'view'}} {{trace 'view todos'}} {{/eq}}" +
+				"{{#eq action   'edit'}} {{trace 'edit todos'}} {{/eq}}" +
 			"{{/eq}}" +
 			"{{#eq page 'recipes'}}" +
 				"{{#eq action 'view'}} {{trace 'view recipes'}} {{/eq}}" +
@@ -4831,21 +4792,23 @@ function makeTest(name, doc, mutation) {
 
 		stache(template)(state, {
 			trace: function(value, options) {
+
 				if(counter === 0) {
 					equal(value, 'view todos');
 				} else if(counter === 1) {
 					equal(value, 'edit recipes')
 				} else {
-					ok(false, 'Traced an unexpected template call');
+					ok(false, 'Traced an unexpected template call: '+value);
 				}
 				counter++;
 			}
 		});
-
+		queues.batch.start();
 		state.set({
 			action: 'edit',
 			page: 'recipes'
 		});
+		queues.batch.stop();
 
 		equal(counter, 2, 'Counter incremented twice');
 	});
@@ -5023,10 +4986,10 @@ function makeTest(name, doc, mutation) {
 		template = stache("{{>dude dudes}}");
 
 		var data = new SimpleMap({
-			dudes: [
+			dudes: new DefineList([
 				{ name: "austin" },
 				{ name: "justin" }
-			]
+			])
 		});
 		var dom = template(data,{
 			helpers: {
@@ -5099,11 +5062,11 @@ function makeTest(name, doc, mutation) {
 
 		var data = new SimpleMap({
 			bar: "name",
-			foo: {
+			foo: new SimpleMap({
 				"bar:baz": "zulu",
 				name: "Kevin",
 				fullName: "Kevin Phillips"
-			}
+			})
 		});
 		var dom = template(data);
 		div.appendChild(dom);
@@ -5113,7 +5076,7 @@ function makeTest(name, doc, mutation) {
 		equal(getAttr(p, 'class'), 'zulu', 'correct value for foo[\'bar:baz\']');
 
 		data.set('bar', 'fullName');
-		data.set('foo.bar:baz', 'tango');
+		data.get('foo').set('bar:baz', 'tango');
 
 		equal(getAttr(p, 'id'), 'Kevin Phillips', 'correct value for foo[bar]');
 		equal(getAttr(p, 'class'), 'tango', 'correct value for foo[\'bar:baz\']');
@@ -5328,9 +5291,9 @@ function makeTest(name, doc, mutation) {
 		var template = stache("{{#eq place['place:name'] 'foo' }}yes{{else}}no{{/eq}}");
 		var div = doc.createElement('div');
 		var vm = new SimpleMap({
-			place: {
+			place: new SimpleMap({
 				'place:name': 'foo'
-			}
+			})
 		});
 		var dom = template(vm);
 		div.appendChild(dom);
@@ -5346,9 +5309,9 @@ function makeTest(name, doc, mutation) {
 		var template = stache("{{#eq place[foo] foo }}yes{{else}}no{{/eq}}");
 		var div = doc.createElement('div');
 		var vm = new SimpleMap({
-			place: {
+			place: new SimpleMap({
 				'foo': 'foo'
-			},
+			}),
 			foo: 'foo'
 		});
 		var dom = template(vm);
@@ -5356,7 +5319,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'yes', 'initially true');
 
-		vm.set('place.foo', 'bar' );
+		vm.get('place').set('foo', 'bar' );
 
 		equal(innerHTML(div), 'no', 'updated');
 	});
@@ -5477,13 +5440,13 @@ function makeTest(name, doc, mutation) {
 			return renderer({first: first, last: last});
 		});
 
-		fullNameFrag.on("change", function(){
+		canReflect.onValue( fullNameFrag, function(){
 			QUnit.ok(false);
 		});
 
-		this.fixture.appendChild(fullNameFrag());
+		this.fixture.appendChild(fullNameFrag.get());
 
-		first("Josh");
+		first.set("Josh");
 		equal(this.fixture.innerHTML, "Josh Meyer");
 	});
 
@@ -5648,7 +5611,7 @@ function makeTest(name, doc, mutation) {
 		var a = {}, b = {}, c = {};
 
 		var list = new Observation(function(){
-		  return which() ? [a,b,c]: [a,c];
+		  return which.get() ? [a,b,c]: [a,c];
 		});
 
 		var template = stache("<ul>{{#each list}}<li/>{{/each}}</ul>");
@@ -5659,7 +5622,7 @@ function makeTest(name, doc, mutation) {
 		var aLI = lis[0],
 			cLI = lis[1];
 
-		which(true);
+		which.set(true);
 
 		lis = ul.getElementsByTagName("li");
 		var aLI2 = lis[0],

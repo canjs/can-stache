@@ -3,7 +3,7 @@ var b = require( "steal-benchmark" );
 var stache = require( "can-stache/can-stache" );
 var DefineMap = require( "can-define/map/map" );
 var DefineList = require( "can-define/list/list" );
-var canBatch = require( "can-event/batch/batch" );
+var canBatch = require( "can-queues" );
 
 window.stache = stache;
 window.DefineMap = DefineMap;
