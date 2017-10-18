@@ -8,7 +8,7 @@ is truthy. Both `FN` and `INVERSE` will be rendered with the
 current scope.
 
 ```
-{{#unless person.isAwake() }} Shhhhh! {{/if}}
+{{#unless person.isAwake() }} Shhhhh! {{/unless}}
 ```
 
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.
