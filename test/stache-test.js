@@ -6290,7 +6290,7 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("partials warn on missing context (#328)", function() {
+	testHelpers.dev.devOnlyTest("partials warn on missing context (#328)", function() {
 		stop();
 		var teardown = testHelpers.dev.willWarn(/is not defined in the scope/, function(message, matched) {
 			if(matched) {
@@ -6301,9 +6301,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache("{{>foo bar}}");
-
-		var frag = renderer({ foo: stache("baz") });
-
+		renderer({ foo: stache("baz") });
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
