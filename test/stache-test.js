@@ -6290,6 +6290,22 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
+	test("partials warn on missing context (#328)", function() {
+		stop();
+		var teardown = testHelpers.dev.willWarn(/is not defined in the scope/, function(message, matched) {
+			if(matched) {
+				QUnit.ok(true, "Warning fired");
+				QUnit.equal(teardown(), 1, "One matching warning fired");
+				start();
+			}
+		});
+
+		var renderer = stache("{{>foo bar}}");
+
+		var frag = renderer({ foo: stache("baz") });
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
