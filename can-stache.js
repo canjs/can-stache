@@ -56,7 +56,7 @@ function stache (filename, template) {
 	}
 
 	// The HTML section that is the root section for the entire template.
-	var section = new HTMLSectionBuilder(),
+	var section = new HTMLSectionBuilder(filename),
 		// Tracks the state of the parser.
 		state = {
 			node: null,
@@ -425,6 +425,10 @@ function stache (filename, template) {
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
 		scope.set('*self', scopifiedRenderer);
+
+		// pass filename so it can be used in dev warnings
+		optionsScope._meta.filename = section.filename;
+
 		return renderer.apply( this, arguments );
 	});
 	return scopifiedRenderer;
