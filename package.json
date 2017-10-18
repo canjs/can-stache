@@ -1,6 +1,6 @@
 {
   "name": "can-stache",
-  "version": "3.10.1",
+  "version": "3.10.2",
   "description": "Live binding handlebars templates",
   "homepage": "http://canjs.com",
   "repository": {
@@ -24,7 +24,7 @@
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "build": "node build.js",
-    "detect-cycle": "detect-cyclic-packages --ignore done-serve"
+    "detect-cycle": "detect-cyclic-packages"
   },
   "main": "can-stache",
   "keywords": [
