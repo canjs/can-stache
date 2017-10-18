@@ -95,9 +95,8 @@ function makeTest(name, doc, mutation) {
 			return txt;
 		};
 
-
 	var oldDoc;
-	QUnit.module(name ,{
+	QUnit.module(name, {
 		setup: function(){
 			if(doc === window.document) {
 				DOCUMENT(null);
@@ -137,7 +136,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(frag.childNodes.item(0)).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
 
-
 	test("basic replacement", function(){
 
 		var stashed = stache("<h1 class='foo'><span>Hello {{message}}!</span></h1>");
@@ -148,7 +146,6 @@ function makeTest(name, doc, mutation) {
 		});
 		equal( innerHTML(frag.firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
-
 
 	test("a section helper", function(){
 
@@ -255,7 +252,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-
 	test("boxes example", function(){
 
 		var boxes = [],
@@ -299,7 +295,6 @@ function makeTest(name, doc, mutation) {
 		ok(! /top: 0px/.test( frag.firstChild.firstChild.getAttribute("style")) , "!0px");
 
 	});
-
 
 	var override = {
 		comments: {
@@ -366,8 +361,6 @@ function makeTest(name, doc, mutation) {
 			});
 		});
 	});
-
-
 
 	test('Tokens returning 0 where they should display the number', function () {
 		var template = "<div id='zero'>{{completed}}</div>";
@@ -548,7 +541,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual( getText(t.template, t.data), expected);
 	});
 
-
 	test("No arguments passed to helper", function () {
 		var template = stache("{{noargHelper}}");
 
@@ -595,6 +587,7 @@ function makeTest(name, doc, mutation) {
 
 		deepEqual(innerHTML(div), "foo");
 	});
+
 	if(isNormalDOM) {
 		test("Partials and observes", function () {
 			var template;
@@ -619,7 +612,6 @@ function makeTest(name, doc, mutation) {
 			equal(innerHTML(ths[1]), 'there', 'Second column heading correct');
 		});
 	}
-
 
 	test("Deeply nested partials", function () {
 		var t = {
@@ -794,7 +786,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual(getText(v.template,v.data), expected);
 	});
 
-
 	test("render with double angle", function () {
 		var text = "{{& replace_me }}{{{ replace_me_too }}}" +
 			"<ul>{{#animals}}" +
@@ -862,7 +853,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(div.getElementsByTagName('span')[0]).toLowerCase(), "<strong>foo</strong><strong>bar</strong>");
 		equal(div.getElementsByTagName('input')[0].value, "I use 'quote' fingers \"a lot\"", "escaped no matter what");
 	});
-
 
 	test("attribute single unescaped, html single unescaped", function () {
 
@@ -1055,7 +1045,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(span), 'Warp drive, Mr. Sulu', 'value in block statement updated innerHTML');
 
 	});
-
 
 	test('hookup within a tag', function () {
 		var text = '<div {{ obs.foo }} ' + '{{ obs.baz }}>lorem ipsum</div>',
@@ -2200,7 +2189,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual( getText( t.template, t.data), expected);
 	});
 
-
 	test("avoid global helpers", function () {
 
 		var noglobals = stache("{{sometext person.name}}");
@@ -2233,7 +2221,6 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div2), "Ajax rules");
 
 	});
-
 
 	test("Each does not redraw items", function () {
 
@@ -2337,6 +2324,7 @@ function makeTest(name, doc, mutation) {
 		}));
 
 	});
+
 	// CHANGED FROM MUSTACHE
 	test("Object references can escape periods for key names containing periods", function () {
 		var template = stache("{{#foo.bar}}" +
@@ -2589,7 +2577,7 @@ function makeTest(name, doc, mutation) {
 		equal(img.getAttribute("src"), url, "images src is correct");
 	});
 
-	//if(doc.body.style) {
+	// if(doc.body.style) {
 	//    test("style property is live-bindable in IE (#494)", 4, function () {
 	//
 	//        var template = stache('<div style="width: {{width}}px; background-color: {{color}};">hi</div>')
@@ -2611,9 +2599,7 @@ function makeTest(name, doc, mutation) {
 	//        equal(div.style.width, "10px");
 	//        equal(div.style.backgroundColor, "blue");
 	//    });
-	//}
-
-
+	// }
 
 	test("empty lists update", 2, function () {
 		var template = stache('<p>{{#list}}{{.}}{{/list}}</p>');
@@ -3568,23 +3554,22 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-//        if(window.jQuery || window.Zepto) {
-//
-//            test("helpers returning jQuery or Zepto collection", function(){
-//
-//                stache.registerHelper("jQueryHelper", function(options){
-//                    var section = options.fn({first: "Justin"});
-//                    return $( can.frag("<h1>")).append( section );
-//                });
-//
-//                var template = stache( "{{#jQueryHelper}}{{first}} {{last}}{{/jQueryHelper}}");
-//
-//                var res = template({last: "Meyer"});
-//                equal(res.firstChild.nodeName.toLowerCase(), "h1");
-//                equal(innerHTML(res.firstChild), "Justin Meyer");
-//
-//            });
-//        }
+	// if(window.jQuery || window.Zepto) {
+	// 	test("helpers returning jQuery or Zepto collection", function() {
+	//
+	// 		stache.registerHelper("jQueryHelper", function(options) {
+	// 			var section = options.fn({first: "Justin"});
+	// 			return $( can.frag("<h1>")).append( section );
+	// 		});
+	//
+	// 		var template = stache( "{{#jQueryHelper}}{{first}} {{last}}{{/jQueryHelper}}");
+	//
+	// 		var res = template({last: "Meyer"});
+	// 		equal(res.firstChild.nodeName.toLowerCase(), "h1");
+	// 		equal(innerHTML(res.firstChild), "Justin Meyer");
+	//
+	// 	});
+	// }
 
 	test("./ in key", function(){
 		var template = stache( "<div><label>{{name}}</label>{{#children}}<span>{{./name}}-{{name}}</span>{{/children}}</div>");
@@ -3676,6 +3661,7 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 	//!steal-remove-end
+
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new CanMap({
@@ -4038,8 +4024,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-
-
 	test("possible to teardown immediate nodeList (#1593)", function(){
 		expect(3);
 		var map = new CanMap({show: true});
@@ -4096,6 +4080,7 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
 	});
+
 	if(doc.createElementNS && System.env !== 'canjs-test') {
 		test("svg elements for (#1327)", function(){
 
@@ -4878,7 +4863,6 @@ function makeTest(name, doc, mutation) {
 		template(appState);
 	});
 
-
 	test("content within {{#if}} inside partial surrounded by {{#if}} should not display outside partial (#2186)", function() {
 		stache.registerPartial('partial', '{{#showHiddenSection}}<div>Hidden</div>{{/showHiddenSection}}');
 		var renderer = stache('<div>{{#showPartial}}{{>partial}}{{/showPartial}}</div>');
@@ -5538,6 +5522,7 @@ function makeTest(name, doc, mutation) {
 		makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
 		makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
 		makeWarnChecks("{{#call()}}...{{/call}}", []);
+		makeWarnChecks("<div>\n{{#if foo}}\n</div>\n{{/if}}", []); // (#321)
 	});
 
 	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
@@ -5563,7 +5548,6 @@ function makeTest(name, doc, mutation) {
 			stache("<button ($weirdattribute)='showMessage()'>Click</button>");
 		});
 	});
-
 
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
@@ -5823,7 +5807,6 @@ function makeTest(name, doc, mutation) {
 			start();
 		});
 	});
-
 
 	testHelpers.dev.devOnlyTest("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
 		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/, function(message, matched) {
