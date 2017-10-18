@@ -6274,6 +6274,20 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
+	testHelpers.dev.devOnlyTest("partials warn on missing context (#328)", function() {
+		stop();
+		var teardown = testHelpers.dev.willWarn(/is not defined in the scope/, function(message, matched) {
+			if(matched) {
+				QUnit.ok(true, "Warning fired");
+				QUnit.equal(teardown(), 1, "One matching warning fired");
+				start();
+			}
+		});
+
+		var renderer = stache("{{>foo bar}}");
+		renderer({ foo: stache("baz") });
+	});
+  
 	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
 		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
 
@@ -6361,6 +6375,7 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(teardown(), 0, "No warnings should be given");
 	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

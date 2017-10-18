@@ -12,6 +12,7 @@ var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
+var dev = require("can-log/dev/dev");
 
 
 // ## Types
