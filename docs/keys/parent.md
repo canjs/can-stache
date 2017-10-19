@@ -8,8 +8,8 @@ Start looking for values in the parent context.
 Look for values starting in the parent context.
 
 ```
-{{#each todos}}
-	<div class='{{#if ../isEditing(this)}}editing{{/if}}'>
+{{#each(todos)}}
+	<div class='{{#if(../isEditing(this))}}editing{{/if}}'>
 		{{./name}}
 	</div>
 {{/each}}

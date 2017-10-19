@@ -15,12 +15,12 @@ Stache includes a number of built-in helpers, but custom helpers can be register
 
 ## Built-in Helpers
 
-The `[can-stache.tags.section {{#if key}}]` helper is used for **if** statements. The **if** helper is similar
+The `[can-stache.tags.section {{#if(key)}}]` helper is used for **if** statements. The **if** helper is similar
 to using a `[can-stache.tags.section {{#key}}]` section. If they key passed to the helper is **truthy**, the
 section will be rendered.
 
 	Template:
-		{{#if friends}}
+		{{#if(friends)}}
 			I have friends!
 		{{/if}}
 
@@ -32,14 +32,14 @@ section will be rendered.
 	Result:
 		I have friends!
 
-When using the `[can-stache.helpers.if {{#if key}}]` helper, or any other helper for that matter,
+When using the `[can-stache.helpers.if {{#if(key)}}]` helper, or any other helper for that matter,
 the special `[can-stache.helpers.else {{else}}]` helper is available. `{{else}}` is equivalent to
 an [can-stache.tags.inverse {{^key}}] inverse section (renders if given **falsey** data), except that it
 only uses a single tag and exists inside a helper section.
 
 	Template:
 		<ul>
-			{{#if friends}}
+			{{#if(friends)}}
 				</li>{{name}}</li>
 			{{else}}
 				<li>No friends.</li>
@@ -56,12 +56,12 @@ only uses a single tag and exists inside a helper section.
 			<li>No friends.</li>
 		</ul>
 
-The `[can-stache.helpers.unless {{#unless key}}]` helper is equivalent to using a
+The `[can-stache.helpers.unless {{#unless(key)}}]` helper is equivalent to using a
 `[can-stache.tags.inverse {{^key}}]` inverse section. If they key passed to the helper is **falsey**, the
 section will be rendered.
 
 	Template:
-		{{#unless friends}}
+		{{#unless(friends)}}
 			You don't have any friends!
 		{{/unless}}
 
@@ -73,13 +73,13 @@ section will be rendered.
 	Result:
 		You don't have any friends!
 
-The `[can-stache.helpers.each {{#each key}}]` helper is similar to using a
+The `[can-stache.helpers.each {{#each(key)}}]` helper is similar to using a
 `[can-stache.tags.section {{#key}}]` section for iterating an array. In this case, the entire array
 will be rendered using the inner text item by item.
 
 	Template:
 		<ul>
-			{{#each friends}}
+			{{#each(friends)}}
 				<li>{{name}}</li>
 			{{/each}}
 		</ul>
@@ -98,13 +98,13 @@ will be rendered using the inner text item by item.
 			<li>Justin</li>
 		</ul>
 
-The `[can-stache.helpers.with {{#with key}}]` helper is equivalent to using a
+The `[can-stache.helpers.with {{#with(key)}}]` helper is equivalent to using a
 `[can-stache.tags.section {{#key}}]` section for regular objects. The helper will change
 the current context so that all tags inside will look for keys on the local context first.
 
 	Template:
 		<h1>Hi {{name}}</h1>
-		{{#with friend}}
+		{{#with(friend)}}
 			<p>You have a new friend: {{name}}</p>
 		{{/with}}
 
@@ -118,12 +118,12 @@ the current context so that all tags inside will look for keys on the local cont
 		<h1>Hi Austin</h1>
 		<p>You have a new friend: Justin</p>
 
-When using the `[can-stache.helpers.is {{#is key1 key2}}]` helper you can simply compare
+When using the `[can-stache.helpers.is {{#eq(key1, key2)}}]` helper you can simply compare
 key1 and key2. If the result of comparsion is **truthy**, the section will be rendered.
 
 	Template:
 		<ul>
-		{{#is name 'Alex'}}
+		{{#eq(name, 'Alex')}}
 			</li>Your name is {{name}}</li>
 		{{else}}
 			<li>Your name is not Alex!</li>
@@ -256,7 +256,7 @@ routing helper it will show/hide the text.
 		}
 	});
 
-	{{#routing 'advanced'}}
+	{{#routing('advanced')}}
 		You have applied the advanced filter.
 	{{/routing}}
 
@@ -284,7 +284,7 @@ you can set a custom context by passing the object instead of `this`.
 		}
 	});
 
-	{{#exercise pets 'walked' 3 where='around the block' when=time}}
+	{{#exercise(pets, 'walked', 3, where='around the block' when=time)}}
 		Along with the {{#group}}{{.}}, {{/group}}
 		we {{action}} {{where}} {{num}} times {{when}}.
 	{{else}}

@@ -13,12 +13,12 @@ Creates a reusable sub-template from `BLOCK` named `partialName` that can be ren
 {{/addressTemplate}}
 
 <div>
-	{{#with business.address}}
+	{{#with(business.address)}}
 		{{>addressTemplate}}
 	{{/with}}
 </div>
 <ul>
-	{{#each business.people}}
+	{{#each(business.people)}}
 		<li>
 			{{fullName}}, {{birthday}}
 			{{>addressTemplate address}}
@@ -74,12 +74,12 @@ This template:
 {{/addressTemplate}}
 
 <div>
-	{{#with business.address}}
+	{{#with(business.address)}}
 		{{>addressTemplate}}
 	{{/with}}
 </div>
 <ul>
-	{{#each business.people}}
+	{{#each(business.people)}}
 		<li>
 			{{fullName}}
 			{{>addressTemplate address}}
@@ -141,8 +141,8 @@ This template:
 
 ```handlebars
 {{<recursive}}
-	<div>{{./name}} <b>Type:</b> {{#if ./nodes.length}}Branch{{else}}Leaf{{/if}}</div>
-	{{#each ./nodes}}
+	<div>{{./name}} <b>Type:</b> {{#if(./nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
+	{{#each(./nodes)}}
 		{{>recursive .}}
 	{{/each}}
 {{/recursive}}
@@ -191,8 +191,8 @@ This template:
 
 ```handlebars
 {{<recursive}}
-	<div>{{name}} <b>Type:</b> {{#if nodes.length}}Branch{{else}}Leaf{{/if}}</div>
-	{{#each nodes}}
+	<div>{{name}} <b>Type:</b> {{#if(nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
+	{{#each(nodes)}}
 		{{>recursive}}
 	{{/each}}
 {{/recursive}}
@@ -214,14 +214,14 @@ Will recurse on `nodes` and your output will be something like this:
 (hangs from too much recursion)
 ```
 
-This is because when it’s rendering that named partial with “Problem Child” as the context, the template sees `nodes` here: `{{#each nodes}}`, then it checks the current context (Problem Child), doesn't find anything called `nodes`, then moves up the scope to its parent context to check for `nodes`. Since `nodes` is on the parent (and contains the Problem Child), it uses that for the `#each` and you’re stuck in infinite recursion.
+This is because when it’s rendering that named partial with “Problem Child” as the context, the template sees `nodes` here: `{{#each(nodes)}}`, then it checks the current context (Problem Child), doesn't find anything called `nodes`, then moves up the scope to its parent context to check for `nodes`. Since `nodes` is on the parent (and contains the Problem Child), it uses that for the `#each()` and you’re stuck in infinite recursion.
 
 To avoid that, it’s best practice to always be specific about the context for your expressions within a named partial:
 
 ```handlebars
 {{<recursive}}
-	<div>{{./name}} <b>Type:</b> {{#if ./nodes.length}}Branch{{else}}Leaf{{/if}}</div>
-	{{#each ./nodes}}
+	<div>{{./name}} <b>Type:</b> {{#if(./nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
+	{{#each(./nodes)}}
 		{{>recursive .}}
 	{{/each}}
 {{/recursive}}

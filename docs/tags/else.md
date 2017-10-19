@@ -1,7 +1,7 @@
 @function can-stache.helpers.else {{else}}
 @parent can-stache.tags 4
 
-@signature `{{#helper}}BLOCK{{else}}INVERSE{{/helper}}`
+@signature `{{#helper()}}BLOCK{{else}}INVERSE{{/helper}}`
 
 Creates an `inverse` block for a [can-stache.helper helper function]'s
 [can-stache.helperOptions options argument]'s `inverse` property.

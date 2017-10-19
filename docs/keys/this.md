@@ -8,8 +8,8 @@ Write out or return the current context.
 Writes out or returns the current context.
 
 ```
-{{#each names}}{{this}} {{/each}}
-{{#each names}}
+{{#each(names)}}{{this}} {{/each}}
+{{#each(names)}}
 	{{sanitize(this)}}
 {{/each}}
 ```
@@ -20,8 +20,8 @@ Writes out or returns the current context.
   The same as writing `this`, but with 3 fewer characters!
 
   ```
-  {{#each names}}{{.}} {{/each}}
-  {{#each names}}
+  {{#each(names)}}{{.}} {{/each}}
+  {{#each(names)}}
   	{{sanitize(.)}}
   {{/each}}
   ```
@@ -34,7 +34,7 @@ Writes out or returns the current context.
 To write out the current context, write `{{.}}` or `{{this}}`. For example,
 a template like:
 
-    {{#each names}}{{this}} {{/each}}
+    {{#each(names)}}{{this}} {{/each}}
 
 With data like:
 

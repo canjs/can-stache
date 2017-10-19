@@ -36,7 +36,7 @@ variables, template variables do not have block level scope.  The following
 does not work:
 
 ```
-{{#each something}}
+{{#each(something)}}
 	<component-a {^prop-a}="*variable"/>
 	<component-b {prop-b}="*variable"/>
 {{/each}}
@@ -53,7 +53,7 @@ stache.regsiterHelper("localContext", function(options){
 And used like:
 
 ```
-{{#each something}}
+{{#each(something)}}
 	{{#localContext}}
 	  <component-a {^prop-a}="./variable"/>
 	  <component-b {prop-b}="./variable"/>

@@ -14,7 +14,7 @@ QUnit.test("routeUrl and routeCurrent", function(){
 	route.data = routeData;
 	route.ready();
 
-	var template = stache("<a href=\"{{routeUrl page='recipe' id=recipe.id}}\">{{recipe.name}}</a>");
+	var template = stache("<a href=\"{{routeUrl(page='recipe' id=recipe.id)}}\">{{recipe.name}}</a>");
 
 	var frag = template({
 		recipe: new CanMap({id: 5, name: 'Cool recipe'})
@@ -53,11 +53,11 @@ QUnit.test("routeUrl and routeCurrent", function(){
 		frag = template({});
 		QUnit.equal(frag.firstChild.nodeValue, "yes", "route is somewhat current");
 
-		template = stache("{{#routeCurrent foo='bar' true}}yes{{else}}no{{/routeCurrent}}");
+		template = stache("{{#routeCurrent(foo='bar', true)}}yes{{else}}no{{/routeCurrent}}");
 		frag = template({});
 		QUnit.equal(frag.firstChild.nodeValue, "yes", "route is somewhat current");
 
-		template = stache("<a href=\"{{routeUrl page='recipes' id=6 true}}\"></a>");
+		template = stache("<a href=\"{{routeUrl(page='recipes' id=6, true)}}\"></a>");
 		frag = template({});
 
 		QUnit.equal( frag.firstChild.getAttribute("href"), "#!&foo=bar&page=recipes&id=6", "merge works helper");

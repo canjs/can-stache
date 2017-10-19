@@ -19,7 +19,7 @@ omitted up to the next tag, magic tag, or non-whitespace character. It also work
 
 ```html
 <div>
-	{{-#if user.isMarried-}}
+	{{-#if(user.isMarried)-}}
 		Mrs
 	{{-else-}}
 		Miss
@@ -30,7 +30,7 @@ omitted up to the next tag, magic tag, or non-whitespace character. It also work
 would render as:
 
 ```html
-<div>{{#if user.isMarried}}Mrs{{else}}Miss{{/if}}</div>
+<div>{{#if(user.isMarried)}}Mrs{{else}}Miss{{/if}}</div>
 ```
 
 and
@@ -54,7 +54,7 @@ One use case is to remove spaces around span elements.
 ```html
 <div>
 	<span>
-		{{-#if user.isMarried-}}
+		{{-#if(user.isMarried)-}}
 			Mrs.
 		{{-else-}}
 			Miss.
@@ -68,7 +68,7 @@ would render as:
 
 ```html
 <div>
-	<span>{{#if user.isMarried}}Mrs.{{else}}Miss.{{/if}}</span>{{ user.name }}
+	<span>{{#if(user.isMarried)}}Mrs.{{else}}Miss.{{/if}}</span>{{ user.name }}
 </div>
 ```
 
@@ -81,7 +81,7 @@ while still being cleanly formatted for human consumption.
 ```html
 <div>
 	{{-! output the users name }}
-	{{-#if user.name}}
+	{{-#if(user.name)}}
 		{{ user.name }}
 	{{/if-}}
 </div>
@@ -90,7 +90,7 @@ while still being cleanly formatted for human consumption.
 would render as:
 
 ```html
-<div>{{-! output the users name }}{{-#if user.name}}
+<div>{{-! output the users name }}{{-#if(user.name)}}
 		{{ user.name }}
 	{{/if-}}</div>
 ```

@@ -1,4 +1,4 @@
-@function can-stache.helpers.routeCurrent {{#routeCurrent hash}}
+@function can-stache.helpers.routeCurrent {{#routeCurrent(hash)}}
 @parent can-stache/helpers/route
 
 Returns if the hash values match the [can-route]'s current properties.
@@ -26,13 +26,13 @@ Or on its own:
 
   @return {Boolean} Returns the result of calling [can-route.current route.current].
 
-@signature `{{#routeCurrent [subsetMatch] hashes...}}FN{{else}}INVERSE{{/routeCurrent}}`
+@signature `{{#routeCurrent([subsetMatch], hashes...)}}FN{{else}}INVERSE{{/routeCurrent}}`
 
 Renders `FN` if the `hashes` passed to [can-route.current route.current] returns `true`.
 Renders the `INVERSE` if [can-route.current route.current] returns `false`.
 
 ```
-<a class="{{#routeCurrent true page='todos'}}active{{/routeCurrent}}">Todos</a>
+<a class="{{#routeCurrent(true, page='todos')}}active{{/routeCurrent}}">Todos</a>
 ```
 
   @param {Boolean} [subsetMatch] If an optional `true` is passed, `routeCurrent` will
@@ -59,8 +59,8 @@ Renders the `INVERSE` if [can-route.current route.current] returns `false`.
 Use the `routeCurrent` helper like:
 
 ```
-<li {{#routeCurrent page="recipe" id=5}}class='active'{{/routeCurrent}}>
-  <a href='{{routeUrl page="recipe" id=5}}'>{{recipe.name}}</a>
+<li {{#routeCurrent(page="recipe" id=5)}}class='active'{{/routeCurrent}}>
+  <a href='{{routeUrl(page="recipe" id=5)}}'>{{recipe.name}}</a>
 </li>
 ```
 
