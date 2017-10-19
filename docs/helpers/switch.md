@@ -8,13 +8,13 @@ Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.he
 ```
 {{#switch user.type}}
 	{{#case "admin"}}
-		Pay
+		<button value="edit"/>
 	{{/case}}
-	{{#case "admin"}}
-		<button/>
+	{{#case "manager"}}
+		<button value="view">
 	{{/case}}
 	{{#default}}
-		Look at data
+		You do not have permission!
 	{{/default}}
 {{/switch}}
 ```
