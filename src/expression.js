@@ -15,17 +15,11 @@ var canSymbol = require("can-symbol");
 //!steal-remove-start
 // warn on keys like {{foo}} if foo is not in the current scope
 // don't warn on things like {{./foo}} or {{../foo}} or {{foo.bar}} or {{%index}} or {{this}}
-function displayScopeWalkingWarning(key, scope, computeData, readOptions) {
+function displayScopeWalkingWarning(key, computeData, filename) {
 	if (key.indexOf(".") < 0 && key !== "this") {
-		var value = canReflect.getValue(computeData);
-
-		// read value of key explicitly from current scope
-		var valueWithoutScopeWalking = scope.peek("./" + key, readOptions);
-
-		// if values don't match, scope must have been walked to get original value
-		// if the value is a function, they won't ever match
-		var scopeWasWalked = typeof value !== 'function' &&
-			value !== valueWithoutScopeWalking;
+		// if scope that value was found in (`scope`) is not the starting scope,
+		// we must have walked up the scope to find the value
+		var scopeWasWalked = computeData.scope && (computeData.scope !== computeData.startingScope);
 
 		// values read from non-contexts, such as aliases created for #each and #with
 		// should not warn
@@ -34,9 +28,9 @@ function displayScopeWalkingWarning(key, scope, computeData, readOptions) {
 
 		// if scope was walked and value isn't an alias, display dev warning
 		if (scopeWasWalked && !readFromNonContext) {
-			if (readOptions && readOptions.filename) {
+			if (filename) {
 				dev.warn(
-					readOptions.filename + ': "' + key + '" ' +
+					filename + ': "' + key + '" ' +
 					'is not in the current scope, so it is being read from the parent scope.\n' +
 					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
 				);
@@ -56,12 +50,13 @@ function displayScopeWalkingWarning(key, scope, computeData, readOptions) {
 // Helper for getting a bound compute in the scope.
 var getObservableValue_fromKey = function (key, scope, readOptions) {
 		var data = scope.computeData(key, readOptions);
+		compute.temporarilyBind(data);
 
 		//!steal-remove-start
-		displayScopeWalkingWarning(key, scope, data, readOptions);
+		// this must happen after `temporarilyBind`ing computeData
+		// so that we know where the value was found
+		displayScopeWalkingWarning(key, data, readOptions && readOptions.filename);
 		//!steal-remove-end
-
-		compute.temporarilyBind(data);
 
 		return data;
 	},

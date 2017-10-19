@@ -6336,6 +6336,48 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, "Warning should be given");
 	});
 
+	testHelpers.dev.devOnlyTest("scope walking warning should not read value twice (#336)", function() {
+		var teardown = testHelpers.dev.willWarn(/scopewalk.stache: "age" is not in the current scope/);
+		var renderer = stache("scopewalk.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		var childCount = 0;
+		var Child = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					childCount++;
+					return age;
+				}
+			}
+		});
+		var parentCount = 0;
+		var Parent = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					parentCount++;
+					return age;
+				}
+			},
+			children: [ Child ]
+		});
+
+		var child = new Child({ name: 'Ramiya', age: 3 });
+		var parent = new Parent({ name: 'Justing', age: 33, children: [ child ] });
+
+		renderer(parent);
+
+		QUnit.equal(teardown(), 0, 'no warning should be given');
+		QUnit.equal(childCount, 1, 'child.age should be read once');
+		QUnit.equal(parentCount, 0, 'parent.age should not be read');
+	});
+
 	testHelpers.dev.devOnlyTest("should not warn on aliases created in #each or #with (#311)", function() {
 		var teardown = testHelpers.dev.willWarn(/is not in the current scope/);
 
