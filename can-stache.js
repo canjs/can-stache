@@ -12,7 +12,7 @@ var getIntermediateAndImports = require('./src/intermediate_and_imports');
 var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
 
 var attributeEncoder = require('can-attribute-encoder');
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
