@@ -1,4 +1,4 @@
-var canLog = require('can-util/js/log/log');
+var canLog = require('can-log');
 function noop () {};
 var resolveValue = noop;
 var evaluateArgs = noop;

@@ -6,7 +6,7 @@ var mustacheHelpers = require('../helpers/core');
 
 var each = require('can-util/js/each/each');
 var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");

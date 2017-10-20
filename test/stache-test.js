@@ -26,7 +26,7 @@ var DOCUMENT = require('can-util/dom/document/document');
 var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
 
 var canEach = require('can-util/js/each/each');
-var canDev = require('can-util/js/dev/dev');
+var canDev = require('can-log/dev/dev');
 var string = require('can-util/js/string/string');
 var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
@@ -5538,7 +5538,7 @@ function makeTest(name, doc, mutation) {
 		);
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})
@@ -5796,7 +5796,7 @@ function makeTest(name, doc, mutation) {
 		});
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})

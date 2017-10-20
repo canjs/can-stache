@@ -1,6 +1,6 @@
 var unit = require('steal-qunit');
 var Compute = require('can-compute');
-var canLog = require('can-util/js/log/log');
+var canLog = require('can-log');
 var debug = require('./-debugger');
 
 var helper = debug.helper;
