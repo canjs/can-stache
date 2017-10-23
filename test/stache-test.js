@@ -3628,39 +3628,26 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	//!steal-remove-start
-	if (canDev) {
-		test("Logging: Helper not found in stache template(#726)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find helper "helpme".';
+	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find helper "helpme".');
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
-
-			stache('<li>{{helpme name}}</li>')({
-				name: 'Hulk Hogan'
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{helpme name}}</li>')({
+			name: 'Hulk Hogan'
 		});
 
-		test("Logging: Variable not found in stache template (#720)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find key or helper "user.name".';
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
+	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find key or helper "user.name".');
 
-			stache('<li>{{user.name}}</li>')({
-				user: {}
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{user.name}}</li>')({
+			user: {}
 		});
-	}
-	//!steal-remove-end
+
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
+
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new CanMap({
@@ -5492,36 +5479,24 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
-		var makeWarnChecks = function(input, texts) {
-			var count = 0;
-			var _warn = canDev.warn;
-			canDev.warn = function(text) {
-				equal(text, texts[count++]);
-			};
+		var teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{#if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#if someCondition}}");
 
-			stache("filename.stache", input);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{^if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{^if someCondition}}");
 
-			equal(count, texts.length);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}");
+		stache("filename.stache", "{{#call()}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#call()}}");
 
-			canDev.warn = _warn;
-		};
-
-		// Fails
-		makeWarnChecks("{{#if someCondition}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{^if someCondition}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{#call()}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}"
-		]);
-
-		// Successes
-		makeWarnChecks("{{#if}}...{{/}}", []);
-		makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{#call()}}...{{/call}}", []);
+		teardown = testHelpers.dev.willWarn(/filename.stache/);
+		stache("filename.stache", "{{#if}}...{{/}}");
+		stache("filename.stache", "{{#if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{^if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{#call()}}...{{/call}}");
+		QUnit.equal(teardown(), 0, "matching tags should not have warnings");
 	});
 
 	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
