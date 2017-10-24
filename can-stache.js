@@ -424,7 +424,7 @@ function stache (filename, template) {
 			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
-		scope.set('*self', scopifiedRenderer);
+		scope.set('scope.view', scopifiedRenderer);
 
 		// pass filename so it can be used in dev warnings
 		optionsScope._meta.filename = section.filename;
