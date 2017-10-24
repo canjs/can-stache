@@ -12,6 +12,7 @@ var CanMap = require('can-map');
 var CanList = require('can-list');
 var canCompute = require('can-compute');
 var DefineMap = require('can-define/map/map');
+var DefineList = require('can-define/list/list');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
@@ -32,6 +33,9 @@ var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var testHelpers = require('can-test-helpers');
+var canLog = require('can-log');
+var debug = require('../helpers/-debugger');
+var helpersCore = require('can-stache/helpers/core');
 
 var browserDoc = DOCUMENT();
 var mutationObserver = MUTATION_OBSERVER();
@@ -6372,6 +6376,209 @@ function makeTest(name, doc, mutation) {
 		renderer(data);
 
 		QUnit.equal(teardown(), 0, "No warnings should be given");
+	});
+
+	test("#if works with call expressions", function(){
+		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#unless works with call expressions", function(){
+		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
+		var map = new DefineMap({
+			foo: false
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("log works with call expressions", function(){
+		var map = new DefineMap({
+			foo: "bar"
+		});
+		var log = console.log;
+
+		console.log = function(value){
+			QUnit.equal(value, map);
+		};
+		
+		var template = stache("{{log()}}");
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		console.log = log;
+	});
+
+	test("debugger works with call expressions", function(){
+		debug.__testing.allowDebugger = false;
+		var log = canLog.log;
+		var warn = canLog.warn;
+
+		var logs = [
+			"Use `get(<path>)` to debug this template",
+			"Forgotten {{debugger}} helper"
+		];
+		canLog.log = canLog.warn = function(message){
+			QUnit.equal(message, logs.shift());
+		}
+
+		var template = stache("{{debugger()}}");
+		var div = doc.createElement("div");
+		var frag = template();
+
+		div.appendChild(frag);
+
+		canLog.log = log;
+		canLog.warn = warn;
+		debug.__testing.allowDebugger = true;
+	});
+
+	test("#eq works with call expressions", function(){
+		var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#is works with call expressions", function(){
+		var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#switch, #case, and #default work with call expressions", function(){
+		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
+		var map = new DefineMap({
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "admin");
+		map.type = "peasant";
+		QUnit.equal(innerHTML(div), "peasant");
+	});
+
+	test("joinbase works with call expressions", function(){
+		var baseUrl = System.baseURL || getBaseURL();
+		var template = stache("{{joinBase('hello/', name, '.png')}}");
+		var map = new DefineMap({
+			name: "world"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), joinURIs(baseUrl, "hello/world.png"));
+	});
+
+	test("#each works with hash expression in call expression", function(){
+		var template = stache("{{#each(todos, todo=value num=index)}}<p data-index=\"{{num}}\">{{todo.name}}</p>{{/each}}");
+		var map = new DefineMap({
+			todos: [
+				{
+					name: "foo"
+				},
+				{
+					name: "bar"
+				}
+			]
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		var p = div.getElementsByTagName("p");
+		for(var i = 0; i < p.length; i++){
+			QUnit.equal(innerHTML(p[i]), map.todos[i].name);
+			QUnit.equal(p[i].getAttribute("data-index"), i);
+		}
+	});
+
+	test("#each will call expression should optimized for performance", function(){
+		var count = 0;
+		stache.registerHelper('myEach', function() {
+			count++;
+			return helpersCore.helpers.each.apply(this, arguments);
+		})
+		var template = stache("{{#myEach(.)}}<p>{{.}}</p>{{/myEach}}");
+		var map = new DefineList(["foo", "baz"]);
+		
+		template(canCompute(map));
+
+		map.push("qux", "quux");
+		map.splice(1, 0, "bar");
+		map.pop();
+		map.shift();
+		map.unshift("foo");
+
+		equal(count, 1);
+	});
+
+	test("#with works with hash expression in call expression", function(){
+		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
+		var map = new DefineMap({
+			foo: "hello",
+			baz: "world"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
+	});
+
+	test("call expression works with hash expression", function(){
+		var exprData = core.expression.parse("helper(todos, todo=value num=index)");
+		var args = core.expression.Call.prototype.args.call(exprData, Scope.refsScope().add({}), new core.Options({}));
+
+		equal(args().hashExprs.todo.key, "value");
+		equal(args().hashExprs.num.key, "index");
+	});
+
+	test("#each with hash expression in call expression should not warn", function(){
+		var template = stache("{{#each(todos, todo=value)}}<p>{{todo}}</p>{{/each}}");
+		var map = new DefineMap({todos: ["foo", "bar", "baz"]});
+		var warn1 = testHelpers.dev.willWarn(/can-stache: Using the `as`/i);
+		var warn2 = testHelpers.dev.willWarn(/can-stache: Do not use/i);
+
+		template(map);
+
+		equal(warn1(), 0);
+		equal(warn2(), 0);
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
