@@ -224,7 +224,6 @@ Call.prototype.args = function(scope, helperOptions){
 };
 
 Call.prototype.value = function(scope, helperScope, helperOptions){
-
 	var method = this.methodExpr.value(scope, helperScope);
 	// TODO: remove this hack
 	var isHelper = this.isHelper = this.methodExpr.isHelper;
@@ -250,7 +249,13 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 		}
 	};
 
-	var computeValue = new SetterObservable(computeFn,computeFn);
+	//!steal-remove-start
+	Object.defineProperty(computeFn, "name", {
+		value: "{{" + this.methodExpr[canSymbol.for('can-stache.originalKey')] + "}}"
+	});
+	//!steal-remove-end
+
+	var computeValue = new SetterObservable(computeFn, computeFn);
 	Observation.temporarilyBind(computeValue);
 	return computeValue;
 };
@@ -343,10 +348,16 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		if(typeof computeData.initialValue === "function") {
 			args = this.args(scope, helperOptions).map(toComputeOrValue);
 			// TODO: this should be an observation.
-			var functionResult = new Observation(function(){
-
+			function observation(){
 				return computeData.initialValue.apply(null, args);
+			}
+			//!steal-remove-start
+			Object.defineProperty(observation, "name", {
+				value: canReflect.getName(this),
 			});
+			//!steal-remove-end
+
+			var functionResult = new Observation(observation);
 			// TODO: probably don't need to bind
 			Observation.temporarilyBind(functionResult);
 			return {
@@ -460,6 +471,13 @@ Helper.prototype.closingTag = function() {
 	return this.methodExpr.key;
 };
 
+//!steal-remove-start
+canReflect.assignSymbols(Helper.prototype,{
+	"can.getName": function() {
+		return canReflect.getName(this.constructor) + "{{" + (this.methodExpr[canSymbol.for('can-stache.originalKey')] || this.methodExpr.key) + "}}";
+	},
+});
+//!steal-remove-end
 
 // NAME - \w
 // KEY - foo, foo.bar, foo@bar, %foo (special), &foo (references), ../foo, ./foo
