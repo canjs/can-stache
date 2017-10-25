@@ -6,19 +6,57 @@ var mustacheHelpers = require('../helpers/core');
 
 var each = require('can-util/js/each/each');
 var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
-// ## Helpers
 
+//!steal-remove-start
+// warn on keys like {{foo}} if foo is not in the current scope
+// don't warn on things like {{./foo}} or {{../foo}} or {{foo.bar}} or {{%index}} or {{this}}
+function displayScopeWalkingWarning(key, computeData, filename) {
+	if (key.indexOf(".") < 0 && key !== "this") {
+		// if scope that value was found in (`scope`) is not the starting scope,
+		// we must have walked up the scope to find the value
+		var scopeWasWalked = computeData.scope && (computeData.scope !== computeData.startingScope);
+
+		// values read from non-contexts, such as aliases created for #each and #with
+		// should not warn
+		var readFromNonContext = computeData && computeData.scope &&
+			computeData.scope._meta && computeData.scope._meta.notContext;
+
+		// if scope was walked and value isn't an alias, display dev warning
+		if (scopeWasWalked && !readFromNonContext) {
+			if (filename) {
+				dev.warn(
+					filename + ': "' + key + '" ' +
+					'is not in the current scope, so it is being read from the parent scope.\n' +
+					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
+				);
+			} else {
+				dev.warn(
+					'"' + key + '" ' +
+					'is not in the current scope, so it is being read from the parent scope.\n' +
+					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
+				);
+			}
+		}
+	}
+}
+//!steal-remove-end
+
+// ## Helpers
 // Helper for getting a bound compute in the scope.
 var getObservableValue_fromKey = function (key, scope, readOptions) {
-
 		var data = scope.computeData(key, readOptions);
-
 		compute.temporarilyBind(data);
+
+		//!steal-remove-start
+		// this must happen after `temporarilyBind`ing computeData
+		// so that we know where the value was found
+		displayScopeWalkingWarning(key, data, readOptions && readOptions.filename);
+		//!steal-remove-end
 
 		return data;
 	},
@@ -326,6 +364,10 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		initialValue,
 		args;
 
+		//!steal-remove-start
+		var filename = helperOptions && helperOptions._meta && helperOptions._meta.filename;
+		//!steal-remove-end
+
 	// If the expression looks like a helper, try to get a helper right away.
 	if (looksLikeAHelper) {
 		// Try to find a registered helper.
@@ -336,14 +378,42 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// Try to find a value or function
 		computeData = getObservableValue_fromKey(methodKey, scope, {
 			isArgument: true
+
+			//!steal-remove-start
+			, filename: filename
+			//!steal-remove-end
 		});
 		// if it's a function ... we need another compute that represents
 		// the call to that function
+		// This handles functions in any of these forms:
+		// {{#foo}}...{{/foo}}
+		// {{^foo}}...{{/foo}}
+		// {{foo bar}}
+		// {{foo}}
+		// {{{foo}}}
+		//
+		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
+			//!steal-remove-start
+			if (filename) {
+				dev.warn(
+					filename + ': "' +
+					methodKey + '" is being called as a function.\n' +
+					'\tThis will not happen automatically in an upcoming release.\n' +
+					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
+				);
+			} else {
+				dev.warn(
+					'"' + methodKey + '" is being called as a function.\n' +
+					'\tThis will not happen automatically in an upcoming release.\n' +
+					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
+				);
+			}
+			//!steal-remove-end
+
 			args = this.args(scope, helperOptions).map(toComputeOrValue);
 			// TODO: this should be an observation.
 			var functionResult = compute(function(){
-
 				return computeData.initialValue.apply(null, args);
 			});
 			// TODO: probably don't need to bind
@@ -357,33 +427,20 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 			// we will use that
 			return {value: computeData};
 		}
-		// else value is undefined
 
-		/*args = this.args(scope, helperOptions);
-		// Get info about the compute that represents this lookup.
-		// This way, we can get the initial value without "reading" the compute.
-		var computeData = getObservableValue_fromKey(methodKey, scope, {
-			isArgument: false,
-			args: args && args.length ? args : [scope.peek('.'), scope]
-		}),
-			compute = computeData.compute;
-
-		initialValue = computeData.initialValue;
-
-		// Set name to be the compute if the compute reads observables,
-		// or the value of the value of the compute if no observables are found.
-		if( computeDataHasDependencies( computeData ) ) {
-			value = compute;
-		} else {
-			value = initialValue;
-		}*/
-
-		// If it doesn't look like a helper and there is no value, check helpers
-		// anyway. This is for when foo is a helper in `{{foo}}`.
+		// If it doesn't look like a helper and there is no value, check helpers anyway.
+		// This handles helper functions, arrays, lists, computes, or primitives in:
+		// {{#foo}}...{{/foo}}
+		// {{^foo}}...{{/foo}}
+		// {{foo}}
+		// {{{foo}}}
+		// {{& foo}}
+		//
+		// also `foo.bar` in any of the above if bar is any of the mentioned types
+		// or foo is null or undefined
 		if( !looksLikeAHelper && initialValue === undefined ) {
 			helper = mustacheHelpers.getHelper(methodKey, helperOptions);
 		}
-
 	}
 
 	//!steal-remove-start

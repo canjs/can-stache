@@ -18,7 +18,6 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 var canBatch = require('can-event/batch/batch');
 var makeDocument = require('can-vdom/make-document/make-document');
-var testHelpers = require('can-test-helpers');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
@@ -27,7 +26,7 @@ var DOCUMENT = require('can-util/dom/document/document');
 var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
 
 var canEach = require('can-util/js/each/each');
-var canDev = require('can-util/js/dev/dev');
+var canDev = require('can-log/dev/dev');
 var string = require('can-util/js/string/string');
 var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
@@ -210,20 +209,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, "Exactly one warning called");
 
 	});
-
-	/*test("attribute sections", function(){
-	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
-
-	 var frag = stashed({
-	 top: 1,
-	 left: 2,
-	 color: 3
-	 });
-
-	 equal(frag.firstChild.style.top, "1px", "top works");
-	 equal(frag.firstChild.style.left, "2px", "left works");
-	 equal(frag.firstChild.style.backgroundColor.replace(/\s/g,""), "rgb(0,0,3)", "color works");
-	 });*/
 
 	test("attributes sections", function(){
 		var template = stache("<div {{attributes}}/>");
@@ -2363,7 +2348,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerHelper('rsvp', function (attendee, event) {
 			return attendee.name + ' is attending ' + event.name;
 		});
-		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/#attendee}}"),
+		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/attendee}}"),
 			data = {
 				attendee: {
 					name: 'Justin'
@@ -3628,39 +3613,25 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	//!steal-remove-start
-	if (canDev) {
-		test("Logging: Helper not found in stache template(#726)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find helper "helpme".';
+	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find helper "helpme".');
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
-
-			stache('<li>{{helpme name}}</li>')({
-				name: 'Hulk Hogan'
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{helpme name}}</li>')({
+			name: 'Hulk Hogan'
 		});
 
-		test("Logging: Variable not found in stache template (#720)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find key or helper "user.name".';
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
+	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find key or helper "user.name".');
 
-			stache('<li>{{user.name}}</li>')({
-				user: {}
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{user.name}}</li>')({
+			user: {}
 		});
-	}
-	//!steal-remove-end
+
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
 
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
@@ -4096,7 +4067,6 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
-	// TODO fix from here
 	test('using #each when toggling between list and null', function() {
 		var state = new CanMap();
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
@@ -5492,37 +5462,24 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
-		var makeWarnChecks = function(input, texts) {
-			var count = 0;
-			var _warn = canDev.warn;
-			canDev.warn = function(text) {
-				equal(text, texts[count++]);
-			};
+		var teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{#if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#if someCondition}}");
 
-			stache("filename.stache", input);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{^if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{^if someCondition}}");
 
-			equal(count, texts.length);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}");
+		stache("filename.stache", "{{#call()}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#call()}}");
 
-			canDev.warn = _warn;
-		};
-
-		// Fails
-		makeWarnChecks("{{#if someCondition}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{^if someCondition}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{#call()}}\n...\n{{/foo}}", [
-			"filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}"
-		]);
-
-		// Successes
-		makeWarnChecks("{{#if}}...{{/}}", []);
-		makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{#call()}}...{{/call}}", []);
-		makeWarnChecks("<div>\n{{#if foo}}\n</div>\n{{/if}}", []); // (#321)
+		teardown = testHelpers.dev.willWarn(/filename.stache/);
+		stache("filename.stache", "{{#if}}...{{/}}");
+		stache("filename.stache", "{{#if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{^if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{#call()}}...{{/call}}");
+		QUnit.equal(teardown(), 0, "matching tags should not have warnings");
 	});
 
 	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
@@ -5539,7 +5496,7 @@ function makeTest(name, doc, mutation) {
 		);
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})
@@ -5796,7 +5753,7 @@ function makeTest(name, doc, mutation) {
 		});
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})
@@ -6252,6 +6209,169 @@ function makeTest(name, doc, mutation) {
 
 		equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
 		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
+	});
+
+	test('check if <content> is already registred #165', function () {
+		stop();
+		viewCallbacks.tag("content", function() {});
+
+		var teardown = testHelpers.dev.willWarn(/Custom tag: content is already defined/, function(message, matched) {
+			QUnit.notOk(matched, message);
+		});
+
+		clone({
+			'can-view-callbacks': viewCallbacks
+		})
+		.import('can-stache')
+		.then(function(stache) {
+			stache('<content>foo</content>');
+			QUnit.equal(teardown(), 0, "Warning was not logged");
+			start();
+		});
+	});
+
+	testHelpers.dev.devOnlyTest("partials warn on missing context (#328)", function() {
+		stop();
+		var teardown = testHelpers.dev.willWarn(/is not defined in the scope/, function(message, matched) {
+			if(matched) {
+				QUnit.ok(true, "Warning fired");
+				QUnit.equal(teardown(), 1, "One matching warning fired");
+				start();
+			}
+		});
+
+		var renderer = stache("{{>foo bar}}");
+		renderer({ foo: stache("baz") });
+	});
+  
+	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
+
+		stache("mystache.stache", "{{aFunction}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function is called");
+			}
+		});
+
+		QUnit.equal(teardown(), 1, "Warning was given");
+	});
+
+	testHelpers.dev.devOnlyTest("do not warn on explicit function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called automatically/);
+
+		stache("mystache.stache", "{{aFunction()}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function should be called");
+			}
+		});
+
+		QUnit.equal(teardown(), 0, "Warning should not be given");
+	});
+
+	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
+
+		var data = new DefineMap({
+			name: 'Justin',
+			age: 33,
+			children: [{
+				name: 'TBD'
+			}]
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 1, "Warning should be given");
+	});
+
+	testHelpers.dev.devOnlyTest("scope walking warning should not read value twice (#336)", function() {
+		var teardown = testHelpers.dev.willWarn(/scopewalk.stache: "age" is not in the current scope/);
+		var renderer = stache("scopewalk.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		var childCount = 0;
+		var Child = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					childCount++;
+					return age;
+				}
+			}
+		});
+		var parentCount = 0;
+		var Parent = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					parentCount++;
+					return age;
+				}
+			},
+			children: [ Child ]
+		});
+
+		var child = new Child({ name: 'Ramiya', age: 3 });
+		var parent = new Parent({ name: 'Justing', age: 33, children: [ child ] });
+
+		renderer(parent);
+
+		QUnit.equal(teardown(), 0, 'no warning should be given');
+		QUnit.equal(childCount, 1, 'child.age should be read once');
+		QUnit.equal(parentCount, 0, 'parent.age should not be read');
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn on aliases created in #each or #with (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/is not in the current scope/);
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one" ],
+			itemsObject: { 2: "two", 3: "three" },
+			obj: { key: "4: four" }
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each itemsArray item=value num=index}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject item=value num=key}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#with objKey=obj.key}}" +
+					"<li>{{objKey}}</li>" +
+				"{{/with}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 0, "No warnings should be given");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

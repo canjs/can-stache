@@ -2,7 +2,11 @@ var mustacheCore = require('./mustache_core');
 var parser = require('can-view-parser');
 // require('can/view/import/import');
 
-module.exports = function(source){
+module.exports = function(filename, source){
+	if (arguments.length === 1) {
+		source = arguments[0];
+		filename = undefined;
+	}
 
 	var template = source;
 	template = mustacheCore.cleanWhitespaceControl(template);
@@ -32,6 +36,7 @@ module.exports = function(source){
 	}
 
 	var intermediate = parser(template, {
+		filename: filename,
 		start: function( tagName, unary ){
 			if(tagName === "can-import") {
 				isUnary = unary;

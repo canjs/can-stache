@@ -12,7 +12,7 @@ var getIntermediateAndImports = require('./src/intermediate_and_imports');
 var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
 
 var attributeEncoder = require('can-attribute-encoder');
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-util/dom/document/document');
 var assign = require('can-util/js/assign/assign');
@@ -23,12 +23,13 @@ var importer = require('can-util/js/import/import');
 require('can-view-target');
 require('can-view-nodelist');
 
-
-// This was moved from the legacy view/scanner.js to here.
-// This makes sure content elements will be able to have a callback.
-viewCallbacks.tag("content", function(el, tagData) {
-	return tagData.scope;
-});
+if(!viewCallbacks.tag("content")) {
+	// This was moved from the legacy view/scanner.js to here.
+	// This makes sure content elements will be able to have a callback.
+	viewCallbacks.tag("content", function(el, tagData) {
+		return tagData.scope;
+	});
+}
 
 var wrappedAttrPattern = /[{(].*[)}]/;
 var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
@@ -55,7 +56,7 @@ function stache (filename, template) {
 	}
 
 	// The HTML section that is the root section for the entire template.
-	var section = new HTMLSectionBuilder(),
+	var section = new HTMLSectionBuilder(filename),
 		// Tracks the state of the parser.
 		state = {
 			node: null,
@@ -423,7 +424,11 @@ function stache (filename, template) {
 			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
-		scope.set('*self', scopifiedRenderer);
+		scope.set('scope.view', scopifiedRenderer);
+
+		// pass filename so it can be used in dev warnings
+		optionsScope._meta.filename = section.filename;
+
 		return renderer.apply( this, arguments );
 	});
 	return scopifiedRenderer;
