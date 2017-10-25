@@ -1,7 +1,9 @@
 @typedef {String} can-stache/keys/variable *variable
 @parent can-stache/keys
+@description Store a variable local to the template.
 
-Store a variable local to the template.
+@deprecated {4.0} `{{*variable}}` is deprecated in favor of [can-stache/keys/scope/scope.vars `{{scope.vars.variable}}`]
+
 
 @signature `*variable`
 
