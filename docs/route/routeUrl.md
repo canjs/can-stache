@@ -1,4 +1,4 @@
-@function can-stache.helpers.routeUrl {{routeUrl hashes}}
+@function can-stache.helpers.routeUrl {{routeUrl(hashes)}}
 @parent can-stache/helpers/route
 
 Returns a url using [can-route.url route.url].
@@ -20,12 +20,12 @@ Or in conjunction with other helpers:
 {{makeLink "details" routeUrl(page='todos', true)}}
 ```
 
-@signature `{{routeUrl [merge] hashes... }}`
+@signature `{{routeUrl([merge], hashes...)}}`
 
 Passes the hashes to `route.url` and returns the result.
 
 ```
-<a href="{{routeUrl page='todos' id=todo.id}}">details</a>
+<a href="{{routeUrl(page='todos' id=todo.id)}}">details</a>
 ```
 
 @param {Boolean} [merge] Pass `true` to create a url that merges `hashes` into the
@@ -42,7 +42,7 @@ current [can-route] properties.
 Use the `routeUrl` helper like:
 
 ```
-<a href='{{routeUrl page="recipe" id=5}}'>{{recipe.name}}</a>
+<a href='{{routeUrl(page="recipe" id=5)}}'>{{recipe.name}}</a>
 ```
 
 This produces (with no pretty routing rules):

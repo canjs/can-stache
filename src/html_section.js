@@ -25,10 +25,10 @@ var decodeHTML = typeof document !== "undefined" && (function(){
 // Contains a stack of HTMLSections.
 // An HTMLSection is created everytime a subsection is found. For example:
 //
-//     {{#if items}} {{#items}} X
+//     {{#if(items)}} {{#items}} X
 //
 // At the point X was being processed, there would be 2 HTMLSections in the
-// stack.  One for the content of `{{#if items}}` and the other for the
+// stack.  One for the content of `{{#if(items)}}` and the other for the
 // content of `{{#items}}`
 var HTMLSectionBuilder = function(filename){
 	if (filename) {

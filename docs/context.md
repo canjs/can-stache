@@ -123,7 +123,7 @@ You can also create unique scope variables using [Hash Expressions](https://canj
 in the [`{{#each}}`](http://localhost/canjs/doc/can-stache.helpers.each.html#___eachEXPRESSIONHASH_EXPRESSION__FN__else__INVERSE___each__) helper:
 
 ```
-{{#each todos todo=value num=index}}
+{{#each(todos, todo=value num=index)}}
 	<li data-index="{{num}}">{{todo.name}}</li>
 {{/each}}
 ```
@@ -131,7 +131,7 @@ in the [`{{#each}}`](http://localhost/canjs/doc/can-stache.helpers.each.html#___
 and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___withHASHES__BLOCK___with__) helper:
 
 ```
-{{#with street=person.address.street city=person.address.city}}
+{{#with(street=person.address.street city=person.address.city)}}
     Street: {{street}}
 	City: {{city}}
 {{/with}}

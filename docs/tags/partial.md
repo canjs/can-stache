@@ -10,7 +10,7 @@ Looks up another template with `key` and renders it with the current scope or
 
 ```js
 stache.registerPartial("address.stache", "<p>{{street}} {{city}}</p>");
-var template = stache("{{#each people}} {{>address.stache address}} {{/each}}")
+var template = stache("{{#each(people)}} {{>address.stache address}} {{/each}}")
 ```
 
 @param {can-stache/expressions/key-lookup|String} key A key used to lookup a
@@ -114,5 +114,5 @@ For example, if you've embedded a partial like:
 This can be rendered like:
 
 ```
-{{#each todos}}{{>todo-stache}}{{/each}}
+{{#each(todos)}}{{>todo-stache}}{{/each}}
 ```

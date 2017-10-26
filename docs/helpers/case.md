@@ -1,20 +1,20 @@
-@function can-stache.helpers.case {{#case expression}}
+@function can-stache.helpers.case {{#case(expression)}}
 @parent can-stache.htags 14
 
-@signature `{{#case EXPRESSION}}BLOCK{{/case}}`
+@signature `{{#case(EXPRESSION)}}BLOCK{{/case}}`
 
 Renders the `BLOCK` when `EXPRESSION` matches the `EXPRESSION` provided in the parent [can-stache.helpers.switch].
 
 ```
-{{#switch user.type}}
-	{{#case "admin"}}
-		Pay
+{{#switch(user.type)}}
+	{{#case("admin")}}
+		<button value="edit"/>
 	{{/case}}
-	{{#case "admin"}}
-		<button/>
+	{{#case("manager")}}
+		<button value="view">
 	{{/case}}
-	{{#default}}
-		Look at data
+	{{#default()}}
+		You do not have permission!
 	{{/default}}
 {{/switch}}
 ```
@@ -30,7 +30,7 @@ the case `EXPRESSION` matches the switch's `EXPRESSION`.
 
 The `case` helper is contextual inside of a [can-stache.helpers.switch] block. The parent switch contains an `expr` that will be matched against the case `expr` and if they are equal the block will be returned.
 
-For more information on how `{{#case}}` is used check:
+For more information on how `{{#case()}}` is used check:
 
 - [can-stache.helpers.switch]
 - [can-stache.helpers.default]
