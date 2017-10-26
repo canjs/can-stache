@@ -12,34 +12,42 @@ The current template. See [can-stache/keys/scope/scope.view] for details.
 
 @signature `scope.filename`
 
-The filename of the current template.
+The filename of the current template (only available in dev mode).
 
-@body
-
-## Use
-
-To print the filename of the current template, you can use the following expression:
-
-```
-{{scope.filename}}
-```
-
-For templates rendered by passing a string directly to [can-stache], a additional string can be passed as the first argument to specify a `filename`:
-
-```
-can.stache('my-template', '{{scope.filename}}');
-```
+	{{scope.filename}}
 
 @signature `scope.lineNumber`
 
-The current line number that is being rendered.
+The current line number that is being rendered (only available in dev mode).
 
-@body
+	{{scope.lineNumber}}
 
-## Use
+@signature `scope.index`
 
-To print the line number that is currently being rendered, you can use the following expression:
+When looping over an array, [can-define/list/list], or [can-list], you an use `scope.index` to write out the index of each property:
+
+    {{#each(tasks)}}
+      <li>{{scope.index}} {{name}}</li>
+    {{/each}}
+
+Indexes start at 0.  If you want to start at 1, you can create a helper like:
+
+    stache.registerHelper('scope.indexNum', function(options){
+      return options.scope.get("scope.index")+1;
+    })
+
+And use it like:
+
+    {{#each(task)}}
+      <li>{{scope.indexNum}} {{name}}</li>
+    {{/each}}
+
+@signature `scope.key`
+
+Like `scope.index`, but provides the key value when looping through an object:
 
 ```
-{{scope.lineNumber}}
+{{#each(style)}}
+   {{scope.key}}: {{this}}
+{{/each}}
 ```
