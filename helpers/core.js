@@ -12,6 +12,7 @@ var dev = require('can-log/dev/dev');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var Hashes = require("../expressions/hashes");
 var debuggerHelper = require('./-debugger').helper;
 
 var domData = require('can-util/dom/data/data');
@@ -49,7 +50,7 @@ var helpers = {
 			aliases,
 			key;
 
-		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
+		if ((argsLen === 2 && !(argExprs[1].expr instanceof Hashes)) || (argsLen === 3 && argExprs[1].key === 'as')) {
 			asVariable = args[argsLen - 1];
 
 			if (typeof asVariable !== 'string') {
@@ -363,5 +364,6 @@ module.exports = {
 	},
 	resolve: resolve,
 	resolveHash: resolveHash,
-	looksLikeOptions: looksLikeOptions
+	looksLikeOptions: looksLikeOptions,
+	helpers: assign({}, helpers)
 };

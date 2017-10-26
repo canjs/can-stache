@@ -1,0 +1,3 @@
+module.exports = function SetIdentifier(value){
+    this.value = value;
+};
