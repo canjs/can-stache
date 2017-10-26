@@ -49,7 +49,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		args;
 
 		//!steal-remove-start
-		var filename = helperOptions && helperOptions._meta && helperOptions._meta.filename;
+		var filename = scope.peek('scope.filename');
 		//!steal-remove-end
 
 	// If the expression looks like a helper, try to get a helper right away.
