@@ -6580,6 +6580,21 @@ function makeTest(name, doc, mutation) {
 		equal(warn1(), 0);
 		equal(warn2(), 0);
 	});
+	
+	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
+		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
+		var frag = template();
+
+		equal(frag.firstChild.firstChild.nodeValue, '1');
+		equal(frag.lastChild.firstChild.nodeValue, '2');
+	});
+
+	testHelpers.dev.devOnlyTest("scope has filename", function(){
+		var template = stache('some-file', '{{scope.filename}}');
+		var frag = template();
+
+		equal(frag.firstChild.nodeValue, 'some-file');
+	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 

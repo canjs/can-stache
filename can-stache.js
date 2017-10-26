@@ -85,7 +85,7 @@ function stache (filename, template) {
 
 			if(mode === ">") {
 				// Partials use liveBindingPartialRenderers
-				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
+				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState(), lineNo));
 
 			} else if(mode === "/") {
 
@@ -125,19 +125,17 @@ function stache (filename, template) {
 				// A StringBranchRenderer function processes the mustache text and returns a
 				// text value.
 				var makeRenderer = section instanceof HTMLSectionBuilder ?
-
 					mustacheCore.makeLiveBindingBranchRenderer:
 					mustacheCore.makeStringBranchRenderer;
-
 
 				if(mode === "{" || mode === "&") {
 
 					// Adds a renderer function that just reads a value or calls a helper.
-					section.add( makeRenderer(null,stache, copyState() ));
+					section.add(makeRenderer(null,stache, copyState(), lineNo));
 
 				} else if(mode === "#" || mode === "^" || mode === "<") {
 					// Adds a renderer function and starts a section.
-					var renderer = makeRenderer(mode, stache, copyState());
+					var renderer = makeRenderer(mode, stache, copyState(), lineNo);
 					section.startSection(renderer);
 					section.last().startedWith = mode;
 
@@ -157,7 +155,7 @@ function stache (filename, template) {
 					}
 				} else {
 					// Adds a renderer function that only updates text.
-					section.add( makeRenderer(null,stache, copyState({text: true}) ));
+					section.add(makeRenderer(null, stache, copyState({text: true}), lineNo));
 				}
 
 			}
@@ -343,8 +341,7 @@ function stache (filename, template) {
 			(state.textContentOnly || section).add(text);
 		},
 		special: function(text, lineNo){
-
-			var firstAndText = mustacheCore.splitModeFromExpression(text, state),
+			var firstAndText = mustacheCore.splitModeFromExpression(text, state, lineNo),
 				mode = firstAndText.mode,
 				expression = firstAndText.expression;
 
@@ -395,7 +392,7 @@ function stache (filename, template) {
 					state.node.attributes = [];
 				}
 				if(!mode) {
-					state.node.attributes.push( mustacheCore.makeLiveBindingBranchRenderer( null,expression, copyState() ) );
+					state.node.attributes.push(mustacheCore.makeLiveBindingBranchRenderer(null, expression, copyState(), lineNo));
 				} else if( mode === "#" || mode === "^" ) {
 					if(!state.node.section) {
 						state.node.section = new TextSectionBuilder();
@@ -409,7 +406,7 @@ function stache (filename, template) {
 				makeRendererAndUpdateSection(state.textContentOnly || section, mode, expression, lineNo);
 			}
 		},
-		comment: function( text ) {
+		comment: function(text) {
 			// create comment node
 			section.add({
 				comment: text
@@ -424,7 +421,11 @@ function stache (filename, template) {
 			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
+
 		scope.set('scope.view', scopifiedRenderer);
+		//!steal-remove-start
+		scope.set('scope.filename', section.filename);
+		//!steal-remove-end
 
 		// pass filename so it can be used in dev warnings
 		optionsScope._meta.filename = section.filename;
