@@ -36,7 +36,6 @@
     "can-namespace": "1.0.0",
     "can-observation": "^4.0.0-pre.7",
     "can-reflect": "^1.2.1",
-    "can-route": "^3.2.0",
     "can-stache-key": "^1.0.0-pre.2",
     "can-symbol": "^1.0.0",
     "can-util": "^3.10.6",

@@ -13,10 +13,7 @@ __testing = {
 };
 
 resolveValue = function (value) {
-	if (value && value.isComputed) {
-		return value();
-	}
-	if (value && value[canSymbol.for("can.isValueLike")] && value[canSymbol.for("can.getValue")]) {
+	if (value && value[canSymbol.for("can.getValue")]) {
 		return canReflect.getValue(value);
 	}
 	return value;
