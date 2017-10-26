@@ -4460,21 +4460,21 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div.getElementsByTagName('span')[2]), "turtle", "turtle added");
 
 	});
-
+	
 	test("call expression with #if", function(){
 
-			var truthy = new SimpleObservable(true);
-			var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
-			var frag = template({truthy: truthy});
+		var truthy = new SimpleObservable(true);
+		var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
+		var frag = template({truthy: truthy});
 
-			equal( frag.firstChild.nodeValue, "true", "set to true");
+		equal( frag.firstChild.nodeValue, "true", "set to true");
 
-			truthy.set(false);
+		truthy.set(false);
 
-			equal( frag.firstChild.nodeValue, "false", "set to false");
-		});
+		equal( frag.firstChild.nodeValue, "false", "set to false");
+	});
 
-		test('getHelper w/o optional options argument (#1497)', function() {
+	test('getHelper w/o optional options argument (#1497)', function() {
 		var options = stache.getHelper('each');
 		ok(typeof options.fn === 'function', 'each helper returned');
 	});

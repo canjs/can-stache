@@ -9,6 +9,7 @@ var SimpleMap = require('can-simple-map');
 var DefineList = require('can-define/list/list');
 var assign = require("can-util/js/assign/assign");
 var queues = require("can-queues");
+var testHelpers = require('can-test-helpers');
 
 QUnit.module("can-stache/src/expression");
 
@@ -863,4 +864,18 @@ test("ast with [double][brackets] or [bracket].prop (#207)", function(){
 	QUnit.deepEqual(ast, expected);
 
 
+});
+
+testHelpers.dev.devOnlyTest("All expression types have sourceText on prototype", function(){
+	["Arg", "Bracket", "Call",  "Hashes", "Helper",
+	 "HelperLookup", "HelperScopeLookup", "Literal", "ScopeLookup"].forEach(function(name){
+		 QUnit.ok(typeof expression[name].prototype.sourceText === "function", name);
+	 });
+});
+
+
+testHelpers.dev.devOnlyTest("expression.sourceText - everything", function(){
+	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested@prop outerPropA=helperC(2,valueB)"
+	var exprData = expression.parse(source);
+	QUnit.equal(exprData.sourceText(),source);
 });

@@ -13,6 +13,9 @@ var canSymbol = require("can-symbol");
 var Observation = require("can-observation");
 var SetterObservable = require("can-simple-observable/setter/setter");
 var makeComputeLike = require("can-view-scope/make-compute-like");
+
+var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+
 // ## Helpers
 
 // Helper for getting a bound compute in the scope.
@@ -113,6 +116,15 @@ Bracket.prototype.value = function (scope, helpers) {
 	var root = this.root ? this.root.value(scope, helpers) : scope.peek('.');
 	return getObservableValue_fromDynamicKey_fromObservable(this.key.value(scope, helpers), root, scope, helpers, {});
 };
+//!steal-remove-start
+Bracket.prototype.sourceText = function(){
+	if(this.rootExpr) {
+		return this.rootExpr.sourceText()+"["+this.key+"]";
+	} else {
+		return "["+this.key+"]";
+	}
+};
+//!steal-remove-end
 
 // ### Literal
 // For inline static values like `{{"Hello World"}}`
@@ -122,13 +134,19 @@ var Literal = function(value){
 Literal.prototype.value = function(){
 	return this._value;
 };
+//!steal-remove-start
+Literal.prototype.sourceText = function(){
+	return JSON.stringify(this._value);
+};
+//!steal-remove-end
 
 // ### Lookup
 // `new Lookup(String, [Expression])`
 // Finds a value in the scope or a helper.
-var Lookup = function(key, root) {
+var Lookup = function(key, root, sourceText) {
 	this.key = key;
 	this.rootExpr = root;
+	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
 Lookup.prototype.value = function(scope, helperOptions){
 
@@ -141,6 +159,17 @@ Lookup.prototype.value = function(scope, helperOptions){
 		return result.helper || result.value;
 	}
 };
+//!steal-remove-start
+Lookup.prototype.sourceText = function(){
+	if(this[sourceTextSymbol]) {
+		return this[sourceTextSymbol];
+	} else if(this.rootExpr) {
+		return this.rootExpr.sourceText()+"."+this.key;
+	} else {
+		return this.key;
+	}
+};
+//!steal-remove-end
 
 // ### ScopeLookup
 // Looks up a value in the scope, returns a compute for the value it finds.
@@ -155,6 +184,9 @@ ScopeLookup.prototype.value = function(scope, helperOptions){
 
 	return getObservableValue_fromKey(this.key, scope, helperOptions);
 };
+//!steal-remove-start
+ScopeLookup.prototype.sourceText = Lookup.prototype.sourceText
+//!steal-remove-end
 
 // ### Arg
 // `new Arg(Expression [,modifierOptions] )`
@@ -167,6 +199,11 @@ var Arg = function(expression, modifiers){
 Arg.prototype.value = function(){
 	return this.expr.value.apply(this.expr, arguments);
 };
+//!steal-remove-start
+Arg.prototype.sourceText = function(){
+	return (this.modifiers.compute ? "~" : "")+ this.expr.sourceText();
+};
+//!steal-remove-end
 
 // ### Hash
 // A placeholder. This isn't actually used.
@@ -195,6 +232,17 @@ Hashes.prototype.value = function(scope, helperOptions){
 		return finalHash;
 	});
 };
+//!steal-remove-start
+Hashes.prototype.sourceText = function(){
+	var hashes = [];
+	each(this.hashExprs, function(expr, prop){
+		hashes.push( prop+"="+expr.sourceText() );
+	});
+	return hashes.join(" ");
+};
+//!steal-remove-end
+
+
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
 // A call expression like `method(arg1, arg2)` that, by default,
@@ -248,10 +296,9 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 			return func.apply(null, args);
 		}
 	};
-
 	//!steal-remove-start
 	Object.defineProperty(computeFn, "name", {
-		value: "{{" + this.methodExpr[canSymbol.for('can-stache.originalKey')] + "}}"
+		value: "{{" + this.sourceText() + "}}"
 	});
 	//!steal-remove-end
 
@@ -259,15 +306,20 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	Observation.temporarilyBind(computeValue);
 	return computeValue;
 };
-
+//!steal-remove-start
+Call.prototype.sourceText = function(){
+	var args = this.argExprs.map(function(arg){
+		return arg.sourceText();
+	});
+	return this.methodExpr.sourceText()+"("+args.join(",")+")";
+}
 Call.prototype.closingTag = function() {
-	//!steal-remove-start
-	if(this.methodExpr[canSymbol.for('can-stache.originalKey')]) {
-		return this.methodExpr[canSymbol.for('can-stache.originalKey')];
+	if(this.methodExpr[sourceTextSymbol]) {
+		return this.methodExpr[sourceTextSymbol];
 	}
-	//!steal-remove-end
 	return this.methodExpr.key;
 };
+//!steal-remove-end
 
 // ### HelperLookup
 // An expression that looks up a value in the helper or scope.
@@ -280,6 +332,9 @@ HelperLookup.prototype.value = function(scope, helperOptions){
 	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peek('.'), scope]});
 	return result.helper || result.value;
 };
+//!steal-remove-start
+HelperLookup.prototype.sourceText = Lookup.prototype.sourceText;
+//!steal-remove-end
 
 // ### HelperScopeLookup
 // An expression that looks up a value in the scope.
@@ -291,6 +346,9 @@ var HelperScopeLookup = function(){
 HelperScopeLookup.prototype.value = function(scope, helperOptions){
 	return getObservableValue_fromKey(this.key, scope, {callMethodsOnObservables: true, isArgument: true, args: [scope.peek('.'), scope]});
 };
+//!steal-remove-start
+HelperScopeLookup.prototype.sourceText = Lookup.prototype.sourceText;
+//!steal-remove-end
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
 	this.methodExpr = methodExpression;
@@ -472,10 +530,23 @@ Helper.prototype.closingTag = function() {
 };
 
 //!steal-remove-start
+Helper.prototype.sourceText = function(){
+	var text = [this.methodExpr.sourceText()];
+	if(this.argExprs.length) {
+		text.push( this.argExprs.map(function(arg){
+			return arg.sourceText();
+		}).join(" ") );
+	}
+	if(!isEmptyObject(this.hashExprs)){
+		text.push( Hashes.prototype.sourceText.call(this) );
+	}
+	return text.join(" ");
+};
+//!steal-remove-end
 canReflect.assignSymbols(Helper.prototype,{
 	"can.getName": function() {
-		return canReflect.getName(this.constructor) + "{{" + (this.methodExpr[canSymbol.for('can-stache.originalKey')] || this.methodExpr.key) + "}}";
-	},
+		return canReflect.getName(this.constructor) + "{{" + (this.sourceText()) + "}}";
+	}
 });
 //!steal-remove-end
 
@@ -614,6 +685,7 @@ var convertKeyToLookup = function(key){
 };
 var convertToAtLookup = function(ast){
 	if(ast.type === "Lookup") {
+		canReflect.setKeyValue(ast, sourceTextSymbol, ast.key);
 		ast.key = convertKeyToLookup(ast.key);
 	}
 	return ast;
@@ -713,10 +785,7 @@ var expression = {
 	hydrateAst: function(ast, options, methodType, isArg){
 		var hashes;
 		if(ast.type === "Lookup") {
-			var lookup = new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType) );
-			//!steal-remove-start
-			canReflect.setKeyValue(lookup, canSymbol.for("can-stache.originalKey"), ast[canSymbol.for("can-stache.originalKey")]);
-			//!steal-remove-end
+			var lookup = new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType), ast[sourceTextSymbol] );
 			return lookup;
 		}
 		else if(ast.type === "Literal") {
@@ -889,11 +958,6 @@ var expression = {
 			else if(token === "(") {
 				top = stack.top();
 				if(top.type === "Lookup") {
-					//!steal-remove-start
-					//This line is just for matching stache magic tags elsewhere,
-					// because convertToAtLookup modifies the original key
-					canReflect.setKeyValue(top, canSymbol.for("can-stache.originalKey"), top.key);
-					//!steal-remove-end
 					stack.replaceTopAndPush({
 						type: "Call",
 						method: convertToAtLookup(top)
