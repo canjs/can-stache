@@ -413,7 +413,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The state of HTML where the expression was found.
 	 */
-	splitModeFromExpression: function(expression, state){
+	splitModeFromExpression: function(expression, state, lineNo){
 		expression = expression.trim();
 		var mode = expression.charAt(0);
 

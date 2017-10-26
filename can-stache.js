@@ -182,7 +182,7 @@ function stache (filename, template) {
 
 	parser(template, {
 		filename: filename,
-		start: function(tagName, unary){
+		start: function(tagName, unary, lineNo){
 			var matchedNamespace = namespaces[tagName];
 
 			if (matchedNamespace && !unary ) {
@@ -198,7 +198,7 @@ function stache (filename, template) {
 				namespace: matchedNamespace || last(state.namespaceStack)
 			};
 		},
-		end: function(tagName, unary){
+		end: function(tagName, unary, lineNo){
 			var isCustomTag =  viewCallbacks.tag(tagName);
 
 			if(unary){
@@ -236,7 +236,7 @@ function stache (filename, template) {
 			state.node =null;
 
 		},
-		close: function(tagName) {
+		close: function(tagName, lineNo) {
 			var matchedNamespace = namespaces[tagName];
 
 			if (matchedNamespace  ) {
@@ -280,7 +280,7 @@ function stache (filename, template) {
 			}
 			state.sectionElementStack.pop();
 		},
-		attrStart: function(attrName){
+		attrStart: function(attrName, lineNo){
 			if(state.node.section) {
 				state.node.section.add(attrName+"=\"");
 			} else {
@@ -291,7 +291,7 @@ function stache (filename, template) {
 			}
 
 		},
-		attrEnd: function(attrName){
+		attrEnd: function(attrName, lineNo){
 			if(state.node.section) {
 				state.node.section.add("\" ");
 			} else {
@@ -329,7 +329,7 @@ function stache (filename, template) {
 				state.attr = null;
 			}
 		},
-		attrValue: function(value){
+		attrValue: function(value, lineNo){
 			var section = state.node.section || state.attr.section;
 			if(section){
 				section.add(value);
@@ -337,7 +337,7 @@ function stache (filename, template) {
 				state.attr.value += value;
 			}
 		},
-		chars: function(text) {
+		chars: function(text, lineNo) {
 			(state.textContentOnly || section).add(text);
 		},
 		special: function(text, lineNo){
@@ -412,7 +412,7 @@ function stache (filename, template) {
 				comment: text
 			});
 		},
-		done: function(){}
+		done: function(lineNo){}
 	});
 
 	var renderer = section.compile();
