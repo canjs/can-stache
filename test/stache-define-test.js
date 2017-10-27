@@ -13,7 +13,6 @@ test("basic replacement and updating", function(){
 	});
 	var stashed = stache("<h1 class='foo'>{{message}}</h1>");
 
-
 	var frag = stashed(map);
 
 	equal( frag.firstChild.firstChild.nodeValue, "World","got back the right text");
