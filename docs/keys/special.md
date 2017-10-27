@@ -1,11 +1,10 @@
 @typedef {String} can-stache/keys/special %special
 @parent can-stache/keys
-
-@deprecated {4.0} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
-
-[can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
+@description [can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
 provide special values that start with `%` to prevent potential collisions with
 other values. Special values should not be confused with [can-stache/keys/variable template variables] like [can-stache/keys/variable/self *self]
+
+@deprecated {4.0} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
 
 @signature `%index`
 
