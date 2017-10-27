@@ -98,7 +98,7 @@ var helpers = {
 							var filename = canReflect.getKeyValue(templateContext, 'filename');
 							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 							dev.warn(
-								(filename ? filename + ': ' : '') +
+								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
 								'%index is deprecated. Use scope.index instead.'
 							);
@@ -111,7 +111,7 @@ var helpers = {
 							var filename = canReflect.getKeyValue(templateContext, 'filename');
 							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 							dev.warn(
-								(filename ? filename + ': ' : '') +
+								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
 								'@index is deprecated. Use scope.index instead.'
 							);
@@ -165,7 +165,7 @@ var helpers = {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
-							(filename ? filename + ': ' : '') +
+							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'%key is deprecated. Use scope.key instead.'
 						);
@@ -208,7 +208,7 @@ var helpers = {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
-							(filename ? filename + ': ' : '') +
+							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'%key is deprecated. Use scope.key instead.'
 						);
@@ -221,7 +221,7 @@ var helpers = {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
-							(filename ? filename + ': ' : '') +
+							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'@key is deprecated. Use scope.key instead.'
 						);
@@ -255,7 +255,7 @@ var helpers = {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
-							(filename ? filename + ': ' : '') +
+							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'%key is deprecated. Use scope.key instead.'
 						);
@@ -268,7 +268,7 @@ var helpers = {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
-							(filename ? filename + ': ' : '') +
+							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'@key is deprecated. Use scope.key instead.'
 						);

@@ -95,7 +95,7 @@ module.exports = {
 				"%index": i,
 				"@index": i
 			};
-			var item = isObservable ? compute(items, '' + i) :items[i];
+			var item = isObservable ? compute(items, '' + i) : items[i];
 
 			if (asVariable) {
 				aliases[asVariable] = item;
