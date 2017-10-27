@@ -14,13 +14,13 @@ The current template. See [can-stache/keys/scope/scope.view] for details.
 
 The filename of the current template (only available in dev mode).
 
-	{{scope.filename}}
+    {{scope.filename}}
 
 @signature `scope.lineNumber`
 
 The current line number that is being rendered (only available in dev mode).
 
-	{{scope.lineNumber}}
+    {scope.lineNumber}}
 
 @signature `scope.index`
 
@@ -46,8 +46,30 @@ And use it like:
 
 Like `scope.index`, but provides the key value when looping through an object:
 
-```
-{{#each(style)}}
-   {{scope.key}}: {{this}}
-{{/each}}
-```
+    {{#each(style)}}
+      {{scope.key}}: {{this}}
+    {{/each}}
+
+@signature `scope.element`
+
+In an event binding, `scope.element` references the DOM element the event happened on:
+
+    <input on:click="doSomething(scope.element.value)"/>
+
+@signature `scope.event`
+
+In an event binding, `scope.event` references the dispatched event object:
+
+    <input on:click="doSomething(scope.event)/>"
+
+@signature `scope.viewModel`
+
+In an event binding, `scope.viewModel` references the view model of the current element:
+
+    <my-component on:closed="doSomething(scope.viewModel)"/>
+
+@signature `scope.arguments`
+
+In an event binding, `scope.arguments` references the arguments passed when the event was dispatched/triggered.
+
+    <input on:click="doSomething(scope.arguments)"/>
