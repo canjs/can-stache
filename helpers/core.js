@@ -114,15 +114,13 @@ var helpers = {
 		var expr = resolved,
 			result;
 
-		if ( !! expr && utils.isArrayLike(expr)) {
-			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if(isIterable(expr)) {
+		if(isIterable(expr)) {
 			result = [];
 			each(expr, function(value, key){
 				aliases = {
-					"%key": key
+					"%key": key,
+					"%index": key,
+					"@index": key
 				};
 				if (asVariable) {
 					aliases[asVariable] = value;
@@ -165,6 +163,14 @@ var helpers = {
 				};
 				if (asVariable) {
 					aliases[asVariable] = expr[key];
+				}
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = expr[key];
+					}
+					if (hashOptions.key) {
+						aliases[hashOptions.key] = key;
+					}
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
 			}

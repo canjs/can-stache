@@ -36,6 +36,7 @@ var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
+var utils = require('../src/utils');
 
 var browserDoc = DOCUMENT();
 var mutationObserver = MUTATION_OBSERVER();
@@ -6561,6 +6562,19 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
 	});
 
+	test("#with works with hash expression and objects in call expression", function(){
+		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
+		var map = {
+			foo: "hello",
+			baz: "world"
+		};
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
+	});
+
 	test("call expression works with hash expression", function(){
 		var exprData = core.expression.parse("helper(todos, todo=value num=index)");
 		var args = core.expression.Call.prototype.args.call(exprData, Scope.refsScope().add({}), new core.Options({}));
@@ -6579,6 +6593,44 @@ function makeTest(name, doc, mutation) {
 
 		equal(warn1(), 0);
 		equal(warn2(), 0);
+	});
+
+	test('#each with call expression and plain array should not use utils.getItemsFragContent', function(){
+		var getItemsFragContent = utils.getItemsFragContent;
+		var callCount = 0;
+		utils.getItemsFragContent = function(){
+			callCount++;
+		};
+
+		var list = ['foo', 'bar', 'baz'];
+		var template = stache('{{#each(this)}}{{this}}{{/each}}');
+		template(list);
+
+		equal(callCount, 0);
+
+		utils.getItemsFragContent = getItemsFragContent;
+	});
+
+	test('#each with call expression and arrays should work with hash expressions', function(){
+		var list = ['foo', 'bar', 'baz'];
+		var template = stache('{{#each(this, item=value)}}{{item}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(list);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), list.join(''));
+	});
+
+	test('#each with call expression and objects should work with hash expressions', function(){
+		var map = {'foo': 'bar', 'baz': 'qux'};
+		var template = stache('{{#each(this, prefix=key item=value)}}{{prefix}}:{{item}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'foo:barbaz:qux');
 	});
 	
 	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
