@@ -36,7 +36,6 @@ var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
-var utils = require('../src/utils');
 
 var browserDoc = DOCUMENT();
 var mutationObserver = MUTATION_OBSERVER();
@@ -6595,36 +6594,21 @@ function makeTest(name, doc, mutation) {
 		equal(warn2(), 0);
 	});
 
-	test('#each with call expression and plain array should not use utils.getItemsFragContent', function(){
-		var getItemsFragContent = utils.getItemsFragContent;
-		var callCount = 0;
-		utils.getItemsFragContent = function(){
-			callCount++;
-		};
-
-		var list = ['foo', 'bar', 'baz'];
-		var template = stache('{{#each(this)}}{{this}}{{/each}}');
-		template(list);
-
-		equal(callCount, 0);
-
-		utils.getItemsFragContent = getItemsFragContent;
-	});
 
 	test('#each with call expression and arrays should work with hash expressions', function(){
 		var list = ['foo', 'bar', 'baz'];
-		var template = stache('{{#each(this, item=value)}}{{item}}{{/each}}');
+		var template = stache('{{#each(this, item=value, itemIndex=index)}}{{itemIndex}}:{{item}}{{/each}}');
 		var div = doc.createElement('div');
 		var frag = template(list);
 
 		div.appendChild(frag);
 
-		equal(innerHTML(div), list.join(''));
+		equal(innerHTML(div), '0:foo1:bar2:baz');
 	});
 
 	test('#each with call expression and objects should work with hash expressions', function(){
 		var map = {'foo': 'bar', 'baz': 'qux'};
-		var template = stache('{{#each(this, prefix=key item=value)}}{{prefix}}:{{item}}{{/each}}');
+		var template = stache('{{#each(this, itemKey=key itemValue=value)}}{{itemKey}}:{{itemValue}}{{/each}}');
 		var div = doc.createElement('div');
 		var frag = template(map);
 
