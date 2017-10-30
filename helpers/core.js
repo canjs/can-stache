@@ -113,16 +113,58 @@ var helpers = {
 
 		var expr = resolved,
 			result;
+		if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
+			result = [];
 
-		if ( !! expr && utils.isArrayLike(expr)) {
-			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+			(expr.forEach || expr.each).call(expr, function(val, key){
+				var value = compute(expr, key);
+				aliases = {
+					"%key": key,
+					"@key": key
+				};
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.key) {
+						aliases[hashOptions.key] = key;
+					}
+				}
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+			});
+
 			return options.stringOnly ? result.join('') : result;
-		}
-		else if(isIterable(expr)) {
+		} else if(Array.isArray(expr)) {
+			result = [];
+			each(expr, function(value, index){
+				aliases = {
+					"%index": index,
+					"@index": index
+				};
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.index) {
+						aliases[hashOptions.index] = index;
+					}
+				}
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+			});
+			return options.stringOnly ? result.join('') : result;
+		} else if(expr instanceof Object) {
 			result = [];
 			each(expr, function(value, key){
 				aliases = {
-					"%key": key
+					"%key": key,
+					"@key": key
 				};
 				if (asVariable) {
 					aliases[asVariable] = value;
@@ -138,36 +180,6 @@ var helpers = {
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});
-			return options.stringOnly ? result.join('') : result;
-		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
-			result = [];
-
-			(expr.forEach || expr.each).call(expr, function(val, key){
-				var value = compute(expr, key);
-				aliases = {
-					"%key": key,
-					"@key": key
-				};
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
-			});
-
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if (expr instanceof Object) {
-			result = [];
-			for (key in expr) {
-				aliases = {
-					"%key": key,
-					"@key": key
-				};
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
-			}
 			return options.stringOnly ? result.join('') : result;
 		}
 	},
