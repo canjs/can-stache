@@ -6561,6 +6561,19 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
 	});
 
+	test("#with works with hash expression and objects in call expression", function(){
+		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
+		var map = {
+			foo: "hello",
+			baz: "world"
+		};
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
+	});
+
 	test("call expression works with hash expression", function(){
 		var exprData = core.expression.parse("helper(todos, todo=value num=index)");
 		var args = core.expression.Call.prototype.args.call(exprData, Scope.refsScope().add({}), new core.Options({}));
@@ -6579,6 +6592,29 @@ function makeTest(name, doc, mutation) {
 
 		equal(warn1(), 0);
 		equal(warn2(), 0);
+	});
+
+
+	test('#each with call expression and arrays should work with hash expressions', function(){
+		var list = ['foo', 'bar', 'baz'];
+		var template = stache('{{#each(this, item=value, itemIndex=index)}}{{itemIndex}}:{{item}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(list);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), '0:foo1:bar2:baz');
+	});
+
+	test('#each with call expression and objects should work with hash expressions', function(){
+		var map = {'foo': 'bar', 'baz': 'qux'};
+		var template = stache('{{#each(this, itemKey=key itemValue=value)}}{{itemKey}}:{{itemValue}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'foo:barbaz:qux');
 	});
 	
 	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){

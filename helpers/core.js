@@ -144,19 +144,17 @@ var helpers = {
 
 		var expr = resolved,
 			result;
-
-		if ( !! expr && utils.isArrayLike(expr)) {
-			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if(isIterable(expr)) {
+		if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
 			result = [];
-			each(expr, function(value, key){
+			(expr.forEach || expr.each).call(expr, function(val, key){
+				var value = compute(expr, key);
 				var templateContext = options.scope.getTemplateContext()._context;
+
 				canReflect.setKeyValue(templateContext, 'key', key);
 
 				aliases = {
-					"%key": key
+					"%key": key,
+					"@key": key
 				};
 
 				//!steal-remove-start
@@ -168,6 +166,127 @@ var helpers = {
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
 							'%key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+
+				Object.defineProperty(aliases, '@key', {
+					get: function() {
+						var filename = canReflect.getKeyValue(templateContext, 'filename');
+						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+				//!steal-remove-end
+
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.key) {
+						aliases[hashOptions.key] = key;
+					}
+				}
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+			});
+
+			return options.stringOnly ? result.join('') : result;
+		} else if(Array.isArray(expr)) {
+			result = [];
+			each(expr, function(value, index){
+				var templateContext = options.scope.getTemplateContext()._context;
+				canReflect.setKeyValue(templateContext, 'key', key);
+
+				aliases = {
+					"%index": index,
+					"@index": index
+				};
+
+				//!steal-remove-start
+				Object.defineProperty(aliases, '%key', {
+					get: function() {
+						var filename = canReflect.getKeyValue(templateContext, 'filename');
+						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'%key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+
+				Object.defineProperty(aliases, '@key', {
+					get: function() {
+						var filename = canReflect.getKeyValue(templateContext, 'filename');
+						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+				//!steal-remove-end
+
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.index) {
+						aliases[hashOptions.index] = index;
+					}
+				}
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+			});
+			return options.stringOnly ? result.join('') : result;
+		} else if(expr instanceof Object) {
+			result = [];
+			each(expr, function(value, key){
+				var templateContext = options.scope.getTemplateContext()._context;
+				canReflect.setKeyValue(templateContext, 'key', key);
+
+				aliases = {
+					"%key": key,
+					"@key": key
+				};
+
+				//!steal-remove-start
+				Object.defineProperty(aliases, '%key', {
+					get: function() {
+						var filename = canReflect.getKeyValue(templateContext, 'filename');
+						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'%key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+
+				Object.defineProperty(aliases, '@key', {
+					get: function() {
+						var filename = canReflect.getKeyValue(templateContext, 'filename');
+						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@key is deprecated. Use scope.key instead.'
 						);
 						return key;
 					}
@@ -188,100 +307,6 @@ var helpers = {
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
 			});
-			return options.stringOnly ? result.join('') : result;
-		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
-			result = [];
-
-			(expr.forEach || expr.each).call(expr, function(val, key){
-				var value = compute(expr, key);
-				var templateContext = options.scope.getTemplateContext()._context;
-				canReflect.setKeyValue(templateContext, 'key', key);
-
-				aliases = {
-					"%key": key,
-					"@key": key
-				};
-
-				//!steal-remove-start
-				Object.defineProperty(aliases, '%key', {
-					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'%key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-
-				Object.defineProperty(aliases, '@key', {
-					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'@key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-				//!steal-remove-end
-
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
-			});
-
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if (expr instanceof Object) {
-			result = [];
-			for (key in expr) {
-				var templateContext = options.scope.getTemplateContext()._context;
-				canReflect.setKeyValue(templateContext, 'key', key);
-
-				aliases = {
-					"%key": key,
-					"@key": key
-				};
-
-				//!steal-remove-start
-				Object.defineProperty(aliases, '%key', {
-					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'%key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-
-				Object.defineProperty(aliases, '@key', {
-					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'@key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-				//!steal-remove-end
-
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
-			}
 			return options.stringOnly ? result.join('') : result;
 		}
 	},
