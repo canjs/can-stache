@@ -2,25 +2,29 @@
 @parent can-stache/keys
 @description The template context
 
-@signature `scope.vars`
+@signature `scope.arguments`
 
-Variables local to the template. See [can-stache/keys/scope/scope.vars] for details.
+In an event binding, `scope.arguments` references the arguments passed when the event was dispatched/triggered.
 
-@signature `scope.view`
+    <input on:click="doSomething(scope.arguments)"/>
 
-The current template. See [can-stache/keys/scope/scope.view] for details.
+@signature `scope.element`
+
+In an event binding, `scope.element` references the DOM element the event happened on:
+
+    <input on:click="doSomething(scope.element.value)"/>
+
+@signature `scope.event`
+
+In an event binding, `scope.event` references the dispatched event object:
+
+    <input on:click="doSomething(scope.event)/>"
 
 @signature `scope.filename`
 
 The filename of the current template (only available in dev mode).
 
     {{scope.filename}}
-
-@signature `scope.lineNumber`
-
-The current line number that is being rendered (only available in dev mode).
-
-    {scope.lineNumber}}
 
 @signature `scope.index`
 
@@ -50,26 +54,22 @@ Like `scope.index`, but provides the key value when looping through an object:
       {{scope.key}}: {{this}}
     {{/each}}
 
-@signature `scope.element`
+@signature `scope.lineNumber`
 
-In an event binding, `scope.element` references the DOM element the event happened on:
+The current line number that is being rendered (only available in dev mode).
 
-    <input on:click="doSomething(scope.element.value)"/>
+    {scope.lineNumber}}
 
-@signature `scope.event`
+@signature `scope.vars`
 
-In an event binding, `scope.event` references the dispatched event object:
+Variables local to the template. See [can-stache/keys/scope/scope.vars] for details.
 
-    <input on:click="doSomething(scope.event)/>"
+@signature `scope.view`
+
+The current template. See [can-stache/keys/scope/scope.view] for details.
 
 @signature `scope.viewModel`
 
 In an event binding, `scope.viewModel` references the view model of the current element:
 
     <my-component on:closed="doSomething(scope.viewModel)"/>
-
-@signature `scope.arguments`
-
-In an event binding, `scope.arguments` references the arguments passed when the event was dispatched/triggered.
-
-    <input on:click="doSomething(scope.arguments)"/>
