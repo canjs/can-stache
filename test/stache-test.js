@@ -6632,6 +6632,397 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.nodeValue, 'some-file');
 	});
 
+	QUnit.test("using scope.index works when using #each with arrays", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{scope.index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #each with arrays", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{%index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #each with arrays", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{@index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with DefineMap", function() {
+		var data = new DefineMap({
+			itemsObj: {
+				zero: 0,
+				one: 1,
+				two: 2
+			}
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with DefineMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var data = new DefineMap({
+			itemsObj: {
+				zero: 0,
+				one: 1,
+				two: 2
+			}
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with CanMap", function() {
+		var itemsObj = new CanMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with CanMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var itemsObj = new CanMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with CanMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
+
+		var itemsObj = new CanMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{@key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with objects", function() {
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with objects", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with objects", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
+
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{@key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.index works when using #array", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{scope.index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: %index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{%index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: @index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{@index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
