@@ -5,7 +5,7 @@ var Observation = require('can-observation');
 var utils = require('./utils');
 var mustacheCore = require('./mustache_core');
 
-var getDocument = require("can-util/dom/document/document");
+var getDocument = require("can-globals/document/document");
 
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
