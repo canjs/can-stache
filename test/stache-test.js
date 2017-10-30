@@ -6943,6 +6943,86 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(teardown(), 3, '3 warnings shown');
 	});
+
+	QUnit.test("using scope.index works when using #array", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{scope.index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: %index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{%index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: @index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{@index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

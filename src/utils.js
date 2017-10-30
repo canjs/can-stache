@@ -3,6 +3,7 @@ var Observation = require('can-observation');
 var observationReader = require('can-stache-key');
 var compute = require('can-compute');
 var canReflect = require('can-reflect');
+var dev = require('can-log/dev/dev');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -88,13 +89,45 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = canReflect.isObservableLike(items);
+			isObservable = canReflect.isObservableLike(items),
+			templateContext = scope.getTemplateContext()._context;
 
 		for (var i = 0; i < len; i++) {
+			canReflect.setKeyValue(templateContext, 'index', i);
+
 			var aliases = {
 				"%index": i,
 				"@index": i
 			};
+
+			//!steal-remove-start
+			Object.defineProperty(aliases, '%index', {
+				get: function() {
+					var filename = canReflect.getKeyValue(templateContext, 'filename');
+					var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+					dev.warn(
+						(filename ? filename + ': ' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'%index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+
+			Object.defineProperty(aliases, '@index', {
+				get: function() {
+					var filename = canReflect.getKeyValue(templateContext, 'filename');
+					var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+					dev.warn(
+						(filename ? filename + ': ' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'@index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+			//!steal-remove-end
+
 			var item = isObservable ? compute(items, '' + i) : items[i];
 
 			if (asVariable) {
