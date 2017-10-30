@@ -60,6 +60,28 @@ The current line number that is being rendered (only available in dev mode).
 
     {scope.lineNumber}}
 
+@signature `scope.root`
+
+The root scope. This can be used for reading data from the root when in another scope:
+
+```html
+var view = stache(`
+{{#each(tasks)}}
+  <li>{{name}}{{scope.root.exclamation}}</li>
+{{/each}}
+`);
+
+var data = new DefineMap({
+	task: ["one", "two"],
+	exclamation: "!!!"
+});
+
+var frag = view(data);
+// renders:
+// <li>one!!!</li>
+// <li>two!!!</li>
+```
+
 @signature `scope.vars`
 
 Variables local to the template. See [can-stache/keys/scope/scope.vars] for details.

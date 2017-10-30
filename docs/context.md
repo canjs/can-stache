@@ -136,3 +136,14 @@ and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___with
 	City: {{city}}
 {{/with}}
 ```
+
+You can also always read from the root scope using `scope.root`. This allows you to read data from the context you passed to your renderer function even in loops or recursive templates:
+
+```
+<span>{{scope.root.message}}{{name}}</span>
+{{#./child}}
+	<div>
+		{{>*self}}
+	</div>
+{{/child}}
+```
