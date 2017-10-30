@@ -137,12 +137,32 @@ var helpers = {
 			});
 
 			return options.stringOnly ? result.join('') : result;
-		} else if(Array.isArray(expr) || expr instanceof Object) {
+		} else if(Array.isArray(expr)) {
+			result = [];
+			each(expr, function(value, index){
+				aliases = {
+					"%index": index,
+					"@index": index
+				};
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.index) {
+						aliases[hashOptions.index] = index;
+					}
+				}
+				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+			});
+			return options.stringOnly ? result.join('') : result;
+		} else if(expr instanceof Object) {
 			result = [];
 			each(expr, function(value, key){
 				aliases = {
-					"%index": key,
-					"@index": key,
 					"%key": key,
 					"@key": key
 				};
@@ -156,9 +176,6 @@ var helpers = {
 					}
 					if (hashOptions.key) {
 						aliases[hashOptions.key] = key;
-					}
-					if (hashOptions.index) {
-						aliases[hashOptions.index] = key;
 					}
 				}
 				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
