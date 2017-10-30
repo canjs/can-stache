@@ -1,5 +1,6 @@
 @module {function} can-stache
-@parent can-core
+@parent can-views
+@collection can-core
 @release 2.1
 @group can-stache.pages 0 Pages
 @group can-stache.static 1 Methods
