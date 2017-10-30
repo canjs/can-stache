@@ -423,12 +423,10 @@ function stache (filename, template) {
 		}
 
 		scope.set('scope.view', scopifiedRenderer);
+
 		//!steal-remove-start
 		scope.set('scope.filename', section.filename);
 		//!steal-remove-end
-
-		// pass filename so it can be used in dev warnings
-		optionsScope._meta.filename = section.filename;
 
 		return renderer.apply( this, arguments );
 	});
