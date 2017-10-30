@@ -422,13 +422,15 @@ function stache (filename, template) {
 			assign( optionsScope.inlinePartials, inlinePartials );
 		}
 
+		// allow the current renderer to be called with {{>scope.view}}
 		scope.set('scope.view', scopifiedRenderer);
+
+		// allow reading from the root context using {{scope.root.<whatever>}}
+		scope.set('scope.root', scope._context);
+
 		//!steal-remove-start
 		scope.set('scope.filename', section.filename);
 		//!steal-remove-end
-
-		// pass filename so it can be used in dev warnings
-		optionsScope._meta.filename = section.filename;
 
 		return renderer.apply( this, arguments );
 	});

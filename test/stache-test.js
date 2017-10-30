@@ -7023,6 +7023,31 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(teardown(), 3, '3 warnings shown');
 	});
+
+	QUnit.test("values can be read from the scope passed to a stache renderer using {{scope.root}}", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ],
+			exclamation: "!!!"
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{.}}{{scope.root.exclamation}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero!!!" );
+		QUnit.equal( innerHTML(lis[1]), "one!!!" );
+		QUnit.equal( innerHTML(lis[2]), "two!!!" );
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
