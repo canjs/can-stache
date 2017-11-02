@@ -204,7 +204,7 @@ var helpers = {
 			result = [];
 			each(expr, function(value, index){
 				var templateContext = options.scope.getTemplateContext()._context;
-				canReflect.setKeyValue(templateContext, 'key', key);
+				canReflect.setKeyValue(templateContext, 'index', index);
 
 				aliases = {
 					"%index": index,
@@ -212,29 +212,29 @@ var helpers = {
 				};
 
 				//!steal-remove-start
-				Object.defineProperty(aliases, '%key', {
+				Object.defineProperty(aliases, '%index', {
 					get: function() {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
-							'%key is deprecated. Use scope.key instead.'
+							'%index is deprecated. Use scope.index instead.'
 						);
-						return key;
+						return index;
 					}
 				});
 
-				Object.defineProperty(aliases, '@key', {
+				Object.defineProperty(aliases, '@index', {
 					get: function() {
 						var filename = canReflect.getKeyValue(templateContext, 'filename');
 						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
-							'@key is deprecated. Use scope.key instead.'
+							'@index is deprecated. Use scope.index instead.'
 						);
-						return key;
+						return index;
 					}
 				});
 				//!steal-remove-end

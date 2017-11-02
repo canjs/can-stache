@@ -6633,9 +6633,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	QUnit.test("using scope.index works when using #each with arrays", function() {
-		var data = new DefineMap({
+		var data = {
 			itemsArray: [ "zero", "one", "two" ]
-		});
+		};
 
 		var renderer = stache("index.stache",
 			"<ul>\n" +
@@ -6659,9 +6659,9 @@ function makeTest(name, doc, mutation) {
 	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #each with arrays", function() {
 		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
 
-		var data = new DefineMap({
+		var data = {
 			itemsArray: [ "zero", "one", "two" ]
-		});
+		};
 
 		var renderer = stache("index.stache",
 			"<ul>\n" +
@@ -6687,9 +6687,9 @@ function makeTest(name, doc, mutation) {
 	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #each with arrays", function() {
 		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
 
-		var data = new DefineMap({
+		var data = {
 			itemsArray: [ "zero", "one", "two" ]
-		});
+		};
 
 		var renderer = stache("index.stache",
 			"<ul>\n" +
