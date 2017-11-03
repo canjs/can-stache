@@ -84,9 +84,6 @@ var helpers = {
 				nodeLists.update(options.nodeList, [el]);
 
 				var cb = function (item, index, parentNodeList) {
-					var templateContext = options.scope.getTemplateContext()._context;
-					canReflect.setKeyValue(templateContext, 'index', canReflect.getValue(index));
-
 					var aliases = {
 						"%index": index,
 						"@index": index
@@ -95,8 +92,8 @@ var helpers = {
 					//!steal-remove-start
 					Object.defineProperty(aliases, '%index', {
 						get: function() {
-							var filename = canReflect.getKeyValue(templateContext, 'filename');
-							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
 							dev.warn(
 								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
@@ -108,8 +105,8 @@ var helpers = {
 
 					Object.defineProperty(aliases, '@index', {
 						get: function() {
-							var filename = canReflect.getKeyValue(templateContext, 'filename');
-							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
 							dev.warn(
 								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
@@ -133,7 +130,13 @@ var helpers = {
 						}
 					}
 
-					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);
+					return options.fn(
+						options.scope
+							.add(aliases, { notContext: true })
+							.add(item)
+							.add({ index: index }, { special: true }),
+						options.options, parentNodeList
+					);
 				};
 
 				live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
