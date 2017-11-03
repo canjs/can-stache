@@ -7048,6 +7048,20 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[1]), "one!!!" );
 		QUnit.equal( innerHTML(lis[2]), "two!!!" );
 	});
+
+	QUnit.test("scope.index works after updating the source list", function(){
+		var div = doc.createElement('div');
+		var list = new DefineList(["a", "c", "d", "e", "f"]);
+		var template = stache("{{#each(this)}}{{scope.index}}{{/each}}");
+		var frag = template(list);
+
+		div.appendChild(frag);
+
+		list.splice(1, 0, "b")
+
+		QUnit.equal(innerHTML(div), "012345");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

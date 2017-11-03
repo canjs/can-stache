@@ -85,7 +85,7 @@ var helpers = {
 
 				var cb = function (item, index, parentNodeList) {
 					var templateContext = options.scope.getTemplateContext()._context;
-					canReflect.setKeyValue(templateContext, 'index', index);
+					canReflect.setKeyValue(templateContext, 'index', canReflect.getValue(index));
 
 					var aliases = {
 						"%index": index,
