@@ -89,11 +89,10 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = canReflect.isObservableLike(items),
-			templateContext = scope.getTemplateContext()._context;
+			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
-			canReflect.setKeyValue(templateContext, 'index', i);
+			scope.set('scope.index', i);
 
 			var aliases = {
 				"%index": i,
@@ -103,8 +102,8 @@ module.exports = {
 			//!steal-remove-start
 			Object.defineProperty(aliases, '%index', {
 				get: function() {
-					var filename = canReflect.getKeyValue(templateContext, 'filename');
-					var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
 					dev.warn(
 						(filename ? filename + ': ' : '') +
 						(lineNumber ? lineNumber + ': ' : '') +
@@ -116,8 +115,8 @@ module.exports = {
 
 			Object.defineProperty(aliases, '@index', {
 				get: function() {
-					var filename = canReflect.getKeyValue(templateContext, 'filename');
-					var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
 					dev.warn(
 						(filename ? filename + ': ' : '') +
 						(lineNumber ? lineNumber + ': ' : '') +
