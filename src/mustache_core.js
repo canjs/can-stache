@@ -172,8 +172,7 @@ var core = {
 
 		return function(scope, options, parentSectionNodeList){
 			//!steal-remove-start
-			var templateContext = scope.getTemplateContext()._context;
-			canReflect.setKeyValue(templateContext, 'lineNumber', lineNo);
+			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
@@ -257,8 +256,7 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
-			var templateContext = scope.getTemplateContext()._context;
-			canReflect.setKeyValue(templateContext, 'lineNumber', lineNo);
+			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
@@ -310,8 +308,7 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
-			var templateContext = scope.getTemplateContext()._context;
-			canReflect.setKeyValue(templateContext, 'lineNumber', lineNo);
+			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = expressionString;

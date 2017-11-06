@@ -84,9 +84,6 @@ var helpers = {
 				nodeLists.update(options.nodeList, [el]);
 
 				var cb = function (item, index, parentNodeList) {
-					var templateContext = options.scope.getTemplateContext()._context;
-					canReflect.setKeyValue(templateContext, 'index', index);
-
 					var aliases = {
 						"%index": index,
 						"@index": index
@@ -95,8 +92,8 @@ var helpers = {
 					//!steal-remove-start
 					Object.defineProperty(aliases, '%index', {
 						get: function() {
-							var filename = canReflect.getKeyValue(templateContext, 'filename');
-							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
 							dev.warn(
 								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
@@ -108,8 +105,8 @@ var helpers = {
 
 					Object.defineProperty(aliases, '@index', {
 						get: function() {
-							var filename = canReflect.getKeyValue(templateContext, 'filename');
-							var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
 							dev.warn(
 								(filename ? filename + ':' : '') +
 								(lineNumber ? lineNumber + ': ' : '') +
@@ -133,7 +130,13 @@ var helpers = {
 						}
 					}
 
-					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);
+					return options.fn(
+						options.scope
+							.add(aliases, { notContext: true })
+							.add({ index: index }, { special: true })
+							.add(item),
+						options.options, parentNodeList
+					);
 				};
 
 				live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
@@ -148,9 +151,6 @@ var helpers = {
 			result = [];
 			(expr.forEach || expr.each).call(expr, function(val, key){
 				var value = compute(expr, key);
-				var templateContext = options.scope.getTemplateContext()._context;
-
-				canReflect.setKeyValue(templateContext, 'key', key);
 
 				aliases = {
 					"%key": key,
@@ -160,8 +160,8 @@ var helpers = {
 				//!steal-remove-start
 				Object.defineProperty(aliases, '%key', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -173,8 +173,8 @@ var helpers = {
 
 				Object.defineProperty(aliases, '@key', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -196,15 +196,18 @@ var helpers = {
 						aliases[hashOptions.key] = key;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
 			});
 
 			return options.stringOnly ? result.join('') : result;
 		} else if(Array.isArray(expr)) {
 			result = [];
 			each(expr, function(value, index){
-				var templateContext = options.scope.getTemplateContext()._context;
-				canReflect.setKeyValue(templateContext, 'index', index);
 
 				aliases = {
 					"%index": index,
@@ -214,8 +217,8 @@ var helpers = {
 				//!steal-remove-start
 				Object.defineProperty(aliases, '%index', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -227,8 +230,8 @@ var helpers = {
 
 				Object.defineProperty(aliases, '@index', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -251,14 +254,17 @@ var helpers = {
 						aliases[hashOptions.index] = index;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ index: index }, { special: true })
+						.add(value))
+				);
 			});
 			return options.stringOnly ? result.join('') : result;
 		} else if(expr instanceof Object) {
 			result = [];
 			each(expr, function(value, key){
-				var templateContext = options.scope.getTemplateContext()._context;
-				canReflect.setKeyValue(templateContext, 'key', key);
 
 				aliases = {
 					"%key": key,
@@ -268,8 +274,8 @@ var helpers = {
 				//!steal-remove-start
 				Object.defineProperty(aliases, '%key', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -281,8 +287,8 @@ var helpers = {
 
 				Object.defineProperty(aliases, '@key', {
 					get: function() {
-						var filename = canReflect.getKeyValue(templateContext, 'filename');
-						var lineNumber = canReflect.getKeyValue(templateContext, 'lineNumber');
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
 						dev.warn(
 							(filename ? filename + ':' : '') +
 							(lineNumber ? lineNumber + ': ' : '') +
@@ -305,7 +311,12 @@ var helpers = {
 						aliases[hashOptions.key] = key;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
 			});
 			return options.stringOnly ? result.join('') : result;
 		}
