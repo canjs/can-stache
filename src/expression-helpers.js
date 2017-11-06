@@ -21,8 +21,11 @@ function displayScopeWalkingWarning(key, computeData, filename) {
 		var readFromNonContext = computeData && computeData.scope &&
 			computeData.scope._meta && computeData.scope._meta.notContext;
 
+		var readFromSpecialContext = computeData && computeData.scope &&
+			computeData.scope._meta && computeData.scope._meta.special;
+
 		// if scope was walked and value isn't an alias, display dev warning
-		if (scopeWasWalked && !readFromNonContext) {
+		if (scopeWasWalked && !readFromNonContext && !readFromSpecialContext) {
 			if (filename) {
 				dev.warn(
 					filename + ': "' + key + '" ' +

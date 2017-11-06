@@ -133,8 +133,8 @@ var helpers = {
 					return options.fn(
 						options.scope
 							.add(aliases, { notContext: true })
-							.add(item)
-							.add({ index: index }, { special: true }),
+							.add({ index: index }, { special: true })
+							.add(item),
 						options.options, parentNodeList
 					);
 				};
@@ -196,7 +196,12 @@ var helpers = {
 						aliases[hashOptions.key] = key;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
 			});
 
 			return options.stringOnly ? result.join('') : result;
@@ -249,7 +254,12 @@ var helpers = {
 						aliases[hashOptions.index] = index;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ index: index }, { special: true })
+						.add(value))
+				);
 			});
 			return options.stringOnly ? result.join('') : result;
 		} else if(expr instanceof Object) {
@@ -301,7 +311,12 @@ var helpers = {
 						aliases[hashOptions.key] = key;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
 			});
 			return options.stringOnly ? result.join('') : result;
 		}

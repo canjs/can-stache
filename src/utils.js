@@ -92,8 +92,6 @@ module.exports = {
 			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
-			scope.set('scope.index', i);
-
 			var aliases = {
 				"%index": i,
 				"@index": i
@@ -132,7 +130,12 @@ module.exports = {
 			if (asVariable) {
 				aliases[asVariable] = item;
 			}
-			result.push(helperOptions.fn(scope.add(aliases, { notContext: true }).add(item)));
+			result.push(helperOptions.fn(
+				scope
+				.add(aliases, { notContext: true })
+				.add({ index: i }, { special: true })
+				.add(item))
+			);
 		}
 		return result;
 	},
