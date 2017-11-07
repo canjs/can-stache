@@ -3617,7 +3617,7 @@ function makeTest(name, doc, mutation) {
 	if (canDev) {
 		test("Logging: Helper not found in stache template(#726)", function () {
 			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find helper "helpme".';
+				message = 'can-stache/expressions/helper.js: Unable to find helper "helpme".';
 
 			canDev.warn = function (text) {
 				equal(text, message, 'Got expected message logged.');
@@ -3632,7 +3632,7 @@ function makeTest(name, doc, mutation) {
 
 		test("Logging: Variable not found in stache template (#720)", function () {
 			var oldlog = canDev.warn,
-				message = 'can-stache/src/expression.js: Unable to find key or helper "user.name".';
+				message = 'can-stache/expressions/helper.js: Unable to find key or helper "user.name".';
 
 			canDev.warn = function (text) {
 				equal(text, message, 'Got expected message logged.');

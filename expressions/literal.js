@@ -1,0 +1,15 @@
+// ### Literal
+// For inline static values like `{{"Hello World"}}`
+var Literal = function(value){
+	this._value = value;
+};
+Literal.prototype.value = function(){
+	return this._value;
+};
+//!steal-remove-start
+Literal.prototype.sourceText = function(){
+	return JSON.stringify(this._value);
+};
+//!steal-remove-end
+
+module.exports = Literal;
