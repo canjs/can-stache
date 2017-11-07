@@ -1,7 +1,9 @@
 @typedef {String} can-stache/keys/variable *variable
 @parent can-stache/keys
+@description Store a variable local to the template.
 
-Store a variable local to the template.
+@deprecated {4.0} `{{*variable}}` is deprecated in favor of [can-stache/keys/scope/scope.vars `{{scope.vars.variable}}`]
+
 
 @signature `*variable`
 
@@ -34,7 +36,7 @@ variables, template variables do not have block level scope.  The following
 does not work:
 
 ```
-{{#each something}}
+{{#each(something)}}
 	<component-a {^prop-a}="*variable"/>
 	<component-b {prop-b}="*variable"/>
 {{/each}}
@@ -51,7 +53,7 @@ stache.regsiterHelper("localContext", function(options){
 And used like:
 
 ```
-{{#each something}}
+{{#each(something)}}
 	{{#localContext}}
 	  <component-a {^prop-a}="./variable"/>
 	  <component-b {prop-b}="./variable"/>

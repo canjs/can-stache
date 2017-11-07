@@ -24,7 +24,7 @@ Looks up `key` on the result of a subexpression `EXPRESSION`.
 
 ```
 {{person.first.name}}
-{{#if tasks.completed().length}} ... {{/if}}
+{{#if(tasks.completed().length)}} ... {{/if}}
 ```
 
 @signature `a\\.single\\.key`

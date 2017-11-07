@@ -1,16 +1,14 @@
-@typedef {String} can-stache/keys/variable/self *self
-@parent can-stache/keys
-@description Used to reference the current template and recursively render it
+@typedef {String} can-stache/keys/scope/scope.view scope.view
+@parent can-stache/keys/scope
+@description Used to reference the current template
 
-@deprecated {4.0} `{{>*self}}` is deprecated in favor of [can-stache/keys/scope/scope.view `{{>scope.view}}`]
+@signature `scope.view`
 
-@signature `{{>*self}}`
-
-The entirety of the current template is always stored as a [can-stache.tags.named-partial named partial] `*self`
+The entirety of the current template is always stored as a [can-stache.tags.named-partial named partial] `scope.view`
 
 ```
 <div>
-	{{>*self}}
+	{{>scope.view}}
 </div>
 ```
 
@@ -18,8 +16,8 @@ The entirety of the current template is always stored as a [can-stache.tags.name
 
 ## Use
 
-This can be used to recursively render a template given a stop condition. 
-Note that we use a key expression to set local scope. Also note it is 
+This can be used to recursively render a template given a stop condition.
+Note that we use a key expression to set local scope. Also note it is
 a dot slash on the child key expression.
 The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
@@ -38,7 +36,7 @@ var renderer = stache(`
 	<span>{{name}}</span>
 	{{#./child}}
 		<div>
-			{{>*self}}
+			{{>scope.view}}
 		</div>
 	{{/child}}
 `);
@@ -78,7 +76,7 @@ var renderer = stache(`
 	<p>{{hasArms}}</p>
 	{{#./child}}
 		<div>
-			{{>*self}}
+			{{>scope.view}}
 		</div>
 	{{/child}}
 `);
@@ -100,4 +98,4 @@ The view variable will be the document fragment:
 </div>
 ```
 
-For a more detailed explaination of using partials recursively see [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion]
+For a more detailed explanation of using partials recursively see [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion]

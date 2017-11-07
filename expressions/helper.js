@@ -8,7 +8,6 @@ var expressionHelpers = require("../src/expression-helpers");
 var utils = require('../src/utils');
 var mustacheHelpers = require('../helpers/core');
 var canReflect = require('can-reflect');
-var Observation = require('can-observation');
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
 	this.methodExpr = methodExpression;
@@ -50,6 +49,10 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		initialValue,
 		args;
 
+	//!steal-remove-start
+	var filename = scope.peek('scope.filename');
+	//!steal-remove-end
+
 	// If the expression looks like a helper, try to get a helper right away.
 	if (looksLikeAHelper) {
 		// Try to find a registered helper.
@@ -59,11 +62,39 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	if(!helper) {
 		// Try to find a value or function
 		computeData = expressionHelpers.getObservableValue_fromKey(methodKey, scope, {
-			isArgument: true
+			isArgument: true,
+
+			//!steal-remove-start
+			filename: filename
+			//!steal-remove-end
 		});
 		// if it's a function ... we need another compute that represents
 		// the call to that function
+		// This handles functions in any of these forms:
+		// {{#foo}}...{{/foo}}
+		// {{^foo}}...{{/foo}}
+		// {{foo bar}}
+		// {{foo}}
+		// {{{foo}}}
+		//
+		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
+			//!steal-remove-start
+			if (filename) {
+				dev.warn(
+					filename + ': "' +
+					methodKey + '" is being called as a function.\n' +
+					'\tThis will not happen automatically in an upcoming release.\n' +
+					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
+				);
+			} else {
+				dev.warn(
+					'"' + methodKey + '" is being called as a function.\n' +
+					'\tThis will not happen automatically in an upcoming release.\n' +
+					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
+				);
+			}
+			//!steal-remove-end
 			args = this.args(scope, helperOptions).map(expressionHelpers.toComputeOrValue);
 			// TODO: this should be an observation.
 			function observation(){
@@ -87,33 +118,20 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 			// we will use that
 			return {value: computeData};
 		}
-		// else value is undefined
-
-		/*args = this.args(scope, helperOptions);
-		// Get info about the compute that represents this lookup.
-		// This way, we can get the initial value without "reading" the compute.
-		var computeData = getObservableValue_fromKey(methodKey, scope, {
-			isArgument: false,
-			args: args && args.length ? args : [scope.peek('.'), scope]
-		}),
-			compute = computeData.compute;
-
-		initialValue = computeData.initialValue;
-
-		// Set name to be the compute if the compute reads observables,
-		// or the value of the value of the compute if no observables are found.
-		if( computeDataHasDependencies( computeData ) ) {
-			value = compute;
-		} else {
-			value = initialValue;
-		}*/
 
 		// If it doesn't look like a helper and there is no value, check helpers
 		// anyway. This is for when foo is a helper in `{{foo}}`.
+		// {{#foo}}...{{/foo}}
+		// {{^foo}}...{{/foo}}
+		// {{foo}}
+		// {{{foo}}}
+		// {{& foo}}
+		//
+		// also `foo.bar` in any of the above if bar is any of the mentioned types
+		// or foo is null or undefined
 		if( !looksLikeAHelper && initialValue === undefined ) {
 			helper = mustacheHelpers.getHelper(methodKey, helperOptions);
 		}
-
 	}
 
 	//!steal-remove-start
@@ -178,7 +196,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 
 	Observation.temporarilyBind(computeValue);
 
-	if (!computeHasDependencies( computeValue ) ) {
+	if (!expressionHelpers.computeHasDependencies( computeValue ) ) {
 		return computeValue();
 	} else {
 		return computeValue;

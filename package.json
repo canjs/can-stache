@@ -23,7 +23,7 @@
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "build": "node build.js",
-    "detect-cycle": "detect-cyclic-packages --ignore done-serve"
+    "detect-cycle": "detect-cyclic-packages"
   },
   "main": "can-stache",
   "keywords": [
@@ -33,6 +33,8 @@
   ],
   "dependencies": {
     "can-attribute-encoder": "^0.3.0",
+    "can-globals": "^0.2.0",
+    "can-log": "^0.1.0",
     "can-namespace": "1.0.0",
     "can-observation": "^4.0.0-pre.7",
     "can-reflect": "^1.2.1",
@@ -42,7 +44,7 @@
     "can-view-callbacks": "^4.0.0-pre.1",
     "can-view-live": "^4.0.0-pre.6",
     "can-view-nodelist": "^3.1.0",
-    "can-view-parser": "^3.5.0",
+    "can-view-parser": "^3.6.0",
     "can-view-scope": "^4.0.0-pre.12",
     "can-view-target": "^3.1.0"
   },
@@ -51,7 +53,7 @@
     "can-queues": "<2.0.0",
     "can-simple-map": "^4.0.0-pre.2",
     "can-simple-observable": "^2.0.0-pre.3",
-    "can-test-helpers": "^1.0.1",
+    "can-test-helpers": "^1.1.0",
     "can-vdom": "^3.1.0",
     "detect-cyclic-packages": "^1.1.0",
     "jshint": "^2.9.4",

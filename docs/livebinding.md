@@ -13,7 +13,7 @@ In this example, we have a simple user welcome screen.
 
 	<h1>Welcome {{user}}!</h1>
 	<p>
-		{{#if messages}}
+		{{#if(messages)}}
 			You have {{messages}} new messages.
 		{{else}}
 			You no messages.

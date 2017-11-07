@@ -1,5 +1,6 @@
 @module {function} can-stache
-@parent can-core
+@parent can-views
+@collection can-core
 @release 2.1
 @group can-stache.pages 0 Pages
 @group can-stache.static 1 Methods
@@ -18,10 +19,13 @@
 
 @description Live binding Mustache and Handlebars-compatible templates.
 
-@signature `stache(template)`
+@signature `stache([name,] template)`
 
 Processes the template and returns a [can-stache.renderer renderer function].
 Use [steal-stache] to import template renderer functions with [http://stealjs.com StealJS].
+
+@param {String} [name] Provides an optional name for this type that will show up
+nicely in errors. Files imported with [steal-stache] will use their filename.
 
 @param {String} template The text of a stache template.
 

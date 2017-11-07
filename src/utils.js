@@ -3,6 +3,7 @@ var Observation = require('can-observation');
 var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
+var dev = require('can-log/dev/dev');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -94,12 +95,46 @@ module.exports = {
 			var aliases = {
 				"%index": i
 			};
+
+			//!steal-remove-start
+			Object.defineProperty(aliases, '%index', {
+				get: function() {
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
+					dev.warn(
+						(filename ? filename + ': ' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'%index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+
+			Object.defineProperty(aliases, '@index', {
+				get: function() {
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
+					dev.warn(
+						(filename ? filename + ': ' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'@index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+			//!steal-remove-end
+
 			var item = isObservable ? new KeyObservable(items, i) :items[i];
 
 			if (asVariable) {
 				aliases[asVariable] = item;
 			}
-			result.push(helperOptions.fn(scope.add(aliases, { notContext: true }).add(item)));
+			result.push(helperOptions.fn(
+				scope
+				.add(aliases, { notContext: true })
+				.add({ index: i }, { special: true })
+				.add(item))
+			);
 		}
 		return result;
 	},

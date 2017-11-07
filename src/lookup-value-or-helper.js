@@ -3,7 +3,7 @@ var mustacheHelpers = require("../helpers/core");
 
 // Looks up a value in the scope, and if it is `undefined`, looks up
 // the value as a helper.
-var lookupValueOrHelper = function(key, scope, helperOptions, readOptions){
+function lookupValueOrHelper(key, scope, helperOptions, readOptions) {
 	var scopeKeyData = expressionHelpers.getObservableValue_fromKey(key, scope, readOptions);
 
 	var result = {value: scopeKeyData};
@@ -17,6 +17,6 @@ var lookupValueOrHelper = function(key, scope, helperOptions, readOptions){
 		result.helper = helper && helper.fn;
 	}
 	return result;
-};
+}
 
 module.exports = lookupValueOrHelper;

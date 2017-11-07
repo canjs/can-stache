@@ -15,18 +15,12 @@ var HelperScopeLookup = require("../expressions/helper-scope-lookup");
 var SetIdentifier = require("./set-identifier");
 var expressionHelpers = require("../src/expression-helpers");
 
-var observeReader = require('can-stache-key');
 var utils = require('./utils');
-var mustacheHelpers = require('../helpers/core');
-
 var each = require('can-util/js/each/each');
-var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
-var dev = require('can-util/js/dev/dev');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
-var Observation = require("can-observation");
 
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 
@@ -194,10 +188,10 @@ var convertToHelperIfTopIsLookup = function(stack){
 var expression = {
 	toComputeOrValue: expressionHelpers.toComputeOrValue,
 	convertKeyToLookup: convertKeyToLookup,
+
 	Literal: Literal,
 	Lookup: Lookup,
 	ScopeLookup: ScopeLookup,
-
 	Arg: Arg,
 	Hash: Hash,
 	Hashes: Hashes,
@@ -207,7 +201,7 @@ var expression = {
 	HelperScopeLookup: HelperScopeLookup,
 	Bracket: Bracket,
 
-	SetIdentifier: function(value){ this.value = value; },
+	SetIdentifier: SetIdentifier,
 	tokenize: function(expression){
 		var tokens = [];
 		(expression.trim() + ' ').replace(tokensRegExp, function (whole, arg) {

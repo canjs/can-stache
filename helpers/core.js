@@ -7,10 +7,11 @@ var joinURIs = require('can-util/js/join-uris/join-uris');
 var each = require('can-util/js/each/each');
 var assign = require('can-util/js/assign/assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var Hashes = require("../expressions/hashes");
 var debuggerHelper = require('./-debugger').helper;
 var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
@@ -54,7 +55,7 @@ var helpers = {
 			aliases,
 			key;
 
-		if (argsLen === 2 || (argsLen === 3 && argExprs[1].key === 'as')) {
+		if ((argsLen === 2 && !(argExprs[1].expr instanceof Hashes)) || (argsLen === 3 && argExprs[1].key === 'as')) {
 			asVariable = args[argsLen - 1];
 
 			if (typeof asVariable !== 'string') {
@@ -92,6 +93,34 @@ var helpers = {
 						"%index": index
 					};
 
+					//!steal-remove-start
+					Object.defineProperty(aliases, '%index', {
+						get: function() {
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
+							dev.warn(
+								(filename ? filename + ':' : '') +
+								(lineNumber ? lineNumber + ': ' : '') +
+								'%index is deprecated. Use scope.index instead.'
+							);
+							return index;
+						}
+					});
+
+					Object.defineProperty(aliases, '@index', {
+						get: function() {
+							var filename = options.scope.peek('scope.filename');
+							var lineNumber = options.scope.peek('scope.lineNumber');
+							dev.warn(
+								(filename ? filename + ':' : '') +
+								(lineNumber ? lineNumber + ': ' : '') +
+								'@index is deprecated. Use scope.index instead.'
+							);
+							return index;
+						}
+					});
+					//!steal-remove-end
+
 					if (asVariable) {
 						aliases[asVariable] = item;
 					}
@@ -105,7 +134,13 @@ var helpers = {
 						}
 					}
 
-					return options.fn(options.scope.add(aliases, { notContext: true }).add(item), options.options, parentNodeList);
+					return options.fn(
+						options.scope
+							.add(aliases, { notContext: true })
+							.add({ index: index }, { special: true })
+							.add(item),
+						options.options, parentNodeList
+					);
 				};
 
 				live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
@@ -116,17 +151,157 @@ var helpers = {
 
 		var expr = resolved,
 			result;
-
-		if ( !! expr && utils.isArrayLike(expr)) {
-			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if(isIterable(expr)) {
+		if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
 			result = [];
-			each(expr, function(value, key){
+			canReflect.each(expr, function(val, key){
+				var value = new KeyObservable(expr, key);
+
+				aliases = {
+					"%key": key,
+					"@key": key
+				};
+
+				//!steal-remove-start
+				Object.defineProperty(aliases, '%key', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'%key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+
+				Object.defineProperty(aliases, '@key', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+				//!steal-remove-end
+
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.key) {
+						aliases[hashOptions.key] = key;
+					}
+				}
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
+			});
+
+			return options.stringOnly ? result.join('') : result;
+		} else if(Array.isArray(expr)) {
+			result = [];
+			canReflect.each(expr, function(value, index){
+
+				aliases = {
+					"%index": index,
+					"@index": index
+				};
+
+				//!steal-remove-start
+				Object.defineProperty(aliases, '%index', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'%index is deprecated. Use scope.index instead.'
+						);
+						return index;
+					}
+				});
+
+				Object.defineProperty(aliases, '@index', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@index is deprecated. Use scope.index instead.'
+						);
+						return index;
+					}
+				});
+				//!steal-remove-end
+
+				if (asVariable) {
+					aliases[asVariable] = value;
+				}
+
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = value;
+					}
+					if (hashOptions.index) {
+						aliases[hashOptions.index] = index;
+					}
+				}
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ index: index }, { special: true })
+						.add(value))
+				);
+			});
+			return options.stringOnly ? result.join('') : result;
+		} else if(expr instanceof Object) {
+			result = [];
+			canReflect.each(expr, function(val, key){
+				var value = new KeyObservable(expr, key);
 				aliases = {
 					"%key": key
 				};
+
+				//!steal-remove-start
+				Object.defineProperty(aliases, '%key', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'%key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+
+				Object.defineProperty(aliases, '@key', {
+					get: function() {
+						var filename = options.scope.peek('scope.filename');
+						var lineNumber = options.scope.peek('scope.lineNumber');
+						dev.warn(
+							(filename ? filename + ':' : '') +
+							(lineNumber ? lineNumber + ': ' : '') +
+							'@key is deprecated. Use scope.key instead.'
+						);
+						return key;
+					}
+				});
+				//!steal-remove-end
+
 				if (asVariable) {
 					aliases[asVariable] = value;
 				}
@@ -139,35 +314,13 @@ var helpers = {
 						aliases[hashOptions.key] = key;
 					}
 				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
+				result.push(options.fn(
+					options.scope
+						.add(aliases, { notContext: true })
+						.add({ key: key }, { special: true })
+						.add(value))
+				);
 			});
-			return options.stringOnly ? result.join('') : result;
-		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
-			result = [];
-			canReflect.each(expr, function(val, key){
-				var value = new KeyObservable(expr, key);
-				aliases = {
-					"%key": key
-				};
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(value)));
-			});
-
-			return options.stringOnly ? result.join('') : result;
-		}
-		else if (expr instanceof Object) {
-			result = [];
-			for (key in expr) {
-				aliases = {
-					"%key": key
-				};
-				if (asVariable) {
-					aliases[asVariable] = expr[key];
-				}
-				result.push(options.fn(options.scope.add(aliases, { notContext: true }).add(expr[key])));
-			}
 			return options.stringOnly ? result.join('') : result;
 		}
 	},
@@ -364,5 +517,6 @@ module.exports = {
 	},
 	resolve: resolve,
 	resolveHash: resolveHash,
-	looksLikeOptions: looksLikeOptions
+	looksLikeOptions: looksLikeOptions,
+	helpers: assign({}, helpers)
 };

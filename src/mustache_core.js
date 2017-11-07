@@ -12,6 +12,7 @@ var frag = require("can-util/dom/frag/frag");
 var attr = require("can-util/dom/attr/attr");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
+var dev = require("can-log/dev/dev");
 
 
 // ## Types
@@ -160,7 +161,7 @@ var core = {
 	 * @return {function(this:HTMLElement,can-view-scope,can.view.Options)} A renderer function
 	 * live binds a partial.
 	 */
-	makeLiveBindingPartialRenderer: function(expressionString, state){
+	makeLiveBindingPartialRenderer: function(expressionString, state, lineNo){
 		expressionString = expressionString.trim();
 		var exprData,
 				partialName = expressionString.split(/\s+/).shift();
@@ -170,6 +171,9 @@ var core = {
 		}
 
 		return function(scope, options, parentSectionNodeList){
+			//!steal-remove-start
+			scope.set('scope.lineNumber', lineNo);
+			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
@@ -238,7 +242,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
 	 */
-	makeStringBranchRenderer: function(mode, expressionString){
+	makeStringBranchRenderer: function(mode, expressionString, lineNo){
 		var exprData = core.expression.parse(expressionString),
 			// Use the full mustache expression as the cache key.
 			fullExpression = mode+expressionString;
@@ -250,6 +254,9 @@ var core = {
 
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
+			//!steal-remove-start
+			scope.set('scope.lineNumber', lineNo);
+			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
@@ -291,8 +298,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The html state of where the expression was found.
 	 */
-	makeLiveBindingBranchRenderer: function(mode, expressionString, state){
-
+	makeLiveBindingBranchRenderer: function(mode, expressionString, state, lineNo){
 		// Pre-process the expression.
 		var exprData = core.expression.parse(expressionString);
 		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
@@ -300,13 +306,14 @@ var core = {
 		}
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
-
+			//!steal-remove-start
+			scope.set('scope.lineNumber', lineNo);
+			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = expressionString;
 			// register this nodeList.
 			// Regsiter it with its parent ONLY if this is directly nested.  Otherwise, it's unencessary.
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
-
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
@@ -403,7 +410,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The state of HTML where the expression was found.
 	 */
-	splitModeFromExpression: function(expression, state){
+	splitModeFromExpression: function(expression, state, lineNo){
 		expression = expression.trim();
 		var mode = expression.charAt(0);
 
@@ -479,7 +486,6 @@ var core = {
 	 * @return {String}
 	 */
 	cleanWhitespaceControl: function(template) {
-
 		return template.replace(mustacheWhitespaceRegExp, function(
 			whole,
 			spaceBefore,

@@ -21,24 +21,26 @@ var parser = require('can-view-parser');
 var nodeLists = require('can-view-nodelist');
 
 var makeDocument = require('can-vdom/make-document/make-document');
-var testHelpers = require('can-test-helpers');
+var globals = require('can-globals');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
 var domMutate = require('can-util/dom/mutate/mutate');
-var DOCUMENT = require('can-util/dom/document/document');
-var MUTATION_OBSERVER = require('can-util/dom/mutation-observer/mutation-observer');
+var DOCUMENT = require('can-globals/document/document');
 
 var canEach = require('can-util/js/each/each');
-var canDev = require('can-util/js/dev/dev');
+var canDev = require('can-log/dev/dev');
 var string = require('can-util/js/string/string');
 var makeArray = require('can-util/js/make-array/make-array');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var testHelpers = require('can-test-helpers');
+var canLog = require('can-log');
+var debug = require('../helpers/-debugger');
+var helpersCore = require('can-stache/helpers/core');
 
 var browserDoc = DOCUMENT();
-var mutationObserver = MUTATION_OBSERVER();
+
 
 makeTest('can/view/stache dom', browserDoc);
 makeTest('can/view/stache vdom', makeDocument());
@@ -98,18 +100,17 @@ function makeTest(name, doc, mutation) {
 			return txt;
 		};
 
-
 	var oldDoc;
-	QUnit.module(name ,{
+	QUnit.module(name, {
 		setup: function(){
 			if(doc === window.document) {
 				DOCUMENT(null);
-				MUTATION_OBSERVER(mutationObserver);
+				globals.deleteKeyValue('MutationObserver');
 
 			} else {
 				oldDoc = window.document;
 				DOCUMENT(doc);
-				MUTATION_OBSERVER(null);
+				globals.setKeyValue('MutationObserver', null);
 			}
 
 
@@ -125,7 +126,7 @@ function makeTest(name, doc, mutation) {
 
 			setTimeout(function(){
 				DOCUMENT(window.document);
-				MUTATION_OBSERVER(mutationObserver);
+				globals.deleteKeyValue('MutationObserver');
 				start();
 			},1)
 		}
@@ -140,7 +141,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(frag.childNodes.item(0)).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
 
-
 	test("basic replacement", function(){
 
 		var stashed = stache("<h1 class='foo'><span>Hello {{message}}!</span></h1>");
@@ -151,7 +151,6 @@ function makeTest(name, doc, mutation) {
 		});
 		equal( innerHTML(frag.firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
-
 
 	test("a section helper", function(){
 
@@ -217,20 +216,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	/*test("attribute sections", function(){
-	 var stashed = stache("<h1 style='top: {{top}}px; left: {{left}}px; background: rgb(0,0,{{color}});'>Hi</h1>");
-
-	 var frag = stashed({
-	 top: 1,
-	 left: 2,
-	 color: 3
-	 });
-
-	 equal(frag.firstChild.style.top, "1px", "top works");
-	 equal(frag.firstChild.style.left, "2px", "left works");
-	 equal(frag.firstChild.style.backgroundColor.replace(/\s/g,""), "rgb(0,0,3)", "color works");
-	 });*/
-
 	test("attributes sections", function(){
 		var template = stache("<div {{attributes}}/>");
 		var frag = template({
@@ -257,7 +242,6 @@ function makeTest(name, doc, mutation) {
 
 
 	});
-
 
 	test("boxes example", function(){
 		var boxes = [],
@@ -301,7 +285,6 @@ function makeTest(name, doc, mutation) {
 		ok(! /top: 0px/.test( frag.firstChild.firstChild.getAttribute("style")) , "!0px");
 
 	});
-
 
 	var override = {
 		comments: {
@@ -368,8 +351,6 @@ function makeTest(name, doc, mutation) {
 			});
 		});
 	});
-
-
 
 	test('Tokens returning 0 where they should display the number', function () {
 		var template = "<div id='zero'>{{completed}}</div>";
@@ -550,7 +531,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual( getText(t.template, t.data), expected);
 	});
 
-
 	test("No arguments passed to helper", function () {
 		var template = stache("{{noargHelper}}");
 
@@ -597,6 +577,7 @@ function makeTest(name, doc, mutation) {
 
 		deepEqual(innerHTML(div), "foo");
 	});
+
 	if(isNormalDOM) {
 		test("Partials and observes", function () {
 			var template;
@@ -621,7 +602,6 @@ function makeTest(name, doc, mutation) {
 			equal(innerHTML(ths[1]), 'there', 'Second column heading correct');
 		});
 	}
-
 
 	test("Deeply nested partials", function () {
 		var t = {
@@ -800,7 +780,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual(getText(v.template,v.data), expected);
 	});
 
-
 	test("render with double angle", function () {
 		var text = "{{& replace_me }}{{{ replace_me_too }}}" +
 			"<ul>{{#animals}}" +
@@ -868,7 +847,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(div.getElementsByTagName('span')[0]).toLowerCase(), "<strong>foo</strong><strong>bar</strong>");
 		equal(div.getElementsByTagName('input')[0].value, "I use 'quote' fingers \"a lot\"", "escaped no matter what");
 	});
-
 
 	test("attribute single unescaped, html single unescaped", function () {
 
@@ -1061,7 +1039,6 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(span), 'Warp drive, Mr. Sulu', 'value in block statement updated innerHTML');
 
 	});
-
 
 	test('hookup within a tag', function () {
 		var text = '<div {{ obs.foo }} ' + '{{ obs.baz }}>lorem ipsum</div>',
@@ -2206,7 +2183,6 @@ function makeTest(name, doc, mutation) {
 		deepEqual( getText( t.template, t.data), expected);
 	});
 
-
 	test("avoid global helpers", function () {
 
 		var noglobals = stache("{{sometext person.name}}");
@@ -2239,7 +2215,6 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div2), "Ajax rules");
 
 	});
-
 
 	test("Each does not redraw items", function () {
 
@@ -2343,6 +2318,7 @@ function makeTest(name, doc, mutation) {
 		}));
 
 	});
+
 	// CHANGED FROM MUSTACHE
 	test("Object references can escape periods for key names containing periods", function () {
 		var template = stache("{{#foo.bar}}" +
@@ -2381,7 +2357,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerHelper('rsvp', function (attendee, event) {
 			return attendee.name + ' is attending ' + event.name;
 		});
-		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/#attendee}}"),
+		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/attendee}}"),
 			data = {
 				attendee: {
 					name: 'Justin'
@@ -2595,7 +2571,7 @@ function makeTest(name, doc, mutation) {
 		equal(img.getAttribute("src"), url, "images src is correct");
 	});
 
-	//if(doc.body.style) {
+	// if(doc.body.style) {
 	//    test("style property is live-bindable in IE (#494)", 4, function () {
 	//
 	//        var template = stache('<div style="width: {{width}}px; background-color: {{color}};">hi</div>')
@@ -2617,9 +2593,7 @@ function makeTest(name, doc, mutation) {
 	//        equal(div.style.width, "10px");
 	//        equal(div.style.backgroundColor, "blue");
 	//    });
-	//}
-
-
+	// }
 
 	test("empty lists update", 2, function () {
 		var template = stache('<p>{{#list}}{{.}}{{/list}}</p>');
@@ -2897,7 +2871,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 	});
 
-	test('Live bound iteration of keys of a CanMap with #each and %key', function () {
+	test('Live bound iteration of keys of a SimpleMap with #each and %key', function () {
 		// delete stache._helpers.foo;
 		var template = stache("<ul>{{#each map}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
 		var map = new SimpleMap({
@@ -3538,23 +3512,22 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-//        if(window.jQuery || window.Zepto) {
-//
-//            test("helpers returning jQuery or Zepto collection", function(){
-//
-//                stache.registerHelper("jQueryHelper", function(options){
-//                    var section = options.fn({first: "Justin"});
-//                    return $( can.frag("<h1>")).append( section );
-//                });
-//
-//                var template = stache( "{{#jQueryHelper}}{{first}} {{last}}{{/jQueryHelper}}");
-//
-//                var res = template({last: "Meyer"});
-//                equal(res.firstChild.nodeName.toLowerCase(), "h1");
-//                equal(innerHTML(res.firstChild), "Justin Meyer");
-//
-//            });
-//        }
+	// if(window.jQuery || window.Zepto) {
+	// 	test("helpers returning jQuery or Zepto collection", function() {
+	//
+	// 		stache.registerHelper("jQueryHelper", function(options) {
+	// 			var section = options.fn({first: "Justin"});
+	// 			return $( can.frag("<h1>")).append( section );
+	// 		});
+	//
+	// 		var template = stache( "{{#jQueryHelper}}{{first}} {{last}}{{/jQueryHelper}}");
+	//
+	// 		var res = template({last: "Meyer"});
+	// 		equal(res.firstChild.nodeName.toLowerCase(), "h1");
+	// 		equal(innerHTML(res.firstChild), "Justin Meyer");
+	//
+	// 	});
+	// }
 
 	test("./ in key", function(){
 		var template = stache( "<div><label>{{name}}</label>{{#children}}<span>{{./name}}-{{name}}</span>{{/children}}</div>");
@@ -3613,39 +3586,26 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	//!steal-remove-start
-	if (canDev) {
-		test("Logging: Helper not found in stache template(#726)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/expressions/helper.js: Unable to find helper "helpme".';
+	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find helper "helpme".');
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
-
-			stache('<li>{{helpme name}}</li>')({
-				name: 'Hulk Hogan'
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{helpme name}}</li>')({
+			name: 'Hulk Hogan'
 		});
 
-		test("Logging: Variable not found in stache template (#720)", function () {
-			var oldlog = canDev.warn,
-				message = 'can-stache/expressions/helper.js: Unable to find key or helper "user.name".';
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
 
-			canDev.warn = function (text) {
-				equal(text, message, 'Got expected message logged.');
-			}
+	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find key or helper "user.name".');
 
-			stache('<li>{{user.name}}</li>')({
-				user: {}
-			});
-
-			canDev.warn = oldlog;
+		stache('<li>{{user.name}}</li>')({
+			user: {}
 		});
-	}
-	//!steal-remove-end
+
+		QUnit.equal(teardown(), 1, 'got expected warning');
+	});
+
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
@@ -4008,8 +3968,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-
-
 	test("possible to teardown immediate nodeList (#1593)", function(){
 		expect(3);
 		var map = new SimpleMap({show: true});
@@ -4065,6 +4023,7 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
 	});
+
 	if(doc.createElementNS && System.env !== 'canjs-test') {
 		test("svg elements for (#1327)", function(){
 
@@ -4080,7 +4039,6 @@ function makeTest(name, doc, mutation) {
 		});
 	}
 
-	// TODO fix from here
 	test('using #each when toggling between list and null', function() {
 		var state = new SimpleMap();
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
@@ -4850,7 +4808,6 @@ function makeTest(name, doc, mutation) {
 		template(appState);
 	});
 
-
 	test("content within {{#if}} inside partial surrounded by {{#if}} should not display outside partial (#2186)", function() {
 		stache.registerPartial('partial', '{{#showHiddenSection}}<div>Hidden</div>{{/showHiddenSection}}');
 		var renderer = stache('<div>{{#showPartial}}{{>partial}}{{/showPartial}}</div>');
@@ -5480,36 +5437,24 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
-		var makeWarnChecks = function(input, texts) {
-			var count = 0;
-			var _warn = canDev.warn;
-			canDev.warn = function(text) {
-				equal(text, texts[count++]);
-			};
+		var teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{#if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#if someCondition}}");
 
-			stache(input);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
+		stache("filename.stache", "{{^if someCondition}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{^if someCondition}}");
 
-			equal(count, texts.length);
+		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}");
+		stache("filename.stache", "{{#call()}}\n...\n{{/foo}}");
+		QUnit.equal(teardown(), 1, "{{#call()}}");
 
-			canDev.warn = _warn;
-		};
-
-		// Fails
-		makeWarnChecks("{{#if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{^if someCondition}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/if}}"
-		]);
-		makeWarnChecks("{{#call()}}...{{/foo}}", [
-			"unexpected closing tag {{/foo}} expected {{/call}}"
-		]);
-
-		// Successes
-		makeWarnChecks("{{#if}}...{{/}}", []);
-		makeWarnChecks("{{#if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{^if someCondition}}...{{/if}}", []);
-		makeWarnChecks("{{#call()}}...{{/call}}", []);
+		teardown = testHelpers.dev.willWarn(/filename.stache/);
+		stache("filename.stache", "{{#if}}...{{/}}");
+		stache("filename.stache", "{{#if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{^if someCondition}}...{{/if}}");
+		stache("filename.stache", "{{#call()}}...{{/call}}");
+		QUnit.equal(teardown(), 0, "matching tags should not have warnings");
 	});
 
 	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
@@ -5526,7 +5471,7 @@ function makeTest(name, doc, mutation) {
 		);
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})
@@ -5535,7 +5480,6 @@ function makeTest(name, doc, mutation) {
 			stache("<button ($weirdattribute)='showMessage()'>Click</button>");
 		});
 	});
-
 
 	test("@arg functions are not called (#172)", function() {
 		var data = new DefineMap({
@@ -5784,7 +5728,7 @@ function makeTest(name, doc, mutation) {
 		});
 		clone({
 			'can-stache-bindings': {},
-			'can-util/js/dev/dev': {
+			'can-log/dev/dev': {
 				warn: canDev.warn
 			}
 		})
@@ -5795,7 +5739,6 @@ function makeTest(name, doc, mutation) {
 			start();
 		});
 	});
-
 
 	testHelpers.dev.devOnlyTest("Don't warn about tag mismatch for Call expressions with dots in the method lookup (#214)", function() {
 		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/, function(message, matched) {
@@ -6241,6 +6184,853 @@ function makeTest(name, doc, mutation) {
 
 		equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
 		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
+	});
+
+	test('check if <content> is already registred #165', function () {
+		stop();
+		viewCallbacks.tag("content", function() {});
+
+		var teardown = testHelpers.dev.willWarn(/Custom tag: content is already defined/, function(message, matched) {
+			QUnit.notOk(matched, message);
+		});
+
+		clone({
+			'can-view-callbacks': viewCallbacks
+		})
+		.import('can-stache')
+		.then(function(stache) {
+			stache('<content>foo</content>');
+			QUnit.equal(teardown(), 0, "Warning was not logged");
+			start();
+		});
+	});
+
+	testHelpers.dev.devOnlyTest("partials warn on missing context (#328)", function() {
+		stop();
+		var teardown = testHelpers.dev.willWarn(/is not defined in the scope/, function(message, matched) {
+			if(matched) {
+				QUnit.ok(true, "Warning fired");
+				QUnit.equal(teardown(), 1, "One matching warning fired");
+				start();
+			}
+		});
+
+		var renderer = stache("{{>foo bar}}");
+		renderer({ foo: stache("baz") });
+	});
+  
+	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
+
+		stache("mystache.stache", "{{aFunction}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function is called");
+			}
+		});
+
+		QUnit.equal(teardown(), 1, "Warning was given");
+	});
+
+	testHelpers.dev.devOnlyTest("do not warn on explicit function calling (#312)", function() {
+		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called automatically/);
+
+		stache("mystache.stache", "{{aFunction()}}")({
+			aFunction: function() {
+				QUnit.ok(true, "function should be called");
+			}
+		});
+
+		QUnit.equal(teardown(), 0, "Warning should not be given");
+	});
+
+	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
+
+		var data = new DefineMap({
+			name: 'Justin',
+			age: 33,
+			children: [{
+				name: 'TBD'
+			}]
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 1, "Warning should be given");
+	});
+
+	testHelpers.dev.devOnlyTest("scope walking warning should not read value twice (#336)", function() {
+		var teardown = testHelpers.dev.willWarn(/scopewalk.stache: "age" is not in the current scope/);
+		var renderer = stache("scopewalk.stache",
+			"<ul>" +
+				"{{#each children}}" +
+					"<li>{{name}} is {{age}} years old</li>" +
+				"{{/each}}" +
+			"</ul>"
+		);
+
+		var childCount = 0;
+		var Child = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					childCount++;
+					return age;
+				}
+			}
+		});
+		var parentCount = 0;
+		var Parent = DefineMap.extend({
+			name: 'string',
+			age: {
+				get(age) {
+					parentCount++;
+					return age;
+				}
+			},
+			children: [ Child ]
+		});
+
+		var child = new Child({ name: 'Ramiya', age: 3 });
+		var parent = new Parent({ name: 'Justing', age: 33, children: [ child ] });
+
+		renderer(parent);
+
+		QUnit.equal(teardown(), 0, 'no warning should be given');
+		QUnit.equal(childCount, 1, 'child.age should be read once');
+		QUnit.equal(parentCount, 0, 'parent.age should not be read');
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn on aliases created in #each or #with (#311)", function() {
+		var teardown = testHelpers.dev.willWarn(/is not in the current scope/);
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one" ],
+			itemsObject: { 2: "two", 3: "three" },
+			obj: { key: "4: four" }
+		});
+
+		var renderer = stache("children.stache",
+			"<ul>" +
+				"{{#each itemsArray item=value num=index}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsArray}}" +
+					"<li>{{%index}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject item=value num=key}}" +
+					"<li>{{num}}: {{item}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{this}}</li>" +
+				"{{/each}}" +
+				"{{#each itemsObject}}" +
+					"<li>{{%key}}: {{.}}</li>" +
+				"{{/each}}" +
+				"{{#with objKey=obj.key}}" +
+					"<li>{{objKey}}</li>" +
+				"{{/with}}" +
+			"</ul>"
+		);
+
+		renderer(data);
+
+		QUnit.equal(teardown(), 0, "No warnings should be given");
+	});
+
+	test("#if works with call expressions", function(){
+		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#unless works with call expressions", function(){
+		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
+		var map = new DefineMap({
+			foo: false
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("log works with call expressions", function(){
+		var map = new DefineMap({
+			foo: "bar"
+		});
+		var log = console.log;
+
+		console.log = function(value){
+			QUnit.equal(value, map);
+		};
+		
+		var template = stache("{{log()}}");
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		console.log = log;
+	});
+
+	test("debugger works with call expressions", function(){
+		debug.__testing.allowDebugger = false;
+		var log = canLog.log;
+		var warn = canLog.warn;
+
+		var logs = [
+			"Use `get(<path>)` to debug this template",
+			"Forgotten {{debugger}} helper"
+		];
+		canLog.log = canLog.warn = function(message){
+			QUnit.equal(message, logs.shift());
+		}
+
+		var template = stache("{{debugger()}}");
+		var div = doc.createElement("div");
+		var frag = template();
+
+		div.appendChild(frag);
+
+		canLog.log = log;
+		canLog.warn = warn;
+		debug.__testing.allowDebugger = true;
+	});
+
+	test("#eq works with call expressions", function(){
+		var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#is works with call expressions", function(){
+		var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#switch, #case, and #default work with call expressions", function(){
+		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
+		var map = new DefineMap({
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "admin");
+		map.type = "peasant";
+		QUnit.equal(innerHTML(div), "peasant");
+	});
+
+	test("joinbase works with call expressions", function(){
+		var baseUrl = System.baseURL || getBaseURL();
+		var template = stache("{{joinBase('hello/', name, '.png')}}");
+		var map = new DefineMap({
+			name: "world"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), joinURIs(baseUrl, "hello/world.png"));
+	});
+
+	test("#each works with hash expression in call expression", function(){
+		var template = stache("{{#each(todos, todo=value num=index)}}<p data-index=\"{{num}}\">{{todo.name}}</p>{{/each}}");
+		var map = new DefineMap({
+			todos: [
+				{
+					name: "foo"
+				},
+				{
+					name: "bar"
+				}
+			]
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		var p = div.getElementsByTagName("p");
+		for(var i = 0; i < p.length; i++){
+			QUnit.equal(innerHTML(p[i]), map.todos[i].name);
+			QUnit.equal(p[i].getAttribute("data-index"), i);
+		}
+	});
+
+	test("#each will call expression should optimized for performance", function(){
+		var count = 0;
+		stache.registerHelper('myEach', function() {
+			count++;
+			return helpersCore.helpers.each.apply(this, arguments);
+		})
+		var template = stache("{{#myEach(.)}}<p>{{.}}</p>{{/myEach}}");
+		var map = new DefineList(["foo", "baz"]);
+		
+		template(SimpleObservable(map));
+
+		map.push("qux", "quux");
+		map.splice(1, 0, "bar");
+		map.pop();
+		map.shift();
+		map.unshift("foo");
+
+		equal(count, 1);
+	});
+
+	test("#with works with hash expression in call expression", function(){
+		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
+		var map = new DefineMap({
+			foo: "hello",
+			baz: "world"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
+	});
+
+	test("#with works with hash expression and objects in call expression", function(){
+		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
+		var map = {
+			foo: "hello",
+			baz: "world"
+		};
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), map.foo + " " + map.baz);
+	});
+
+	test("call expression works with hash expression", function(){
+		var exprData = core.expression.parse("helper(todos, todo=value num=index)");
+		var args = core.expression.Call.prototype.args.call(exprData, Scope.refsScope().add({}), new core.Options({}));
+
+		equal(args().hashExprs.todo.key, "value");
+		equal(args().hashExprs.num.key, "index");
+	});
+
+	test("#each with hash expression in call expression should not warn", function(){
+		var template = stache("{{#each(todos, todo=value)}}<p>{{todo}}</p>{{/each}}");
+		var map = new DefineMap({todos: ["foo", "bar", "baz"]});
+		var warn1 = testHelpers.dev.willWarn(/can-stache: Using the `as`/i);
+		var warn2 = testHelpers.dev.willWarn(/can-stache: Do not use/i);
+
+		template(map);
+
+		equal(warn1(), 0);
+		equal(warn2(), 0);
+	});
+
+
+	test('#each with call expression and arrays should work with hash expressions', function(){
+		var list = ['foo', 'bar', 'baz'];
+		var template = stache('{{#each(this, item=value, itemIndex=index)}}{{itemIndex}}:{{item}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(list);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), '0:foo1:bar2:baz');
+	});
+
+	test('#each with call expression and objects should work with hash expressions', function(){
+		var map = {'foo': 'bar', 'baz': 'qux'};
+		var template = stache('{{#each(this, itemKey=key itemValue=value)}}{{itemKey}}:{{itemValue}}{{/each}}');
+		var div = doc.createElement('div');
+		var frag = template(map);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'foo:barbaz:qux');
+	});
+	
+	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
+		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
+		var frag = template();
+
+		equal(frag.firstChild.firstChild.nodeValue, '1');
+		equal(frag.lastChild.firstChild.nodeValue, '2');
+	});
+
+	testHelpers.dev.devOnlyTest("scope has filename", function(){
+		var template = stache('some-file', '{{scope.filename}}');
+		var frag = template();
+
+		equal(frag.firstChild.nodeValue, 'some-file');
+	});
+
+	QUnit.test("using scope.index works when using #each with arrays", function() {
+		var data = {
+			itemsArray: [ "zero", "one", "two" ]
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{scope.index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #each with arrays", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
+
+		var data = {
+			itemsArray: [ "zero", "one", "two" ]
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{%index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #each with arrays", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
+
+		var data = {
+			itemsArray: [ "zero", "one", "two" ]
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{@index}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with DefineMap", function() {
+		var data = new DefineMap({
+			itemsObj: {
+				zero: 0,
+				one: 1,
+				two: 2
+			}
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with DefineMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var data = new DefineMap({
+			itemsObj: {
+				zero: 0,
+				one: 1,
+				two: 2
+			}
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with SimpleMap", function() {
+		var itemsObj = new SimpleMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with SimpleMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var itemsObj = new SimpleMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with SimpleMap", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
+
+		var itemsObj = new SimpleMap({
+			zero: 0,
+			one: 1,
+			two: 2
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{@key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.key works when using #each with objects", function() {
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{scope.key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with objects", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
+
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{%key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with objects", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
+
+		var itemsObj = {
+			zero: 0,
+			one: 1,
+			two: 2
+		};
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsObj}}\n" +
+					"<li>{{@key}}: {{.}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer({ itemsObj: itemsObj });
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
+		QUnit.equal( innerHTML(lis[1]), "one: 1" );
+		QUnit.equal( innerHTML(lis[2]), "two: 2" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("using scope.index works when using #array", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{scope.index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+	});
+
+	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: %index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{%index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #array", function() {
+		var teardown = testHelpers.dev.willWarn("index.stache: 2: @index is deprecated. Use scope.index instead.");
+
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ]
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+			"{{#itemsArray}}\n" +
+			"<li>{{@index}}: {{.}}</li>\n" +
+			"{{/itemsArray}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "0: zero" );
+		QUnit.equal( innerHTML(lis[1]), "1: one" );
+		QUnit.equal( innerHTML(lis[2]), "2: two" );
+
+		QUnit.equal(teardown(), 3, '3 warnings shown');
+	});
+
+	QUnit.test("values can be read from the scope passed to a stache renderer using {{scope.root}}", function() {
+		var data = new DefineMap({
+			itemsArray: [ "zero", "one", "two" ],
+			exclamation: "!!!"
+		});
+
+		var renderer = stache("index.stache",
+			"<ul>\n" +
+				"{{#each itemsArray}}\n" +
+					"<li>{{.}}{{scope.root.exclamation}}</li>\n" +
+				"{{/each}}\n" +
+			"</ul>"
+		);
+
+		var div = doc.createElement('div');
+		var frag = renderer(data);
+		div.appendChild(frag);
+
+		var lis = div.getElementsByTagName('li');
+
+		QUnit.equal( innerHTML(lis[0]), "zero!!!" );
+		QUnit.equal( innerHTML(lis[1]), "one!!!" );
+		QUnit.equal( innerHTML(lis[2]), "two!!!" );
+	});
+
+	QUnit.test("scope.index works after updating the source list", function(){
+		var div = doc.createElement('div');
+		var list = new DefineList(["a", "c", "d", "e", "f"]);
+		var template = stache("{{#each(this)}}{{scope.index}}{{/each}}");
+		var frag = template(list);
+
+		div.appendChild(frag);
+
+		list.splice(1, 0, "b")
+
+		QUnit.equal(innerHTML(div), "012345");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
