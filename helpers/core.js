@@ -57,8 +57,16 @@ var helpers = {
 				asVariable = argExprs[argsLen - 1].key;
 			}
 			//!steal-remove-start
-			dev.warn('can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html');
-			dev.warn('can-stache: Do not use `{{#' + options.nodeList.expression + '}}`, instead use `{{#' + options.nodeList.expression.split(' ')[0] + ' ' + options.nodeList.expression.split(' ')[1] + ' ' + asVariable + '=value}}`');
+			var filename = options.scope.peek('scope.filename');
+			var lineNumber = options.scope.peek('scope.lineNumber');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'the `as` keyword is deprecated. Use ' +
+				'{{#' + options.nodeList.expression.split(' ')[0] + ' ' +
+				options.nodeList.expression.split(' ')[1] + ' ' + asVariable + '=value}} ' +
+				'instead of {{#' + options.nodeList.expression + '}}.'
+			);
 			//!steal-remove-end
 		}
 

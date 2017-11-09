@@ -6153,21 +6153,17 @@ function makeTest(name, doc, mutation) {
 			}]
 		});
 
-		var checkWarnCall = testHelpers.dev.willWarn("can-stache: Using the `as` keyword is deprecated in favor of hash expressions. https://canjs.com/doc/can-stache.helpers.each.html", function (message, matched) {
-			if (matched) {
-				ok(true, "First warning message properly set");
-			}
-		});
+		var checkWarnCall = testHelpers.dev.willWarn("filename.stache:1: the `as` keyword is deprecated. Use {{#each people person=value}} instead of {{#each people as person}}.");
 
-		var renderer = stache(
+		var renderer = stache("filename.stache",
 			"{{#each people as person}}" +
 				"<span>{{person.first}}</span>" +
 				"<span>{{person.last}}</span>" +
-			"{{/with}}"
+			"{{/each}}"
 		);
 
 		renderer(viewModel);
-		checkWarnCall();
+		QUnit.equal(checkWarnCall(), 1, "warning shown");
 	});
 
 	test("using as keyword with each throws deprecation warning helper #300", function () {
@@ -6178,21 +6174,17 @@ function makeTest(name, doc, mutation) {
 			}]
 		});
 
-		var checkWarnCall = testHelpers.dev.willWarn("can-stache: Do not use `{{#each people as person}}`, instead use `{{#each people person=value}}`", function (message, matched) {
-			if (matched) {
-				ok(true, "Second warning message properly set");
-			}
-		});
+		var checkWarnCall = testHelpers.dev.willWarn("filename.stache:1: the `as` keyword is deprecated. Use {{#each people person=value}} instead of {{#each people as person}}.");
 
-		var renderer = stache(
+		var renderer = stache("filename.stache",
 			"{{#each people as person}}" +
 				"<span>{{person.first}}</span>" +
 				"<span>{{person.last}}</span>" +
-			"{{/with}}"
+			"{{/each}}"
 		);
 
 		renderer(viewModel);
-		checkWarnCall();
+		QUnit.equal(checkWarnCall(), 1, "warning shown");
 	});
 
 	test("can assign hash using each on an iterable map #300", function () {
