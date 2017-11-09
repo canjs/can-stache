@@ -468,7 +468,7 @@ var expression = {
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					var bracket = {type: "Bracket", root: top};
 					//!steal-remove-start
-					canReflect.setKeyValue(bracket, canSymbol.for("can-stache.originalKey"), tokens.join('').trim());
+					canReflect.setKeyValue(bracket, canSymbol.for("can-stache.originalKey"), top.key);
 					//!steal-remove-end
 					stack.replaceTopAndPush(bracket);
 				} else if (top.type === "Call") {

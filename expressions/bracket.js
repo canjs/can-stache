@@ -19,7 +19,7 @@ Bracket.prototype.value = function (scope, helpers) {
 
 Bracket.prototype.closingTag = function() {
 	//!steal-remove-start
-	return this[canSymbol.for('can-stache.originalKey')];
+	return this[canSymbol.for('can-stache.originalKey')] || '';
 	//!steal-remove-end
 };
 

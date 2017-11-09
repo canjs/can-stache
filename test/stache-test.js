@@ -7065,15 +7065,31 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("section iteration of property using bracket notation should not warn about unexpected closing tag", function (){
 		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
 
-		stache("{{#items['foo:bar']}}{{this}}{{/items['foo:bar']}}");
+		stache("{{#items['foo:bar']}}{{this}}{{/items}}");
+
+		equal(teardown(), 0);
+	});
+
+	QUnit.test("passing bracket notation to method should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#eq(items['foo:bar'], 'baz')}}qux{{/eq}}");
+
+		equal(teardown(), 0);
+	});
+
+	QUnit.test("reading current scope with bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#['foo:bar']}}qux{{/['foo:bar']}}");
 
 		equal(teardown(), 0);
 	});
 
 	QUnit.test("section iteration of property using bracket notation should warn about unexpected closing tag", function (){
-		var teardown = testHelpers.dev.willWarn("1: unexpected closing tag {{/items}} expected {{/items['foo:bar']}}");
+		var teardown = testHelpers.dev.willWarn("1: unexpected closing tag {{/items['foo:bar']}} expected {{/items}}");
 
-		stache("{{#items['foo:bar']}}{{this}}{{/items}}");
+		stache("{{#items['foo:bar']}}{{this}}{{/items['foo:bar']}}");
 
 		equal(teardown(), 1);
 	});

@@ -100,7 +100,7 @@ function stache (filename, template) {
 				if(section instanceof HTMLSectionBuilder) {
 					//!steal-remove-start
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1];
-					if (last.type === "section" && stache !== "" && stache !== last.tag) {
+					if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
 						if (filename) {
 							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
 						}
