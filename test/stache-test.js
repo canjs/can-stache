@@ -6940,7 +6940,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #array", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache: 2: %index is deprecated. Use scope.index instead.");
+		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
 
 		var data = new DefineMap({
 			itemsArray: [ "zero", "one", "two" ]
@@ -6968,7 +6968,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #array", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache: 2: @index is deprecated. Use scope.index instead.");
+		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
 
 		var data = new DefineMap({
 			itemsArray: [ "zero", "one", "two" ]

@@ -76,9 +76,9 @@ var helpers = {
 		}
 
 		if ((
-				canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
-				( utils.isArrayLike(resolved) && items.isComputed )
-			) && !options.stringOnly) {
+			canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
+			( utils.isArrayLike(resolved) && items.isComputed )
+		) && !options.stringOnly) {
 			return function(el){
 				// make a child nodeList inside the can.view.live.html nodeList
 				// so that if the html is re
@@ -153,7 +153,10 @@ var helpers = {
 		var expr = resolved,
 			result;
 
-		if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
+		if (!!expr && utils.isArrayLike(expr)) {
+			result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+			return options.stringOnly ? result.join('') : result;
+		} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
 			result = [];
 			canReflect.each(expr, function(val, key){
 				var value = new KeyObservable(expr, key);
@@ -209,117 +212,6 @@ var helpers = {
 				));
 			});
 
-			return options.stringOnly ? result.join('') : result;
-		} else if(Array.isArray(expr)) {
-			result = [];
-			canReflect.each(expr, function(value, index){
-				aliases = {
-					"%index": index,
-					"@index": index
-				};
-
-				//!steal-remove-start
-				Object.defineProperty(aliases, '%index', {
-					get: function() {
-						var filename = options.scope.peek('scope.filename');
-						var lineNumber = options.scope.peek('scope.lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'%index is deprecated. Use scope.index instead.'
-						);
-						return index;
-					}
-				});
-
-				Object.defineProperty(aliases, '@index', {
-					get: function() {
-						var filename = options.scope.peek('scope.filename');
-						var lineNumber = options.scope.peek('scope.lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'@index is deprecated. Use scope.index instead.'
-						);
-						return index;
-					}
-				});
-				//!steal-remove-end
-
-				if (asVariable) {
-					aliases[asVariable] = value;
-				}
-
-				if (!isEmptyObject(hashOptions)) {
-					if (hashOptions.value) {
-						aliases[hashOptions.value] = value;
-					}
-					if (hashOptions.index) {
-						aliases[hashOptions.index] = index;
-					}
-				}
-				result.push(options.fn(
-					options.scope
-						.add(aliases, { notContext: true })
-						.add({ index: index }, { special: true })
-						.add(value))
-				);
-			});
-			return options.stringOnly ? result.join('') : result;
-		} else if(expr instanceof Object) {
-			result = [];
-			canReflect.each(expr, function(val, key){
-				var value = new KeyObservable(expr, key);
-				aliases = {
-					"%key": key
-				};
-
-				//!steal-remove-start
-				Object.defineProperty(aliases, '%key', {
-					get: function() {
-						var filename = options.scope.peek('scope.filename');
-						var lineNumber = options.scope.peek('scope.lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'%key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-
-				Object.defineProperty(aliases, '@key', {
-					get: function() {
-						var filename = options.scope.peek('scope.filename');
-						var lineNumber = options.scope.peek('scope.lineNumber');
-						dev.warn(
-							(filename ? filename + ':' : '') +
-							(lineNumber ? lineNumber + ': ' : '') +
-							'@key is deprecated. Use scope.key instead.'
-						);
-						return key;
-					}
-				});
-				//!steal-remove-end
-
-				if (asVariable) {
-					aliases[asVariable] = value;
-				}
-				if (!isEmptyObject(hashOptions)) {
-					if (hashOptions.value) {
-						aliases[hashOptions.value] = value;
-					}
-					if (hashOptions.key) {
-						aliases[hashOptions.key] = key;
-					}
-				}
-				result.push(options.fn(
-					options.scope
-						.add(aliases, { notContext: true })
-						.add({ key: key }, { special: true })
-						.add(value)
-				));
-			});
 			return options.stringOnly ? result.join('') : result;
 		}
 	},

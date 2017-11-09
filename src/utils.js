@@ -4,6 +4,8 @@ var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
 var dev = require('can-log/dev/dev');
+var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var each = require('can-util/js/each/each');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -89,7 +91,17 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = canReflect.isObservableLike(items);
+			isObservable = canReflect.isObservableLike(items),
+			hashExprs = helperOptions.exprData && helperOptions.exprData.hashExprs,
+			hashOptions;
+
+		// Check if using hash
+		if (!isEmptyObject(hashExprs)) {
+			hashOptions = {};
+			each(hashExprs, function (exprs, key) {
+				hashOptions[exprs.key] = key;
+			})
+		}
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {
@@ -102,7 +114,7 @@ module.exports = {
 					var filename = scope.peek('scope.filename');
 					var lineNumber = scope.peek('scope.lineNumber');
 					dev.warn(
-						(filename ? filename + ': ' : '') +
+						(filename ? filename + ':' : '') +
 						(lineNumber ? lineNumber + ': ' : '') +
 						'%index is deprecated. Use scope.index instead.'
 					);
@@ -115,7 +127,7 @@ module.exports = {
 					var filename = scope.peek('scope.filename');
 					var lineNumber = scope.peek('scope.lineNumber');
 					dev.warn(
-						(filename ? filename + ': ' : '') +
+						(filename ? filename + ':' : '') +
 						(lineNumber ? lineNumber + ': ' : '') +
 						'@index is deprecated. Use scope.index instead.'
 					);
@@ -129,6 +141,16 @@ module.exports = {
 			if (asVariable) {
 				aliases[asVariable] = item;
 			}
+
+			if (!isEmptyObject(hashOptions)) {
+				if (hashOptions.value) {
+					aliases[hashOptions.value] = item;
+				}
+				if (hashOptions.index) {
+					aliases[hashOptions.index] = i;
+				}
+			}
+
 			result.push(helperOptions.fn(
 				scope
 				.add(aliases, { notContext: true })
