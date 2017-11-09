@@ -7062,6 +7062,22 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "012345");
 	});
 
+	QUnit.test("section iteration of property using bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items['foo:bar']}}");
+
+		equal(teardown(), 0);
+	});
+
+	QUnit.test("section iteration of property using bracket notation should warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn("1: unexpected closing tag {{/items}} expected {{/items['foo:bar']}}");
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items}}");
+
+		equal(teardown(), 1);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
