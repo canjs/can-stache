@@ -2774,8 +2774,8 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("Rendering indicies of an array with %index + offset (#1078)", function () {
-		var template = stache("<ul>{{#each list}}<li>{{%index 5}} {{.}}</li>{{/each}}</ul>");
+	test("Rendering indicies of an array with @index + offset (#1078)", function () {
+		var template = stache("<ul>{{#each list}}<li>{{@index 5}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -5122,7 +5122,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Helper each inside a text section (attribute) (#8)', function(assert){
-		var template = stache('<div class="{{#each list}}{{.}} {{/}}"></div>');
+		var template = stache('<div class="{{#each list}}{{.}} {{/each}}"></div>');
 
 		var vm = new SimpleMap({
 			list: new DefineList(['one','two'])
@@ -5197,7 +5197,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[0]), 'Kevin Phillips', 'updated value for person().name');
 	});
 
-	test("each values update when replaced in a can map (#62)", function () {
+	test("each values update when replaced in a SimpleMap (#62)", function () {
 		var template = stache("{{#each this}}<p>{{.}}</p>{{/each}}");
 		var div = doc.createElement('div');
 		var vm = new SimpleMap({

@@ -49,7 +49,6 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 	var method = this.methodExpr.value(scope, helperScope);
 	// TODO: remove this hack
 	var isHelper = this.isHelper = this.methodExpr.isHelper;
-
 	var getArgs = this.args(scope, helperScope);
 
 	var computeFn = function(newVal){

@@ -139,7 +139,8 @@ var helpers = {
 							.add(aliases, { notContext: true })
 							.add({ index: index }, { special: true })
 							.add(item),
-						options.options, parentNodeList
+						options.options,
+						parentNodeList
 					);
 				};
 
@@ -151,11 +152,11 @@ var helpers = {
 
 		var expr = resolved,
 			result;
+
 		if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr)) {
 			result = [];
 			canReflect.each(expr, function(val, key){
 				var value = new KeyObservable(expr, key);
-
 				aliases = {
 					"%key": key,
 					"@key": key
@@ -204,15 +205,14 @@ var helpers = {
 					options.scope
 						.add(aliases, { notContext: true })
 						.add({ key: key }, { special: true })
-						.add(value))
-				);
+						.add(value)
+				));
 			});
 
 			return options.stringOnly ? result.join('') : result;
 		} else if(Array.isArray(expr)) {
 			result = [];
 			canReflect.each(expr, function(value, index){
-
 				aliases = {
 					"%index": index,
 					"@index": index
@@ -305,7 +305,6 @@ var helpers = {
 				if (asVariable) {
 					aliases[asVariable] = value;
 				}
-
 				if (!isEmptyObject(hashOptions)) {
 					if (hashOptions.value) {
 						aliases[hashOptions.value] = value;
@@ -318,18 +317,18 @@ var helpers = {
 					options.scope
 						.add(aliases, { notContext: true })
 						.add({ key: key }, { special: true })
-						.add(value))
-				);
+						.add(value)
+				));
 			});
 			return options.stringOnly ? result.join('') : result;
 		}
 	},
-	"%index": function(offset, options) {
+	"@index": function(offset, options) {
 		if (!options) {
 			options = offset;
 			offset = 0;
 		}
-		var index = options.scope.peek("%index");
+		var index = options.scope.peek("@index");
 		return ""+((isFunction(index) ? index() : index) + offset);
 	},
 	'if': function (expr, options) {
