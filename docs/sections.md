@@ -1,4 +1,5 @@
 @page can-stache.Sections Sections
+@parent can-stache.pages 7
 
 Sections (`[can-stache.tags.section {{#key}}]` followed by `[can-stache.tags.close {{/key}}]`) have multiple uses 
 depending on what type of object is passed to the section. In all cases, using a section will change 
@@ -79,20 +80,20 @@ primarily used when the items in the array are primitives like strings and numbe
 ## Understanding when to use Sections with lists
 
 Section iteration will re-render the entire section for any change in the list. It is the prefered method to
-use when a list is replaced or changing significantly. Whereas [can-stache.helpers.each {{#each key}}] iteration
+use when a list is replaced or changing significantly. Whereas [can-stache.helpers.each {{#each(key)}}] iteration
 will do basic diffing and aim to only update the DOM where the change occured. When doing single list item
-changes frequently, [can-stache.helpers.each {{#each key}}] iteration is the faster choice.
+changes frequently, [can-stache.helpers.each {{#each(key)}}] iteration is the faster choice.
 
 For example, assuming "list" is a [can-list] instance:
 
-{{#if list}} will check for the truthy value of list. This is akin to checking for the truthy value of any JS object and will result to true, regardless of list contents or length.
+{{#if(list)}} will check for the truthy value of list. This is akin to checking for the truthy value of any JS object and will result to true, regardless of list contents or length.
 
-{{#if list.length}} will check for the truthy value of the length attribute. If you have an empty list, the length will be 0, so the #if will result to false and no contents will be rendered. If there is a length >= 1, this will result to true and the contents of the #if will be rendered.
+{{#if(list.length)}} will check for the truthy value of the length attribute. If you have an empty list, the length will be 0, so the #if will result to false and no contents will be rendered. If there is a length >= 1, this will result to true and the contents of the #if will be rendered.
 
-{{#each list}} and {{#list}} both iterate through an instance of [can-list], however we setup the bindings differently.
+{{#each(list)}} and {{#list}} both iterate through an instance of [can-list], however we setup the bindings differently.
 
-{{#each list}} will setup bindings on every individual item being iterated through, while {{#list}} will not. This makes a difference in two scenarios:
+{{#each(list)}} will setup bindings on every individual item being iterated through, while {{#list}} will not. This makes a difference in two scenarios:
 
 1) You have a large list, with minimal updates planned after initial render. In this case, {{#list}} might be more advantageous as there will be a faster initial render. However, if any part of the list changes, the entire {{#list}} area will be re-processed.
 
-2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use {{#each list}}, even though it will be slower on initial render(we're setting up more bindings), you'll have faster updates as there are now many sections.
+2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use {{#each(list)}}, even though it will be slower on initial render(we're setting up more bindings), you'll have faster updates as there are now many sections.

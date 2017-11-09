@@ -1,20 +1,20 @@
-@function can-stache.helpers.switch {{#switch expression}}
+@function can-stache.helpers.switch {{#switch(expression)}}
 @parent can-stache.htags 13
 
-@signature `{{#switch EXPRESSION}}BLOCK{{/switch}}`
+@signature `{{#switch(EXPRESSION)}}BLOCK{{/switch}}`
 
 Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.helpers.default] helpers.
 
 ```
-{{#switch user.type}}
-	{{#case "admin"}}
-		Pay
+{{#switch(user.type)}}
+	{{#case("admin")}}
+		<button value="edit"/>
 	{{/case}}
-	{{#case "admin"}}
-		<button/>
+	{{#case("manager")}}
+		<button value="view">
 	{{/case}}
-	{{#default}}
-		Look at data
+	{{#default()}}
+		You do not have permission!
 	{{/default}}
 {{/switch}}
 ```
@@ -31,18 +31,15 @@ Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.he
 The `switch` helper is used to render a block where one of several cases matches expr. It works just like a JavaScript switch.
 
 
-	{{#switch page}}
-
-		{{#case "cart"}}
+	{{#switch(page)}}
+		{{#case("cart")}}
 			<can-import from="cart">
 				<cart-page></cart-page>
 			</can-import>
 		{{/case}}
-
-		{{#default}}
+		{{#default()}}
 			<can-import from="home">
 				<home-page></home-page>
 			</can-import>
 		{{/default}}
-
 	{{/switch}}

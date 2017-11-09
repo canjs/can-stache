@@ -1,15 +1,16 @@
 @typedef {String} can-stache/keys/special %special
 @parent can-stache/keys
-
-[can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
+@description [can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
 provide special values that start with `%` to prevent potential collisions with
 other values. Special values should not be confused with [can-stache/keys/variable template variables] like [can-stache/keys/variable/self *self]
+
+@deprecated {4.0} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
 
 @signature `%index`
 
 When looping over an array, [can-define/list/list], or [can-list], you an use `%index` to write out the index of each property:
 
-    {{#each tasks}}
+    {{#each(tasks)}}
       <li>{{%index}} {{name}}</li>
     {{/each}}
 
@@ -21,7 +22,7 @@ Indexes start at 0.  If you want to start at 1, you can create a helper like:
 
 And use it like:
 
-    {{#each task}}
+    {{#each(task)}}
       <li>{{%indexNum}} {{name}}</li>
     {{/each}}
 
@@ -30,7 +31,7 @@ And use it like:
 Like `%index`, but provides the key value when looping through an object:
 
 ```
-{{#each style}}
+{{#each(style)}}
    {{%key}}: {{this}}
 {{/each}}
 ```

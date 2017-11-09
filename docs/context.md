@@ -35,9 +35,11 @@ Template:
 	<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
 
 Data:
-	{ person: {first: "Alexis"},
+	{
+	  person: { first: "Alexis" },
 	  last: "Abril",
-	  message: "Hello" }
+	  message: "Hello"
+    }
 
 Result:
 	<h1>Hello Alexis Abril</h1>
@@ -60,15 +62,17 @@ we could change the template to:
 
 ```
 Template:
-	<h1>{{message}} {{#person}}{{first}}  {{./last}}{{/person}}</h1>
+	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
 
 Data:
-	{ person: {first: "Alexis"},
+	{
+	  person: { first: "Alexis" },
 	  last: "Abril",
-	  message: "Hello" }
+	  message: "Hello"
+	}
 
 Result:
-	<h1>Hello Alexis </h1>
+	<h1>Hello Alexis</h1>
 ```
 
 [can-stache.tags.section Sections], [can-stache.Helpers Helpers],
@@ -76,3 +80,70 @@ and [can-component custom elements] can modify the scope used to render a subsec
 
 [can-stache.key] modifiers  like `../` and `@key` can control the context and value that
 gets returned.
+
+## Preventing Scope Walking
+
+In order to prevent walking up the scope, you can explicitly choose the context a value is read from.
+
+As mentioned above, you can explicitly read from the current context using `./` before the key:
+
+```
+Template:
+	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
+
+Data:
+	{
+	  person: { first: "Alexis" },
+	  last: "Abril",
+	  message: "Hello"
+    }
+
+Result:
+	<h1>Hello Alexis</h1>
+```
+
+You can also explicitly read from the parent context using `../`:
+
+```
+Template:
+	<h1>{{#person}}{{../message}} {{first}}{{/person}}</h1>
+
+Data:
+	{
+	  person: { first: "Alexis", message: "Hello" },
+	  message: "Hi"
+	}
+
+Result:
+	<h1>Hi Alexis</h1>
+```
+
+You can also create unique scope variables using [Hash Expressions](https://canjs.com/doc/can-stache/expressions/hash.html).
+
+in the [`{{#each}}`](http://localhost/canjs/doc/can-stache.helpers.each.html#___eachEXPRESSIONHASH_EXPRESSION__FN__else__INVERSE___each__) helper:
+
+```
+{{#each(todos, todo=value num=index)}}
+	<li data-index="{{num}}">{{todo.name}}</li>
+{{/each}}
+```
+
+and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___withHASHES__BLOCK___with__) helper:
+
+```
+{{#with(street=person.address.street city=person.address.city)}}
+    Street: {{street}}
+	City: {{city}}
+{{/with}}
+```
+
+You can also always read from the root scope using `scope.root`. This allows you to read data from the context you passed to your renderer function even in loops or recursive templates:
+
+```
+<span>{{scope.root.message}}{{name}}</span>
+{{#./child}}
+	<div>
+		{{>*self}}
+	</div>
+{{/child}}
+```

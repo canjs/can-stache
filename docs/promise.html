@@ -14,12 +14,12 @@
       </tr>
     </thead>
     <tbody>
-    {{#if items.isPending}}
+    {{#if(items.isPending)}}
       <tr class="info"><td colspan="2">Loading</td></tr>
     {{/if}}
-    {{#if items.isResolved}}
-      {{#if items.value.length}}
-        {{#each items.value}}
+    {{#if(items.isResolved)}}
+      {{#if(items.value.length)}}
+        {{#each(items.value)}}
         <tr>
           <td>{{name}}</td> <td>{{url}}</td>
         </tr>
@@ -29,7 +29,7 @@
       {{/if}}
     {{/if}}
     
-    {{#if items.isRejected}}
+    {{#if(items.isRejected)}}
       <tr class="danger">
       	<td colspan="2">Error: {{items.reason.responseJSON.message}}!</td>
   	  </tr>

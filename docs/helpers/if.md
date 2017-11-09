@@ -1,13 +1,13 @@
-@function can-stache.helpers.if {{#if expression}}
+@function can-stache.helpers.if {{#if(expression)}}
 @parent can-stache.htags 2
-@signature `{{#if EXPRESSION}}FN{{else}}INVERSE{{/if}}`
+@signature `{{#if(EXPRESSION)}}FN{{else}}INVERSE{{/if}}`
 
 Renders `FN` if `EXPRESSION` is truthy or `INVERSE` if `EXPRESSION`
 is falsey. Both `FN` and `INVERSE` will be rendered with the
 current scope.
 
 ```
-{{#if person.isAwake() }} Hello {{/if}}
+{{#if(person.isAwake())}} Hello {{/if}}
 ```
 
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.
@@ -21,15 +21,15 @@ if `EXPRESSION` is falsey and [can-stache.helpers.else] is used.
 
 ## Use
 
-`{{#if key}}` provides explicit conditional truthy tests. For example,
+`{{#if(key)}}` provides explicit conditional truthy tests. For example,
 
 The template:
 
-    {{#if user.isFemale}}
-      {{#if user.isMarried}}
+    {{#if(user.isFemale)}}
+      {{#if(user.isMarried)}}
         Mrs
       {{/if}}
-      {{#if user.isSingle}}
+      {{#if(user.isSingle)}}
         Miss
       {{/if}}
     {{/if}}
@@ -44,8 +44,8 @@ Results in:
 
 If can be used with [can-stache.helpers.else {{else}}] too. For example,
 
-    {{#if user.isFemale}}
-      {{#if user.isMarried}}
+    {{#if(user.isFemale)}}
+      {{#if(user.isMarried)}}
         Mrs
       {{else}}
         Miss

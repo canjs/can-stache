@@ -1,14 +1,14 @@
-@function can-stache.helpers.with {{#with expression}}
+@function can-stache.helpers.with {{#with(expression)}}
 @parent can-stache.htags 6
 
 Changes the context within a block.
 
-@signature `{{#with EXPRESSION}}BLOCK{{/with}}`
+@signature `{{#with(EXPRESSION)}}BLOCK{{/with}}`
 
 Renders `BLOCK` with the result of `EXPRESSION` added to the top of the [can-view-scope].
 
 ```
-{{#with person.address}}
+{{#with(person.address)}}
 	Street: {{street}}
 	City: {{city}}
 {{/with}}
@@ -19,12 +19,12 @@ Renders `BLOCK` with the result of `EXPRESSION` added to the top of the [can-vie
 @param {can-stache.sectionRenderer} BLOCK A template that is rendered
 with the context of the `EXPRESSION`'s value.
 
-@signature `{{#with HASHES}}BLOCK{{/with}}`
+@signature `{{#with(HASHES)}}BLOCK{{/with}}`
 
 Renders `BLOCK` with the key-value pairs from a [can-stache/expressions/hash] added to the top of the [can-view-scope].
 
 ```
-{{#with innerStreet=person.address.street innerCity=person.address.city}}
+{{#with(innerStreet=person.address.street innerCity=person.address.city)}}
     Street: {{innerStreet}}
     City: {{innerCity}}
 {{/with}}
@@ -39,12 +39,12 @@ with the hashes added to the context.
 
 ## Use
 
-`{{#with}}` renders a subsection with a new context added to the [can-view-scope].
+`{{#with()}}` renders a subsection with a new context added to the [can-view-scope].
 For example:
 
 ```
 TEMPLATE:
-	{{#with person.address}}
+	{{#with(person.address)}}
 		Street: {{street}}
 		City: {{city}}
 	{{/with}}
@@ -60,7 +60,7 @@ The new context can be a lookup expression, or a set of hashes which are taken t
 
 ```
 TEMPLATE:
-	{{#with innerStreet=person.address.street innerCity=person.address.city}}
+	{{#with(innerStreet=person.address.street innerCity=person.address.city)}}
 		Street: {{innerStreet}}
 		City: {{innerCity}}
 	{{/with}}
@@ -73,12 +73,12 @@ RESULT:
 ```
 
 
-The difference between `{{#with}}` and the default [can-stache.tags.section]
+The difference between `{{#with()}}` and the default [can-stache.tags.section]
 is that the subsection `BLOCK` is rendered no matter what:
 
 ```
 TEMPLATE:
-	{{#with person.address}}
+	{{#with(person.address)}}
 		Street: {{street}}
 		City: {{city}}
 	{{/with}}

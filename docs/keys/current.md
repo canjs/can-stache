@@ -9,7 +9,7 @@ Only looks up `key` in the current context.  Returns `undefined` if
 not found.
 
 ```
-{{#each todo}}
+{{#each(todo)}}
   <input {($checked)}="./complete"/> {{./name}}
 {{/each}}
 ```

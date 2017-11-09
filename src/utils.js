@@ -3,6 +3,9 @@ var Observation = require('can-observation');
 var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
+var dev = require('can-log/dev/dev');
+var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var each = require('can-util/js/each/each');
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 	// ## can.view.Options
@@ -88,18 +91,72 @@ module.exports = {
 	getItemsFragContent: function(items, helperOptions, scope, asVariable) {
 		var result = [],
 			len = observationReader.get(items, 'length'),
-			isObservable = canReflect.isObservableLike(items);
+			isObservable = canReflect.isObservableLike(items),
+			hashExprs = helperOptions.exprData && helperOptions.exprData.hashExprs,
+			hashOptions;
+
+		// Check if using hash
+		if (!isEmptyObject(hashExprs)) {
+			hashOptions = {};
+			each(hashExprs, function (exprs, key) {
+				hashOptions[exprs.key] = key;
+			})
+		}
 
 		for (var i = 0; i < len; i++) {
 			var aliases = {
 				"%index": i
 			};
+
+			//!steal-remove-start
+			Object.defineProperty(aliases, '%index', {
+				get: function() {
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
+					dev.warn(
+						(filename ? filename + ':' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'%index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+
+			Object.defineProperty(aliases, '@index', {
+				get: function() {
+					var filename = scope.peek('scope.filename');
+					var lineNumber = scope.peek('scope.lineNumber');
+					dev.warn(
+						(filename ? filename + ':' : '') +
+						(lineNumber ? lineNumber + ': ' : '') +
+						'@index is deprecated. Use scope.index instead.'
+					);
+					return i;
+				}
+			});
+			//!steal-remove-end
+
 			var item = isObservable ? new KeyObservable(items, i) :items[i];
 
 			if (asVariable) {
 				aliases[asVariable] = item;
 			}
-			result.push(helperOptions.fn(scope.add(aliases, { notContext: true }).add(item)));
+
+			if (!isEmptyObject(hashOptions)) {
+				if (hashOptions.value) {
+					aliases[hashOptions.value] = item;
+				}
+				if (hashOptions.index) {
+					aliases[hashOptions.index] = i;
+				}
+			}
+
+			result.push(helperOptions.fn(
+				scope
+				.add(aliases, { notContext: true })
+				.add({ index: i }, { special: true })
+				.add(item))
+			);
 		}
 		return result;
 	},

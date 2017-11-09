@@ -1,13 +1,13 @@
-@function can-stache.helpers.log {{log}}
+@function can-stache.helpers.log {{log()}}
 @parent can-stache.htags 9
 
-@signature `{{ log([EXPRESSION]) }}`
+@signature `{{log([EXPRESSION])}}`
 
 `console.log`s the current context or the result of the provided expressions.
 
 ```
-{{log}}
-{{ log(person.name, person.age)  }}
+{{log()}}
+{{log(person.name, person.age)}}
 ```
 
 

@@ -26,7 +26,7 @@ Or they can makeup the method, helper, arguments and hash value parts of
 Looks up `key` on the return value of `CALL_EXPRESSION`.
 
 ```
-{{#each Todo.getList(complete=completed).value}}
+{{#each(Todo.getList(complete=completed).value)}}
 ```
 
   @param {can-stache/expressions/call} CALL_EXPRESSION A

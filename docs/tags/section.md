@@ -66,7 +66,7 @@ that can call the `FN` or `INVERSE` helpers to build the content that
 should replace these tags.
 
 ```
-<p>{{#countTo number}}{{num}}{{/countTo}}</p>
+<p>{{#countTo(number)}}{{num}}{{/countTo}}</p>
 ```
 
 Helpers, with their direct access to subsection renderers and scope
