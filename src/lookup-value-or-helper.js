@@ -15,7 +15,7 @@ function lookupValueOrHelper(key, scope, helperOptions, readOptions) {
 	// anyway. This is for when foo is a helper in `{{foo}}`.
 	if(scopeKeyData.initialValue === undefined || key in mustacheHelpers.helpers) {
 		var helper = mustacheHelpers.getHelper(key, helperOptions);
-		result.helper = helper && helper.fn;
+		result.helper = helper;
 	}
 	return result;
 }

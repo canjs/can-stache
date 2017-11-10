@@ -33,13 +33,19 @@ Call.prototype.args = function(scope, helperOptions){
 			value: value
 		});
 	}
-	return function(){
+	return function(doNotWrapArguments){
 		var finalArgs = [];
 		if(!isEmptyObject(hashExprs)){
 			finalArgs.hashExprs = hashExprs;
 		}
 		for(var i = 0, len = args.length; i < len; i++) {
-			finalArgs[i] = args[i].call ? canReflect.getValue( args[i].value ) : expressionHelpers.toCompute( args[i].value );
+			if (doNotWrapArguments) {
+				finalArgs[i] = args[i].value;
+			} else {
+				finalArgs[i] = args[i].call ?
+					canReflect.getValue( args[i].value ) :
+					expressionHelpers.toCompute( args[i].value );
+			}
 		}
 		return finalArgs;
 	};
@@ -47,19 +53,20 @@ Call.prototype.args = function(scope, helperOptions){
 
 Call.prototype.value = function(scope, helperScope, helperOptions){
 	var method = this.methodExpr.value(scope, helperScope);
+	var metadata = method.metadata || {};
+
 	// TODO: remove this hack
-	var isHelper = this.isHelper = this.methodExpr.isHelper;
+	assign(this, metadata);
+
 	var getArgs = this.args(scope, helperScope);
 
 	var computeFn = function(newVal){
-		var func = canReflect.getValue( method );
+		var func = canReflect.getValue( method.fn || method );
 
 		if(typeof func === "function") {
-			var args = getArgs();
+			var args = getArgs(metadata.isLiveBound);
 
-			// if fn/inverse is needed, add after this
-
-			if(isHelper && helperOptions) {
+			if(metadata.isHelper && helperOptions) {
 				// Some helpers assume options has a helpers object that is an instance of Scope.Options
 				helperOptions.helpers = helperOptions.helpers || new Scope.Options({});
 				if(args.hashExprs && helperOptions.exprData){
