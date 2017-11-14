@@ -341,22 +341,12 @@ var makeSimpleHelper = function(fn) {
 	};
 };
 
-var registerSimpleHelper = function(name, callback) {
-	registerHelper(name, makeSimpleHelper(callback));
-};
-
 module.exports = {
 	registerHelper: registerHelper,
 
-	registerSimpleHelper: function() {
-		//!steal-remove-start
-		dev.warn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
-		//!steal-remove-end
-
-		registerSimpleHelper.apply(this, arguments);
+	addHelper: function(name, callback) {
+		return registerHelper(name, makeSimpleHelper(callback));
 	},
-
-	addHelper: registerSimpleHelper,
 
 	// add helpers that set up their own internal live-binding
 	// these helpers will not be wrapped in computes and will

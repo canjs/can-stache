@@ -471,7 +471,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Handlebars advanced helpers (from docs)", function () {
-		stache.registerSimpleHelper('exercise', function (group, action, num, options) {
+		stache.addHelper('exercise', function (group, action, num, options) {
 
 			if (group && group.length > 0 && action && num > 0) {
 				return options.fn({
@@ -4079,9 +4079,9 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(frag.firstChild), 'My Meals', 'shows if case');
 	});
 
-	test('registerSimpleHelper', 3, function() {
+	test('addHelper', 3, function() {
 		var template = stache('<div>Result: {{simple first second}}</div>');
-		stache.registerSimpleHelper('simple', function (first, second) {
+		stache.addHelper('simple', function (first, second) {
 			equal(first, 2);
 			equal(second, 4);
 			return first + second;
@@ -6644,23 +6644,6 @@ function makeTest(name, doc, mutation) {
 		list.splice(1, 0, "b")
 
 		QUnit.equal(innerHTML(div), "012345");
-	});
-
-	testHelpers.dev.devOnlyTest('deprecation warning shown for registerSimpleHelper', function() {
-		var template = stache('<div>{{simple "foo"}}</div>');
-
-		var teardown = testHelpers.dev.willWarn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
-
-		stache.registerSimpleHelper('simple', function(str) {
-			QUnit.equal(str, "foo");
-			return str + "!!!";
-		});
-
-		QUnit.equal(teardown(), 1, "warning shown");
-
-		var frag = template();
-
-		QUnit.equal(innerHTML(frag.firstChild), 'foo!!!');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
