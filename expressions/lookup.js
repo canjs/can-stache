@@ -3,6 +3,7 @@ var lookupValueOrHelper = require("../src/lookup-value-or-helper");
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+var assign = require('can-util/js/assign/assign');
 
 // ### Lookup
 // `new Lookup(String, [Expression])`
@@ -17,9 +18,9 @@ Lookup.prototype.value = function(scope, helperOptions){
 	if (this.rootExpr) {
 		return expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {});
 	} else {
-		// TODO: remove this.  This is hacky.
 		var result = lookupValueOrHelper(this.key, scope, helperOptions);
-		this.isHelper = result.helper && !result.helper.callAsMethod;
+		// TODO: remove this hack
+		assign(this, result.metadata);
 		return result.helper || result.value;
 	}
 };

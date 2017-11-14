@@ -4041,14 +4041,16 @@ function makeTest(name, doc, mutation) {
 
 	test('using #each when toggling between list and null', function() {
 		var state = new SimpleMap();
+		var div = doc.createElement('div');
 		var frag = stache('{{#each deepness.rows}}<div></div>{{/each}}')(state);
+		div.appendChild(frag);
 
 		state.set('deepness', {
 			rows: new DefineList(['test'])
 		});
 		state.set('deepness', null);
 
-		equal(getChildNodes(frag).length, 1, "only the placeholder textnode");
+		equal(div.getElementsByTagName('div').length, 0, "only the placeholder textnode");
 	});
 
 	test("compute defined after template (#1617)", function(){
@@ -6491,24 +6493,28 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("#each will call expression should optimized for performance", function(){
+	test("#each with call expression should be optimized for performance", function(){
+		var div = doc.createElement('div');
 		var count = 0;
-		stache.registerHelper('myEach', function() {
+
+		var eachHelper = helpersCore.getHelper('each');
+		var origEach = eachHelper.fn;
+		eachHelper.fn = function() {
 			count++;
-			return helpersCore.helpers.each.apply(this, arguments);
-		})
-		var template = stache("{{#myEach(.)}}<p>{{.}}</p>{{/myEach}}");
-		var map = new DefineList(["foo", "baz"]);
-		
-		template(SimpleObservable(map));
+			return origEach.apply(this, arguments);
+		};
+		var template = stache("{{#each(this)}}{{this}} {{/each}}");
+		var listCompute = new SimpleObservable([ "one", "two" ]);
 
-		map.push("qux", "quux");
-		map.splice(1, 0, "bar");
-		map.pop();
-		map.shift();
-		map.unshift("foo");
+		var frag = template(listCompute);
+		div.appendChild(frag);
 
-		equal(count, 1);
+		QUnit.equal(innerHTML(div), "one two ");
+
+		listCompute.set(["one", "two", "three"]);
+		QUnit.equal(innerHTML(div), "one two three ");
+
+		QUnit.equal(count, 1, "#each helper should only be called once");
 	});
 
 	test("#with works with hash expression in call expression", function(){
@@ -7023,6 +7029,23 @@ function makeTest(name, doc, mutation) {
 		list.splice(1, 0, "b")
 
 		QUnit.equal(innerHTML(div), "012345");
+	});
+
+	testHelpers.dev.devOnlyTest('deprecation warning shown for registerSimpleHelper', function() {
+		var template = stache('<div>{{simple "foo"}}</div>');
+
+		var teardown = testHelpers.dev.willWarn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
+
+		stache.registerSimpleHelper('simple', function(str) {
+			QUnit.equal(str, "foo");
+			return str + "!!!";
+		});
+
+		QUnit.equal(teardown(), 1, "warning shown");
+
+		var frag = template();
+
+		QUnit.equal(innerHTML(frag.firstChild), 'foo!!!');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
