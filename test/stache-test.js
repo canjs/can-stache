@@ -7031,6 +7031,23 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "012345");
 	});
 
+	testHelpers.dev.devOnlyTest('deprecation warning shown for registerSimpleHelper', function() {
+		var template = stache('<div>{{simple "foo"}}</div>');
+
+		var teardown = testHelpers.dev.willWarn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
+
+		stache.registerSimpleHelper('simple', function(str) {
+			QUnit.equal(str, "foo");
+			return str + "!!!";
+		});
+
+		QUnit.equal(teardown(), 1, "warning shown");
+
+		var frag = template();
+
+		QUnit.equal(innerHTML(frag.firstChild), 'foo!!!');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

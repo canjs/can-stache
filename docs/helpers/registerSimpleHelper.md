@@ -1,6 +1,7 @@
 @function can-stache.registerSimpleHelper registerSimpleHelper
 @description Register a helper that gets passed values.
 @parent can-stache.static
+@deprecated {4.0} Deprecated in favor of [can-stache.addHelper].
 
 @signature `stache.registerSimpleHelper(name, helper)`
 
