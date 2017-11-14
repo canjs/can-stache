@@ -1,7 +1,7 @@
 @typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.simpleHelper(arg,options) simpleHelper
 @parent can-stache.types
 
-@description A helper function passed to [can-stache.registerSimpleHelper].
+@description A helper function passed to [can-stache.addHelper].
 
 @param {*} [...arg] Arguments passed from the tag. After the helper
 name, any space separated [can-stache.key keys], numbers or
@@ -17,7 +17,7 @@ Rendered with
 
 Will call a `madLib` helper with the following arguements.
 
-    stache.registerSimpleHelper('madLib',
+    stache.addHelper('madLib',
       function(subject, verb, number){
         // subject -> "Lebron James"
         // verb -> "swept"
@@ -54,7 +54,7 @@ If the helper is called __within a tag__ like:
 
 The returned function is called with the `<ul>` element:
 
-    stache.registerSimpleHelper("sortable",function(){
+    stache.addHelper("sortable",function(){
       return function(el){
         $(el).slider();
       }
@@ -67,7 +67,7 @@ If the helper is called __between tags__ like:
 The returned function is called with a temporary element. The
 following helper would be called with a temporary `<li>` element:
 
-    stache.registerSimpleHelper("items",function(){
+    stache.addHelper("items",function(){
       return function(li){
 
       }
