@@ -57,30 +57,9 @@ var helpers = {
 				argExprs = options.exprData.argExprs,
 				hashExprs = options.exprData.hashExprs,
 				resolved = peek(items),
-				asVariable,
 				hashOptions,
 				aliases,
 				key;
-
-			if ((argsLen === 2 && !(argExprs[1].expr instanceof Hashes)) || (argsLen === 3 && argExprs[1].key === 'as')) {
-				asVariable = args[argsLen - 1];
-
-				if (typeof asVariable !== 'string') {
-					asVariable = argExprs[argsLen - 1].key;
-				}
-				//!steal-remove-start
-				var filename = options.scope.peek('scope.filename');
-				var lineNumber = options.scope.peek('scope.lineNumber');
-				dev.warn(
-					(filename ? filename + ':' : '') +
-					(lineNumber ? lineNumber + ': ' : '') +
-					'the `as` keyword is deprecated. Use ' +
-					'{{#' + options.nodeList.expression.split(' ')[0] + ' ' +
-					options.nodeList.expression.split(' ')[1] + ' ' + asVariable + '=value}} ' +
-					'instead of {{#' + options.nodeList.expression + '}}.'
-				);
-				//!steal-remove-end
-			}
 
 			// Check if using hash
 			if (!isEmptyObject(hashExprs)) {
@@ -104,41 +83,7 @@ var helpers = {
 					nodeLists.update(options.nodeList, [el]);
 
 					var cb = function (item, index, parentNodeList) {
-						var aliases = {
-							"%index": index
-						};
-
-						//!steal-remove-start
-						Object.defineProperty(aliases, '%index', {
-							get: function() {
-								var filename = options.scope.peek('scope.filename');
-								var lineNumber = options.scope.peek('scope.lineNumber');
-								dev.warn(
-									(filename ? filename + ':' : '') +
-									(lineNumber ? lineNumber + ': ' : '') +
-									'%index is deprecated. Use scope.index instead.'
-								);
-								return index;
-							}
-						});
-
-						Object.defineProperty(aliases, '@index', {
-							get: function() {
-								var filename = options.scope.peek('scope.filename');
-								var lineNumber = options.scope.peek('scope.lineNumber');
-								dev.warn(
-									(filename ? filename + ':' : '') +
-									(lineNumber ? lineNumber + ': ' : '') +
-									'@index is deprecated. Use scope.index instead.'
-								);
-								return index;
-							}
-						});
-						//!steal-remove-end
-
-						if (asVariable) {
-							aliases[asVariable] = item;
-						}
+						var aliases = {};
 
 						if (!isEmptyObject(hashOptions)) {
 							if (hashOptions.value) {
@@ -169,48 +114,14 @@ var helpers = {
 				result;
 
 			if (!!expr && utils.isArrayLike(expr)) {
-				result = utils.getItemsFragContent(expr, options, options.scope, asVariable);
+				result = utils.getItemsFragContent(expr, options, options.scope);
 				return options.stringOnly ? result.join('') : result;
 			} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
 				result = [];
 				canReflect.each(expr, function(val, key){
 					var value = new KeyObservable(expr, key);
-					aliases = {
-						"%key": key,
-						"@key": key
-					};
+					aliases = {};
 
-					//!steal-remove-start
-					Object.defineProperty(aliases, '%key', {
-						get: function() {
-							var filename = options.scope.peek('scope.filename');
-							var lineNumber = options.scope.peek('scope.lineNumber');
-							dev.warn(
-								(filename ? filename + ':' : '') +
-								(lineNumber ? lineNumber + ': ' : '') +
-								'%key is deprecated. Use scope.key instead.'
-							);
-							return key;
-						}
-					});
-
-					Object.defineProperty(aliases, '@key', {
-						get: function() {
-							var filename = options.scope.peek('scope.filename');
-							var lineNumber = options.scope.peek('scope.lineNumber');
-							dev.warn(
-								(filename ? filename + ':' : '') +
-								(lineNumber ? lineNumber + ': ' : '') +
-								'@key is deprecated. Use scope.key instead.'
-							);
-							return key;
-						}
-					});
-					//!steal-remove-end
-
-					if (asVariable) {
-						aliases[asVariable] = value;
-					}
 					if (!isEmptyObject(hashOptions)) {
 						if (hashOptions.value) {
 							aliases[hashOptions.value] = value;
@@ -237,7 +148,7 @@ var helpers = {
 				options = offset;
 				offset = 0;
 			}
-			var index = options.scope.peek("@index");
+			var index = options.scope.peek("scope.index");
 			return ""+((isFunction(index) ? index() : index) + offset);
 		}
 	},
@@ -430,22 +341,12 @@ var makeSimpleHelper = function(fn) {
 	};
 };
 
-var registerSimpleHelper = function(name, callback) {
-	registerHelper(name, makeSimpleHelper(callback));
-};
-
 module.exports = {
 	registerHelper: registerHelper,
 
-	registerSimpleHelper: function() {
-		//!steal-remove-start
-		dev.warn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
-		//!steal-remove-end
-
-		registerSimpleHelper.apply(this, arguments);
+	addHelper: function(name, callback) {
+		return registerHelper(name, makeSimpleHelper(callback));
 	},
-
-	addHelper: registerSimpleHelper,
 
 	// add helpers that set up their own internal live-binding
 	// these helpers will not be wrapped in computes and will

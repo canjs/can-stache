@@ -8,7 +8,7 @@
 Registers a helper function.
 Pass the name of the helper followed by the
 function to which stache should invoke. See [can-stache.Helpers] for more details on using helpers
-and [can-stache.registerSimpleHelper] to avoid converting computes;
+and [can-stache.addHelper] to avoid converting computes;
 
 ```js
 stache.registerHelper("upper", function(str){

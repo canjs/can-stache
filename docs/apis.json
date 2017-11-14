@@ -9,8 +9,9 @@
 			"can-stache.sectionRenderer"
 		]},
 		{"static": [
+			"can-stache.addHelper",
+			"can-stache.addLiveHelper",
 			"can-stache.registerHelper",
-			"can-stache.registerSimpleHelper",
 			"can-stache.registerConverter",
 			"can-stache.safeString"
 		]},
