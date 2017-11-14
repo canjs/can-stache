@@ -2760,8 +2760,8 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering indicies of an array with %index", function () {
-		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
+	test("Rendering indices of an array with scope.index", function () {
+		var template = stache("<ul>{{#each list}}<li>{{scope.index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2774,7 +2774,7 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("Rendering indicies of an array with @index + offset (#1078)", function () {
+	test("Rendering indices of an array with @index + offset (#1078)", function () {
 		var template = stache("<ul>{{#each list}}<li>{{@index 5}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
@@ -2789,7 +2789,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Passing indices into helpers as values", function () {
-		var template = stache("<ul>{{#each list}}<li>{{test %index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{test scope.index}} {{.}}</li>{{/each}}</ul>");
 		var list = [0, 1, 2, 3];
 
 		var lis = template({
@@ -2805,9 +2805,9 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("Rendering live bound indicies with #each, %index and a simple DefineList", function () {
+	test("Rendering live bound indices with #each, scope.index and a simple DefineList", function () {
 		var list = new DefineList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{scope.index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -2851,8 +2851,8 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), '2 e', "fifth item now the 3rd item");
 	});
 
-	test('Rendering keys of an object with #each and %key', function () {
-		var template = stache("<ul>{{#each obj}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
+	test('Rendering keys of an object with #each and scope.key', function () {
+		var template = stache("<ul>{{#each obj}}<li>{{scope.key}} {{.}}</li>{{/each}}</ul>");
 		var obj = {
 			foo: 'string',
 			bar: 1,
@@ -2871,9 +2871,9 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(lis[2]), 'baz false', "third key value pair rendered");
 	});
 
-	test('Live bound iteration of keys of a SimpleMap with #each and %key', function () {
+	test('Live bound iteration of keys of a SimpleMap with #each and scope.key', function () {
 		// delete stache._helpers.foo;
-		var template = stache("<ul>{{#each map}}<li>{{%key}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each map}}<li>{{scope.key}} {{.}}</li>{{/each}}</ul>");
 		var map = new SimpleMap({
 			foo: 'string',
 			bar: 1,
@@ -2998,9 +2998,9 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('%index is correctly calculated when there are identical elements in the array', function () {
+	test('scope.index is correctly calculated when there are identical elements in the array', function () {
 		var data = new DefineList(['foo', 'bar', 'baz', 'qux', 'foo']);
-		var tmp = stache('{{#each data}}{{%index}} {{/each}}');
+		var tmp = stache('{{#each data}}{{scope.index}} {{/each}}');
 
 		var div = doc.createElement('div');
 		var frag = tmp({
@@ -3043,9 +3043,9 @@ function makeTest(name, doc, mutation) {
 		});
 	});
 
-	test("Rendering live bound indicies with #each, %index and a simple CanList when remove first item (#613)", function () {
+	test("Rendering live bound indices with #each, scope.index and a simple CanList when remove first item (#613)", function () {
 		var list = new DefineList(['a', 'b', 'c']);
-		var template = stache("<ul>{{#each list}}<li>{{%index}} {{.}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{scope.index}} {{.}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -3173,11 +3173,11 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('Rendering keys of an object with #each and %key in a Component', function () {
+	test('Rendering keys of an object with #each and scope.key in a Component', function () {
 
 		var template = stache("<ul>" +
 		"{{#each data}}" +
-		"<li>{{%key}} : {{.}}</li>" +
+		"<li>{{scope.key}} : {{.}}</li>" +
 		"{{/data}}" +
 		"</ul>");
 
@@ -3407,7 +3407,7 @@ function makeTest(name, doc, mutation) {
 		}, 10);
 	});
 
-	test("%index in partials loaded from script templates", function () {
+	test("scope.index in partials loaded from script templates", function () {
 
 		if (doc === window.document) {
 			// add template as script
@@ -4559,9 +4559,9 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("Rendering live bound indicies with #each, %index and a simple CanList (#2067)", function () {
+	test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function () {
 		var list = new DefineList([{value:'a'}, {value:'b'}, {value: 'c'}]);
-		var template = stache("<ul>{{#each list}}<li>{{%index}} {{value}}</li>{{/each}}</ul>");
+		var template = stache("<ul>{{#each list}}<li>{{scope.index}} {{value}}</li>{{/each}}</ul>");
 
 		var tpl = template({
 			list: list
@@ -4577,7 +4577,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("%index content should be skipped by ../ (#1554)", function(){
+	test("scope.index content should be skipped by ../ (#1554)", function(){
 		var list = new DefineList(["a","b"]);
 		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
 		var frag = tmpl({items: list});
@@ -4619,12 +4619,12 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
 	});
 
-	test("keep %index working with multi-dimensional arrays (#2127)", function() {
+	test("keep scope.index working with multi-dimensional arrays (#2127)", function() {
 		var data = new SimpleMap({
 			array2 : [['asd'], ['sdf']]
 		});
 
-		var template = stache('<div>{{#each array2}}<span>{{%index}}</span>{{/each}}</div>');
+		var template = stache('<div>{{#each array2}}<span>{{scope.index}}</span>{{/each}}</div>');
 
 		var frag = template(data);
 
@@ -4772,7 +4772,7 @@ function makeTest(name, doc, mutation) {
 		equal(counter, 2, 'Counter incremented twice');
 	});
 
-	test("%index is double wrapped compute in helper (#2179)", function(){
+	test("scope.index is double wrapped compute in helper (#2179)", function(){
 		var appState = new SimpleMap({
 			todos: [
 				{ description: "Foo" },
@@ -4780,7 +4780,7 @@ function makeTest(name, doc, mutation) {
 			]
 		});
 
-		var template =  stache('{{#each todos}}<div>{{indexPlusOne %index}}</div>{{/each}}');
+		var template =  stache('{{#each todos}}<div>{{indexPlusOne scope.index}}</div>{{/each}}');
 
 		stache.registerHelper("indexPlusOne", function(val, options) {
 			var resolved = val();
@@ -4791,7 +4791,7 @@ function makeTest(name, doc, mutation) {
 		template(appState);
 	});
 
-	test("%index is double wrapped compute in helper (#2179)", function(){
+	test("scope.index is double wrapped compute in helper (#2179)", function(){
 		var appState = new SimpleMap({
 			todos: [
 				{ description: "Foo" },
@@ -4799,7 +4799,7 @@ function makeTest(name, doc, mutation) {
 			]
 		});
 
-		var template =  stache('{{#each todos}}<div>{{indexPlusOne %index}}</div>{{/each}}');
+		var template =  stache('{{#each todos}}<div>{{indexPlusOne scope.index}}</div>{{/each}}');
 
 		stache.registerHelper("indexPlusOne", function(val, options) {
 			var resolved = val();
@@ -4839,45 +4839,6 @@ function makeTest(name, doc, mutation) {
           }));
 
           equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
-	});
-
-	test("Render with #each by assigning values to a specific variable wrapped in quotes", function () {
-		var template = "{{#each animals 'animal'}}" +
-		                   "<span>{{animal.name}}</span>" +
-		               "{{/each}}";
-		var renderer = stache(template);
-		var animals = new DefineList([{ name: 'sloth' }]);
-		var frag = renderer({ animals: animals });
-		var div = doc.createElement('div');
-
-		div.appendChild(frag);
-		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
-	});
-
-	test("Render with #each by assigning values to a specific variable without quotes", function () {
-		var template = "{{#each animals animal}}" +
-		                   "<span>{{animal.name}}</span>" +
-		               "{{/each}}";
-		var renderer = stache(template);
-		var animals = new DefineList([{ name: 'sloth' }]);
-		var frag = renderer({ animals: animals });
-		var div = doc.createElement('div');
-
-		div.appendChild(frag);
-		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
-	});
-
-	test("Render with #each by assigning values to a specific variable and expressing it with `as` between list and value variable", function () {
-		var template = "{{#each animals as animal}}" +
-		                   "<span>{{animal.name}}</span>" +
-		               "{{/each}}";
-		var renderer = stache(template);
-		var animals = new DefineList([{ name: 'sloth' }]);
-		var frag = renderer({ animals: animals });
-		var div = doc.createElement('div');
-
-		div.appendChild(frag);
-		equal(div.getElementsByTagName('span')[0].innerHTML, 'sloth');
 	});
 
 	test("Partials with custom context", function () {
@@ -5341,12 +5302,12 @@ function makeTest(name, doc, mutation) {
 
 		div.innerHTML = '';
 
-		template = stache("<p>{{#each foo}}{{ bar[%index] }}{{/each}}</p>")
+		template = stache("<p>{{#each foo}}{{ bar[scope.index] }}{{/each}}</p>")
 		dom = template(data);
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');
 
-		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (Map/List data)');
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[scope.index] when iterating foo (Map/List data)');
 
 		div.innerHTML = '';
 
@@ -5354,7 +5315,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');
 
-		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[%index] when iterating foo (plain object data)');
+		equal(innerHTML(p[0]), 'thudjeek', 'correct value for bar[scope.index] when iterating foo (plain object data)');
 	});
 
 	test("Bracket expression followed by Lookup expression", function () {
@@ -6118,48 +6079,6 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.nextSibling.firstChild.firstChild.nodeValue, "John", "Got aliased value");
 	});
 
-	test("using as keyword with each throws deprecation warning with link to docs #300", function () {
-		var viewModel = new DefineMap({
-			people: [{
-				first: "John",
-				last: "Gardner"
-			}]
-		});
-
-		var checkWarnCall = testHelpers.dev.willWarn("filename.stache:1: the `as` keyword is deprecated. Use {{#each people person=value}} instead of {{#each people as person}}.");
-
-		var renderer = stache("filename.stache",
-			"{{#each people as person}}" +
-				"<span>{{person.first}}</span>" +
-				"<span>{{person.last}}</span>" +
-			"{{/each}}"
-		);
-
-		renderer(viewModel);
-		QUnit.equal(checkWarnCall(), 1, "warning shown");
-	});
-
-	test("using as keyword with each throws deprecation warning helper #300", function () {
-		var viewModel = new DefineMap({
-			people: [{
-				first: "John",
-				last: "Gardner"
-			}]
-		});
-
-		var checkWarnCall = testHelpers.dev.willWarn("filename.stache:1: the `as` keyword is deprecated. Use {{#each people person=value}} instead of {{#each people as person}}.");
-
-		var renderer = stache("filename.stache",
-			"{{#each people as person}}" +
-				"<span>{{person.first}}</span>" +
-				"<span>{{person.last}}</span>" +
-			"{{/each}}"
-		);
-
-		renderer(viewModel);
-		QUnit.equal(checkWarnCall(), 1, "warning shown");
-	});
-
 	test("can assign hash using each on an iterable map #300", function () {
 		var viewModel = new DefineMap({
 			flags: {
@@ -6301,46 +6220,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'no warning should be given');
 		QUnit.equal(childCount, 1, 'child.age should be read once');
 		QUnit.equal(parentCount, 0, 'parent.age should not be read');
-	});
-
-	testHelpers.dev.devOnlyTest("should not warn on aliases created in #each or #with (#311)", function() {
-		var teardown = testHelpers.dev.willWarn(/is not in the current scope/);
-
-		var data = new DefineMap({
-			itemsArray: [ "zero", "one" ],
-			itemsObject: { 2: "two", 3: "three" },
-			obj: { key: "4: four" }
-		});
-
-		var renderer = stache("children.stache",
-			"<ul>" +
-				"{{#each itemsArray item=value num=index}}" +
-					"<li>{{num}}: {{item}}</li>" +
-				"{{/each}}" +
-				"{{#each itemsArray}}" +
-					"<li>{{%index}}: {{this}}</li>" +
-				"{{/each}}" +
-				"{{#each itemsArray}}" +
-					"<li>{{%index}}: {{.}}</li>" +
-				"{{/each}}" +
-				"{{#each itemsObject item=value num=key}}" +
-					"<li>{{num}}: {{item}}</li>" +
-				"{{/each}}" +
-				"{{#each itemsObject}}" +
-					"<li>{{%key}}: {{this}}</li>" +
-				"{{/each}}" +
-				"{{#each itemsObject}}" +
-					"<li>{{%key}}: {{.}}</li>" +
-				"{{/each}}" +
-				"{{#with objKey=obj.key}}" +
-					"<li>{{objKey}}</li>" +
-				"{{/with}}" +
-			"</ul>"
-		);
-
-		renderer(data);
-
-		QUnit.equal(teardown(), 0, "No warnings should be given");
 	});
 
 	test("#if works with call expressions", function(){
@@ -6625,62 +6504,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[2]), "2: two" );
 	});
 
-	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #each with arrays", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
-
-		var data = {
-			itemsArray: [ "zero", "one", "two" ]
-		};
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsArray}}\n" +
-					"<li>{{%index}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer(data);
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "0: zero" );
-		QUnit.equal( innerHTML(lis[1]), "1: one" );
-		QUnit.equal( innerHTML(lis[2]), "2: two" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
-	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #each with arrays", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
-
-		var data = {
-			itemsArray: [ "zero", "one", "two" ]
-		};
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsArray}}\n" +
-					"<li>{{@index}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer(data);
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "0: zero" );
-		QUnit.equal( innerHTML(lis[1]), "1: one" );
-		QUnit.equal( innerHTML(lis[2]), "2: two" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
 	QUnit.test("using scope.key works when using #each with DefineMap", function() {
 		var data = new DefineMap({
 			itemsObj: {
@@ -6709,38 +6532,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[2]), "two: 2" );
 	});
 
-	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with DefineMap", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
-
-		var data = new DefineMap({
-			itemsObj: {
-				zero: 0,
-				one: 1,
-				two: 2
-			}
-		});
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsObj}}\n" +
-					"<li>{{%key}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer(data);
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
-		QUnit.equal( innerHTML(lis[1]), "one: 1" );
-		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
 	QUnit.test("using scope.key works when using #each with SimpleMap", function() {
 		var itemsObj = new SimpleMap({
 			zero: 0,
@@ -6765,66 +6556,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
 		QUnit.equal( innerHTML(lis[1]), "one: 1" );
 		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-	});
-
-	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with SimpleMap", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
-
-		var itemsObj = new SimpleMap({
-			zero: 0,
-			one: 1,
-			two: 2
-		});
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsObj}}\n" +
-					"<li>{{%key}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer({ itemsObj: itemsObj });
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
-		QUnit.equal( innerHTML(lis[1]), "one: 1" );
-		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
-	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with SimpleMap", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
-
-		var itemsObj = new SimpleMap({
-			zero: 0,
-			one: 1,
-			two: 2
-		});
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsObj}}\n" +
-					"<li>{{@key}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer({ itemsObj: itemsObj });
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
-		QUnit.equal( innerHTML(lis[1]), "one: 1" );
-		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
 	});
 
 	QUnit.test("using scope.key works when using #each with objects", function() {
@@ -6853,66 +6584,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[2]), "two: 2" );
 	});
 
-	testHelpers.dev.devOnlyTest("using %key shows a deprecation warning when using #each with objects", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: %key is deprecated. Use scope.key instead.");
-
-		var itemsObj = {
-			zero: 0,
-			one: 1,
-			two: 2
-		};
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsObj}}\n" +
-					"<li>{{%key}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer({ itemsObj: itemsObj });
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
-		QUnit.equal( innerHTML(lis[1]), "one: 1" );
-		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
-	testHelpers.dev.devOnlyTest("using @key shows a deprecation warning when using #each with objects", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: @key is deprecated. Use scope.key instead.");
-
-		var itemsObj = {
-			zero: 0,
-			one: 1,
-			two: 2
-		};
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-				"{{#each itemsObj}}\n" +
-					"<li>{{@key}}: {{.}}</li>\n" +
-				"{{/each}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer({ itemsObj: itemsObj });
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "zero: 0" );
-		QUnit.equal( innerHTML(lis[1]), "one: 1" );
-		QUnit.equal( innerHTML(lis[2]), "two: 2" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
 	QUnit.test("using scope.index works when using #array", function() {
 		var data = new DefineMap({
 			itemsArray: [ "zero", "one", "two" ]
@@ -6935,62 +6606,6 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(lis[0]), "0: zero" );
 		QUnit.equal( innerHTML(lis[1]), "1: one" );
 		QUnit.equal( innerHTML(lis[2]), "2: two" );
-	});
-
-	testHelpers.dev.devOnlyTest("using %index shows a deprecation warning when using #array", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: %index is deprecated. Use scope.index instead.");
-
-		var data = new DefineMap({
-			itemsArray: [ "zero", "one", "two" ]
-		});
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-			"{{#itemsArray}}\n" +
-			"<li>{{%index}}: {{.}}</li>\n" +
-			"{{/itemsArray}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer(data);
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "0: zero" );
-		QUnit.equal( innerHTML(lis[1]), "1: one" );
-		QUnit.equal( innerHTML(lis[2]), "2: two" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
-	});
-
-	testHelpers.dev.devOnlyTest("using @index shows a deprecation warning when using #array", function() {
-		var teardown = testHelpers.dev.willWarn("index.stache:2: @index is deprecated. Use scope.index instead.");
-
-		var data = new DefineMap({
-			itemsArray: [ "zero", "one", "two" ]
-		});
-
-		var renderer = stache("index.stache",
-			"<ul>\n" +
-			"{{#itemsArray}}\n" +
-			"<li>{{@index}}: {{.}}</li>\n" +
-			"{{/itemsArray}}\n" +
-			"</ul>"
-		);
-
-		var div = doc.createElement('div');
-		var frag = renderer(data);
-		div.appendChild(frag);
-
-		var lis = div.getElementsByTagName('li');
-
-		QUnit.equal( innerHTML(lis[0]), "0: zero" );
-		QUnit.equal( innerHTML(lis[1]), "1: one" );
-		QUnit.equal( innerHTML(lis[2]), "2: two" );
-
-		QUnit.equal(teardown(), 3, '3 warnings shown');
 	});
 
 	QUnit.test("values can be read from the scope passed to a stache renderer using {{scope.root}}", function() {
