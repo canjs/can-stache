@@ -7054,6 +7054,38 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "012345");
 	});
 
+	testHelpers.dev.devOnlyTest("section iteration of property using bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("passing bracket notation to method should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#eq(items['foo:bar'], 'baz')}}qux{{/eq}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("reading current scope with bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#['foo:bar']}}qux{{/['foo:bar']}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("section iteration of property using bracket notation should warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn("1: unexpected closing tag {{/items['foo:bar']}} expected {{/items}}");
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items['foo:bar']}}");
+
+		equal(teardown(), 1);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
