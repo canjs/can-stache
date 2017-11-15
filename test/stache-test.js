@@ -5861,7 +5861,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(p[3]), 'Lunch time 3', 'updated value for ["name.full"] in a #with expression');
 	});
 
-	test("Templates can refer to themselves with {{>*self .}} (#159)", function() {
+	test("Templates can refer to themselves with {{>scope.view .}} (#159)", function() {
 		var thing = new DefineMap({
 			child: {
 				hasThing: true,
@@ -5878,7 +5878,7 @@ function makeTest(name, doc, mutation) {
 			"{{#child}}" +
 				"<span>" +
 					"{{#if hasThing}}" +
-						"{{>*self .}}" +
+						"{{>scope.view .}}" +
 					"{{/if}}" +
 				"</span>" +
 			"{{/child}}"
@@ -5907,7 +5907,7 @@ function makeTest(name, doc, mutation) {
 			"{{#child}}" +
 				"<span>" +
 					"{{#if hasThing}}" +
-						"{{>*self}}" +
+						"{{>scope.view}}" +
 					"{{/if}}" +
 				"</span>" +
 			"{{/child}}"
@@ -5940,7 +5940,7 @@ function makeTest(name, doc, mutation) {
 				"<span>" +
 					"{{#if hasThing}}" +
 						"{{>somePartial}}" +
-						"{{>*self}}" +
+						"{{>scope.view}}" +
 					"{{/if}}" +
 				"</span>" +
 			"{{/child}}"
@@ -5970,7 +5970,7 @@ function makeTest(name, doc, mutation) {
 				"<span>" +
 					"{{someProp}}" +
 					"{{#if hasThing}}" +
-						"{{>*self someProp}}" +
+						"{{>scope.view someProp}}" +
 					"{{/if}}" +
 				"</span>" +
 			"{{/child}}"
