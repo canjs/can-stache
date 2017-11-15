@@ -7086,6 +7086,41 @@ function makeTest(name, doc, mutation) {
 		equal(teardown(), 1);
 	});
 
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'end' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		var tagHandler = viewCallbacks.tagHandler;
+
+		viewCallbacks.tagHandler = function (context, tagName, options){
+			equal(options.scope.peek('lineNumber'), 3);
+		}
+
+		stache("foo\nbar\n<cust-elem/>\nbaz")();
+
+		viewCallbacks.tagHandler = tagHandler;
+	});
+
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'close' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		var tagHandler = viewCallbacks.tagHandler;
+
+		viewCallbacks.tagHandler = function (context, tagName, options){
+			equal(options.scope.peek('lineNumber'), 3);
+		}
+
+		stache("foo\nbar\n<cust-elem></cust-elem>\nbaz")();
+
+		viewCallbacks.tagHandler = tagHandler;
+	});
+
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'attrEnd' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		viewCallbacks.attr(/[\w\.:]+:from$/, function (el, attrData){
+			equal(attrData.scope.peek('lineNumber'), 3);
+		});
+
+		stache("foo\nbar\n<div toProp:from=\"fromProp\"/></div>\nbaz")();
+
+		// Remove handler to prevent side effect of other tests from calling this assertion
+		viewCallbacks._regExpAttributes.splice(viewCallbacks._regExpAttributes.length - 1, 1);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
