@@ -5992,7 +5992,7 @@ function makeTest(name, doc, mutation) {
 				child: {
 					hasThing: false,
 					child: {
-						hasThing: true
+						hasThing: false
 					}
 				}
 			}
@@ -6239,7 +6239,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache("{{>foo bar}}");
 		renderer({ foo: stache("baz") });
 	});
-  
+
 	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
 		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
 
@@ -6407,7 +6407,7 @@ function makeTest(name, doc, mutation) {
 		console.log = function(value){
 			QUnit.equal(value, map);
 		};
-		
+
 		var template = stache("{{log()}}");
 		var div = doc.createElement("div");
 		var frag = template(map);
@@ -6528,7 +6528,7 @@ function makeTest(name, doc, mutation) {
 		})
 		var template = stache("{{#myEach(.)}}<p>{{.}}</p>{{/myEach}}");
 		var map = new DefineList(["foo", "baz"]);
-		
+
 		template(canCompute(map));
 
 		map.push("qux", "quux");
@@ -6608,7 +6608,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'foo:barbaz:qux');
 	});
-	
+
 	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
 		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
 		var frag = template();
