@@ -206,6 +206,9 @@ function stache (filename, template) {
 				section.add(state.node);
 				if(isCustomTag) {
 					addAttributesCallback(state.node, function(scope, options, parentNodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
