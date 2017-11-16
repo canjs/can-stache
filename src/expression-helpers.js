@@ -9,55 +9,12 @@ var Observation = require("can-observation");
 var makeComputeLike = require("can-view-scope/make-compute-like");
 var SetterObservable = require("can-simple-observable/setter/setter");
 
-//!steal-remove-start
-// warn on keys like {{foo}} if foo is not in the current scope
-// don't warn on things like {{./foo}} or {{../foo}} or {{foo.bar}} or {{%index}} or {{this}}
-function displayScopeWalkingWarning(key, computeData, filename) {
-	if (key.indexOf(".") < 0 && key !== "this") {
-		// if scope that value was found in (`scope`) is not the starting scope,
-		// we must have walked up the scope to find the value
-		var scopeWasWalked = computeData.scope && (computeData.scope !== computeData.startingScope);
-
-		// values read from non-contexts, such as aliases created for #each and #with
-		// should not warn
-		var readFromNonContext = computeData && computeData.scope &&
-			computeData.scope._meta && computeData.scope._meta.notContext;
-
-		var readFromSpecialContext = computeData && computeData.scope &&
-			computeData.scope._meta && computeData.scope._meta.special;
-
-		// if scope was walked and value isn't an alias, display dev warning
-		if (scopeWasWalked && !readFromNonContext && !readFromSpecialContext) {
-			if (filename) {
-				dev.warn(
-					filename + ': "' + key + '" ' +
-					'is not in the current scope, so it is being read from the parent scope.\n' +
-					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
-				);
-			} else {
-				dev.warn(
-					'"' + key + '" ' +
-					'is not in the current scope, so it is being read from the parent scope.\n' +
-					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
-				);
-			}
-		}
-	}
-}
-//!steal-remove-end
-
 // ## Helpers
 // Helper for getting a bound compute in the scope.
 function getObservableValue_fromKey(key, scope, readOptions) {
 	var data = scope.computeData(key, readOptions);
 
 	Observation.temporarilyBind(data);
-
-    //!steal-remove-start
-    // this must happen after `temporarilyBind`ing computeData
-    // so that we know where the value was found
-    displayScopeWalkingWarning(key, data, readOptions && readOptions.filename);
-    //!steal-remove-end
 
 	return data;
 }

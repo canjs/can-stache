@@ -96,7 +96,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 			}
 			//!steal-remove-end
 			args = this.args(scope, helperOptions).map(expressionHelpers.toComputeOrValue);
-			// TODO: this should be an observation.
+
 			function observation(){
 				return computeData.initialValue.apply(null, args);
 			}
