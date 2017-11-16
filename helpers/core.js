@@ -341,6 +341,19 @@ var makeSimpleHelper = function(fn) {
 	};
 };
 
+var getHelperName = function(name) {
+	var delimiter = './';
+	var index = name.lastIndexOf(delimiter);
+
+	if (index >= 0) {
+		index += delimiter.length
+	} else {
+		index = 0;
+	}
+
+	return name.slice(0, index) + 'helpers.' + name.slice(index);
+};
+
 module.exports = {
 	registerHelper: registerHelper,
 
@@ -358,7 +371,7 @@ module.exports = {
 	},
 
 	getHelper: function(name, options) {
-		var helper = options && options.get && options.get("helpers." + name,{proxyMethods: false});
+		var helper = options && options.get && options.get(getHelperName(name), { proxyMethods: false });
 		if (helper) {
 			helper = { fn: helper };
 		} else {

@@ -6517,6 +6517,32 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "012345");
 	});
 
+	QUnit.test("can read helper from options and options parent", function() {
+		var parent = {
+			helpers: {
+				myHelper: function() {
+					return 'parent';
+				}
+			}
+		};
+
+		var child = {
+			helpers: {
+				myHelper: function() {
+					return 'child';
+				}
+			}
+		};
+
+		var options = new Scope(parent).add(child);
+
+		var parentHelper = stache.getHelper('../myHelper', options).fn;
+		var childHelper = stache.getHelper('myHelper', options).fn;
+
+		QUnit.equal(parentHelper(), 'parent', 'parent helper called');
+		QUnit.equal(childHelper(), 'child', 'child helper called');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
