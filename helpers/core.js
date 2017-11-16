@@ -224,7 +224,7 @@ var helpers = {
 				if(options.hash && !isEmptyObject(options.hash)) {
 					// presumably rare case of both a context object AND hash keys
 					// Leaving it undocumented for now, but no reason not to support it.
-					ctx = options.scope.add(options.hash).add(ctx);
+					ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);
 				}
 			}
 			return options.fn(ctx || {});

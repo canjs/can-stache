@@ -222,16 +222,16 @@ function makeTest(name, doc, mutation) {
 			attributes: "foo='bar'"
 		});
 
-		equal(frag.firstChild.getAttribute('foo'), "bar", "set attribute");
+		equal(frag.firstChild.getAttribute('foo'), "bar", "{{attributes}} set");
 
-		template = stache("<div {{#truthy}}foo='{{baz}}'{{/truthy}}/>");
+		template = stache("<div {{#if truthy}}foo='{{baz}}'{{/if}}/>");
 
 		frag = template({
 			truthy: true,
 			baz: "bar"
 		});
 
-		equal(frag.firstChild.getAttribute('foo'), "bar", "set attribute");
+		equal(frag.firstChild.getAttribute('foo'), "bar", "foo='{{baz}}' set");
 
 		frag = template({
 			truthy: false,
@@ -411,7 +411,7 @@ function makeTest(name, doc, mutation) {
 
 	test("truthy", function () {
 		var t = {
-			template: "{{#name}}Do something, {{name}}!{{/name}}",
+			template: "{{#name}}Do something, {{this}}!{{/name}}",
 			expected: "Do something, Andy!",
 			data: {
 				name: 'Andy'
@@ -514,7 +514,7 @@ function makeTest(name, doc, mutation) {
 
 	test("Passing functions as data, then executing them", function () {
 		var t = {
-			template: "{{#nested}}{{welcome name}}{{/nested}}",
+			template: "{{#nested}}{{welcome ../name}}{{/nested}}",
 			expected: "Welcome Andy!",
 			data: {
 				name: 'Andy',
@@ -629,7 +629,7 @@ function makeTest(name, doc, mutation) {
 			template: "{{#users}}{{>partial}}{{/users}}",
 			expected: "foo - bar",
 			partials: {
-				partial: stache('{{ name }} - {{ company }}')
+				partial: stache('{{ name }} - {{ ../company }}')
 			},
 			data: {
 				users: [{
@@ -764,11 +764,11 @@ function makeTest(name, doc, mutation) {
 
 		var expected = t.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
-		deepEqual(getText(t.template,t.data), expected);
+		deepEqual(getText(t.template,t.data), expected, '#with person');
 
 		var v = {
 			template: "{{#with person}}{{name}}{{/with}}",
-			expected: "Andy",
+			expected: "",
 			data: {
 				person: null,
 				name: "Andy"
@@ -777,7 +777,7 @@ function makeTest(name, doc, mutation) {
 
 		expected = v.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
-		deepEqual(getText(v.template,v.data), expected);
+		deepEqual(getText(v.template,v.data), expected, '#with person - person === null');
 	});
 
 	test("render with double angle", function () {
@@ -975,9 +975,8 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('live binding and removeAttr', function () {
-
 		var text = '{{ #obs.show }}' +
-				'<p {{ obs.attributes }} class="{{ obs.className }}"><span>{{ obs.message }}</span></p>' +
+				'<p {{ ../obs.attributes }} class="{{ ../obs.className }}"><span>{{ ../obs.message }}</span></p>' +
 				'{{ /obs.show }}',
 
 			obs = new SimpleMap({
@@ -1527,27 +1526,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("reading a property from a parent object when the current context is an observe", function () {
-		var template = stache("{{#foos}}<span>{{bar}}</span>{{/foos}}")
-		var data = {
-			foos: new DefineList([{
-				name: "hi"
-			}, {
-				name: 'bye'
-			}]),
-			bar: "Hello World"
-		};
-
-		var div = doc.createElement('div');
-		var res = template(data);
-		div.appendChild(res);
-		var spans = div.getElementsByTagName('span');
-
-		equal(spans.length, 2, 'Got two <span> elements');
-		equal(innerHTML(spans[0]), 'Hello World', 'First span Hello World');
-		equal(innerHTML(spans[1]), 'Hello World', 'Second span Hello World');
-	});
-
 	test("helper parameters don't convert functions", function () {
 		stache.registerHelper('helperWithFn', function (fn) {
 			ok(typeof fn === "function", 'Parameter is a function');
@@ -1713,9 +1691,9 @@ function makeTest(name, doc, mutation) {
 
 	// https://github.com/canjs/canjs/issues/227
 	test("Contexts are not always passed to partials properly", function () {
-		var inner = stache('{{#if other_first_level}}{{other_first_level}}{{else}}{{second_level}}{{/if}}');
+		var inner = stache('{{#if ../other_first_level}}{{../other_first_level}}{{else}}{{second_level}}{{/if}}');
 
-		var renderer = stache('{{#first_level}}<span>{{> inner}}</span> should equal <span>{{other_first_level}}</span>{{/first_level}}'),
+		var renderer = stache('{{#first_level}}<span>{{> inner}}</span> should equal <span>{{../other_first_level}}</span>{{/first_level}}'),
 			data = {
 				first_level: {
 					second_level: "bar"
@@ -2080,7 +2058,7 @@ function makeTest(name, doc, mutation) {
 		var partials = {
 			'nested_data': stache('<span id="has_data" {{data "attr"}}></span>'),
 			'nested_data2': stache('{{#this}}<span id="has_data" {{data "attr"}}></span>{{/this}}'),
-			'nested_data3': stache('{{#bar}}<span id="has_data" {{data "attr"}}></span>{{/bar}}')
+			'nested_data3': stache('{{#../bar}}<span id="has_data" {{data "attr"}}></span>{{/../bar}}')
 		};
 
 		var renderer = stache("{{#bar}}{{> nested_data}}{{/bar}}"),
@@ -2357,7 +2335,7 @@ function makeTest(name, doc, mutation) {
 		stache.registerHelper('rsvp', function (attendee, event) {
 			return attendee.name + ' is attending ' + event.name;
 		});
-		var template = stache("{{#attendee}}{{#events}}<div>{{rsvp attendee .}}</div>{{/events}}{{/attendee}}"),
+		var template = stache("{{#attendee}}{{#../events}}<div>{{rsvp .. .}}</div>{{/../events}}{{/attendee}}"),
 			data = {
 				attendee: {
 					name: 'Justin'
@@ -2449,9 +2427,9 @@ function makeTest(name, doc, mutation) {
 
 		var template = stache(
 			"{{#grid.rows}}" +
-			"{{#grid.cols}}" +
+			"{{#../grid.cols}}" +
 			"<div>{{columnData ../. .}}</div>" +
-			"{{/grid.cols}}" +
+			"{{/../grid.cols}}" +
 			"{{/grid.rows}}");
 
 		var grid = new SimpleMap({
@@ -2571,30 +2549,6 @@ function makeTest(name, doc, mutation) {
 		equal(img.getAttribute("src"), url, "images src is correct");
 	});
 
-	// if(doc.body.style) {
-	//    test("style property is live-bindable in IE (#494)", 4, function () {
-	//
-	//        var template = stache('<div style="width: {{width}}px; background-color: {{color}};">hi</div>')
-	//
-	//        var dims = new SimpleMap({
-	//            width: 5,
-	//            color: 'red'
-	//        });
-	//
-	//        var div = template(dims)
-	//            .firstChild;
-	//
-	//        equal(div.style.width, "5px");
-	//        equal(div.style.backgroundColor, "red");
-	//
-	//        dims.set("width", 10);
-	//        dims.set('color', 'blue');
-	//
-	//        equal(div.style.width, "10px");
-	//        equal(div.style.backgroundColor, "blue");
-	//    });
-	// }
-
 	test("empty lists update", 2, function () {
 		var template = stache('<p>{{#list}}{{.}}{{/list}}</p>');
 		var map = new SimpleMap({
@@ -2612,7 +2566,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("attributes in truthy section", function () {
-		var template = stache('<p {{#attribute}}data-test="{{attribute}}"{{/attribute}}></p>');
+		var template = stache('<p {{#attribute}}data-test="{{this}}"{{/attribute}}></p>');
 		var data1 = {
 			attribute: "test-value"
 		};
@@ -3489,7 +3443,7 @@ function makeTest(name, doc, mutation) {
 			equal( innerHTML(frag.firstChild), "Justin Meyer", "rendered right");
 		});
 
-		var template = stache("<stache-tag><span>{{first}} {{last}}</span></stache-tag>")
+		var template = stache("<stache-tag><span>{{../first}} {{last}}</span></stache-tag>")
 
 		template({first: "Justin"});
 
@@ -3512,23 +3466,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	// if(window.jQuery || window.Zepto) {
-	// 	test("helpers returning jQuery or Zepto collection", function() {
-	//
-	// 		stache.registerHelper("jQueryHelper", function(options) {
-	// 			var section = options.fn({first: "Justin"});
-	// 			return $( can.frag("<h1>")).append( section );
-	// 		});
-	//
-	// 		var template = stache( "{{#jQueryHelper}}{{first}} {{last}}{{/jQueryHelper}}");
-	//
-	// 		var res = template({last: "Meyer"});
-	// 		equal(res.firstChild.nodeName.toLowerCase(), "h1");
-	// 		equal(innerHTML(res.firstChild), "Justin Meyer");
-	//
-	// 	});
-	// }
-
 	test("./ in key", function(){
 		var template = stache( "<div><label>{{name}}</label>{{#children}}<span>{{./name}}-{{name}}</span>{{/children}}</div>");
 
@@ -3538,7 +3475,7 @@ function makeTest(name, doc, mutation) {
 		};
 		var res =  template(data);
 		var spans = res.firstChild.getElementsByTagName('span');
-		equal( innerHTML(spans[0]), "-CanJS", "look in current level" );
+		equal( innerHTML(spans[0]), "-", "not found in current level" );
 		equal( innerHTML(spans[1]), "stache-stache", "found in current level" );
 	});
 
@@ -4071,7 +4008,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var frag = stache(
-			"{{#bar}}<div>{{#if foo}}My Meals{{else}}My Order{{/if}}</div>{{/bar}}"
+			"{{#bar}}<div>{{#if ../foo}}My Meals{{else}}My Order{{/if}}</div>{{/bar}}"
 		)(myMap);
 
 		equal(innerHTML(frag.firstChild), 'My Order', 'shows else case');
@@ -4350,7 +4287,7 @@ function makeTest(name, doc, mutation) {
 			}
 		};
 
-		var template = stache("{{#child}}{{method value}}{{/child}}");
+		var template = stache("{{#child}}{{../method value}}{{/child}}");
 		template(data);
 	});
 
@@ -4675,7 +4612,7 @@ function makeTest(name, doc, mutation) {
 			itemRender: stache('{{somethingCrazy name}}')
 		});
 
-		var renderer = stache('<div>{{#each items}}{{>itemRender}}{{/each}}</div>');
+		var renderer = stache('<div>{{#each items}}{{>../itemRender}}{{/each}}</div>');
 
 		renderer(data);
 
@@ -4826,16 +4763,16 @@ function makeTest(name, doc, mutation) {
 
 	test("nested sections work (#2229)", function(){
 		var template = stache('<div {{#a}}' +
-              '{{#b}}f="f"' +
+              '{{#../b}}f="f"' +
               '{{else}}' +
-                  '{{#c}}f="f"{{/c}}' +
-              '{{/b}}' +
+                  '{{#../c}}f="f"{{/../c}}' +
+              '{{/../b}}' +
           '{{/a}}/>');
 
           var frag = template(new SimpleMap({
-						a: true,
-						b: false,
-						c: true
+			  a: true,
+			  b: false,
+			  c: true
           }));
 
           equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
@@ -4887,7 +4824,7 @@ function makeTest(name, doc, mutation) {
 				}
 			},
 			partials: {
-				dude: stache("{{#this}}<span>{{../hello}} {{name}}</span>{{/this}}")
+				dude: stache("{{#this}}<span>{{../../hello}} {{name}}</span>{{/this}}")
 			}
 		});
 		div.appendChild(dom);
@@ -5302,7 +5239,7 @@ function makeTest(name, doc, mutation) {
 
 		div.innerHTML = '';
 
-		template = stache("<p>{{#each foo}}{{ bar[scope.index] }}{{/each}}</p>")
+		template = stache("<p>{{#each foo}}{{ ../bar[scope.index] }}{{/each}}</p>")
 		dom = template(data);
 		div.appendChild(dom);
 		p = div.getElementsByTagName('p');
@@ -6046,8 +5983,8 @@ function makeTest(name, doc, mutation) {
 
 		view = renderer(viewModel);
 
-		equal(view.firstChild.firstChild.nodeValue, "John", "Got the first name");
-		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Got the last name");
+		equal(view.firstChild.firstChild.nodeValue, "John", "Object AND hash values - Got the first name");
+		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Object AND hash values - Got the last name");
 
 
 	});
@@ -6154,72 +6091,6 @@ function makeTest(name, doc, mutation) {
 		});
 
 		QUnit.equal(teardown(), 0, "Warning should not be given");
-	});
-
-	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
-		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
-
-		var data = new DefineMap({
-			name: 'Justin',
-			age: 33,
-			children: [{
-				name: 'TBD'
-			}]
-		});
-
-		var renderer = stache("children.stache",
-			"<ul>" +
-				"{{#each children}}" +
-					"<li>{{name}} is {{age}} years old</li>" +
-				"{{/each}}" +
-			"</ul>"
-		);
-
-		renderer(data);
-
-		QUnit.equal(teardown(), 1, "Warning should be given");
-	});
-
-	testHelpers.dev.devOnlyTest("scope walking warning should not read value twice (#336)", function() {
-		var teardown = testHelpers.dev.willWarn(/scopewalk.stache: "age" is not in the current scope/);
-		var renderer = stache("scopewalk.stache",
-			"<ul>" +
-				"{{#each children}}" +
-					"<li>{{name}} is {{age}} years old</li>" +
-				"{{/each}}" +
-			"</ul>"
-		);
-
-		var childCount = 0;
-		var Child = DefineMap.extend({
-			name: 'string',
-			age: {
-				get(age) {
-					childCount++;
-					return age;
-				}
-			}
-		});
-		var parentCount = 0;
-		var Parent = DefineMap.extend({
-			name: 'string',
-			age: {
-				get(age) {
-					parentCount++;
-					return age;
-				}
-			},
-			children: [ Child ]
-		});
-
-		var child = new Child({ name: 'Ramiya', age: 3 });
-		var parent = new Parent({ name: 'Justing', age: 33, children: [ child ] });
-
-		renderer(parent);
-
-		QUnit.equal(teardown(), 0, 'no warning should be given');
-		QUnit.equal(childCount, 1, 'child.age should be read once');
-		QUnit.equal(parentCount, 0, 'parent.age should not be read');
 	});
 
 	test("#if works with call expressions", function(){

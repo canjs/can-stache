@@ -261,8 +261,7 @@ test("methods can return values (#1887)", function(){
 	});
 
 	var scope =
-		new Scope(new MyMap({foo: 2, bar: 3}))
-			.add({});
+		new Scope(new MyMap({foo: 2, bar: 3}));
 
 	var callGetSomething = new expression.Helper(
 		new expression.HelperLookup("getSomething"),
