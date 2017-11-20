@@ -312,7 +312,7 @@ function stache (filename, template) {
 
 				//!steal-remove-start
 				var decodedAttrName = attributeEncoder.decode(attrName);
-				weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
+				var weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
 				if (weirdAttribute && !attrCallback) {
 					dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
 				}
