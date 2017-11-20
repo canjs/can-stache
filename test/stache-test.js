@@ -362,7 +362,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Inverted section function returning numbers', function () {
-		var template = "<div id='completed'>{{^todos.completed}}hidden{{/todos.completed}}</div>";
+		var template = "<div id='completed'>{{^todos.completed()}}hidden{{/todos.completed}}</div>";
 		var obsvr = new SimpleMap({
 			named: false
 		});
@@ -1648,7 +1648,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Observe list returned from the function", function () {
-		var renderer = stache('<ul>{{#todos}}<li>{{.}}</li>{{/todos}}</ul>');
+		var renderer = stache('<ul>{{#todos()}}<li>{{.}}</li>{{/todos}}</ul>');
 		var div = doc.createElement('div');
 		var todos = new DefineList();
 		var data = {
@@ -6069,30 +6069,6 @@ function makeTest(name, doc, mutation) {
 		renderer({ foo: stache("baz") });
 	});
   
-	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
-		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
-
-		stache("mystache.stache", "{{aFunction}}")({
-			aFunction: function() {
-				QUnit.ok(true, "function is called");
-			}
-		});
-
-		QUnit.equal(teardown(), 1, "Warning was given");
-	});
-
-	testHelpers.dev.devOnlyTest("do not warn on explicit function calling (#312)", function() {
-		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called automatically/);
-
-		stache("mystache.stache", "{{aFunction()}}")({
-			aFunction: function() {
-				QUnit.ok(true, "function should be called");
-			}
-		});
-
-		QUnit.equal(teardown(), 0, "Warning should not be given");
-	});
-
 	test("#if works with call expressions", function(){
 		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
 		var map = new DefineMap({

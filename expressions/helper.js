@@ -79,38 +79,19 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		//
 		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
-			//!steal-remove-start
-			if (filename) {
-				dev.warn(
-					filename + ': "' +
-					methodKey + '" is being called as a function.\n' +
-					'\tThis will not happen automatically in an upcoming release.\n' +
-					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
-				);
-			} else {
-				dev.warn(
-					'"' + methodKey + '" is being called as a function.\n' +
-					'\tThis will not happen automatically in an upcoming release.\n' +
-					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
-				);
-			}
-			//!steal-remove-end
 			args = this.args(scope, helperOptions).map(expressionHelpers.toComputeOrValue);
 
-			function observation(){
+			function helperFn() {
 				return computeData.initialValue.apply(null, args);
 			}
 			//!steal-remove-start
-			Object.defineProperty(observation, "name", {
+			Object.defineProperty(helperFn, "name", {
 				value: canReflect.getName(this),
 			});
 			//!steal-remove-end
 
-			var functionResult = new Observation(observation);
-			// TODO: probably don't need to bind
-			Observation.temporarilyBind(functionResult);
 			return {
-				value: functionResult
+				value: helperFn
 			};
 		}
 		// if it's some other value ..

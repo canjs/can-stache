@@ -228,7 +228,7 @@ test("expression.Helper:value non-observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}),  {});
 
-	equal(expression.toComputeOrValue(result), "marshall thompson");
+	equal(expression.toComputeOrValue(result)(), "marshall thompson");
 });
 
 test("expression.Helper:value observable values", function(){
@@ -250,7 +250,7 @@ test("expression.Helper:value observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}) );
 
-	equal(result.get(), "marshall thompson");
+	equal(result(), "marshall thompson");
 });
 
 test("methods can return values (#1887)", function(){
@@ -271,7 +271,7 @@ test("methods can return values (#1887)", function(){
 
 	var result = callGetSomething.value(scope, new Scope({}), {asCompute: true});
 
-	equal(result.get(), 5);
+	equal(result(), 5);
 });
 
 test("methods don't update correctly (#1891)", function(){
