@@ -206,6 +206,9 @@ function stache (filename, template) {
 				section.add(state.node);
 				if(isCustomTag) {
 					addAttributesCallback(state.node, function(scope, options, parentNodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
@@ -267,6 +270,9 @@ function stache (filename, template) {
 					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
 					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
@@ -317,6 +323,9 @@ function stache (filename, template) {
 						state.node.attributes = [];
 					}
 					state.node.attributes.push(function(scope, options, nodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
 							scope: scope,
