@@ -58,6 +58,5 @@ var routeCurrent = function(){
 		return result;
 	}
 };
-routeCurrent.callAsMethod = true;
 
-helpers.registerHelper('routeCurrent', routeCurrent);
+helpers.registerHelper('routeCurrent', routeCurrent, { isHelper: false });
