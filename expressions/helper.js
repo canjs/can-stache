@@ -48,10 +48,6 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		initialValue,
 		args;
 
-		//!steal-remove-start
-		var filename = scope.peek('scope.filename');
-		//!steal-remove-end
-
 	// If the expression looks like a helper, try to get a helper right away.
 	if (looksLikeAHelper) {
 		// Try to find a registered helper.
@@ -61,11 +57,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	if(!helper) {
 		// Try to find a value or function
 		computeData = expressionHelpers.getObservableValue_fromKey(methodKey, scope, {
-			isArgument: true,
-
-			//!steal-remove-start
-			filename: filename
-			//!steal-remove-end
+			isArgument: true
 		});
 		// if it's a function ... we need another compute that represents
 		// the call to that function

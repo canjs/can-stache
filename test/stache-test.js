@@ -6267,7 +6267,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
-		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
+		var teardown = testHelpers.dev.willWarn(/children.stache:2: "age" is not in the current scope/);
 
 		var data = new DefineMap({
 			name: 'Justin',
@@ -6278,10 +6278,10 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache("children.stache",
-			"<ul>" +
-				"{{#each children}}" +
-					"<li>{{name}} is {{age}} years old</li>" +
-				"{{/each}}" +
+			"<ul>\n" +
+				"{{#each children}}\n" +
+					"<li>{{name}} is {{age}} years old</li>\n" +
+				"{{/each}}\n" +
 			"</ul>"
 		);
 
