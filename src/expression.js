@@ -308,9 +308,14 @@ var expression = {
 			return new ExpressionType(this.hydrateAst(ast.method, options, ast.type),
 																args, hashes);
 		} else if (ast.type === "Bracket") {
+			var originalKey;
+			//!steal-remove-start
+			originalKey = ast[canSymbol.for("can-stache.originalKey")]
+			//!steal-remove-end
 			return new Bracket(
 				this.hydrateAst(ast.children[0], options),
-				ast.root ? this.hydrateAst(ast.root, options) : undefined
+				ast.root ? this.hydrateAst(ast.root, options) : undefined,
+				originalKey
 			);
 		}
 	},
@@ -460,7 +465,11 @@ var expression = {
 				if (lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket"  )  ) {
 					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
-					stack.replaceTopAndPush({type: "Bracket", root: top});
+					var bracket = {type: "Bracket", root: top};
+					//!steal-remove-start
+					canReflect.setKeyValue(bracket, canSymbol.for("can-stache.originalKey"), top.key);
+					//!steal-remove-end
+					stack.replaceTopAndPush(bracket);
 				} else if (top.type === "Call") {
 					stack.addToAndPush(["Call"], { type: "Bracket" });
 				} else if (top === " ") {

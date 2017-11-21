@@ -100,7 +100,7 @@ function stache (filename, template) {
 				if(section instanceof HTMLSectionBuilder) {
 					//!steal-remove-start
 					var last = state.sectionElementStack[state.sectionElementStack.length - 1];
-					if (last.type === "section" && stache !== "" && stache !== last.tag) {
+					if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
 						if (filename) {
 							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
 						}
@@ -206,6 +206,9 @@ function stache (filename, template) {
 				section.add(state.node);
 				if(isCustomTag) {
 					addAttributesCallback(state.node, function(scope, options, parentNodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
@@ -267,6 +270,9 @@ function stache (filename, template) {
 					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
 					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
 							options: options,
@@ -306,7 +312,7 @@ function stache (filename, template) {
 
 				//!steal-remove-start
 				var decodedAttrName = attributeEncoder.decode(attrName);
-				weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
+				var weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
 				if (weirdAttribute && !attrCallback) {
 					dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
 				}
@@ -317,6 +323,9 @@ function stache (filename, template) {
 						state.node.attributes = [];
 					}
 					state.node.attributes.push(function(scope, options, nodeList){
+						//!steal-remove-start
+						scope.set('scope.lineNumber', lineNo);
+						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
 							scope: scope,

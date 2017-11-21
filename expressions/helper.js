@@ -62,11 +62,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	if(!helper) {
 		// Try to find a value or function
 		computeData = expressionHelpers.getObservableValue_fromKey(methodKey, scope, {
-			isArgument: true,
-
-			//!steal-remove-start
-			filename: filename
-			//!steal-remove-end
+			isArgument: true
 		});
 		// if it's a function ... we need another compute that represents
 		// the call to that function
