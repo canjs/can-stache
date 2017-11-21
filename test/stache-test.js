@@ -7144,6 +7144,29 @@ function makeTest(name, doc, mutation) {
 		viewCallbacks._regExpAttributes.splice(viewCallbacks._regExpAttributes.length - 1, 1);
 	});
 
+	testHelpers.dev.devOnlyTest("passing functions as arguments to helpers should show a warning", function (){
+		var functionTeardown = testHelpers.dev.willWarn(/functions.stache:1: "func1" is being called as a function/);
+		var atFunctionTeardown = testHelpers.dev.willWarn(/functions.stache:2: "@func2" is being called as a function/);
+
+		var data = new DefineMap({
+			func1: function() {
+				return true;
+			},
+			func2: function() {
+				return true;
+			}
+		});
+
+		stache(
+			"functions.stache",
+			"{{#if func1}}hello{{/if}}\n" +
+			"{{#if @func2}}world{{/if}}"
+		)(data);
+
+		QUnit.equal(functionTeardown(), 1, "warning shown for {{#if func1}}");
+		QUnit.equal(atFunctionTeardown(), 0, "warning not shown for {{#if @func1}}");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
