@@ -306,12 +306,14 @@ var expression = {
 			return new ExpressionType(this.hydrateAst(ast.method, options, ast.type),
 																args, hashes);
 		} else if (ast.type === "Bracket") {
+			var originalKey;
+			//!steal-remove-start
+			originalKey = ast[canSymbol.for("can-stache.originalKey")]
+			//!steal-remove-end
 			return new Bracket(
 				this.hydrateAst(ast.children[0], options),
 				ast.root ? this.hydrateAst(ast.root, options) : undefined,
-				//!steal-remove-start
-				ast[canSymbol.for("can-stache.originalKey")]
-				//!steal-remove-end
+				originalKey
 			);
 		}
 	},
