@@ -10,7 +10,7 @@ var dev = require("can-util/js/dev/dev");
 //!steal-remove-start
 // warn on keys like {{foo}} if foo is not in the current scope
 // don't warn on things like {{./foo}} or {{../foo}} or {{foo.bar}} or {{%index}} or {{this}}
-function displayScopeWalkingWarning(key, computeData, filename) {
+function displayScopeWalkingWarning(key, computeData) {
 	if (key.indexOf(".") < 0 && key !== "this") {
 		// if scope that value was found in (`scope`) is not the starting scope,
 		// we must have walked up the scope to find the value
@@ -26,19 +26,16 @@ function displayScopeWalkingWarning(key, computeData, filename) {
 
 		// if scope was walked and value isn't an alias, display dev warning
 		if (scopeWasWalked && !readFromNonContext && !readFromSpecialContext) {
-			if (filename) {
-				dev.warn(
-					filename + ': "' + key + '" ' +
-					'is not in the current scope, so it is being read from the parent scope.\n' +
-					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
-				);
-			} else {
-				dev.warn(
-					'"' + key + '" ' +
-					'is not in the current scope, so it is being read from the parent scope.\n' +
-					'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
-				);
-			}
+			var filename = computeData.scope.peek('scope.filename');
+			var lineNumber = computeData.scope.peek('scope.lineNumber');
+
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'"' + key + '" ' +
+				'is not in the current scope, so it is being read from the parent scope.\n' +
+				'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
+			);
 		}
 	}
 }
@@ -47,16 +44,17 @@ function displayScopeWalkingWarning(key, computeData, filename) {
 // ## Helpers
 // Helper for getting a bound compute in the scope.
 var getObservableValue_fromKey = function (key, scope, readOptions) {
-    var data = scope.computeData(key, readOptions);
-    compute.temporarilyBind(data);
+	var data = scope.computeData(key, readOptions);
+	compute.temporarilyBind(data);
 
-    //!steal-remove-start
-    // this must happen after `temporarilyBind`ing computeData
-    // so that we know where the value was found
-    displayScopeWalkingWarning(key, data, readOptions && readOptions.filename);
-    //!steal-remove-end
+	// display warnings after `temporarilyBind`
+	// so that we know where the value was found and the initialValue
 
-    return data;
+	//!steal-remove-start
+	displayScopeWalkingWarning(key, data);
+	//!steal-remove-end
+
+	return data;
 };
 function computeHasDependencies(compute){
     return compute[canSymbol.for("can.valueHasDependencies")] ?

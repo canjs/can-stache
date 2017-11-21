@@ -6243,7 +6243,7 @@ function makeTest(name, doc, mutation) {
 	});
   
 	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
-		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
+		var teardown = testHelpers.dev.willWarn(/mystache.stache:1: "aFunction" is being called as a function/);
 
 		stache("mystache.stache", "{{aFunction}}")({
 			aFunction: function() {
@@ -6267,7 +6267,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
-		var teardown = testHelpers.dev.willWarn(/children.stache: "age" is not in the current scope/);
+		var teardown = testHelpers.dev.willWarn(/children.stache:2: "age" is not in the current scope/);
 
 		var data = new DefineMap({
 			name: 'Justin',
@@ -6278,10 +6278,10 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache("children.stache",
-			"<ul>" +
-				"{{#each children}}" +
-					"<li>{{name}} is {{age}} years old</li>" +
-				"{{/each}}" +
+			"<ul>\n" +
+				"{{#each children}}\n" +
+					"<li>{{name}} is {{age}} years old</li>\n" +
+				"{{/each}}\n" +
 			"</ul>"
 		);
 
@@ -7142,6 +7142,29 @@ function makeTest(name, doc, mutation) {
 
 		// Remove handler to prevent side effect of other tests from calling this assertion
 		viewCallbacks._regExpAttributes.splice(viewCallbacks._regExpAttributes.length - 1, 1);
+	});
+
+	testHelpers.dev.devOnlyTest("passing functions as arguments to helpers should show a warning", function (){
+		var functionTeardown = testHelpers.dev.willWarn(/functions.stache:1: "func1" is being called as a function/);
+		var atFunctionTeardown = testHelpers.dev.willWarn(/functions.stache:2: "@func2" is being called as a function/);
+
+		var data = new DefineMap({
+			func1: function() {
+				return true;
+			},
+			func2: function() {
+				return true;
+			}
+		});
+
+		stache(
+			"functions.stache",
+			"{{#if func1}}hello{{/if}}\n" +
+			"{{#if @func2}}world{{/if}}"
+		)(data);
+
+		QUnit.equal(functionTeardown(), 1, "warning shown for {{#if func1}}");
+		QUnit.equal(atFunctionTeardown(), 0, "warning not shown for {{#if @func1}}");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

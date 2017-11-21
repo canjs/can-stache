@@ -48,10 +48,6 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		initialValue,
 		args;
 
-		//!steal-remove-start
-		var filename = scope.peek('scope.filename');
-		//!steal-remove-end
-
 	// If the expression looks like a helper, try to get a helper right away.
 	if (looksLikeAHelper) {
 		// Try to find a registered helper.
@@ -61,11 +57,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	if(!helper) {
 		// Try to find a value or function
 		computeData = expressionHelpers.getObservableValue_fromKey(methodKey, scope, {
-			isArgument: true,
-
-			//!steal-remove-start
-			filename: filename
-			//!steal-remove-end
+			isArgument: true
 		});
 		// if it's a function ... we need another compute that represents
 		// the call to that function
@@ -79,20 +71,15 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
 			//!steal-remove-start
-			if (filename) {
-				dev.warn(
-					filename + ': "' +
-					methodKey + '" is being called as a function.\n' +
-					'\tThis will not happen automatically in an upcoming release.\n' +
-					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
-				);
-			} else {
-				dev.warn(
-					'"' + methodKey + '" is being called as a function.\n' +
-					'\tThis will not happen automatically in an upcoming release.\n' +
-					'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
-				);
-			}
+			var filename = scope.peek('scope.filename');
+			var lineNumber = scope.peek('scope.lineNumber');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'"' + methodKey + '" is being called as a function.\n' +
+				'\tThis will not happen automatically in an upcoming release.\n' +
+				'\tYou should call it explicitly using "' + methodKey + '()".\n\n'
+			);
 			//!steal-remove-end
 
 			args = this.args(scope, helperOptions).map(expressionHelpers.toComputeOrValue);
