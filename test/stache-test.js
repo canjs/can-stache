@@ -6243,7 +6243,7 @@ function makeTest(name, doc, mutation) {
 	});
   
 	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
-		var teardown = testHelpers.dev.willWarn(/mystache.stache: "aFunction" is being called as a function/);
+		var teardown = testHelpers.dev.willWarn(/mystache.stache:1: "aFunction" is being called as a function/);
 
 		stache("mystache.stache", "{{aFunction}}")({
 			aFunction: function() {
