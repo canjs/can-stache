@@ -297,7 +297,8 @@ test("methods don't update correctly (#1891)", function(){
 
 	map.runTest();
 
-	equal( canReflect.getValue( num2 ) , 4, "num2 updated correctly");
+	var func = canReflect.getValue( num2 );
+	equal( func() , 4, "num2 updated correctly");
 
 });
 

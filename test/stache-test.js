@@ -2088,25 +2088,6 @@ function makeTest(name, doc, mutation) {
 		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
 	});
 
-	// Issue #333
-	test("Functions passed to default helpers should be evaluated", function () {
-		var renderer = stache("{{#if hasDucks}}Ducks: {{ducks}}{{else}}No ducks!{{/if}}"),
-			div = doc.createElement('div'),
-			data = new SimpleMap({
-				ducks: "",
-				hasDucks: function () {
-					return this.get("ducks")
-							.length > 0;
-				}
-			});
-
-		var span;
-
-		div.appendChild(renderer(data));
-		span = div.getElementsByTagName('span')[0];
-		equal(innerHTML(div), 'No ducks!', 'The function evaluated should evaluate false');
-	});
-
 	test("avoid global helpers", function () {
 		var noglobals = stache("{{sometext person.name}}");
 
@@ -4457,43 +4438,6 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
 		equal(frag.firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
 		equal(frag.firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
-	});
-
-	test("#each passed a method (2001)", function(){
-		var users = new DefineList([
-			{name: "Alexis", num: 4, age: 88},
-			{name: "Brian", num: 2, age: 31}
-		]);
-
-		var template = stache("<div>{{#each people}}<span/>{{/each}}</div>");
-
-		var VM = SimpleMap.extend({
-			people: function() {
-				return this.get("users");
-			},
-			remove: function() {
-				$('#content').empty();
-			}
-		});
-
-		var frag = template(new VM({
-			users: users
-		})),
-			div = frag.firstChild,
-			spans = div.getElementsByTagName("span");
-
-		equal(spans.length, 2, "two spans");
-
-		domMutate.appendChild.call(this.fixture, frag);
-		var fixture = this.fixture;
-		stop();
-		setTimeout(function(){
-			start();
-			domMutate.removeChild.call(fixture, div);
-			ok(true, "removed without breaking");
-		},10);
-
-
 	});
 
 	test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function () {
