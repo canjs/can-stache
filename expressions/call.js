@@ -18,7 +18,7 @@ var Call = function(methodExpression, argExpressions){
 	this.methodExpr = methodExpression;
 	this.argExprs = argExpressions.map(expressionHelpers.convertToArgExpression);
 };
-Call.prototype.args = function(scope, helperOptions){
+Call.prototype.args = function(scope){
 	var hashExprs = {};
 	var args = [];
 	for(var i = 0, len = this.argExprs.length; i < len; i++) {
@@ -51,14 +51,14 @@ Call.prototype.args = function(scope, helperOptions){
 	};
 };
 
-Call.prototype.value = function(scope, helperScope, helperOptions){
-	var method = this.methodExpr.value(scope, helperScope);
+Call.prototype.value = function(scope, helperOptions){
+	var method = this.methodExpr.value(scope);
 	var metadata = method.metadata || {};
 
 	// TODO: remove this hack
 	assign(this, metadata);
 
-	var getArgs = this.args(scope, helperScope);
+	var getArgs = this.args(scope);
 
 	var computeFn = function(newVal){
 		var func = canReflect.getValue( method.fn || method );
@@ -67,8 +67,6 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 			var args = getArgs(metadata.isLiveBound);
 
 			if(metadata.isHelper && helperOptions) {
-				// Some helpers assume options has a helpers object that is an instance of Scope.Options
-				helperOptions.helpers = helperOptions.helpers || new Scope.Options({});
 				if(args.hashExprs && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}

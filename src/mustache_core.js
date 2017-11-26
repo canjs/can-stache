@@ -53,7 +53,7 @@ var core = {
 	 * @param {String} [stringOnly] A flag to indicate that only strings will be returned by subsections.
 	 * @return {Function} An 'evaluator' function that evaluates the expression.
 	 */
-	makeEvaluator: function (scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+	makeEvaluator: function (scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
 
 		if(mode === "^") {
 			var temp = truthyRenderer;
@@ -69,12 +69,11 @@ var core = {
 				context: scope.peek("."),
 				scope: scope,
 				nodeList: nodeList,
-				exprData: exprData,
-				helpersScope: helperOptions
+				exprData: exprData
 			};
-			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
-			value = exprData.value(scope, helperOptions, helperOptionArg);
+			value = exprData.value(scope, helperOptionArg);
 			if(exprData.isHelper) {
 				return value;
 			}
@@ -103,12 +102,12 @@ var core = {
 				args: [scope.peek('.'), scope],
 				asCompute: true
 			};
-			var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			var helperAndValue = exprData.helperAndValue(scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			var helper = helperAndValue.helper;
 			value = helperAndValue.value;
 
 			if(helper) {
-				return exprData.evaluator(helper, scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+				return exprData.evaluator(helper, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			}
 		}
 
@@ -119,7 +118,7 @@ var core = {
 		} else if( mode === "#" || mode === "^" ) {
 			// Setup renderers.
 			helperOptionArg = {};
-			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
@@ -134,17 +133,17 @@ var core = {
 
 					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
 						if (stringOnly) {
-							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg);
 						} else {
 							return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
 						}
 					} else {
-						return helperOptionArg.inverse(scope, helperOptions);
+						return helperOptionArg.inverse(scope);
 					}
 				}
 				// If truthy, render fn, otherwise, inverse.
 				else {
-					return finalValue ? helperOptionArg.fn(finalValue || scope, helperOptions) : helperOptionArg.inverse(scope, helperOptions);
+					return finalValue ? helperOptionArg.fn(finalValue || scope) : helperOptionArg.inverse(scope);
 				}
 			};
 		} else {
@@ -170,7 +169,7 @@ var core = {
 			exprData = core.expression.parse(expressionString);
 		}
 
-		return function(scope, options, parentSectionNodeList){
+		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
 			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
@@ -182,7 +181,7 @@ var core = {
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
-					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope, options) );
+					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
 						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
@@ -192,14 +191,14 @@ var core = {
 						scope = scope.add(newContext);
 					}
 				}
-				// Look up partials in options first.
-				var partial = options.peek("partials." + localPartialName);
-				partial = partial || ( options.inlinePartials && options.inlinePartials[ localPartialName ] );
+				// Look up partials in templateContext first
+				var partial = canReflect.getKeyValue(scope.templateContext.partials, localPartialName);
 				var renderer;
+
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(scope, options, nodeList)
-							: partial(scope, options);
+						return partial.render ? partial.render(scope, nodeList)
+							: partial(scope);
 					};
 				}
 				// Use can.view to get and render the partial.
@@ -217,9 +216,9 @@ var core = {
 
 					renderer = function() {
 						if(typeof localPartialName === "function"){
-							return localPartialName(scope, options, nodeList);
+							return localPartialName(scope, {}, nodeList);
 						} else {
-							return core.getTemplateById(localPartialName)(scope, options, nodeList);
+							return core.getTemplateById(localPartialName)(scope, {}, nodeList);
 						}
 
 					};
@@ -253,14 +252,14 @@ var core = {
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
 			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
-				evaluator = makeEvaluator( scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+				evaluator = makeEvaluator( scope, null, mode, exprData, truthyRenderer, falseyRenderer, true);
 				if(!mode) {
 					scope.__cache[fullExpression] = evaluator;
 				}
@@ -305,7 +304,7 @@ var core = {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
 			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
@@ -317,7 +316,7 @@ var core = {
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
+			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
 				// If this is within a tag, make sure we only get string values.
 				state.tag );
 
@@ -510,7 +509,6 @@ var core = {
 
 		});
 	},
-	Options: utils.Options,
 	getTemplateById: function(){}
 };
 

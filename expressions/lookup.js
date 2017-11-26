@@ -13,12 +13,12 @@ var Lookup = function(key, root, sourceText) {
 	this.rootExpr = root;
 	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
-Lookup.prototype.value = function(scope, helperOptions){
+Lookup.prototype.value = function(scope){
 
 	if (this.rootExpr) {
-		return expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope, helperOptions), scope, {}, {});
+		return expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope), scope, {}, {});
 	} else {
-		var result = lookupValueOrHelper(this.key, scope, helperOptions);
+		var result = lookupValueOrHelper(this.key, scope);
 		// TODO: remove this hack
 		assign(this, result.metadata);
 		return result.helper || result.value;

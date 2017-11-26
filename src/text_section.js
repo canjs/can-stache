@@ -42,9 +42,9 @@ assign(TextSectionBuilder.prototype,{
 		});
 		//!steal-remove-end
 
-		return function(scope, options){
+		return function(scope){
 			function textSectionRender(){
-				return renderer(scope, options);
+				return renderer(scope);
 			}
 			//!steal-remove-start
 			Object.defineProperty(textSectionRender,"name",{
@@ -64,7 +64,7 @@ assign(TextSectionBuilder.prototype,{
 					live.attr(this, state.attr, observation);
 				}
 				else {
-					live.attrs(this, observation, scope, options);
+					live.attrs(this, observation, scope);
 				}
 				canReflect.offValue(observation, noop);
 			} else {
@@ -83,8 +83,8 @@ assign(TextSectionBuilder.prototype,{
 });
 
 var passTruthyFalsey = function(process, truthy, falsey){
-	return function(scope, options){
-		return process.call(this, scope, options, truthy, falsey);
+	return function(scope){
+		return process.call(this, scope, truthy, falsey);
 	};
 };
 
@@ -112,12 +112,12 @@ assign( TextSection.prototype, {
 			}
 		}
 
-		return function(scope, options){
+		return function(scope){
 			var txt = "",
 				value;
 			for(var i = 0; i < len; i++){
 				value = values[i];
-				txt += typeof value === "string" ? value : value.call(this, scope, options);
+				txt += typeof value === "string" ? value : value.call(this, scope);
 			}
 			return txt;
 		};

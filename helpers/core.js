@@ -157,7 +157,7 @@ var helpers = {
 			var value;
 			// if it's a function, wrap its value in a compute
 			// that will only change values from true to false
-			if (expr && expr.isComputed) {
+			if (expr && canReflect.isValueLike(expr)) {
 				value = canReflect.getValue(new TruthyObservable(expr));
 			} else {
 				value = !! resolve(expr);
@@ -264,20 +264,25 @@ var helpers = {
 		fn: function(expression, options){
 			resolve(expression);
 			var found = false;
-			var newOptions = options.helpers.add({
-				"case": function(value, options){
-					if(!found && resolve(expression) === resolve(value)) {
-						found = true;
-						return options.fn(options.scope || this);
-					}
-				},
-				"default": function(options){
-					if(!found) {
-						return options.fn(options.scope || this);
-					}
+			var localHelpers = options.scope.templateContext.helpers;
+
+			var caseHelper = function(value, options) {
+				if(!found && resolve(expression) === resolve(value)) {
+					found = true;
+					return options.fn(options.scope || this);
 				}
-			});
-			return options.fn(options.scope, newOptions);
+			};
+
+			var defaultHelper = function(options) {
+				if(!found) {
+					return options.fn(options.scope || this);
+				}
+			};
+
+			canReflect.setKeyValue(localHelpers, 'case', caseHelper);
+			canReflect.setKeyValue(localHelpers, 'default', defaultHelper);
+
+			return options.fn(options.scope, options);
 		}
 	},
 	'joinBase': {
@@ -290,7 +295,7 @@ var helpers = {
 				return isFunction(value) ? value() : value;
 			}).join("");
 
-			var templateModule = options.helpers.peek("helpers.module");
+			var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
 			var parentAddress = templateModule ? templateModule.uri: undefined;
 
 			var isRelative = moduleReference[0] === ".";
@@ -341,19 +346,6 @@ var makeSimpleHelper = function(fn) {
 	};
 };
 
-var getHelperName = function(name) {
-	var delimiter = './';
-	var index = name.lastIndexOf(delimiter);
-
-	if (index >= 0) {
-		index += delimiter.length
-	} else {
-		index = 0;
-	}
-
-	return name.slice(0, index) + 'helpers.' + name.slice(index);
-};
-
 module.exports = {
 	registerHelper: registerHelper,
 
@@ -370,8 +362,9 @@ module.exports = {
 		});
 	},
 
-	getHelper: function(name, options) {
-		var helper = options && options.get && options.get(getHelperName(name), { proxyMethods: false });
+	getHelper: function(name, scope) {
+		var helper = scope && canReflect.getKeyValue(scope.templateContext.helpers, name);
+
 		if (helper) {
 			helper = { fn: helper };
 		} else {

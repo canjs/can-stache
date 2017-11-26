@@ -1,6 +1,7 @@
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
+var canReflect = require('can-reflect');
 
 var utils = require('./utils');
 var mustacheCore = require('./mustache_core');
@@ -9,6 +10,7 @@ var getDocument = require("can-globals/document/document");
 
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
+var each = require('can-util/js/each/each');
 
 var decodeHTML = typeof document !== "undefined" && (function(){
 	var el = getDocument().createElement('div');
@@ -40,12 +42,31 @@ var HTMLSectionBuilder = function(filename){
 HTMLSectionBuilder.scopify = function(renderer) {
 	return Observation.ignore(function(scope, options, nodeList){
 		if ( !(scope instanceof Scope) ) {
-			scope = Scope.refsScope().add(scope || {});
+			scope = new Scope(scope || {});
 		}
-		if ( !(options instanceof mustacheCore.Options) ) {
-			options = new mustacheCore.Options(options || {});
+
+		// if an object is passed to options, assume it is the helpers object
+		if (options && !options.helpers && !options.partials && !options.tags) {
+			options = {
+				helpers: options
+			};
 		}
-		return renderer(scope, options, nodeList);
+
+		var templateContext = scope.templateContext;
+
+		// loop through each option category - helpers, partials, etc
+		each(options, function(optionValues, optionKey) {
+			var container = templateContext[optionKey];
+
+			if (container) {
+				// loop through each helper/partial
+				each(optionValues, function(optionValue, optionValueKey) {
+					canReflect.setKeyValue(container, optionValueKey, optionValue);
+				});
+			}
+		});
+
+		return renderer(scope, nodeList);
 	});
 };
 
@@ -86,14 +107,12 @@ assign(HTMLSectionBuilder.prototype,{
 		var compiled = this.stack.pop().compile();
 		// ignore observations here.  the render fn
 		//  itself doesn't need to be observable.
-		return Observation.ignore(function(scope, options, nodeList){
+		return Observation.ignore(function(scope, nodeList){
 			if ( !(scope instanceof Scope) ) {
-				scope = Scope.refsScope().add(scope || {});
+				scope = new Scope(scope || {});
 			}
-			if ( !(options instanceof mustacheCore.Options) ) {
-				options = new mustacheCore.Options(options || {});
-			}
-			return compiled.hydrate(scope, options, nodeList);
+
+			return compiled.hydrate(scope, nodeList);
 		});
 	},
 	push: function(chars){
@@ -113,10 +132,9 @@ var HTMLSection = function(process){
 	// A record of what targetData element we are within.
 	this.targetStack = [];
 	var self = this;
-	this.targetCallback = function(scope, options, sectionNode){
+	this.targetCallback = function(scope, sectionNode){
 		process.call(this,
 			scope,
-			options,
 			sectionNode,
 			self.compiled.hydrate.bind(self.compiled),
 			self.inverseCompiled && self.inverseCompiled.hydrate.bind(self.inverseCompiled)  ) ;

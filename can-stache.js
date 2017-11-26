@@ -18,6 +18,8 @@ var DOCUMENT = require('can-globals/document/document');
 var assign = require('can-util/js/assign/assign');
 var last = require('can-util/js/last/last');
 var importer = require('can-util/js/import/import');
+var each = require('can-util/js/each/each');
+var canReflect = require('can-reflect');
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
@@ -425,17 +427,17 @@ function stache (filename, template) {
 	});
 
 	var renderer = section.compile();
-	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
-		if( Object.keys( inlinePartials ).length ) {
-			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
-			assign( optionsScope.inlinePartials, inlinePartials );
-		}
+	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, nodeList ) {
+		var templateContext = scope.templateContext;
+
+		each(inlinePartials, function(partial, partialName) {
+			canReflect.setKeyValue(templateContext.partials, partialName, partial);
+		});
 
 		// allow the current renderer to be called with {{>scope.view}}
-		scope.set('scope.view', scopifiedRenderer);
-
+		canReflect.setKeyValue(templateContext, 'view', scopifiedRenderer);
 		//!steal-remove-start
-		scope.set('scope.filename', section.filename);
+		canReflect.setKeyValue(templateContext, 'filename', section.filename);
 		//!steal-remove-end
 
 		return renderer.apply( this, arguments );
