@@ -540,8 +540,8 @@ function makeTest(name, doc, mutation) {
 		var div1 = doc.createElement('div');
 		var div2 = doc.createElement('div');
 
-		div1.appendChild(template( {}));
-		div2.appendChild(template( new SimpleMap()));
+		div1.appendChild(template({}));
+		div2.appendChild(template(new SimpleMap()));
 
 		deepEqual(innerHTML(div1), "foo");
 		deepEqual(innerHTML(div2), "foo");
@@ -3413,13 +3413,12 @@ function makeTest(name, doc, mutation) {
 
 	test("viewCallbacks.tag", function(){
 
-		expect(4);
+		expect(3);
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(tagData.scope instanceof Scope, "got scope");
-			ok(tagData.options instanceof Scope, "got options");
 			equal(typeof tagData.subtemplate, "function", "got subtemplate");
-			var frag = tagData.subtemplate(tagData.scope.add({last: "Meyer"}), tagData.options);
+			var frag = tagData.subtemplate(tagData.scope.add({last: "Meyer"}));
 
 			equal( innerHTML(frag.firstChild), "Justin Meyer", "rendered right");
 		});
@@ -3432,11 +3431,10 @@ function makeTest(name, doc, mutation) {
 
 	test("viewCallbacks.attr", function(){
 
-		expect(3);
+		expect(2);
 
 		viewCallbacks.attr("stache-attr", function(el, attrData){
 			ok(attrData.scope instanceof Scope, "got scope");
-			ok(attrData.options instanceof Scope, "got options");
 			equal(attrData.attributeName, "stache-attr", "got attribute name");
 
 		});
@@ -4152,12 +4150,11 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
 	});
 
-	test('Custom attribute callbacks are called when in a conditional within a live section', 8, function () {
+	test('Custom attribute callbacks are called when in a conditional within a live section', 6, function () {
 		viewCallbacks.attr('test-attr', function(el, attrData) {
 			ok(true, "test-attr called");
 			equal(attrData.attributeName, 'test-attr', "attributeName set correctly");
 			ok(attrData.scope, "scope isn't undefined");
-			ok(attrData.options, "options isn't undefined");
 		});
 
 		var state = new SimpleMap({
@@ -5421,13 +5418,12 @@ function makeTest(name, doc, mutation) {
 
 	test("Plain JS object scope works with subtemplate (#208)", function(){
 
-		expect(4);
+		expect(3);
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(tagData.scope instanceof Scope, "got scope");
-			ok(tagData.options instanceof Scope, "got options");
 			equal(typeof tagData.subtemplate, "function", "got subtemplate");
-			var frag = tagData.subtemplate({last: "Meyer"}, tagData.options);
+			var frag = tagData.subtemplate({last: "Meyer"});
 
 			equal( innerHTML(frag.firstChild), "Meyer", "rendered right");
 		});
@@ -6215,7 +6211,7 @@ function makeTest(name, doc, mutation) {
 
 	test("call expression works with hash expression", function(){
 		var exprData = core.expression.parse("helper(todos, todo=value num=index)");
-		var args = core.expression.Call.prototype.args.call(exprData, Scope.refsScope().add({}), new core.Options({}));
+		var args = core.expression.Call.prototype.args.call(exprData, new Scope({}));
 
 		equal(args().hashExprs.todo.key, "value");
 		equal(args().hashExprs.num.key, "index");
@@ -6435,32 +6431,6 @@ function makeTest(name, doc, mutation) {
 		list.splice(1, 0, "b")
 
 		QUnit.equal(innerHTML(div), "012345");
-	});
-
-	QUnit.test("can read helper from options and options parent", function() {
-		var parent = {
-			helpers: {
-				myHelper: function() {
-					return 'parent';
-				}
-			}
-		};
-
-		var child = {
-			helpers: {
-				myHelper: function() {
-					return 'child';
-				}
-			}
-		};
-
-		var options = new Scope(parent).add(child);
-
-		var parentHelper = stache.getHelper('../myHelper', options).fn;
-		var childHelper = stache.getHelper('myHelper', options).fn;
-
-		QUnit.equal(parentHelper(), 'parent', 'parent helper called');
-		QUnit.equal(childHelper(), 'child', 'child helper called');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

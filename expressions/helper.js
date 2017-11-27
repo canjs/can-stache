@@ -15,7 +15,7 @@ var Helper = function(methodExpression, argExpressions, hashExpressions){
 	this.hashExprs = hashExpressions;
 	this.mode = null;
 };
-Helper.prototype.args = function(scope, helperOptions){
+Helper.prototype.args = function(scope){
 	var args = [];
 	for(var i = 0, len = this.argExprs.length; i < len; i++) {
 		var arg = this.argExprs[i];
@@ -24,7 +24,7 @@ Helper.prototype.args = function(scope, helperOptions){
 	}
 	return args;
 };
-Helper.prototype.hash = function(scope, helperOptions){
+Helper.prototype.hash = function(scope){
 	var hash = {};
 	for(var prop in this.hashExprs) {
 		var val = this.hashExprs[prop];
@@ -36,7 +36,7 @@ Helper.prototype.hash = function(scope, helperOptions){
 // looks up the name key in the scope
 // returns a `helper` property if there is a helper for the key.
 // returns a `value` property if the value is looked up.
-Helper.prototype.helperAndValue = function(scope, helperOptions){
+Helper.prototype.helperAndValue = function(scope){
 
 	//{{foo bar}}
 	var looksLikeAHelper = this.argExprs.length || !isEmptyObject(this.hashExprs),
@@ -56,7 +56,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 	// If the expression looks like a helper, try to get a helper right away.
 	if (looksLikeAHelper) {
 		// Try to find a registered helper.
-		helper = mustacheHelpers.getHelper(methodKey, helperOptions);
+		helper = mustacheHelpers.getHelper(methodKey, scope);
 
 	}
 	if(!helper) {
@@ -75,7 +75,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		//
 		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
-			args = this.args(scope, helperOptions).map(expressionHelpers.toComputeOrValue);
+			args = this.args(scope).map(expressionHelpers.toComputeOrValue);
 
 			function helperFn() {
 				return computeData.initialValue.apply(null, args);
@@ -107,7 +107,7 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// also `foo.bar` in any of the above if bar is any of the mentioned types
 		// or foo is null or undefined
 		if( !looksLikeAHelper && initialValue === undefined ) {
-			helper = mustacheHelpers.getHelper(methodKey, helperOptions);
+			helper = mustacheHelpers.getHelper(methodKey, scope);
 		}
 	}
 
@@ -127,17 +127,18 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		helper: helper && helper.fn
 	};
 };
-Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly){
+
+Helper.prototype.evaluator = function(helper, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly){
 
 	var helperOptionArg = {
 		stringOnly: stringOnly
 	},
 		context = scope.peek("."),
-		args = this.args(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly),
-		hash = this.hash(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+		args = this.args(scope),
+		hash = this.hash(scope);
 
 	// Add additional data to be used by helper functions
-	utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+	utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 	assign(helperOptionArg, {
 		context: context,
@@ -145,9 +146,7 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 		contexts: scope,
 		hash: hash,
 		nodeList: nodeList,
-		exprData: this,
-		helperOptions: helperOptions,
-		helpers: helperOptions
+		exprData: this
 	});
 
 	args.push(helperOptionArg);
@@ -157,9 +156,9 @@ Helper.prototype.evaluator = function(helper, scope, helperOptions, /*REMOVE*/re
 	};
 };
 
-Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly){
+Helper.prototype.value = function(scope, nodeList, truthyRenderer, falseyRenderer, stringOnly){
 
-	var helperAndValue = this.helperAndValue(scope, helperOptions);
+	var helperAndValue = this.helperAndValue(scope);
 
 	var helper = helperAndValue.helper;
 	// a method could have been called, resulting in a value
@@ -167,7 +166,7 @@ Helper.prototype.value = function(scope, helperOptions, nodeList, truthyRenderer
 		return helperAndValue.value;
 	}
 
-	var fn = this.evaluator(helper, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+	var fn = this.evaluator(helper, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 	var computeValue = new Observation(fn);
 

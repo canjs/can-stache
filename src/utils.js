@@ -45,16 +45,16 @@ module.exports = {
 	},
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
-	convertToScopes: function(helperOptions, scope, options, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
-		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, options, nodeList, isStringOnly) : noop;
-		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, options, nodeList, isStringOnly) : noop;
+	convertToScopes: function(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
+		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly) : noop;
+		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly) : noop;
 		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.
-	makeRendererConvertScopes: function (renderer, parentScope, parentOptions, nodeList, observeObservables) {
-		var rendererWithScope = function(ctx, opts, parentNodeList){
-			return renderer(ctx || parentScope, opts, parentNodeList);
+	makeRendererConvertScopes: function (renderer, parentScope, nodeList, observeObservables) {
+		var rendererWithScope = function(ctx, parentNodeList){
+			return renderer(ctx || parentScope, parentNodeList);
 		};
 		var convertedRenderer = function (newScope, newOptions, parentNodeList) {
 			// prevent binding on fn.
@@ -64,26 +64,24 @@ module.exports = {
 					newScope = parentScope.add(newScope);
 				}
 				else {
-					newScope = Scope.refsScope().add(newScope || {});
+					newScope = new Scope(newScope || {});
 				}
 			}
-			if (newOptions !== undefined && !(newOptions instanceof Options)) {
-				newOptions = parentOptions.add(newOptions);
-			}
-			var result = rendererWithScope(newScope, newOptions || parentOptions, parentNodeList || nodeList );
+
+			var result = rendererWithScope(newScope, parentNodeList || nodeList );
 			return result;
 		};
 		return observeObservables ? convertedRenderer : Observation.ignore(convertedRenderer);
 	},
 	// Calls the truthy subsection for each item in a list and returning them in a string.
-	getItemsStringContent: function(items, isObserveList, helperOptions, options){
+	getItemsStringContent: function(items, isObserveList, helperOptions){
 		var txt = "",
 			len = observationReader.get(items, 'length'),
 			isObservable = canReflect.isObservableLike(items);
 
 		for (var i = 0; i < len; i++) {
 			var item = isObservable ? new KeyObservable(items, i) :items[i];
-			txt += helperOptions.fn(item, options);
+			txt += helperOptions.fn(item);
 		}
 		return txt;
 	},

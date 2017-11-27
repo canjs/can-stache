@@ -691,7 +691,7 @@ test("registerConverter helpers push and pull correct values", function () {
 	var scope = new Scope( data );
 	var parentExpression = expression.parse("numberToHex(~observeVal)",{baseMethodType: "Call"});
 
-	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	var twoWayCompute = parentExpression.value(scope);
 	//twoWayCompute('34');
 
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
@@ -720,7 +720,7 @@ test("registerConverter helpers push and pull multiple values", function () {
 	});
 	var scope = new Scope( data );
 	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
-	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	var twoWayCompute = parentExpression.value(scope);
 	//twoWayCompute('34');
 
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
@@ -757,7 +757,7 @@ test("registerConverter helpers are chainable", function () {
 	var scope = new Scope( data );
 
 	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))",{baseMethodType: "Call"});
-	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
+	var twoWayCompute = parentExpression.value(scope);
 	//twoWayCompute('34');
 
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
