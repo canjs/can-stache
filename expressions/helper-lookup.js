@@ -9,8 +9,7 @@ var HelperLookup = function(){
 	Lookup.apply(this, arguments);
 };
 HelperLookup.prototype.value = function(scope, helperOptions){
-	var result = lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peek('.'), scope]});
-	return result.helper || result.value;
+	return lookupValueOrHelper(this.key, scope, helperOptions, {isArgument: true, args: [scope.peek('.'), scope]});
 };
 //!steal-remove-start
 HelperLookup.prototype.sourceText = Lookup.prototype.sourceText;

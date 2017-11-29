@@ -21,7 +21,7 @@ Lookup.prototype.value = function(scope){
 		var result = lookupValueOrHelper(this.key, scope);
 		// TODO: remove this hack
 		assign(this, result.metadata);
-		return result.helper || result.value;
+		return result;
 	}
 };
 //!steal-remove-start
