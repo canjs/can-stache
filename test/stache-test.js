@@ -3445,6 +3445,19 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("viewCallbacks passes parent node list", function(){
+		expect(1);
+
+		var nodeList = [];
+		var template = stache("<node-list-passed />");
+
+		viewCallbacks.tag("node-list-passed", function(el, tagData){
+			strictEqual(tagData.parentNodeList, nodeList, "got parentNodeList");
+		});
+
+		template({}, nodeList);
+	});
+
 	test("./ in key", function(){
 		var template = stache( "<div><label>{{name}}</label>{{#children}}<span>{{./name}}-{{name}}</span>{{/children}}</div>");
 
@@ -4335,7 +4348,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div.getElementsByTagName('span')[2]), "turtle", "turtle added");
 
 	});
-	
+
 	test("call expression with #if", function(){
 
 		var truthy = new SimpleObservable(true);
@@ -6008,7 +6021,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache("{{>foo bar}}");
 		renderer({ foo: stache("baz") });
 	});
-  
+
 	test("#if works with call expressions", function(){
 		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
 		var map = new DefineMap({
@@ -6046,7 +6059,7 @@ function makeTest(name, doc, mutation) {
 		console.log = function(value){
 			QUnit.equal(value, map);
 		};
-		
+
 		var template = stache("{{log()}}");
 		var div = doc.createElement("div");
 		var frag = template(map);
@@ -6251,7 +6264,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'foo:barbaz:qux');
 	});
-	
+
 	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
 		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
 		var frag = template();

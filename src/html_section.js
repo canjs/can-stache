@@ -45,6 +45,12 @@ HTMLSectionBuilder.scopify = function(renderer) {
 			scope = new Scope(scope || {});
 		}
 
+		// Support passing nodeList as the second argument
+		if (nodeList === undefined && canReflect.isListLike(options)) {
+			nodeList = options;
+			options = undefined;
+		}
+
 		// if an object is passed to options, assume it is the helpers object
 		if (options && !options.helpers && !options.partials && !options.tags) {
 			options = {

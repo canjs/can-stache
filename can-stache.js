@@ -207,13 +207,12 @@ function stache (filename, template) {
 				// If it's a custom tag with content, we need a section renderer.
 				section.add(state.node);
 				if(isCustomTag) {
-					addAttributesCallback(state.node, function(scope, options, parentNodeList){
+					addAttributesCallback(state.node, function(scope, parentNodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
-							options: options,
 							subtemplate: null,
 							templateType: "stache",
 							parentNodeList: parentNodeList
@@ -271,13 +270,12 @@ function stache (filename, template) {
 				} else {
 					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
-					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+					addAttributesCallback(oldNode, function(scope, parentNodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
-							options: options,
 							subtemplate: renderer  ? makeRendererConvertScopes(renderer) : renderer,
 							templateType: "stache",
 							parentNodeList: parentNodeList,
@@ -324,14 +322,13 @@ function stache (filename, template) {
 					if( !state.node.attributes ) {
 						state.node.attributes = [];
 					}
-					state.node.attributes.push(function(scope, options, nodeList){
+					state.node.attributes.push(function(scope, nodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
 							scope: scope,
-							options: options,
 							nodeList: nodeList
 						});
 					});
