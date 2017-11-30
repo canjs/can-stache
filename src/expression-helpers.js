@@ -50,7 +50,7 @@ function toComputeOrValue(value) {
 	// convert to non observable value
 	if(canReflect.isObservableLike(value)) {
 		// we only want to do this for things that `should` have dependencies, but dont.
-		if(canReflect.valueHasDependencies(value) === false) {
+		if(canReflect.isValueLike(value) && canReflect.valueHasDependencies(value) === false) {
 			return canReflect.getValue(value);
 		}
 		// if compute data
