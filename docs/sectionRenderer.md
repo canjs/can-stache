@@ -47,7 +47,7 @@ data. Notice how the section has access to `first` and `last`.
     })
 
     var template = stache(
-      "{{#helper}}{{first}} {{last}}{{/helper}}");
+      "{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
       
     template({last: "Meyer"}) //-> <h1>Justin Meyer</h1>
 
@@ -62,7 +62,7 @@ how the section has access to `last`:
     });
 
     var template = stache(
-      "{{#helper}}{{first}} {{last}}{{/helper}}");
+      "{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
       
     template({last: "Meyer"}) //-> <h1> Meyer</h1>
     
@@ -77,7 +77,7 @@ section. Notice how `last` is not available in the section:
     });
 
     var template = stache(
-      "{{#helper}}{{first}} {{last}}{{/helper}}");
+      "{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
       
     template({last: "Meyer"}) //-> <h1>Justin </h1>
 
