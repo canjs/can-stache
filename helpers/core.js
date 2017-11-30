@@ -17,6 +17,7 @@ var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
 var observationRecorder = require("can-observation-recorder");
+var lookupPriorities = require("../src/lookup-priorities");
 
 var domData = require('can-util/dom/data/data');
 
@@ -142,7 +143,7 @@ var helpers = {
 			}
 		}
 	},
-	"@index": {
+	"index": {
 		fn: function(offset, options) {
 			if (!options) {
 				options = offset;
@@ -328,7 +329,7 @@ var registerHelper = function(name, callback, metadata){
 	//!steal-remove-end
 
 	helpers[name] = {
-		metadata: assign({ isHelper: true }, metadata),
+		metadata: assign({ isHelper: true, priority: lookupPriorities.GLOBAL_HELPER }, metadata),
 		fn: callback
 	};
 };
@@ -366,18 +367,27 @@ module.exports = {
 		var helper = scope && canReflect.getKeyValue(scope.templateContext.helpers, name);
 
 		if (helper) {
-			helper = { fn: helper };
+			helper = {
+				fn: helper,
+				metadata: {
+					priority: lookupPriorities.LOCAL_HELPER,
+				}
+			};
 		} else {
-			helper = helpers[name];
+			helper = assign({}, helpers[name]);
+
+			if (!isEmptyObject(helper)) {
+				helper.metadata = assign({ priority: lookupPriorities.BUILT_IN_HELPER }, helper.metadata);
+			}
 		}
-		if(helper) {
-			helper.metadata = assign((helper.metadata || {}), { isHelper: true });
+
+		if (!isEmptyObject(helper)) {
+			helper.metadata = assign( helper.metadata, { isHelper: true });
 			return helper;
 		}
 	},
 
 	resolve: resolve,
 	resolveHash: resolveHash,
-	looksLikeOptions: looksLikeOptions,
-	helpers: assign({}, helpers)
+	looksLikeOptions: looksLikeOptions
 };

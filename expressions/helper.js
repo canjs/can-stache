@@ -8,6 +8,8 @@ var expressionHelpers = require("../src/expression-helpers");
 var utils = require('../src/utils');
 var mustacheHelpers = require('../helpers/core');
 var canReflect = require('can-reflect');
+var lookupValueOrHelper = require("../src/lookup-value-or-helper");
+var ScopeKeyData = require("can-view-scope/scope-key-data");
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
 	this.methodExpr = methodExpression;
@@ -39,8 +41,7 @@ Helper.prototype.hash = function(scope){
 Helper.prototype.helperAndValue = function(scope){
 
 	//{{foo bar}}
-	var looksLikeAHelper = this.argExprs.length || !isEmptyObject(this.hashExprs),
-		helper,
+	var helperOrValue,
 		computeData,
 		// If a literal, this means it should be treated as a key. But helpers work this way for some reason.
 		// TODO: fix parsing so numbers will also be assumed to be keys.
@@ -53,32 +54,14 @@ Helper.prototype.helperAndValue = function(scope){
 	var filename = scope.peek('scope.filename');
 	//!steal-remove-end
 
-	// If the expression looks like a helper, try to get a helper right away.
-	if (looksLikeAHelper) {
-		// Try to find a registered helper.
-		helper = mustacheHelpers.getHelper(methodKey, scope);
+	helperOrValue = lookupValueOrHelper(methodKey, scope);
 
-	}
-	if(!helper) {
-		// Try to find a value or function
-		computeData = expressionHelpers.getObservableValue_fromKey(methodKey, scope, {
-			isArgument: true
-		});
-		// if it's a function ... we need another compute that represents
-		// the call to that function
-		// This handles functions in any of these forms:
-		// {{#foo}}...{{/foo}}
-		// {{^foo}}...{{/foo}}
-		// {{foo bar}}
-		// {{foo}}
-		// {{{foo}}}
-		//
-		// it also handles when `bar` is a function in `foo.bar` in any of the above
-		if(typeof computeData.initialValue === "function") {
-			args = this.args(scope).map(expressionHelpers.toComputeOrValue);
+	if (helperOrValue instanceof ScopeKeyData) {
+		args = this.args(scope).map(expressionHelpers.toComputeOrValue);
 
+		if(typeof helperOrValue.initialValue === "function") {
 			function helperFn() {
-				return computeData.initialValue.apply(null, args);
+				return helperOrValue.initialValue.apply(null, args);
 			}
 			//!steal-remove-start
 			Object.defineProperty(helperFn, "name", {
@@ -91,40 +74,24 @@ Helper.prototype.helperAndValue = function(scope){
 			};
 		}
 		// if it's some other value ..
-		else if(typeof computeData.initialValue !== "undefined") {
+		else if(typeof helperOrValue.initialValue !== "undefined") {
 			// we will use that
-			return {value: computeData};
+			return {value: helperOrValue};
 		}
-
-		// If it doesn't look like a helper and there is no value, check helpers
-		// anyway. This is for when foo is a helper in `{{foo}}`.
-		// {{#foo}}...{{/foo}}
-		// {{^foo}}...{{/foo}}
-		// {{foo}}
-		// {{{foo}}}
-		// {{& foo}}
-		//
-		// also `foo.bar` in any of the above if bar is any of the mentioned types
-		// or foo is null or undefined
-		if( !looksLikeAHelper && initialValue === undefined ) {
-			helper = mustacheHelpers.getHelper(methodKey, scope);
-		}
-	}
-
-	//!steal-remove-start
-	if ( !helper ) {
-		if(looksLikeAHelper) {
-			dev.warn('can-stache/expressions/helper.js: Unable to find helper "' + methodKey + '".');
-		} else {
+		//!steal-remove-start
+		else {
 			dev.warn('can-stache/expressions/helper.js: Unable to find key or helper "' + methodKey + '".');
 		}
+		//!steal-remove-end
+
+		return {
+			value: helperOrValue,
+			args: args
+		};
 	}
-	//!steal-remove-end
 
 	return {
-		value: computeData,
-		args: args,
-		helper: helper && helper.fn
+		helper: helperOrValue && helperOrValue.fn
 	};
 };
 

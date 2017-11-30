@@ -583,10 +583,10 @@ function makeTest(name, doc, mutation) {
 			var template;
 			var div = doc.createElement('div');
 
-			template = stache("<table><thead><tr>{{#data}}{{>list}}{{/data}}</tr></thead></table>")
+			template = stache("<table><thead><tr>{{#theData}}{{>list}}{{/theData}}</tr></thead></table>")
 
 			var dom = template({
-				data: new SimpleMap({
+				theData: new SimpleMap({
 					list: ["hi", "there"]
 				})
 			},{
@@ -2122,24 +2122,43 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div2), "Ajax rules");
 	});
 
-	test("Helpers always have priority (#258)", function () {
-		stache.registerHelper('callMe', function (arg) {
-			return arg + ' called me!';
-		});
+	QUnit.test("local helpers should have priority over scope functions over global helpers", function() {
+		stache.addHelper('help', function() { return 'global'; });
 
-		var t = {
-			template: "<div>{{callMe 'Tester'}}</div>",
-			expected: "<div>Tester called me!</div>",
-			data: {
-				callMe: function (arg) {
-					return arg + ' hanging up!';
-				}
+		/*
+		 * if there is a local helper, a function on the scope, and a global helper
+		 * the local helper takes precedence
+		 */
+		var result = getText(
+			'{{help()}}', {
+				help: function() { return 'scope'; }
+			}, {
+				help: function() { return 'local'; }
 			}
-		};
+		);
 
-		var expected = t.expected.replace(/&quot;/g, '&#34;')
-			.replace(/\r\n/g, '\n');
-		deepEqual( getText( t.template, t.data), expected);
+		QUnit.equal(result, 'local', 'local, scope function, global - uses local');
+
+		/*
+		 * if there is a function on the scope and a global helper
+		 * the function on the scope takes precedence
+		 */
+		result = getText(
+			'{{help()}}', {
+				help: function() { return 'scope'; }
+			}
+		);
+		QUnit.equal(result, 'scope', 'scope function, global - uses scope');
+
+		/*
+		 * if there is only a global helper
+		 * call it
+		 */
+		result = getText(
+			'{{help()}}'
+		);
+		QUnit.equal(result, 'global', 'global - uses global');
+
 	});
 
 	test("avoid global helpers", function () {
@@ -3516,7 +3535,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find helper "helpme".');
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find key or helper "helpme".');
 
 		stache('<li>{{helpme name}}</li>')({
 			name: 'Hulk Hogan'
@@ -4761,10 +4780,10 @@ function makeTest(name, doc, mutation) {
 		var template;
 		var div = doc.createElement('div');
 
-		template = stache("{{#data}}{{>dude dudes}}{{/data}}");
+		template = stache("{{#theData}}{{>dude dudes}}{{/theData}}");
 
 		var dom = template({
-			data: new SimpleMap({
+			theData: new SimpleMap({
 				hello: "Hello",
 				dudes: [
 					{ name: "austin" },
@@ -6172,16 +6191,24 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
+	var overwriteGlobalHelper = function(name, fn) {
+		var origHelper = helpersCore.getHelper(name);
+		var origFn = origHelper.fn;
+
+		helpersCore.registerHelper(name, function() {
+			return fn.apply(this, arguments);
+		}, origHelper.metadata);
+
+		return origFn;
+	};
 	test("#each with call expression should be optimized for performance", function(){
 		var div = doc.createElement('div');
 		var count = 0;
 
-		var eachHelper = helpersCore.getHelper('each');
-		var origEach = eachHelper.fn;
-		eachHelper.fn = function() {
+		var origEach = overwriteGlobalHelper('each', function() {
 			count++;
 			return origEach.apply(this, arguments);
-		};
+		});
 		var template = stache("{{#each(this)}}{{this}} {{/each}}");
 		var listCompute = new SimpleObservable([ "one", "two" ]);
 
@@ -6194,6 +6221,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "one two three ");
 
 		QUnit.equal(count, 1, "#each helper should only be called once");
+		overwriteGlobalHelper('each', origEach);
 	});
 
 	test("#with works with hash expression in call expression", function(){
