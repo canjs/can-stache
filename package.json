@@ -35,7 +35,7 @@
   "dependencies": {
     "can-attribute-encoder": "^0.3.0",
     "can-compute": "^3.3.1",
-    "can-globals": "^0.2.0",
+    "can-globals": "<2.0.0",
     "can-log": "^0.1.0",
     "can-namespace": "1.0.0",
     "can-observation": "^3.3.1",
