@@ -879,3 +879,36 @@ testHelpers.dev.devOnlyTest("expression.sourceText - everything", function(){
 	var exprData = expression.parse(source);
 	QUnit.equal(exprData.sourceText(),source);
 });
+
+test('Call Expressions can return functions instead of Observations', function() {
+	var data = new SimpleMap({
+		name: "kevin",
+		foo: function() {
+			return this.get("name");
+		}
+	});
+
+	var expr = new expression.Call( new expression.Lookup("@foo"), [], {} );
+
+	var val = new SimpleObservable(
+		expr.value( new Scope( data ) )
+	);
+
+	equal(canReflect.getValue(val.value), "kevin", "got correct initial value");
+
+	ok(canReflect.isObservableLike(val.value), "value is observable by default");
+	canReflect.onValue(val.value, function(newVal) {
+		equal(newVal, "mark", "got correct changed value");
+	});
+
+	data.set("name", "mark");
+
+	var nonBindingVal = new SimpleObservable(
+		expr.value( new Scope( data ), {
+			doNotWrapInObservation: true
+		})
+	);
+
+	equal(canReflect.getValue(nonBindingVal.value), "mark", "got correct initial value");
+	ok(!canReflect.isObservableLike(nonBindingVal.value), "value is not observable when doNotWrapInObservation is true");
+});

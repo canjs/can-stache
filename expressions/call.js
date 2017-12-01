@@ -85,9 +85,13 @@ Call.prototype.value = function(scope, helperOptions){
 	});
 	//!steal-remove-end
 
-	var computeValue = new SetterObservable(computeFn, computeFn);
-	Observation.temporarilyBind(computeValue);
-	return computeValue;
+	if (helperOptions && helperOptions.doNotWrapInObservation) {
+		return computeFn();
+	} else {
+		var computeValue = new SetterObservable(computeFn, computeFn);
+		Observation.temporarilyBind(computeValue);
+		return computeValue;
+	}
 };
 //!steal-remove-start
 Call.prototype.sourceText = function(){
