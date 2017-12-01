@@ -24,7 +24,7 @@ function outer(){
 outer();
 ```
 
-JavaScript looks for `last` looks in the `inner` context and then walks up the
+JavaScript looks for `last` in the `inner` context and then walks up the
 scope to the `outer` context to find a `last` variable.
 
 
