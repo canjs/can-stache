@@ -1,6 +1,7 @@
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 var canReflect = require('can-reflect');
 
 var utils = require('./utils');
@@ -40,7 +41,7 @@ var HTMLSectionBuilder = function(filename){
 };
 
 HTMLSectionBuilder.scopify = function(renderer) {
-	return Observation.ignore(function(scope, options, nodeList){
+	return ObservationRecorder.ignore(function(scope, options, nodeList){
 		if ( !(scope instanceof Scope) ) {
 			scope = new Scope(scope || {});
 		}
@@ -113,7 +114,7 @@ assign(HTMLSectionBuilder.prototype,{
 		var compiled = this.stack.pop().compile();
 		// ignore observations here.  the render fn
 		//  itself doesn't need to be observable.
-		return Observation.ignore(function(scope, nodeList){
+		return ObservationRecorder.ignore(function(scope, nodeList){
 			if ( !(scope instanceof Scope) ) {
 				scope = new Scope(scope || {});
 			}
