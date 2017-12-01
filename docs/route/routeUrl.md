@@ -42,16 +42,16 @@ current [can-route] properties.
 Use the `routeUrl` helper like:
 
 ```
-<a href='{{routeUrl(page="recipe" id=5)}}'>{{recipe.name}}</a>
+<a href='{{routeUrl page="recipe" id=5}}'>{{recipe.name}}</a>
 ```
 
 This produces (with no pretty routing rules):
 
 ```
-<a href='#!&page=5&id=5'>{{recipe.name}}</a>
+<a href='#!&page=recipe&id=5'>{{recipe.name}}</a>
 ```
 
-It this functionality could also be written as:
+It this functionality could also be written as a call expression:
 
 ```
 <a href='{{ routeUrl(page="recipe" id=5) }}'>{{recipe.name}}</a>
