@@ -6,6 +6,7 @@ var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 
 var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-util/dom/frag/frag");
@@ -223,7 +224,7 @@ var core = {
 
 					};
 				}
-				var res = Observation.ignore(renderer)();
+				var res = ObservationRecorder.ignore(renderer)();
 				return frag(res);
 			});
 			canReflect.setPriority(partialFrag,nodeList.nesting );
@@ -357,7 +358,7 @@ var core = {
 				// we hide any observables read in the function by saving any observables that
 				// have been read and then setting them back which overwrites any `can.__observe` calls
 				// performed in value.
-				Observation.ignore(value)(this);
+				ObservationRecorder.ignore(value)(this);
 
 			}
 			// If the computeValue has observable dependencies, setup live binding.

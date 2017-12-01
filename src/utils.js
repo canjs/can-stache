@@ -1,5 +1,6 @@
 var Scope = require('can-view-scope');
 var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
@@ -71,7 +72,8 @@ module.exports = {
 			var result = rendererWithScope(newScope, parentNodeList || nodeList );
 			return result;
 		};
-		return observeObservables ? convertedRenderer : Observation.ignore(convertedRenderer);
+		return observeObservables ? convertedRenderer :
+			ObservationRecorder.ignore(convertedRenderer);
 	},
 	// Calls the truthy subsection for each item in a list and returning them in a string.
 	getItemsStringContent: function(items, isObserveList, helperOptions){

@@ -37,6 +37,7 @@
     "can-log": "^0.1.0",
     "can-namespace": "1.0.0",
     "can-observation": "^4.0.0-pre.7",
+    "can-observation-recorder": "<2.0.0",
     "can-reflect": "^1.2.1",
     "can-stache-key": "^1.0.0-pre.13",
     "can-symbol": "^1.0.0",
