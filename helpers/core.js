@@ -1,11 +1,9 @@
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var utils = require('../src/utils');
-var isFunction = require('can-util/js/is-function/is-function');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var joinURIs = require('can-util/js/join-uris/join-uris');
-var each = require('can-util/js/each/each');
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var isIterable = require("can-util/js/is-iterable/is-iterable");
 var dev = require('can-log/dev/dev');
 var canSymbol = require("can-symbol");
@@ -65,7 +63,7 @@ var helpers = {
 			// Check if using hash
 			if (!isEmptyObject(hashExprs)) {
 				hashOptions = {};
-				each(hashExprs, function (exprs, key) {
+				canReflect.eachKey(hashExprs, function (exprs, key) {
 					hashOptions[exprs.key] = key;
 				})
 			}
@@ -150,7 +148,7 @@ var helpers = {
 				offset = 0;
 			}
 			var index = options.scope.peek("scope.index");
-			return ""+((isFunction(index) ? index() : index) + offset);
+			return ""+((typeof(index) === "function" ? index() : index) + offset);
 		}
 	},
 	'if': {
@@ -184,7 +182,7 @@ var helpers = {
 			var callFn = new Observation(function(){
 				for (var i = 0; i < args.length - 1; i++) {
 					curValue = resolve(args[i]);
-					curValue = isFunction(curValue) ? curValue() : curValue;
+					curValue = typeof curValue === "function" ? curValue() : curValue;
 
 					if (i > 0) {
 						if (curValue !== lastValue) {
@@ -235,7 +233,7 @@ var helpers = {
 		fn: function (options) {
 			// go through the arguments
 			var logs = [];
-			each(arguments, function(val){
+			canReflect.eachIndex(arguments, function(val){
 				if(!looksLikeOptions(val)) {
 					logs.push(val);
 				}
@@ -293,7 +291,7 @@ var helpers = {
 
 			var moduleReference = args.map( function(expr){
 				var value = resolve(expr);
-				return isFunction(value) ? value() : value;
+				return typeof value === "function" ? value() : value;
 			}).join("");
 
 			var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
@@ -337,7 +335,7 @@ var registerHelper = function(name, callback, metadata){
 var makeSimpleHelper = function(fn) {
 	return function() {
 		var realArgs = [];
-		each(arguments, function(val) {
+		canReflect.eachIndex(arguments, function(val) {
 			while (val && val.isComputed) {
 				val = val();
 			}

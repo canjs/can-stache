@@ -9,9 +9,8 @@ var mustacheCore = require('./mustache_core');
 
 var getDocument = require("can-globals/document/document");
 
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var last = require('can-util/js/last/last');
-var each = require('can-util/js/each/each');
 
 var decodeHTML = typeof document !== "undefined" && (function(){
 	var el = getDocument().createElement('div');
@@ -62,12 +61,12 @@ HTMLSectionBuilder.scopify = function(renderer) {
 		var templateContext = scope.templateContext;
 
 		// loop through each option category - helpers, partials, etc
-		each(options, function(optionValues, optionKey) {
+		canReflect.eachKey(options, function(optionValues, optionKey) {
 			var container = templateContext[optionKey];
 
 			if (container) {
 				// loop through each helper/partial
-				each(optionValues, function(optionValue, optionValueKey) {
+				canReflect.eachKey(optionValues, function(optionValue, optionValueKey) {
 					canReflect.setKeyValue(container, optionValueKey, optionValue);
 				});
 			}

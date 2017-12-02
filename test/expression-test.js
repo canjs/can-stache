@@ -1,13 +1,12 @@
 var expression = require('../src/expression');
 var QUnit = require('steal-qunit');
-var each = require('can-util/js/each/each');
 var Scope = require('can-view-scope');
 var helpers = require('../helpers/converter');
 var canReflect = require("can-reflect");
 var SimpleObservable = require('can-simple-observable');
 var SimpleMap = require('can-simple-map');
 var DefineList = require('can-define/list/list');
-var assign = require("can-util/js/assign/assign");
+var assign = require("can-assign");
 var queues = require("can-queues");
 var testHelpers = require('can-test-helpers');
 
@@ -178,7 +177,7 @@ test("expression.parse - everything", function(){
 	deepEqual(callHelperBdotZed, exprData.argExprs[0], "call helper b.zed");
 
 	var expectedArgs = [callHelperBdotZed, def, nested];
-	each(exprData.argExprs, function(arg, i){
+	canReflect.each(exprData.argExprs, function(arg, i){
 		deepEqual(arg, expectedArgs[i], "helperA arg["+i);
 	});
 

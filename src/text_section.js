@@ -4,7 +4,7 @@ var utils = require('./utils');
 
 var attr = require("can-util/dom/attr/attr");
 
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");

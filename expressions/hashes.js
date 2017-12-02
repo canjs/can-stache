@@ -1,7 +1,6 @@
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");
 var expressionHelpers = require("../src/expression-helpers");
-var each = require('can-util/js/each/each');
 
 var Hashes = function(hashes){
 	this.hashExprs = hashes;
@@ -28,7 +27,7 @@ Hashes.prototype.value = function(scope, helperOptions){
 //!steal-remove-start
 Hashes.prototype.sourceText = function(){
 	var hashes = [];
-	each(this.hashExprs, function(expr, prop){
+	canReflect.eachKey(this.hashExprs, function(expr, prop){
 		hashes.push( prop+"="+expr.sourceText() );
 	});
 	return hashes.join(" ");

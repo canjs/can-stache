@@ -16,8 +16,7 @@ var SetIdentifier = require("./set-identifier");
 var expressionHelpers = require("../src/expression-helpers");
 
 var utils = require('./utils');
-var each = require('can-util/js/each/each');
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
@@ -277,7 +276,7 @@ var expression = {
 		}
 		else if(ast.type === "Hashes") {
 			hashes = {};
-			each(ast.children, function(hash){
+			ast.children.forEach(function(hash){
 				hashes[hash.prop] = this.hydrateAst( hash.children[0], options, methodType, true );
 			}, this);
 			return new Hashes(hashes);
@@ -294,7 +293,7 @@ var expression = {
 					if(child.type === "Hashes" && ast.type === "Helper" &&
 						(ExpressionType !== Call)) {
 
-						each(child.children, function(hash){
+						child.children.forEach(function(hash){
 							hashes[hash.prop] = this.hydrateAst( hash.children[0], options, ast.type, true );
 						}, this);
 

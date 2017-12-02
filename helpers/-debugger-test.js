@@ -1,5 +1,5 @@
 var unit = require('steal-qunit');
-var canLog = require('can-util/js/log/log');
+var canLog = require('can-log');
 var debug = require('./-debugger');
 var SimpleObservable = require("can-simple-observable");
 

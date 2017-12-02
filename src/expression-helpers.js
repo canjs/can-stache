@@ -4,7 +4,6 @@ var Literal = require("../expressions/literal");
 var canReflect = require("can-reflect");
 var observeReader = require("can-stache-key");
 var canSymbol = require("can-symbol");
-var dev = require("can-util/js/dev/dev");
 var Observation = require("can-observation");
 var makeComputeLike = require("can-view-scope/make-compute-like");
 var SetterObservable = require("can-simple-observable/setter/setter");

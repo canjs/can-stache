@@ -28,7 +28,6 @@ var domData = require('can-util/dom/data/data');
 var domMutate = require('can-util/dom/mutate/mutate');
 var DOCUMENT = require('can-globals/document/document');
 
-var canEach = require('can-util/js/each/each');
 var canDev = require('can-log/dev/dev');
 var string = require('can-util/js/string/string');
 var makeArray = require('can-util/js/make-array/make-array');
@@ -313,44 +312,6 @@ function makeTest(name, doc, mutation) {
 			'Standalone Without Newline': '#\n/'
 		}
 	};
-
-	// Add mustache specs to the test
-	canEach(window.MUSTACHE_SPECS, function(specData){
-		var spec = specData.name;
-		canEach(specData.data.tests, function (t) {
-			test('specs/' + spec + ' - ' + t.name + ': ' + t.desc, function () {
-				// stache does not escape double quotes, mustache expects &quot;.
-				// can uses \n for new lines, mustache expects \r\n.
-				var expected = (override[spec] && override[spec][t.name]) || t.expected.replace(/&quot;/g, '"');
-				//.replace(/\r\n/g, '\n');
-
-				// Mustache's "Recursion" spec generates invalid HTML
-				if (spec === 'partials' && t.name === 'Recursion') {
-					t.partials.node = t.partials.node.replace(/</g, '[')
-						.replace(/\}>/g, '}]');
-					expected = expected.replace(/</g, '[')
-						.replace(/>/g, ']');
-				} else if(spec === 'partials'){
-					//expected = expected.replace(/\</g,"&lt;").replace(/\>/g,"&gt;")
-				}
-
-
-				// register the partials in the spec
-				if (t.partials) {
-					for (var name in t.partials) {
-						stache.registerPartial(name, t.partials[name])
-					}
-				}
-
-				// register lambdas
-				if (t.data.lambda && t.data.lambda.js) {
-					t.data.lambda = eval('(' + t.data.lambda.js + ')');
-				}
-				var res = stache(t.template)(t.data);
-				deepEqual(getTextFromFrag(res), expected);
-			});
-		});
-	});
 
 	test('Tokens returning 0 where they should display the number', function () {
 		var template = "<div id='zero'>{{completed}}</div>";
@@ -2985,7 +2946,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('html comments must not break mustache scanner', function () {
-		canEach([
+		canReflect.each([
 			'text<!-- comment -->',
 			'text<!-- comment-->',
 			'text<!--comment -->',
@@ -3256,7 +3217,7 @@ function makeTest(name, doc, mutation) {
 			},
 			print_hash: function () {
 				var ret = [];
-				canEach(
+				canReflect.each(
 					arguments[arguments.length - 1].hash, function (arg, key) {
 						while (arg && arg.isComputed) {
 							arg = arg();

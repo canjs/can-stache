@@ -3,7 +3,7 @@ var lookupValueOrHelper = require("../src/lookup-value-or-helper");
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 
 // ### Lookup
 // `new Lookup(String, [Expression])`

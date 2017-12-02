@@ -15,10 +15,9 @@ var attributeEncoder = require('can-attribute-encoder');
 var dev = require('can-log/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-globals/document/document');
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var last = require('can-util/js/last/last');
 var importer = require('can-util/js/import/import');
-var each = require('can-util/js/each/each');
 var canReflect = require('can-reflect');
 // Make sure that we can also use our modules with Stache as a plugin
 
@@ -427,7 +426,7 @@ function stache (filename, template) {
 	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, nodeList ) {
 		var templateContext = scope.templateContext;
 
-		each(inlinePartials, function(partial, partialName) {
+		canReflect.eachKey(inlinePartials, function(partial, partialName) {
 			canReflect.setKeyValue(templateContext.partials, partialName, partial);
 		});
 
