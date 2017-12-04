@@ -50,10 +50,6 @@ Helper.prototype.helperAndValue = function(scope){
 		initialValue,
 		args;
 
-	//!steal-remove-start
-	var filename = scope.peek('scope.filename');
-	//!steal-remove-end
-
 	helperOrValue = lookupValueOrHelper(methodKey, scope);
 
 	if (helperOrValue instanceof ScopeKeyData) {
