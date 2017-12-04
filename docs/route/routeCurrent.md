@@ -60,19 +60,19 @@ Use the `routeCurrent` helper like:
 
 ```
 <li {{#routeCurrent(page="recipe" id=5)}}class='active'{{/routeCurrent}}>
-  <a href='{{routeUrl(page="recipe" id=5)}}'>{{recipe.name}}</a>
+  <a href='{{routeUrl page="recipe" id=5}}'>{{recipe.name}}</a>
 </li>
 ```
 
-With default routes and a url like `#!&page=5&id=5`, this produces:
+With default routes and a url like `#!&page=recipe&id=5`, this produces:
 
 ```
 <li class='active'>
-  <a href='#!&page=5&id=5'>{{recipe.name}}</a>
+  <a href='#!&page=recipe&id=5'>{{recipe.name}}</a>
 </li>
 ```
 
-It this functionality could use call expressions like:
+This functionality could also be written as a call expression:
 
 ```
 <li {{#routeCurrent(page="recipe" id=5)}}class='active'{{/routeCurrent}}>
