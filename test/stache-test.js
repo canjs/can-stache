@@ -15,6 +15,7 @@ var Observation = require('can-observation');
 var SimpleMap = require('can-simple-map');
 var SimpleObservable = require("can-simple-observable");
 
+var encoder = require('can-attribute-encoder');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
@@ -6433,6 +6434,75 @@ function makeTest(name, doc, mutation) {
 		list.splice(1, 0, "b")
 
 		QUnit.equal(innerHTML(div), "012345");
+	});
+
+	testHelpers.dev.devOnlyTest("section iteration of property using bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("passing bracket notation to method should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#eq(items['foo:bar'], 'baz')}}qux{{/eq}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("reading current scope with bracket notation should not warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn(/unexpected closing tag/);
+
+		stache("{{#['foo:bar']}}qux{{/['foo:bar']}}");
+
+		equal(teardown(), 0);
+	});
+
+	testHelpers.dev.devOnlyTest("section iteration of property using bracket notation should warn about unexpected closing tag", function (){
+		var teardown = testHelpers.dev.willWarn("1: unexpected closing tag {{/items['foo:bar']}} expected {{/items}}");
+
+		stache("{{#items['foo:bar']}}{{this}}{{/items['foo:bar']}}");
+
+		equal(teardown(), 1);
+	});
+
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'end' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		var tagHandler = viewCallbacks.tagHandler;
+
+		viewCallbacks.tagHandler = function (context, tagName, options){
+			equal(options.scope.peek('scope.lineNumber'), 3);
+		}
+
+		stache("foo\nbar\n<cust-elem/>\nbaz")();
+
+		viewCallbacks.tagHandler = tagHandler;
+	});
+
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'close' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		var tagHandler = viewCallbacks.tagHandler;
+
+		viewCallbacks.tagHandler = function (context, tagName, options){
+			equal(options.scope.peek('scope.lineNumber'), 3);
+		}
+
+		stache("foo\nbar\n<cust-elem></cust-elem>\nbaz")();
+
+		viewCallbacks.tagHandler = tagHandler;
+	});
+
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'attrEnd' before passing it to viewCallbacks.tagHandler (#373)", function (){
+		var attribute = 'toProp:from';
+		var encodedAttribute = encoder.encode(attribute);
+		viewCallbacks.attr(encodedAttribute, function (el, attrData){
+			equal(attrData.scope.peek('scope.lineNumber'), 3);
+		});
+
+		stache("foo\nbar\n<div " + attribute + "=\"fromProp\"/></div>\nbaz")();
+
+		// Remove handler to prevent side effect of other tests from calling this assertion
+		delete viewCallbacks._attributes[encodedAttribute];
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
