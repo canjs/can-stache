@@ -13,6 +13,7 @@ var CanList = require('can-list');
 var canCompute = require('can-compute');
 var DefineMap = require('can-define/map/map');
 var DefineList = require('can-define/list/list');
+var encoder = require('can-attribute-encoder');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
@@ -6241,7 +6242,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache("{{>foo bar}}");
 		renderer({ foo: stache("baz") });
 	});
-  
+
 	testHelpers.dev.devOnlyTest("warn on automatic function calling (#312)", function() {
 		var teardown = testHelpers.dev.willWarn(/mystache.stache:1: "aFunction" is being called as a function/);
 
@@ -6409,7 +6410,7 @@ function makeTest(name, doc, mutation) {
 		console.log = function(value){
 			QUnit.equal(value, map);
 		};
-		
+
 		var template = stache("{{log()}}");
 		var div = doc.createElement("div");
 		var frag = template(map);
@@ -6614,7 +6615,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'foo:barbaz:qux');
 	});
-	
+
 	testHelpers.dev.devOnlyTest("scope has lineNumber", function(){
 		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
 		var frag = template();
@@ -7134,14 +7135,16 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope at 'attrEnd' before passing it to viewCallbacks.tagHandler (#373)", function (){
-		viewCallbacks.attr(/[\w\.:]+:from$/, function (el, attrData){
+		var attribute = 'toProp:from';
+		var encodedAttribute = encoder.encode(attribute);
+		viewCallbacks.attr(encodedAttribute, function (el, attrData){
 			equal(attrData.scope.peek('lineNumber'), 3);
 		});
 
-		stache("foo\nbar\n<div toProp:from=\"fromProp\"/></div>\nbaz")();
+		stache("foo\nbar\n<div " + attribute + "=\"fromProp\"/></div>\nbaz")();
 
 		// Remove handler to prevent side effect of other tests from calling this assertion
-		viewCallbacks._regExpAttributes.splice(viewCallbacks._regExpAttributes.length - 1, 1);
+		delete viewCallbacks._attributes[encodedAttribute];
 	});
 
 	testHelpers.dev.devOnlyTest("passing functions as arguments to helpers should show a warning", function (){
