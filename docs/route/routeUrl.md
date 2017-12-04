@@ -51,7 +51,7 @@ This produces (with no pretty routing rules):
 <a href='#!&page=recipe&id=5'>{{recipe.name}}</a>
 ```
 
-It this functionality could also be written as a call expression:
+This functionality could also be written as a call expression:
 
 ```
 <a href='{{ routeUrl(page="recipe" id=5) }}'>{{recipe.name}}</a>
