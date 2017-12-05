@@ -135,11 +135,7 @@ Helper.prototype.value = function(scope, nodeList, truthyRenderer, falseyRendere
 
 	Observation.temporarilyBind(computeValue);
 
-	if (!expressionHelpers.computeHasDependencies( computeValue ) ) {
-		return computeValue();
-	} else {
-		return computeValue;
-	}
+	return computeValue;
 };
 
 Helper.prototype.closingTag = function() {
