@@ -37,8 +37,6 @@
 			"can-stache.helpers.joinBase",
 			"can-stache.helpers.key",
 			"can-stache.helpers.log",
-			"can-stache.helpers.routeCurrent",
-			"can-stache.helpers.routeUrl",
 			"can-stache.helpers.sectionHelper",
 			"can-stache.helpers.switch",
 			"can-stache.helpers.unless",
