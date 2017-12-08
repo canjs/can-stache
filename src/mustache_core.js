@@ -132,7 +132,7 @@ var core = {
 					var isObserveList = canReflect.isObservableLike(finalValue) &&
 						canReflect.isListLike(finalValue);
 
-					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
+					if(canReflect.getKeyValue(finalValue, "length")) {
 						if (stringOnly) {
 							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
 						} else {
