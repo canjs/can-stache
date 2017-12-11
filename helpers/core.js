@@ -15,7 +15,7 @@ var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
 var observationRecorder = require("can-observation-recorder");
-var lookupPriorities = require("../src/lookup-priorities");
+var helpers = require("can-stache-helpers");
 
 var domData = require('can-util/dom/data/data');
 
@@ -44,292 +44,274 @@ var resolveHash = function(hash){
 
 var peek = observationRecorder.ignore(resolve);
 
-var helpers = {
-	"each": {
-		metadata: {
-			isLiveBound: true
-		},
-		fn: function(items) {
-			var args = [].slice.call(arguments),
-				options = args.pop(),
-				argsLen = args.length,
-				argExprs = options.exprData.argExprs,
-				hashExprs = options.exprData.hashExprs,
-				resolved = peek(items),
-				hashOptions,
-				aliases,
-				key;
+var eachHelper = function(items) {
+	var args = [].slice.call(arguments),
+		options = args.pop(),
+		argsLen = args.length,
+		argExprs = options.exprData.argExprs,
+		hashExprs = options.exprData.hashExprs,
+		resolved = peek(items),
+		hashOptions,
+		aliases,
+		key;
 
-			// Check if using hash
-			if (!isEmptyObject(hashExprs)) {
-				hashOptions = {};
-				canReflect.eachKey(hashExprs, function (exprs, key) {
-					hashOptions[exprs.key] = key;
-				})
-			}
+	// Check if using hash
+	if (!isEmptyObject(hashExprs)) {
+		hashOptions = {};
+		canReflect.eachKey(hashExprs, function (exprs, key) {
+			hashOptions[exprs.key] = key;
+		})
+	}
 
-			if ((
-				canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
-				( utils.isArrayLike(resolved) && canReflect.isValueLike(items))
-			) && !options.stringOnly) {
-				return function(el){
-					// make a child nodeList inside the can.view.live.html nodeList
-					// so that if the html is re
-					var nodeList = [el];
-					nodeList.expression = "live.list";
-					nodeLists.register(nodeList, null, options.nodeList, true);
-					// runs nest replacements
-					nodeLists.update(options.nodeList, [el]);
+	if ((
+		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
+			( utils.isArrayLike(resolved) && canReflect.isValueLike(items))
+	) && !options.stringOnly) {
+		return function(el){
+			// make a child nodeList inside the can.view.live.html nodeList
+			// so that if the html is re
+			var nodeList = [el];
+			nodeList.expression = "live.list";
+			nodeLists.register(nodeList, null, options.nodeList, true);
+			// runs nest replacements
+			nodeLists.update(options.nodeList, [el]);
 
-					var cb = function (item, index, parentNodeList) {
-						var aliases = {};
+			var cb = function (item, index, parentNodeList) {
+				var aliases = {};
 
-						if (!isEmptyObject(hashOptions)) {
-							if (hashOptions.value) {
-								aliases[hashOptions.value] = item;
-							}
-							if (hashOptions.index) {
-								aliases[hashOptions.index] = index;
-							}
-						}
-
-						return options.fn(
-							options.scope
-								.add(aliases, { notContext: true })
-								.add({ index: index }, { special: true })
-								.add(item),
-							options.options,
-							parentNodeList
-						);
-					};
-
-					live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
-						return options.inverse(options.scope.add(list), options.options, parentNodeList);
-					});
-				};
-			}
-
-			var expr = resolve(items),
-				result;
-
-			if (!!expr && utils.isArrayLike(expr)) {
-				result = utils.getItemsFragContent(expr, options, options.scope);
-				return options.stringOnly ? result.join('') : result;
-			} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
-				result = [];
-				canReflect.each(expr, function(val, key){
-					var value = new KeyObservable(expr, key);
-					aliases = {};
-
-					if (!isEmptyObject(hashOptions)) {
-						if (hashOptions.value) {
-							aliases[hashOptions.value] = value;
-						}
-						if (hashOptions.key) {
-							aliases[hashOptions.key] = key;
-						}
+				if (!isEmptyObject(hashOptions)) {
+					if (hashOptions.value) {
+						aliases[hashOptions.value] = item;
 					}
-					result.push(options.fn(
-						options.scope
-							.add(aliases, { notContext: true })
-							.add({ key: key }, { special: true })
-							.add(value)
-					));
-				});
-
-				return options.stringOnly ? result.join('') : result;
-			}
-		}
-	},
-	"index": {
-		fn: function(offset, options) {
-			if (!options) {
-				options = offset;
-				offset = 0;
-			}
-			var index = options.scope.peek("scope.index");
-			return ""+((typeof(index) === "function" ? index() : index) + offset);
-		}
-	},
-	'if': {
-		fn: function (expr, options) {
-			var value;
-			// if it's a function, wrap its value in a compute
-			// that will only change values from true to false
-			if (expr && canReflect.isValueLike(expr)) {
-				value = canReflect.getValue(new TruthyObservable(expr));
-			} else {
-				value = !! resolve(expr);
-			}
-
-			if (value) {
-				return options.fn(options.scope || this);
-			} else {
-				return options.inverse(options.scope || this);
-			}
-		}
-	},
-	'is': {
-		fn: function() {
-			var lastValue, curValue,
-				options = arguments[arguments.length - 1];
-
-			if (arguments.length - 2 <= 0) {
-				return options.inverse();
-			}
-
-			var args = arguments;
-			var callFn = new Observation(function(){
-				for (var i = 0; i < args.length - 1; i++) {
-					curValue = resolve(args[i]);
-					curValue = typeof curValue === "function" ? curValue() : curValue;
-
-					if (i > 0) {
-						if (curValue !== lastValue) {
-							return false;
-						}
+					if (hashOptions.index) {
+						aliases[hashOptions.index] = index;
 					}
-					lastValue = curValue;
 				}
-				return true;
+
+				return options.fn(
+					options.scope
+					.add(aliases, { notContext: true })
+					.add({ index: index }, { special: true })
+					.add(item),
+				options.options,
+				parentNodeList
+				);
+			};
+
+			live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
+				return options.inverse(options.scope.add(list), options.options, parentNodeList);
 			});
+		};
+	}
 
-			return callFn.get() ? options.fn() : options.inverse();
+	var expr = resolve(items),
+		result;
+
+	if (!!expr && utils.isArrayLike(expr)) {
+		result = utils.getItemsFragContent(expr, options, options.scope);
+		return options.stringOnly ? result.join('') : result;
+	} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
+		result = [];
+		canReflect.each(expr, function(val, key){
+			var value = new KeyObservable(expr, key);
+			aliases = {};
+
+			if (!isEmptyObject(hashOptions)) {
+				if (hashOptions.value) {
+					aliases[hashOptions.value] = value;
+				}
+				if (hashOptions.key) {
+					aliases[hashOptions.key] = key;
+				}
+			}
+			result.push(options.fn(
+				options.scope
+				.add(aliases, { notContext: true })
+				.add({ key: key }, { special: true })
+				.add(value)
+			));
+		});
+
+		return options.stringOnly ? result.join('') : result;
+	}
+};
+eachHelper.isLiveBound = true;
+
+var builtInHelpers = {
+	"each": eachHelper,
+	"index":  function(offset, options) {
+		if (!options) {
+			options = offset;
+			offset = 0;
+		}
+		var index = options.scope.peek("scope.index");
+		return ""+((typeof(index) === "function" ? index() : index) + offset);
+	},
+	'if': function (expr, options) {
+		var value;
+		// if it's a function, wrap its value in a compute
+		// that will only change values from true to false
+		if (expr && canReflect.isValueLike(expr)) {
+			value = canReflect.getValue(new TruthyObservable(expr));
+		} else {
+			value = !! resolve(expr);
+		}
+
+		if (value) {
+			return options.fn(options.scope || this);
+		} else {
+			return options.inverse(options.scope || this);
 		}
 	},
-	'eq': {
-		fn: function() {
-			return helpers.is.fn.apply(this, arguments);
+	'is': function() {
+		var lastValue, curValue,
+			options = arguments[arguments.length - 1];
+
+		if (arguments.length - 2 <= 0) {
+			return options.inverse();
 		}
+
+		var args = arguments;
+		var callFn = new Observation(function(){
+			for (var i = 0; i < args.length - 1; i++) {
+				curValue = resolve(args[i]);
+				curValue = typeof curValue === "function" ? curValue() : curValue;
+
+				if (i > 0) {
+					if (curValue !== lastValue) {
+						return false;
+					}
+				}
+				lastValue = curValue;
+			}
+			return true;
+		});
+
+		return callFn.get() ? options.fn() : options.inverse();
 	},
-	'unless': {
-		fn: function (expr, options) {
-			return helpers['if'].fn.apply(this, [expr, assign(assign({}, options), {
-				fn: options.inverse,
-				inverse: options.fn
-			})]);
+	'eq': function() {
+		return helpers.is.apply(this, arguments);
+	},
+	'unless': function (expr, options) {
+		return helpers['if'].apply(this, [expr, assign(assign({}, options), {
+			fn: options.inverse,
+			inverse: options.fn
+		})]);
+	},
+	'with': function (expr, options) {
+		var ctx = expr;
+		if(!options) {
+			// hash-only case if no current context expression
+			options = expr;
+			expr = true;
+			ctx = options.hash;
+		} else {
+			expr = resolve(expr);
+			if(options.hash && !isEmptyObject(options.hash)) {
+				// presumably rare case of both a context object AND hash keys
+				// Leaving it undocumented for now, but no reason not to support it.
+				ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);
+			}
 		}
+		return options.fn(ctx || {});
 	},
-	'with': {
-		fn: function (expr, options) {
-			var ctx = expr;
-			if(!options) {
-				// hash-only case if no current context expression
-				options = expr;
-				expr = true;
-				ctx = options.hash;
+	'log':  function (options) {
+		// go through the arguments
+		var logs = [];
+		canReflect.eachIndex(arguments, function(val){
+			if(!looksLikeOptions(val)) {
+				logs.push(val);
+			}
+		});
+
+		if (typeof console !== "undefined" && console.log) {
+			if (!logs.length) {
+				console.log(options.context);
 			} else {
-				expr = resolve(expr);
-				if(options.hash && !isEmptyObject(options.hash)) {
-					// presumably rare case of both a context object AND hash keys
-					// Leaving it undocumented for now, but no reason not to support it.
-					ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);
-				}
-			}
-			return options.fn(ctx || {});
-		}
-	},
-	'log': {
-		fn: function (options) {
-			// go through the arguments
-			var logs = [];
-			canReflect.eachIndex(arguments, function(val){
-				if(!looksLikeOptions(val)) {
-					logs.push(val);
-				}
-			});
-
-
-			if (typeof console !== "undefined" && console.log) {
-				if (!logs.length) {
-					console.log(options.context);
-				} else {
-					console.log.apply(console, logs);
-				}
+				console.log.apply(console, logs);
 			}
 		}
 	},
-	'data': {
-		fn: function(attr){
-			// options will either be the second or third argument.
-			// Get the argument before that.
-			var data = arguments.length === 2 ? this : arguments[1];
-			return function(el){
-				domData.set.call( el, attr, data || this.context );
-			};
-		}
+	'data': function(attr){
+		// options will either be the second or third argument.
+		// Get the argument before that.
+		var data = arguments.length === 2 ? this : arguments[1];
+		return function(el){
+			domData.set.call( el, attr, data || this.context );
+		};
 	},
-	'switch': {
-		fn: function(expression, options){
-			resolve(expression);
-			var found = false;
-			var localHelpers = options.scope.templateContext.helpers;
+	'switch': function(expression, options){
+		resolve(expression);
+		var found = false;
 
-			var caseHelper = function(value, options) {
-				if(!found && resolve(expression) === resolve(value)) {
-					found = true;
-					return options.fn(options.scope || this);
-				}
-			};
-
-			var defaultHelper = function(options) {
-				if(!found) {
-					return options.fn(options.scope || this);
-				}
-			};
-
-			canReflect.setKeyValue(localHelpers, 'case', caseHelper);
-			canReflect.setKeyValue(localHelpers, 'default', defaultHelper);
-
-			return options.fn(options.scope, options);
-		}
-	},
-	'joinBase': {
-		fn: function(firstExpr/* , expr... */){
-			var args = [].slice.call(arguments);
-			var options = args.pop();
-
-			var moduleReference = args.map( function(expr){
-				var value = resolve(expr);
-				return typeof value === "function" ? value() : value;
-			}).join("");
-
-			var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
-			var parentAddress = templateModule ? templateModule.uri: undefined;
-
-			var isRelative = moduleReference[0] === ".";
-
-			if(isRelative && parentAddress) {
-				return joinURIs(parentAddress, moduleReference);
-			} else {
-				var baseURL = (typeof System !== "undefined" &&
-					(System.renderingBaseURL || System.baseURL)) ||	getBaseURL();
-
-				// Make sure one of them has a needed /
-				if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
-					baseURL += "/";
-				}
-
-				return joinURIs(baseURL, moduleReference);
+		var caseHelper = function(value, options) {
+			if(!found && resolve(expression) === resolve(value)) {
+				found = true;
+				return options.fn(options.scope.peek('this') || this);
 			}
+		};
+		caseHelper.isHelper = true;
+
+		var newScope = options.scope.add({
+			case: caseHelper,
+			get default() { return !found; }
+		}, { notContext: true });
+
+		return options.fn(newScope, options);
+	},
+	'joinBase': function(firstExpr/* , expr... */){
+		var args = [].slice.call(arguments);
+		var options = args.pop();
+
+		var moduleReference = args.map( function(expr){
+			var value = resolve(expr);
+			return typeof value === "function" ? value() : value;
+		}).join("");
+
+		var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
+		var parentAddress = templateModule ? templateModule.uri: undefined;
+
+		var isRelative = moduleReference[0] === ".";
+
+		if(isRelative && parentAddress) {
+			return joinURIs(parentAddress, moduleReference);
+		} else {
+			var baseURL = (typeof System !== "undefined" &&
+				(System.renderingBaseURL || System.baseURL)) ||	getBaseURL();
+
+			// Make sure one of them has a needed /
+			if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
+				baseURL += "/";
+			}
+
+			return joinURIs(baseURL, moduleReference);
 		}
 	}
 };
 
-helpers.eachOf = helpers.each;
-helpers.debugger = { fn: debuggerHelper };
+builtInHelpers.eachOf = builtInHelpers.each;
+builtInHelpers.debugger = debuggerHelper;
 
-var registerHelper = function(name, callback, metadata){
+
+var addBuiltInHelpers = function() {
+	canReflect.each(builtInHelpers, function(helper, helperName) {
+		helper.isHelper = true;
+		helpers[helperName] = helper;
+	});
+};
+
+// add all the built-in helpers when stache is loaded
+addBuiltInHelpers();
+
+var registerHelper = function(name, callback){
 	//!steal-remove-start
 	if (helpers[name]) {
 		dev.warn('The helper ' + name + ' has already been registered.');
 	}
 	//!steal-remove-end
 
-	helpers[name] = {
-		metadata: assign({ isHelper: true, priority: lookupPriorities.GLOBAL_HELPER }, metadata),
-		fn: callback
-	};
+	callback.isHelper = true;
+	helpers[name] = callback;
 };
 
 var makeSimpleHelper = function(fn) {
@@ -356,36 +338,29 @@ module.exports = {
 	// these helpers will not be wrapped in computes and will
 	// receive observable arguments when called with Call Expressions
 	addLiveHelper: function(name, callback) {
-		return registerHelper(name, callback, {
-			isLiveBound: true
-		});
+		callback.isLiveBound = true;
+		return registerHelper(name, callback);
 	},
 
 	getHelper: function(name, scope) {
-		var helper = scope && canReflect.getKeyValue(scope.templateContext.helpers, name);
+		var helper = scope && scope.getHelper(name);
 
-		if (helper) {
-			helper = {
-				fn: helper,
-				metadata: {
-					priority: lookupPriorities.LOCAL_HELPER,
-				}
-			};
-		} else {
-			helper = assign({}, helpers[name]);
-
-			if (!isEmptyObject(helper)) {
-				helper.metadata = assign({ priority: lookupPriorities.BUILT_IN_HELPER }, helper.metadata);
-			}
+		if (!helper) {
+			helper = helpers[name];
 		}
 
-		if (!isEmptyObject(helper)) {
-			helper.metadata = assign( helper.metadata, { isHelper: true });
-			return helper;
-		}
+		return helper;
 	},
 
 	resolve: resolve,
 	resolveHash: resolveHash,
-	looksLikeOptions: looksLikeOptions
+	looksLikeOptions: looksLikeOptions,
+	__resetHelpers: function() {
+		// remove all helpers from can-stache-helpers object
+		for (var helper in helpers) {
+			delete helpers[helper];
+		}
+
+		addBuiltInHelpers();
+	}
 };

@@ -44,7 +44,7 @@ var core = {
 	// a function that can quickly evaluate the expression.
 	/**
 	 * @hide
-	 * Given a mode and expresion data, returns a function that evaluates that expression.
+	 * Given a mode and expression data, returns a function that evaluates that expression.
 	 * @param {can-view-scope} The scope in which the expression is evaluated.
 	 * @param {can.view.Options} The option helpers in which the expression is evaluated.
 	 * @param {String} mode Either null, #, ^. > is handled elsewhere
@@ -67,7 +67,8 @@ var core = {
 
 		if(exprData instanceof expression.Call) {
 			helperOptionArg =  {
-				context: scope.peek("."),
+				stringOnly: stringOnly,
+				context: scope.peek("this"),
 				scope: scope,
 				nodeList: nodeList,
 				exprData: exprData
@@ -75,40 +76,31 @@ var core = {
 			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 			value = exprData.value(scope, helperOptionArg);
+
+			// if this is a helper function being called with a Call Expression, return what it rendered
 			if(exprData.isHelper) {
 				return value;
 			}
 		} else if (exprData instanceof expression.Bracket) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else if (exprData instanceof expression.Lookup) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
 			// Brackets get wrapped in Helpers when used in attributes
 			// like `<p class="{{ foo[bar] }}" />`
 			value = exprData.methodExpr.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else {
 			var readOptions = {
 				// will return a function instead of calling it.
 				// allowing it to be turned into a compute if necessary.
 				isArgument: true,
-				args: [scope.peek('.'), scope],
+				args: [scope.peek("this"), scope],
 				asCompute: true
 			};
-			var helperAndValue = exprData.helperAndValue(scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-			var helper = helperAndValue.helper;
-			value = helperAndValue.value;
+			value = exprData.helperValue(scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
-			if(helper) {
-				return exprData.evaluator(helper, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			if(value.isHelper) {
+				return exprData.evaluator(value, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			}
 		}
 
@@ -142,7 +134,6 @@ var core = {
 						return helperOptionArg.inverse(scope);
 					}
 				}
-				// If truthy, render fn, otherwise, inverse.
 				else {
 					return finalValue ? helperOptionArg.fn(finalValue || scope) : helperOptionArg.inverse(scope);
 				}
@@ -306,6 +297,8 @@ var core = {
 		}
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
+			// If this is within a tag, make sure we only get string values.
+			var stringOnly = state.tag;
 			//!steal-remove-start
 			scope.set('scope.lineNumber', lineNo);
 			//!steal-remove-end
@@ -317,13 +310,11 @@ var core = {
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
-				// If this is within a tag, make sure we only get string values.
-				state.tag );
+			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
 
 			// Create a compute that can not be observed by other
 			// comptues. This is important because this renderer is likely called by
-			// parent expresions.  If this value changes, the parent expressions should
+			// parent expressions.  If this value changes, the parent expressions should
 			// not re-evaluate. We prevent that by making sure this compute is ignored by
 			// everyone else.
 			//var compute = can.compute(evaluator, null, false);
@@ -350,8 +341,9 @@ var core = {
 
 			var value = canReflect.getValue(observable);
 
-			// If value is a function, it's a helper that returned a function.
-			if(typeof value === "function") {
+			// If value is a function and not a Lookup ({{foo}}),
+			// it's a helper that returned a function and should be called.
+			if(typeof value === "function" && !(exprData instanceof expression.Lookup)) {
 
 				// A helper function should do it's own binding.  Similar to how
 				// we prevented this function's compute from being noticed by parent expressions,

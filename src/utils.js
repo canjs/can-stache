@@ -8,11 +8,7 @@ var dev = require('can-log/dev/dev');
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
-	// ## can.view.Options
-	//
-	// This contains the local helpers, partials, and tags available to a template.
 
-var Options = Scope.Options; // jshint ignore:line
 var noop = function () {};
 
 module.exports = {
@@ -124,6 +120,5 @@ module.exports = {
 			);
 		}
 		return result;
-	},
-	Options: Options
+	}
 };

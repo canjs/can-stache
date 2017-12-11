@@ -8,7 +8,6 @@ var expressionHelpers = require("../src/expression-helpers");
 var utils = require('../src/utils');
 var mustacheHelpers = require('../helpers/core');
 var canReflect = require('can-reflect');
-var lookupValueOrHelper = require("../src/lookup-value-or-helper");
 var ScopeKeyData = require("can-view-scope/scope-key-data");
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
@@ -35,60 +34,41 @@ Helper.prototype.hash = function(scope){
 	}
 	return hash;
 };
-// looks up the name key in the scope
-// returns a `helper` property if there is a helper for the key.
-// returns a `value` property if the value is looked up.
-Helper.prototype.helperAndValue = function(scope){
 
+// looks up the name key in the scope and return it
+Helper.prototype.helperValue = function(scope){
 	//{{foo bar}}
-	var helperOrValue,
-		computeData,
+	var computeData,
 		// If a literal, this means it should be treated as a key. But helpers work this way for some reason.
 		// TODO: fix parsing so numbers will also be assumed to be keys.
 		methodKey = this.methodExpr instanceof Literal ?
-			""+this.methodExpr._value : this.methodExpr.key,
-		initialValue,
-		args;
+			"" + this.methodExpr._value :
+			this.methodExpr.key,
 
-	helperOrValue = lookupValueOrHelper(methodKey, scope);
+		helperValue = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
+		args = this.args(scope).map(expressionHelpers.toComputeOrValue),
 
-	if (helperOrValue instanceof ScopeKeyData) {
-		args = this.args(scope).map(expressionHelpers.toComputeOrValue);
+		initialValue = helperValue && helperValue.initialValue,
+		isHelper = initialValue && initialValue.isHelper;
 
-		if(typeof helperOrValue.initialValue === "function") {
-			function helperFn() {
-				return helperOrValue.initialValue.apply(null, args);
-			}
-			//!steal-remove-start
-			Object.defineProperty(helperFn, "name", {
-				value: canReflect.getName(this),
-			});
-			//!steal-remove-end
-
-			return {
-				value: helperFn
-			};
-		}
-		// if it's some other value ..
-		else if(typeof helperOrValue.initialValue !== "undefined") {
-			// we will use that
-			return {value: helperOrValue};
-		}
-		//!steal-remove-start
-		else {
-			dev.warn('can-stache/expressions/helper.js: Unable to find key or helper "' + methodKey + '".');
-		}
-		//!steal-remove-end
-
-		return {
-			value: helperOrValue,
-			args: args
+	if (typeof initialValue === "function") {
+		helperValue = function helperFn() {
+			return initialValue.apply(scope.peek("this"), isHelper ? arguments : args);
 		};
+		helperValue.isHelper = isHelper;
+		//!steal-remove-start
+		Object.defineProperty(helperValue, "name", {
+			value: canReflect.getName(this)
+		});
+		//!steal-remove-end
 	}
+	//!steal-remove-start
+	else {
+		dev.warn('can-stache/expressions/helper.js: Unable to find helper "' + methodKey + '".');
+	}
+	//!steal-remove-end
 
-	return {
-		helper: helperOrValue && helperOrValue.fn
-	};
+	return  helperValue;
 };
 
 Helper.prototype.evaluator = function(helper, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly){
@@ -96,7 +76,7 @@ Helper.prototype.evaluator = function(helper, scope, readOptions, nodeList, trut
 	var helperOptionArg = {
 		stringOnly: stringOnly
 	},
-		context = scope.peek("."),
+		context = scope.peek("this"),
 		args = this.args(scope),
 		hash = this.hash(scope);
 
@@ -120,13 +100,11 @@ Helper.prototype.evaluator = function(helper, scope, readOptions, nodeList, trut
 };
 
 Helper.prototype.value = function(scope, nodeList, truthyRenderer, falseyRenderer, stringOnly){
+	var helperValue = this.helperValue(scope);
 
-	var helperAndValue = this.helperAndValue(scope);
-
-	var helper = helperAndValue.helper;
 	// a method could have been called, resulting in a value
-	if(!helper) {
-		return helperAndValue.value;
+	if(!helperValue.isHelper) {
+		return helperValue;
 	}
 
 	var fn = this.evaluator(helper, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);

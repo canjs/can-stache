@@ -130,17 +130,16 @@ test("expression.ast - everything", function(){
 
 test("expression.parse - everything", function(){
 
-	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
+	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested.prop() outerPropA=helperC(2,valueB)");
 
 	var oneExpr = new expression.Literal(1),
 		twoExpr = new expression.Literal(2),
 		def = new expression.Literal('def'),
 
-		valueA = new expression.ScopeLookup("valueA"),
-		valueB = new expression.ScopeLookup("valueB"),
-		nested = new expression.HelperScopeLookup("nested@prop"),
+		valueA = new expression.Lookup("valueA"),
+		valueB = new expression.Lookup("valueB"),
 
-		helperA = new expression.HelperLookup("helperA"),
+		helperA = new expression.Lookup("helperA"),
 		helperB = new expression.Lookup("@helperB"),
 		helperC = new expression.Lookup("@helperC");
 
@@ -154,7 +153,13 @@ test("expression.parse - everything", function(){
 		[oneExpr, valueA, helperBHashArg, oneExpr]
 	);
 
-	var callHelperBdotZed = new expression.ScopeLookup("zed", callHelperB);
+	var callHelperBdotZed = new expression.Lookup("zed", callHelperB);
+
+	var callNestedProp = new expression.Call(
+		new expression.Lookup("nested@prop"),
+		[],
+		{}
+	);
 
 	var callHelperC = new expression.Call(
 		helperC,
@@ -164,7 +169,7 @@ test("expression.parse - everything", function(){
 
 	var callHelperA = new expression.Helper(
 		helperA,
-		[callHelperBdotZed, def, nested],
+		[callHelperBdotZed, def, callNestedProp],
 		{
 			outerPropA: callHelperC
 		}
@@ -176,13 +181,12 @@ test("expression.parse - everything", function(){
 
 	deepEqual(callHelperBdotZed, exprData.argExprs[0], "call helper b.zed");
 
-	var expectedArgs = [callHelperBdotZed, def, nested];
+	var expectedArgs = [callHelperBdotZed, def, callNestedProp];
 	canReflect.each(exprData.argExprs, function(arg, i){
-		deepEqual(arg, expectedArgs[i], "helperA arg["+i);
+		deepEqual(arg, expectedArgs[i], "helperA arg["+i+"]");
 	});
 
-
-	deepEqual( exprData, callHelperA, "full thing");
+	deepEqual(exprData, callHelperA, "full thing");
 });
 
 test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
@@ -193,7 +197,7 @@ test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
 		methodRule: "call"
 	});
 
-	var valueContent = new expression.ScopeLookup("content");
+	var valueContent = new expression.Lookup("content");
 	var hashArg = new expression.Arg(new expression.Hashes({
 		content: valueContent
 	}));
@@ -220,7 +224,7 @@ test("expression.Helper:value non-observable values", function(){
 	});
 
 	var callFullName = new expression.Helper(
-		new expression.HelperLookup("fullName"),
+		new expression.Lookup("fullName"),
 		[new expression.Literal('marshall'), new expression.Literal('thompson')],
 		{}
 	);
@@ -242,8 +246,8 @@ test("expression.Helper:value observable values", function(){
 	var scope = new Scope(obj);
 
 	var callFullName = new expression.Helper(
-		new expression.HelperLookup("fullName"),
-		[new expression.HelperLookup("first"), new expression.Literal('thompson')],
+		new expression.Lookup("fullName"),
+		[new expression.Lookup("first"), new expression.Literal('thompson')],
 		{}
 	);
 
@@ -263,8 +267,8 @@ test("methods can return values (#1887)", function(){
 		new Scope(new MyMap({foo: 2, bar: 3}));
 
 	var callGetSomething = new expression.Helper(
-		new expression.HelperLookup("getSomething"),
-		[new expression.ScopeLookup("bar")],
+		new expression.Lookup("getSomething"),
+		[new expression.Lookup("bar")],
 		{}
 	);
 
@@ -289,7 +293,7 @@ test("methods don't update correctly (#1891)", function(){
 		new Scope(map);
 
 	var num2Expression = new expression.Lookup("num2");
-	var num2 = num2Expression.value( scope, new Scope({}), {asCompute: true} );
+	var num2 = num2Expression.value( scope, {asCompute: true} );
 
 	canReflect.onValue(num2,function(){});
 
@@ -674,7 +678,7 @@ test("Bracket expression", function(){
 	equal(compute.get(), "Kevin!");
 });
 
-test("registerConverter helpers push and pull correct values", function () {
+QUnit.test("registerConverter helpers push and pull correct values", function () {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -701,7 +705,7 @@ test("registerConverter helpers push and pull correct values", function () {
 	equal(data.get("observeVal"), 127, 'push converter called');
 });
 
-test("registerConverter helpers push and pull multiple values", function () {
+QUnit.test("registerConverter helpers push and pull multiple values", function () {
 
 	helpers.registerConverter('isInList', {
 		get: function(valCompute, list) {
@@ -731,7 +735,7 @@ test("registerConverter helpers push and pull multiple values", function () {
 });
 
 
-test("registerConverter helpers are chainable", function () {
+QUnit.test("registerConverter helpers are chainable", function () {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -866,15 +870,14 @@ test("ast with [double][brackets] or [bracket].prop (#207)", function(){
 });
 
 testHelpers.dev.devOnlyTest("All expression types have sourceText on prototype", function(){
-	["Arg", "Bracket", "Call",  "Hashes", "Helper",
-	 "HelperLookup", "HelperScopeLookup", "Literal", "ScopeLookup"].forEach(function(name){
-		 QUnit.ok(typeof expression[name].prototype.sourceText === "function", name);
-	 });
+	["Arg", "Bracket", "Call",  "Hashes", "Helper", "Literal"].forEach(function(name){
+		QUnit.ok(typeof expression[name].prototype.sourceText === "function", name);
+	});
 });
 
 
 testHelpers.dev.devOnlyTest("expression.sourceText - everything", function(){
-	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested@prop outerPropA=helperC(2,valueB)"
+	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested.prop() outerPropA=helperC(2,valueB)"
 	var exprData = expression.parse(source);
 	QUnit.equal(exprData.sourceText(),source);
 });

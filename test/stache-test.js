@@ -118,6 +118,10 @@ function makeTest(name, doc, mutation) {
 			doc.body.appendChild(this.fixture);
 
 			this.animals = ['sloth', 'bear', 'monkey'];
+
+			// reset stache helpers so that any helpers registered in
+			// the previous test do not conflict with scope properties
+			helpersCore.__resetHelpers();
 		},
 		teardown: function(){
 
@@ -152,7 +156,7 @@ function makeTest(name, doc, mutation) {
 		equal( innerHTML(frag.firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
 
-	test("a section helper", function(){
+	QUnit.test("a section helper", function(){
 
 
 		stache.registerHelper("helper", function(options){
@@ -161,7 +165,7 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		var stashed = stache("<h1 class='foo'>{{#helper}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
+		var stashed = stache("<h1 class='foo'>{{#helper()}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
 
 
 		var frag = stashed({});
@@ -171,7 +175,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test('helpers used as section should have helperOptionArg.isSection set', function (assert) {
+	QUnit.test('helpers used as section should have helperOptionArg.isSection set', function (assert) {
 		var done = assert.async();
 
 		stache.registerHelper('genericTestHelper', function (options) {
@@ -179,13 +183,13 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{#genericTestHelper}}<span>Test</span>{{/genericTestHelper}}</div>';
+		var template = '<div>{{#genericTestHelper()}}<span>Test</span>{{/genericTestHelper}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
 	});
 
-	test('helpers used inline should have helperOptionArg.isSection unset', function (assert) {
+	QUnit.test('helpers used inline should have helperOptionArg.isSection unset', function (assert) {
 		var done = assert.async();
 
 		stache.registerHelper('genericTestHelper2', function (options) {
@@ -193,7 +197,7 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{genericTestHelper2}}</div>';
+		var template = '<div>{{genericTestHelper2()}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
@@ -400,7 +404,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(getText( t.template, t.data), expected);
 	});
 
-	test("Handlebars helpers", function () {
+	QUnit.test("Handlebars helpers", function () {
 		stache.registerHelper('hello', function (options) {
 			return 'Should not hit this';
 		});
@@ -418,7 +422,7 @@ function makeTest(name, doc, mutation) {
 				hash.where + ' times' + (hash.loud === true ? ' loudly' : '') + '.';
 		});
 		var t = {
-			template: "{{hello}} {{there}}! {{bark name 'Austin and Andy' 3 obj=name action='growled and snarled' where=2 loud=true}} Then there were {{zero}} barks :(",
+			template: "{{hello}} {{there()}}! {{bark name 'Austin and Andy' 3 obj=name action='growled and snarled' where=2 loud=true}} Then there were {{zero()}} barks :(",
 			expected: "Hello there! The dog barked at Austin and Andy 3 times, then the dog growled and snarled 2 times loudly. Then there were 0 barks :(",
 			data: {
 				name: 'dog',
@@ -432,7 +436,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual( getText(t.template, t.data) , expected);
 	});
 
-	test("Handlebars advanced helpers (from docs)", function () {
+	QUnit.test("Handlebars advanced helpers (from docs)", function () {
 		stache.addHelper('exercise', function (group, action, num, options) {
 
 			if (group && group.length > 0 && action && num > 0) {
@@ -494,7 +498,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("No arguments passed to helper", function () {
-		var template = stache("{{noargHelper}}");
+		var template = stache("{{noargHelper()}}");
 
 		stache.registerHelper("noargHelper", function () {
 			return "foo"
@@ -509,7 +513,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(innerHTML(div2), "foo");
 	});
 
-	test("String literals passed to helper should work (#1143)", 1, function() {
+	QUnit.test("String literals passed to helper should work (#1143)", 1, function() {
 		stache.registerHelper("concatStrings", function(arg1, arg2) {
 			return arg1 + arg2;
 		});
@@ -524,7 +528,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("No arguments passed to helper with list", function () {
-		var template = stache("{{#items}}{{noargHelper}}{{/items}}");
+		var template = stache("{{#items}}{{noargHelper()}}{{/items}}");
 		var div = doc.createElement('div');
 
 		div.appendChild(template({
@@ -1145,7 +1149,7 @@ function makeTest(name, doc, mutation) {
 			return num;
 		};
 
-		var text = '<div>{{ completed }}</div>',
+		var text = '<div>{{ completed() }}</div>',
 
 			compiled = stache(text)({
 				completed: completed
@@ -1194,7 +1198,7 @@ function makeTest(name, doc, mutation) {
 			return num;
 		};
 
-		var text = '<div>{{{ completed }}}</div>',
+		var text = '<div>{{{ completed() }}}</div>',
 
 			compiled = stache(text)({
 				completed: completed
@@ -1236,7 +1240,7 @@ function makeTest(name, doc, mutation) {
 			return "items='" + num + "'";
 		};
 
-		var text = '<div {{{ completed }}}></div>',
+		var text = '<div {{{ completed() }}}></div>',
 
 			compiled = stache(text)({
 				completed: completed
@@ -1278,7 +1282,7 @@ function makeTest(name, doc, mutation) {
 			return num;
 		};
 
-		var text = '<div items="{{{ completed }}}"></div>',
+		var text = '<div items="{{{ completed() }}}"></div>',
 
 			compiled = stache(text)({
 				completed: completed
@@ -1488,7 +1492,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("helper parameters don't convert functions", function () {
+	QUnit.test("helper parameters don't convert functions", function () {
 		stache.registerHelper('helperWithFn', function (fn) {
 			ok(typeof fn === "function", 'Parameter is a function');
 			equal(fn(), 'Hit me!', 'Got the expected function');
@@ -1502,7 +1506,7 @@ function makeTest(name, doc, mutation) {
 		});
 	})
 
-	test("computes as helper parameters don't get converted", function () {
+	QUnit.test("computes as helper parameters don't get converted", function () {
 		stache.registerHelper('computeTest', function (no) {
 			equal(no(), 5, 'Got computed calue');
 			ok(no.isComputed, 'no is still a compute')
@@ -1628,7 +1632,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	// https://github.com/canjs/canjs/issues/228
-	test("Contexts within helpers not always resolved correctly", function () {
+	QUnit.test("Contexts within helpers not always resolved correctly", function () {
 
 		stache.registerHelper("bad_context", function (context, options) {
 			return ["<span>"+this.text+"</span> should not be ",options.fn(context)];
@@ -1652,7 +1656,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	// https://github.com/canjs/canjs/issues/227
-	test("Contexts are not always passed to partials properly", function () {
+	QUnit.test("Contexts are not always passed to partials properly", function () {
 		var inner = stache('{{#if ../other_first_level}}{{../other_first_level}}{{else}}{{second_level}}{{/if}}');
 
 		var renderer = stache('{{#first_level}}<span>{{> inner}}</span> should equal <span>{{../other_first_level}}</span>{{/first_level}}'),
@@ -1670,7 +1674,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	// https://github.com/canjs/canjs/issues/231
-	test("Functions and helpers should be passed the same context", function () {
+	QUnit.test("Functions and helpers should be passed the same context", function () {
 
 		var textNodes = function(el, cb) {
 			var cur = el.firstChild;
@@ -1684,23 +1688,15 @@ function makeTest(name, doc, mutation) {
 			}
 		};
 
-		stache.registerHelper("to_upper", function (fn, options) {
-			if (!fn.fn) {
-				return typeof fn === "function" ? fn()
-					.toString()
-					.toUpperCase() : fn.toString()
-					.toUpperCase();
-			} else {
-				//fn is options, we need to go through that document and lower case all text nodes
-				var frag = fn.fn(this);
-				textNodes(frag, function(el){
-					el.nodeValue = el.nodeValue.toUpperCase();
-				});
-				return frag;
-			}
+		stache.registerHelper("to_upper", function (options) {
+			var frag = options.fn(options.context);
+			textNodes(frag, function(el){
+				el.nodeValue = el.nodeValue.toUpperCase();
+			});
+			return frag;
 		});
 
-		var renderer = stache(' "<span>{{#to_upper}}{{next_level.text}}{{/to_upper}}</span>"'),
+		var renderer = stache(' "<span>{{#to_upper()}}{{next_level.text()}}{{/to_upper}}</span>"'),
 			data = {
 				next_level: {
 					text: function () {
@@ -1710,8 +1706,6 @@ function makeTest(name, doc, mutation) {
 				}
 			},
 			div = doc.createElement('div');
-
-		window.other_text = 'Window context';
 
 		div.appendChild(renderer(data));
 
@@ -1766,7 +1760,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("objects with a 'key' or 'index' property should work in helpers", function () {
-		var renderer = stache('{{ #obj }}{{ show_name }}{{ /obj }}'),
+		var renderer = stache('{{ #obj }}{{ show_name(this) }}{{ /obj }}'),
 			div = doc.createElement('div');
 
 		div.appendChild(renderer({
@@ -1776,8 +1770,8 @@ function makeTest(name, doc, mutation) {
 				key: 'bar'
 			}
 		}, {
-			show_name: function () {
-				return this.name;
+			show_name: function (obj) {
+				return obj.name;
 			}
 		}));
 		equal(innerHTML(div), "Forks", 'item name rendered');
@@ -1791,8 +1785,8 @@ function makeTest(name, doc, mutation) {
 				index: 'bar'
 			}
 		}, {
-			show_name: function () {
-				return this.name;
+			show_name: function (obj) {
+				return obj.name;
 			}
 		}));
 		equal(innerHTML(div), "Forks", 'item name rendered');
@@ -2084,7 +2078,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div2), "Ajax rules");
 	});
 
-	QUnit.test("local helpers should have priority over scope functions over global helpers", function() {
+	QUnit.test("scope functions should have priority over local helpers over global helpers", function() {
 		stache.addHelper('help', function() { return 'global'; });
 
 		/*
@@ -2099,7 +2093,7 @@ function makeTest(name, doc, mutation) {
 			}
 		);
 
-		QUnit.equal(result, 'local', 'local, scope function, global - uses local');
+		QUnit.equal(result, 'scope', 'scope function, local, global - uses scope');
 
 		/*
 		 * if there is a function on the scope and a global helper
@@ -2107,10 +2101,11 @@ function makeTest(name, doc, mutation) {
 		 */
 		result = getText(
 			'{{help()}}', {
-				help: function() { return 'scope'; }
+			},{
+				help: function() { return 'local'; }
 			}
 		);
-		QUnit.equal(result, 'scope', 'scope function, global - uses scope');
+		QUnit.equal(result, 'local', 'local, global - uses local');
 
 		/*
 		 * if there is only a global helper
@@ -2347,7 +2342,7 @@ function makeTest(name, doc, mutation) {
 			};
 		});
 
-		var template = stache("<ul>{{itemsHelper}}</ul>");
+		var template = stache("<ul>{{itemsHelper()}}</ul>");
 		template();
 	});
 
@@ -2988,7 +2983,7 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		var template = stache("<div>{{safeHelper}}</div>")
+		var template = stache("<div>{{safeHelper()}}</div>")
 
 		var frag = template();
 		equal(frag.firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
@@ -3115,18 +3110,18 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("{{each}} does not error with undefined list (#602)", function () {
-		var text = '<div>{{#each data}}{{name}}{{/each}}</div>'
+		var text = '<div>{{#each person}}{{name}}{{/each}}</div>'
 
 		equal(getText(text,{}), '<div></div>', 'Empty text rendered');
 		equal(getText(text,{
-			data: false
+			person: false
 		}), '<div></div>', 'Empty text rendered');
 
 		equal(getText(text,{
-			data: null
+			person: null
 		}), '<div></div>', 'Empty text rendered');
 		equal(getText(text,{
-			data: [{
+			person: [{
 				name: 'David'
 			}]
 		}), '<div>David</div>', 'Expected name rendered');
@@ -3456,7 +3451,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.peek(".").foo, "bar", "got scope");
+			equal(tagData.scope.peek("this").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 
@@ -3472,7 +3467,7 @@ function makeTest(name, doc, mutation) {
 
 		viewCallbacks.tag("stache-tag", function(el, tagData){
 			ok(true,"tag callback called");
-			equal(tagData.scope.peek(".").foo, "bar", "got scope");
+			equal(tagData.scope.peek("this").foo, "bar", "got scope");
 			ok(!tagData.subtemplate, "there is no subtemplate");
 		});
 
@@ -3497,7 +3492,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find key or helper "helpme".');
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find helper "helpme".');
 
 		stache('<li>{{helpme name}}</li>')({
 			name: 'Hulk Hogan'
@@ -3507,7 +3502,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find key or helper "user.name".');
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/lookup.js: Unable to find key "user.name".');
 
 		stache('<li>{{user.name}}</li>')({
 			user: {}
@@ -3517,7 +3512,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
-		var tmpl = "{{#foo}}<span>{{bar}}</span>{{/foo}}";
+		var tmpl = "{{#foo()}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
 			bar : 'baz'
 		}), {
@@ -3530,8 +3525,10 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(node), 'baz', 'Context is forwarded correctly');
 	});
 
-	test("Calling .fn with falsy value as the context will render correctly (#658)", function(){
-		var tmpl = "{{#zero}}<span>{{ . }}</span>{{/zero}}{{#emptyString}}<span>{{ . }}</span>{{/emptyString}}{{#nullVal}}<span>{{ . }}</span>{{/nullVal}}";
+	test("Calling .fn with falsey value as the context will render correctly (#658)", function(){
+		var tmpl = "{{#zero()}}<span>{{ this }}</span>{{/zero}}" +
+					"{{#emptyString()}}<span>{{ this }}</span>{{/emptyString}}" +
+					"{{#nullVal()}}<span>{{ this }}</span>{{/nullVal}}";
 
 		var frag = stache(tmpl)({ foo: 'bar' }, {
 			zero : function(opts){
@@ -3546,9 +3543,9 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		equal(innerHTML(frag.firstChild), '0', 'Context is set correctly for falsy values');
-		equal(innerHTML(frag.childNodes.item(1)), '', 'Context is set correctly for falsy values');
-		equal(innerHTML(frag.childNodes.item(2)), '', 'Context is set correctly for falsy values');
+		equal(innerHTML(frag.firstChild), '0', 'Context is set correctly for falsey values');
+		equal(innerHTML(frag.childNodes.item(1)), '', 'Context is set correctly for falsey values');
+		equal(innerHTML(frag.childNodes.item(2)), '', 'Context is set correctly for falsey values');
 	});
 
 	test("Custom elements created with default namespace in IE8", function(){
@@ -3669,7 +3666,7 @@ function makeTest(name, doc, mutation) {
 			abbreviation : 'ARS'
 		});
 
-		var template = stache('<span>{{team.shortName}}</span>');
+		var template = stache('<span>{{team.shortName()}}</span>');
 		var frag = template({
 			team : team
 		});
@@ -4018,7 +4015,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helper evaluated 1st time...
-		stache('{{#listHasLength}}{{/listHasLength}}')(state, helpers);
+		stache('{{#listHasLength()}}{{/listHasLength}}')(state, helpers);
 
 		// Helper evaluated 2nd time...
 		state.set('list', new DefineList([]));
@@ -4050,7 +4047,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helpers evaluated 1st time...
-		stache('{{#bindViaNestedAttrs}}{{/bindViaNestedAttrs}}')(state, helpers);
+		stache('{{#bindViaNestedAttrs()}}{{/bindViaNestedAttrs}}')(state, helpers);
 
 		// Helpers evaluated 2nd time...
 		state.set('parent', new SimpleMap({
@@ -4344,8 +4341,8 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('getHelper w/o optional options argument (#1497)', function() {
-		var options = stache.getHelper('each');
-		ok(typeof options.fn === 'function', 'each helper returned');
+		var helper = stache.getHelper('each');
+		ok(typeof helper === 'function', 'each helper returned');
 	});
 
 	test("methods don't update correctly (#1891)", function() {
@@ -4355,7 +4352,7 @@ function makeTest(name, doc, mutation) {
 		});
 		var frag = stache(
 			'<span class="num1">{{num1}}</span>' +
-			'<span class="num2">{{num2}}</span>')(map);
+			'<span class="num2">{{num2()}}</span>')(map);
 
 		equal(frag.firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
 		equal(frag.lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
@@ -4369,7 +4366,7 @@ function makeTest(name, doc, mutation) {
 	test('eq called twice (#1931)', function() {
 		expect(1);
 
-		var oldIs = stache.getHelper('is').fn;
+		var oldIs = stache.getHelper('is');
 
 		stache.registerHelper('is', function() {
 			ok(true, 'comparator invoked only once during setup');
@@ -4400,10 +4397,24 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Re-evaluating a case in a switch (#1988)", function(){
-		var template = stache("{{#switch page}}{{#case 'home'}}<h1 id='home'>Home</h1>" +
-			"{{/case}}{{#case 'users'}}{{#if slug}}<h1 id='user'>User - {{slug}}</h1>" +
-			"{{else}}<h1 id='users'>Users</h1><ul><li>User 1</li><li>User 2</li>" +
-			"</ul>{{/if}}{{/case}}{{/switch}}");
+		var template = stache(
+			"{{#switch page}}" +
+				"{{#case 'home'}}" +
+					"<h1 id='home'>Home</h1>" +
+				"{{/case}}" +
+				"{{#case 'users'}}" +
+					"{{#if slug}}" +
+						"<h1 id='user'>User - {{slug}}</h1>" +
+					"{{else}}" +
+						"<h1 id='users'>Users</h1>" +
+						"<ul>" +
+							"<li>User 1</li>" +
+							"<li>User 2</li>" +
+						"</ul>" +
+					"{{/if}}" +
+				"{{/case}}" +
+			"{{/switch}}"
+		);
 
 		var map = new SimpleMap({
 			page: "home"
@@ -4416,10 +4427,8 @@ function makeTest(name, doc, mutation) {
 		map.set("page", "users");
 		equal(frag.firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
 
-
 		map.set("slug", "Matthew");
 		equal(frag.firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
-
 
 		queues.batch.start();
 		map.set("page", "home");
@@ -5328,13 +5337,12 @@ function makeTest(name, doc, mutation) {
 			noop: undefined
 		});
 
-		equal(getText("{{func1}}", data), "called");
-		equal(getText("{{#if func1}}yes{{else}}no{{/if}}", data), "yes");
-		equal(getText("{{#if @func2}}yes{{else}}no{{/if}}", data), "yes");
+		equal(getText("{{func1()}}", data), "called");
+		equal(getText("{{#if func1()}}yes{{else}}no{{/if}}", data), "yes");
+		equal(getText("{{#if func2}}yes{{else}}no{{/if}}", data), "yes");
 
 		equal(getText("{{noop}}", data), "");
 		equal(getText("{{#if noop}}yes{{else}}no{{/if}}", data), "no");
-		equal(getText("{{#if @noop}}yes{{else}}no{{/if}}", data), "no");
 
 	});
 
@@ -6102,8 +6110,8 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "bar");
 	});
 
-	test("#switch, #case, and #default work with call expressions", function(){
-		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
+	test("#switch and #case work with call expressions", function(){
+		var template = stache("{{#switch(type)}}{{#case('admin', scope.helperOptions))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
 		var map = new DefineMap({
 			type: "admin"
 		});
@@ -6153,15 +6161,14 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	var overwriteGlobalHelper = function(name, fn) {
+	var overwriteGlobalHelper = function(name, fn, method) {
 		var origHelper = helpersCore.getHelper(name);
-		var origFn = origHelper.fn;
 
-		helpersCore.registerHelper(name, function() {
+		helpersCore[method || 'registerHelper'](name, function() {
 			return fn.apply(this, arguments);
-		}, origHelper.metadata);
+		});
 
-		return origFn;
+		return origHelper;
 	};
 	test("#each with call expression should be optimized for performance", function(){
 		var div = doc.createElement('div');
@@ -6170,7 +6177,7 @@ function makeTest(name, doc, mutation) {
 		var origEach = overwriteGlobalHelper('each', function() {
 			count++;
 			return origEach.apply(this, arguments);
-		});
+		}, 'addLiveHelper');
 		var template = stache("{{#each(this)}}{{this}} {{/each}}");
 		var listCompute = new SimpleObservable([ "one", "two" ]);
 
@@ -6503,6 +6510,38 @@ function makeTest(name, doc, mutation) {
 
 		// Remove handler to prevent side effect of other tests from calling this assertion
 		delete viewCallbacks._attributes[encodedAttribute];
+	});
+
+	QUnit.test("{{bar}} should not call `bar`", function(){
+		var div = doc.createElement('div');
+		var data = {
+			bar: function() {
+				QUnit.ok(false, 'bar should not be called');
+				return 'bar value';
+			}
+		};
+		var template = stache("{{bar}}");
+		var frag = template(data);
+
+		div.appendChild(frag);
+
+		QUnit.equal(innerHTML(div), "");
+	});
+
+	QUnit.test("{{bar 'foo'}} should call `bar` and pass 'foo'", function(){
+		var div = doc.createElement('div');
+		var data = {
+			bar: function(key) {
+				QUnit.ok(true, 'bar should be called');
+				return key;
+			}
+		};
+		var template = stache("{{bar 'foo'}}");
+		var frag = template(data);
+
+		div.appendChild(frag);
+
+		QUnit.equal(innerHTML(div), "foo");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
