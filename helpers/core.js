@@ -433,7 +433,7 @@ module.exports = {
 
 	registerSimpleHelper: function() {
 		//!steal-remove-start
-		dev.warn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
+		dev.warn("stache.registerSimpleHelper is deprecated. Use stache.addHelper instead.");
 		//!steal-remove-end
 
 		registerSimpleHelper.apply(this, arguments);

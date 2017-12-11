@@ -7064,7 +7064,7 @@ function makeTest(name, doc, mutation) {
 	testHelpers.dev.devOnlyTest('deprecation warning shown for registerSimpleHelper', function() {
 		var template = stache('<div>{{simple "foo"}}</div>');
 
-		var teardown = testHelpers.dev.willWarn("stache.registerSimplePartial is deprecated. Use stache.addHelper instead.");
+		var teardown = testHelpers.dev.willWarn("stache.registerSimpleHelper is deprecated. Use stache.addHelper instead.");
 
 		stache.registerSimpleHelper('simple', function(str) {
 			QUnit.equal(str, "foo");
