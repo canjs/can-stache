@@ -215,23 +215,7 @@ var builtInHelpers = {
 		}
 		return options.fn(ctx || {});
 	},
-	'log':  function (options) {
-		// go through the arguments
-		var logs = [];
-		canReflect.eachIndex(arguments, function(val){
-			if(!looksLikeOptions(val)) {
-				logs.push(val);
-			}
-		});
-
-		if (typeof console !== "undefined" && console.log) {
-			if (!logs.length) {
-				console.log(options.context);
-			} else {
-				console.log.apply(console, logs);
-			}
-		}
-	},
+	'console': console,
 	'data': function(attr){
 		// options will either be the second or third argument.
 		// Get the argument before that.

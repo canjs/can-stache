@@ -3566,7 +3566,7 @@ function makeTest(name, doc, mutation) {
 				template: "{{>partial}}",
 				expected: "foo",
 				partials: {
-					partial: '{{ help }}'
+					partial: '{{ help() }}'
 				},
 				helpers: {
 					'help': function(){
@@ -4937,8 +4937,8 @@ function makeTest(name, doc, mutation) {
 				QUnit.equal(first, FIRST);
 				QUnit.equal(second, SECOND);
 			};
-			var template1 = stache("{{log first second}}"),
-				template2 = stache("{{ log(first, second) }}");
+			var template1 = stache("{{console.log first second}}"),
+				template2 = stache("{{ console.log(first, second) }}");
 
 
 			template1({first: FIRST, second: SECOND});
@@ -6045,17 +6045,18 @@ function makeTest(name, doc, mutation) {
 		});
 		var log = console.log;
 
+		QUnit.stop();
 		console.log = function(value){
 			QUnit.equal(value, map);
+			console.log = log;
+			QUnit.start();
 		};
 
-		var template = stache("{{log()}}");
+		var template = stache("{{console.log(this)}}");
 		var div = doc.createElement("div");
 		var frag = template(map);
 
 		div.appendChild(frag);
-
-		console.log = log;
 	});
 
 	test("debugger works with call expressions", function(){
