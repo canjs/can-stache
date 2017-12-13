@@ -75,6 +75,10 @@ var core = {
 			};
 			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
+			// store the helperOptions on a special context so they can be read manually
+			// by call expressions like {{#bar(scope.helperOptions)}} ... {{else}} ... {{/bar}}
+			scope = scope.add({ helperOptions: helperOptionArg }, { special: true });
+
 			value = exprData.value(scope, helperOptionArg);
 
 			// if this is a helper function being called with a Call Expression, return what it rendered

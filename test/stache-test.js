@@ -165,7 +165,7 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		var stashed = stache("<h1 class='foo'>{{#helper()}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
+		var stashed = stache("<h1 class='foo'>{{#helper(scope.helperOptions)}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
 
 
 		var frag = stashed({});
@@ -183,7 +183,7 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{#genericTestHelper()}}<span>Test</span>{{/genericTestHelper}}</div>';
+		var template = '<div>{{#genericTestHelper(scope.helperOptions)}}<span>Test</span>{{/genericTestHelper}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
@@ -197,7 +197,7 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{genericTestHelper2()}}</div>';
+		var template = '<div>{{genericTestHelper2(scope.helperOptions)}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
@@ -1696,7 +1696,7 @@ function makeTest(name, doc, mutation) {
 			return frag;
 		});
 
-		var renderer = stache(' "<span>{{#to_upper()}}{{next_level.text()}}{{/to_upper}}</span>"'),
+		var renderer = stache(' "<span>{{#to_upper(scope.helperOptions)}}{{next_level.text()}}{{/to_upper}}</span>"'),
 			data = {
 				next_level: {
 					text: function () {
@@ -3512,7 +3512,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
-		var tmpl = "{{#foo()}}<span>{{bar}}</span>{{/foo}}";
+		var tmpl = "{{#foo(scope.helperOptions)}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
 			bar : 'baz'
 		}), {
@@ -3526,9 +3526,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Calling .fn with falsey value as the context will render correctly (#658)", function(){
-		var tmpl = "{{#zero()}}<span>{{ this }}</span>{{/zero}}" +
-					"{{#emptyString()}}<span>{{ this }}</span>{{/emptyString}}" +
-					"{{#nullVal()}}<span>{{ this }}</span>{{/nullVal}}";
+		var tmpl = "{{#zero(scope.helperOptions)}}<span>{{ this }}</span>{{/zero}}" +
+					"{{#emptyString(scope.helperOptions)}}<span>{{ this }}</span>{{/emptyString}}" +
+					"{{#nullVal(scope.helperOptions)}}<span>{{ this }}</span>{{/nullVal}}";
 
 		var frag = stache(tmpl)({ foo: 'bar' }, {
 			zero : function(opts){
@@ -4015,7 +4015,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helper evaluated 1st time...
-		stache('{{#listHasLength()}}{{/listHasLength}}')(state, helpers);
+		stache('{{#listHasLength(scope.helperOptions)}}{{/listHasLength}}')(state, helpers);
 
 		// Helper evaluated 2nd time...
 		state.set('list', new DefineList([]));
@@ -4047,7 +4047,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helpers evaluated 1st time...
-		stache('{{#bindViaNestedAttrs()}}{{/bindViaNestedAttrs}}')(state, helpers);
+		stache('{{#bindViaNestedAttrs(scope.helperOptions)}}{{/bindViaNestedAttrs}}')(state, helpers);
 
 		// Helpers evaluated 2nd time...
 		state.set('parent', new SimpleMap({
