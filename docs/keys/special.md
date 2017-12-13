@@ -4,7 +4,7 @@
 provide special values that start with `%` to prevent potential collisions with
 other values. Special values should not be confused with [can-stache/keys/variable template variables] like [can-stache/keys/variable/self *self]
 
-@deprecated {4.0} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
+@deprecated {3.12} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
 
 @signature `%index`
 
