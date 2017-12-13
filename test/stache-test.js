@@ -1137,7 +1137,7 @@ function makeTest(name, doc, mutation) {
 		var completed = function () {
 			l.get('length');
 			var num = 0;
-			l.each(function (item) {
+			l.forEach(function (item) {
 				if (item.get('complete')) {
 					num++;
 				}
@@ -1186,7 +1186,7 @@ function makeTest(name, doc, mutation) {
 		var completed = function () {
 			l.get('length');
 			var num = 0;
-			l.each(function (item) {
+			l.forEach(function (item) {
 				if (item.get('complete')) {
 					num++;
 				}
@@ -1228,7 +1228,7 @@ function makeTest(name, doc, mutation) {
 		var completed = function () {
 			l.get('length');
 			var num = 0;
-			l.each(function (item) {
+			l.forEach(function (item) {
 				if (item.get('complete')) {
 					num++;
 				}
@@ -1270,7 +1270,7 @@ function makeTest(name, doc, mutation) {
 		var completed = function () {
 			l.get('length');
 			var num = 0;
-			l.each(function (item) {
+			l.forEach(function (item) {
 				if (item.get('complete')) {
 					num++;
 				}
