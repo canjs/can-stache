@@ -2816,7 +2816,7 @@ function makeTest(name, doc, mutation) {
 
 		// A hack b/c map can't delete keys
 		delete map._data.foo;
-		map.dispatch("__keys")
+		map.dispatch("can.keys")
 
 		lis = tpl.firstChild.getElementsByTagName('li');
 		equal(lis.length, 3, "three lis");
