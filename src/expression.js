@@ -6,11 +6,8 @@ var Literal = require("../expressions/literal");
 var Hashes = require("../expressions/hashes");
 var Bracket = require("../expressions/bracket");
 var Call = require("../expressions/call");
-var ScopeLookup = require("../expressions/scope-lookup");
 var Helper = require("../expressions/helper");
 var Lookup = require("../expressions/lookup");
-var HelperLookup = require("../expressions/helper-lookup");
-var HelperScopeLookup = require("../expressions/helper-scope-lookup");
 
 var SetIdentifier = require("./set-identifier");
 var expressionHelpers = require("../src/expression-helpers");
@@ -190,14 +187,11 @@ var expression = {
 
 	Literal: Literal,
 	Lookup: Lookup,
-	ScopeLookup: ScopeLookup,
 	Arg: Arg,
 	Hash: Hash,
 	Hashes: Hashes,
 	Call: Call,
 	Helper: Helper,
-	HelperLookup: HelperLookup,
-	HelperScopeLookup: HelperScopeLookup,
 	Bracket: Bracket,
 
 	SetIdentifier: SetIdentifier,
@@ -215,16 +209,14 @@ var expression = {
 	},
 	lookupRules: {
 		"default": function(ast, methodType, isArg){
-			var name = (methodType === "Helper" && !ast.root ? "Helper" : "")+(isArg ? "Scope" : "")+"Lookup";
-			return expression[name];
+			return ast.type === "Helper" ? Helper : Lookup;
 		},
 		"method": function(ast, methodType, isArg){
-			return ScopeLookup;
+			return Lookup;
 		}
 	},
 	methodRules: {
 		"default": function(ast){
-
 			return ast.type === "Call" ? Call : Helper;
 		},
 		"call": function(ast){
@@ -262,7 +254,8 @@ var expression = {
 	hydrateAst: function(ast, options, methodType, isArg){
 		var hashes;
 		if(ast.type === "Lookup") {
-			var lookup = new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType), ast[sourceTextSymbol] );
+			var LookupRule = options.lookupRule(ast, methodType, isArg);
+			var lookup = new LookupRule(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType), ast[sourceTextSymbol] );
 			return lookup;
 		}
 		else if(ast.type === "Literal") {
