@@ -23,7 +23,7 @@ Lookup.prototype.value = function(scope, readOptions){
 	}
 
 	//!steal-remove-start
-	if (!value.initialValue) {
+	if (typeof value.initialValue === 'undefined') {
 		dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
 	}
 	//!steal-remove-end

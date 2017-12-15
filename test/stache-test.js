@@ -3511,6 +3511,17 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, 'got expected warning');
 	});
 
+	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template should not happen for falsey values", function () {
+		var teardown = testHelpers.dev.willWarn(/can-stache\/expressions\/lookup.js: Unable to find key/);
+
+		stache('{{bool}} {{emptyString}}')({
+			bool: false,
+			emptyString: ''
+		});
+
+		QUnit.equal(teardown(), 0, 'no warnings shown');
+	});
+
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo(scope.helperOptions)}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
