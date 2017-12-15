@@ -6556,6 +6556,22 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "foo");
 	});
 
+	QUnit.test('#scope.helpers can be used to call a built-in helper if the scope has a property of the same name', function(){
+		var list = ['one', 'two', 'three'];
+		var template = stache('{{#scope.helpers.if truthy}}truthy{{else}}falsey{{/scope.helpers.if}}');
+		var div = doc.createElement('div');
+		var frag = template({
+			truthy: true,
+			if: function(val) {
+				QUnit.ok(false, 'should not be called');
+				return false;
+			}
+		});
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'truthy');
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
