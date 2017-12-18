@@ -5,8 +5,26 @@
 
 Every part of a stache template is rendered with a
 given [can-view-scope scope]. The scope is used to lookup
-values. A scope can contain multiple places to lookup values. Each of those
-places is called a `context`.  
+values. A scope looks in a single `context` by default with
+methods to look up values from above.
+
+In this example, `{{last}}` has no output because the context of the `{{#person}}` block doesn't contain a `last` property:
+```
+Template:
+	<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
+
+Data:
+	{
+		person: { first: "Alexis" },
+		last: "Abril",
+		message: "Hello"
+	}
+
+Result:
+	<h1>Hello Alexis</h1>
+```
+
+A scope can walk up the contexts to find the property with the `scope.find(...)` method.
 
 This is very similar to how `last` is looked up in the following JavaScript:
 
@@ -32,14 +50,14 @@ Lets look at what happens with the scope the following example:
 
 ```
 Template:
-	<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
+	<h1>{{message}} {{#person}}{{first}} {{scope.find('last')}}{{/person}}</h1>
 
 Data:
 	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
-    }
+		person: { first: "Alexis" },
+		last: "Abril",
+		message: "Hello"
+	}
 
 Result:
 	<h1>Hello Alexis Abril</h1>
@@ -49,30 +67,30 @@ Result:
 2. `{{message}}` is looked up within `Data`.
 3. `{{#person}}` adds the `person` context to the top of the scope. `scope:[Data,Data.person]`
 4. `{{first}}` is looked up in the scope.  It will be found on `Data.person`.
-5. `{{last}}` is looked up in the scope.  
+5. from `{{scope.find('last')}}`, `last` is looked up in the scope.  
    1. `last` is looked in `Data.person`, it's not found.
    2. `last` is looked up in `Data` and returned.
 6. `{{/person}}` removes `person` from the scope. `scope:[Data]`
 
 
 
-The context used to lookup a value can be controlled with adding `../` or `./` before a
-key. For instance, if we wanted to make sure `last` was only going to lookup on `person`,
+The context used to lookup a value can be specified with adding `../` before a
+key. For instance, if we wanted to make sure `last` was going to look up above `person`,
 we could change the template to:
 
 ```
 Template:
-	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
+	<h1>{{message}} {{#person}}{{first}} {{../last}}{{/person}}</h1>
 
 Data:
 	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
+		person: { first: "Alexis", last: "*****" },
+		last: "Abril",
+		message: "Hello"
 	}
 
 Result:
-	<h1>Hello Alexis</h1>
+	<h1>Hello Alexis Abril</h1>
 ```
 
 [can-stache.tags.section Sections], [can-stache.Helpers Helpers],
@@ -80,43 +98,6 @@ and [can-component custom elements] can modify the scope used to render a subsec
 
 [can-stache.key] modifiers  like `../` and `@key` can control the context and value that
 gets returned.
-
-## Preventing Scope Walking
-
-In order to prevent walking up the scope, you can explicitly choose the context a value is read from.
-
-As mentioned above, you can explicitly read from the current context using `./` before the key:
-
-```
-Template:
-	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
-
-Data:
-	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
-    }
-
-Result:
-	<h1>Hello Alexis</h1>
-```
-
-You can also explicitly read from the parent context using `../`:
-
-```
-Template:
-	<h1>{{#person}}{{../message}} {{first}}{{/person}}</h1>
-
-Data:
-	{
-	  person: { first: "Alexis", message: "Hello" },
-	  message: "Hi"
-	}
-
-Result:
-	<h1>Hi Alexis</h1>
-```
 
 You can also create unique scope variables using [Hash Expressions](https://canjs.com/doc/can-stache/expressions/hash.html).
 
@@ -132,7 +113,7 @@ and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___with
 
 ```
 {{#with(street=person.address.street city=person.address.city)}}
-    Street: {{street}}
+		Street: {{street}}
 	City: {{city}}
 {{/with}}
 ```
