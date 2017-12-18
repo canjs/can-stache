@@ -46,6 +46,16 @@ makeTest('can/view/stache dom', browserDoc);
 makeTest('can/view/stache vdom', makeDocument());
 
 // HELPERS
+function overwriteGlobalHelper(name, fn, method) {
+	var origHelper = helpersCore.getHelper(name);
+
+	helpersCore[method || 'registerHelper'](name, function() {
+		return fn.apply(this, arguments);
+	});
+
+	return origHelper;
+};
+
 function makeTest(name, doc, mutation) {
 	var isNormalDOM = doc === window.document;
 
@@ -4345,11 +4355,9 @@ function makeTest(name, doc, mutation) {
 	test('eq called twice (#1931)', function() {
 		expect(1);
 
-		var oldIs = stache.getHelper('is');
-
-		stache.registerHelper('is', function() {
+		var origEq = overwriteGlobalHelper('eq', function() {
 			ok(true, 'comparator invoked only once during setup');
-			return oldIs.apply(this, arguments);
+			return origEq.apply(this, arguments);
 		});
 
 		var a = new SimpleObservable(0),
@@ -4361,7 +4369,7 @@ function makeTest(name, doc, mutation) {
 		b.set(1);
 		queues.batch.stop();
 
-		stache.registerHelper('is', oldIs);
+		overwriteGlobalHelper('eq', origEq);
 	});
 
 	test("#each with else works (#1979)", function(){
@@ -6141,15 +6149,6 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	var overwriteGlobalHelper = function(name, fn, method) {
-		var origHelper = helpersCore.getHelper(name);
-
-		helpersCore[method || 'registerHelper'](name, function() {
-			return fn.apply(this, arguments);
-		});
-
-		return origHelper;
-	};
 	test("#each with call expression should be optimized for performance", function(){
 		var div = doc.createElement('div');
 		var count = 0;
