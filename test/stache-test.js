@@ -2118,38 +2118,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("avoid global helpers", function () {
-
-		var noglobals = stache("{{sometext person.name}}");
-
-		var div = doc.createElement('div'),
-			div2 = doc.createElement('div');
-		var person = new SimpleMap({
-			name: "Brian"
-		});
-		var result = noglobals({
-			person: person
-		}, {
-			sometext: function (name) {
-				return "Mr. " + name()
-			}
-		});
-		var result2 = noglobals({
-			person: person
-		}, {
-			sometext: function (name) {
-				return name() + " rules"
-			}
-		});
-		div.appendChild(result);
-		div2.appendChild(result2);
-
-		person.set("name", "Ajax")
-
-		equal(innerHTML(div), "Mr. Ajax");
-		equal(innerHTML(div2), "Ajax rules");
-
-	});
 
 	test("Each does not redraw items", function () {
 
@@ -4113,7 +4081,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(getText(t.template, t.data), 'Not 10 ducks');
 	});
 
-	test("Handlerbars helper: switch - changing to default (#1857)", function(){
+	test("Handlebars helper: switch - changing to default (#1857)", function(){
 		var template = stache('{{#switch ducks}}{{#case "10"}}10 ducks{{/case}}' +
 		'{{#default}}Not 10 ducks{{/default}}{{/switch}}');
 		var map = new SimpleMap({
