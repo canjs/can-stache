@@ -49,9 +49,12 @@ makeTest('can/view/stache vdom', makeDocument());
 function overwriteGlobalHelper(name, fn, method) {
 	var origHelper = helpersCore.getHelper(name);
 
-	helpersCore[method || 'registerHelper'](name, function() {
+	var newHelper = function() {
 		return fn.apply(this, arguments);
-	});
+	};
+	newHelper.requiresOptionsArgument = origHelper.requiresOptionsArgument;
+
+	helpersCore[method || 'registerHelper'](name, newHelper);
 
 	return origHelper;
 };
@@ -6099,7 +6102,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("#switch and #case work with call expressions", function(){
-		var template = stache("{{#switch(type)}}{{#case('admin', scope.helperOptions))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
+		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
 		var map = new DefineMap({
 			type: "admin"
 		});

@@ -52,9 +52,8 @@ Call.prototype.args = function(scope){
 };
 
 Call.prototype.value = function(scope, helperOptions){
-	var method = this.methodExpr.value(scope);
+	var method = this.methodExpr.value(scope, { proxyMethods: false });
 	var initialValue = method && method.initialValue;
-	var isLiveBound = initialValue && initialValue.isLiveBound;
 	var isHelper = initialValue && initialValue.isHelper;
 
 	// if this was a helper function, mark it as a helper so that
@@ -68,9 +67,9 @@ Call.prototype.value = function(scope, helperOptions){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = getArgs(isLiveBound);
+			var args = getArgs(func.isLiveBound);
 
-			if(isHelper && helperOptions) {
+			if (func.requiresOptionsArgument) {
 				if(args.hashExprs && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}
@@ -80,7 +79,7 @@ Call.prototype.value = function(scope, helperOptions){
 				args.unshift(new SetIdentifier(newVal));
 			}
 
-			return func.apply(scope.peek('this'), args);
+			return func.apply(method.root || scope.peek("this"), args);
 		}
 	};
 	//!steal-remove-start

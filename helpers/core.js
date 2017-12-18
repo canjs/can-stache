@@ -136,6 +136,7 @@ var eachHelper = function(items) {
 	}
 };
 eachHelper.isLiveBound = true;
+eachHelper.requiresOptionsArgument = true;
 
 var indexHelper = function(offset, options) {
 	if (!options) {
@@ -145,6 +146,7 @@ var indexHelper = function(offset, options) {
 	var index = options.scope.peek("scope.index");
 	return ""+((typeof(index) === "function" ? index() : index) + offset);
 };
+indexHelper.requiresOptionsArgument = true;
 
 var ifHelper = function (expr, options) {
 	var value;
@@ -162,6 +164,7 @@ var ifHelper = function (expr, options) {
 		return options.inverse(options.scope || this);
 	}
 };
+ifHelper.requiresOptionsArgument = true;
 
 var isHelper = function() {
 	var lastValue, curValue,
@@ -189,6 +192,7 @@ var isHelper = function() {
 
 	return callFn.get() ? options.fn() : options.inverse();
 };
+isHelper.requiresOptionsArgument = true;
 
 var unlessHelper = function (expr, options) {
 	return ifHelper.apply(this, [expr, assign(assign({}, options), {
@@ -196,6 +200,7 @@ var unlessHelper = function (expr, options) {
 		inverse: options.fn
 	})]);
 };
+unlessHelper.requiresOptionsArgument = true;
 
 var withHelper = function (expr, options) {
 	var ctx = expr;
@@ -214,6 +219,7 @@ var withHelper = function (expr, options) {
 	}
 	return options.fn(ctx || {});
 };
+withHelper.requiresOptionsArgument = true;
 
 var dataHelper = function(attr) {
 	// options will either be the second or third argument.
@@ -235,6 +241,7 @@ var switchHelper = function(expression, options){
 		}
 	};
 	caseHelper.isHelper = true;
+	caseHelper.requiresOptionsArgument = true;
 
 	var newScope = options.scope.add({
 		case: caseHelper,
@@ -243,6 +250,7 @@ var switchHelper = function(expression, options){
 
 	return options.fn(newScope, options);
 };
+switchHelper.requiresOptionsArgument = true;
 
 var joinBaseHelper = function(firstExpr/* , expr... */){
 	var args = [].slice.call(arguments);
@@ -272,6 +280,7 @@ var joinBaseHelper = function(firstExpr/* , expr... */){
 		return joinURIs(baseURL, moduleReference);
 	}
 };
+joinBaseHelper.requiresOptionsArgument = true;
 
 var builtInHelpers = {
 	'debugger': debuggerHelper,
