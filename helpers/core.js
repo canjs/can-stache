@@ -240,7 +240,6 @@ var switchHelper = function(expression, options){
 			return options.fn(options.scope.peek('this') || this);
 		}
 	};
-	caseHelper.isHelper = true;
 	caseHelper.requiresOptionsArgument = true;
 
 	var newScope = options.scope.add({
@@ -301,7 +300,6 @@ var builtInHelpers = {
 
 var addBuiltInHelpers = function() {
 	canReflect.each(builtInHelpers, function(helper, helperName) {
-		helper.isHelper = true;
 		helpers[helperName] = helper;
 	});
 };
@@ -316,7 +314,6 @@ var registerHelper = function(name, callback){
 	}
 	//!steal-remove-end
 
-	callback.isHelper = true;
 	helpers[name] = callback;
 };
 

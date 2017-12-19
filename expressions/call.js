@@ -53,14 +53,6 @@ Call.prototype.args = function(scope){
 
 Call.prototype.value = function(scope, helperOptions){
 	var method = this.methodExpr.value(scope, { proxyMethods: false });
-	var initialValue = method && method.initialValue;
-	var isHelper = initialValue && initialValue.isHelper;
-
-	// if this was a helper function, mark it as a helper so that
-	// mustache_core knows that it rendered something that should be displayed
-	// this will skip the logic for handling things like {{#foo()}}...{{/foo}}
-	this.isHelper = isHelper;
-
 	var getArgs = this.args(scope);
 
 	var computeFn = function(newVal){

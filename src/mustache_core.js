@@ -64,6 +64,7 @@ var core = {
 
 		var value,
 			helperOptions =  {
+				metadata: { rendered: false },
 				stringOnly: stringOnly,
 				context: scope.peek("this"),
 				scope: scope,
@@ -71,7 +72,7 @@ var core = {
 				exprData: exprData
 			};
 			// set up renderers
-			utils.convertToScopes(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 		if(exprData instanceof expression.Call) {
 
@@ -81,11 +82,6 @@ var core = {
 			scope = scope.add({ helperOptions: helperOptions }, { special: true });
 
 			value = exprData.value(scope, helperOptions);
-
-			// if this is a helper function being called with a Call Expression, return what it rendered
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else if (exprData instanceof expression.Bracket) {
 			value = exprData.value(scope);
 		} else if (exprData instanceof expression.Lookup) {
@@ -96,15 +92,13 @@ var core = {
 			value = exprData.methodExpr.value(scope, helperOptions);
 		} else {
 			value = exprData.value(scope, helperOptions);
-
-			if(value.isHelper) {
+			if (typeof value === "function") {
 				return value;
 			}
 		}
 
-		// Return evaluators for no mode.
-		if(!mode) {
-			// If it's computed, return a function that just reads the compute.
+		// return evaluator for no mode or rendered value if a renderer was called
+		if(!mode || helperOptions.metadata.rendered) {
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
 			return function(){

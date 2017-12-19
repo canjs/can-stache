@@ -43,8 +43,7 @@ Helper.prototype.value = function(scope, helperOptions){
 		this.methodExpr.key,
 		helperInstance = this,
 		helperFn = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
-		initialValue = helperFn && helperFn.initialValue,
-		isHelper = initialValue && initialValue.isHelper;
+		initialValue = helperFn && helperFn.initialValue;
 
 	if (typeof initialValue === "function") {
 		helperFn = function helperFn() {
@@ -58,7 +57,6 @@ Helper.prototype.value = function(scope, helperOptions){
 
 			return initialValue.apply(scope.peek("this"), args);
 		};
-		helperFn.isHelper = isHelper;
 		//!steal-remove-start
 		Object.defineProperty(helperFn, "name", {
 			value: canReflect.getName(this)
