@@ -35,43 +35,32 @@ Helper.prototype.hash = function(scope){
 	return hash;
 };
 
-// looks up the name key in the scope and return it
-Helper.prototype.helperValue = function(scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly) {
+Helper.prototype.value = function(scope, helperOptions){
 	// If a literal, this means it should be treated as a key. But helpers work this way for some reason.
 	// TODO: fix parsing so numbers will also be assumed to be keys.
 	var methodKey = this.methodExpr instanceof Literal ?
 		"" + this.methodExpr._value :
 		this.methodExpr.key,
 		helperInstance = this,
-		helperValue = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
-		initialValue = helperValue && helperValue.initialValue,
+		helperFn = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
+		initialValue = helperFn && helperFn.initialValue,
 		isHelper = initialValue && initialValue.isHelper;
 
 	if (typeof initialValue === "function") {
-		helperValue = function helperFn() {
-			var helperOptionArg = { stringOnly: stringOnly },
-				context = scope.peek("this"),
-				args = helperInstance.args(scope),
-				hash = helperInstance.hash(scope);
-
-			// Add additional data to be used by helper functions
-			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-
-			assign(helperOptionArg, {
-				context: context,
-				scope: scope,
-				hash: hash,
-				nodeList: nodeList,
-				exprData: helperInstance
-			});
+		helperFn = function helperFn() {
+			var args = helperInstance.args(scope),
+				helperOptionArg = assign(assign({}, helperOptions), {
+					hash: helperInstance.hash(scope),
+					exprData: helperInstance
+				});
 
 			args.push(helperOptionArg);
 
-			return initialValue.apply(context, args);
+			return initialValue.apply(scope.peek("this"), args);
 		};
-		helperValue.isHelper = isHelper;
+		helperFn.isHelper = isHelper;
 		//!steal-remove-start
-		Object.defineProperty(helperValue, "name", {
+		Object.defineProperty(helperFn, "name", {
 			value: canReflect.getName(this)
 		});
 		//!steal-remove-end
@@ -82,30 +71,7 @@ Helper.prototype.helperValue = function(scope, readOptions, nodeList, truthyRend
 	}
 	//!steal-remove-end
 
-	return  helperValue;
-};
-
-Helper.prototype.evaluator = function(helper, scope) {
-	return function () {
-		return helper.apply(scope.peek("this"), arguments);
-	};
-};
-
-Helper.prototype.value = function(scope, nodeList, truthyRenderer, falseyRenderer, stringOnly){
-	var helperValue = this.helperValue(scope);
-
-	// a method could have been called, resulting in a value
-	if(!helperValue.isHelper) {
-		return helperValue;
-	}
-
-	var fn = this.evaluator(helper, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-
-	var computeValue = new Observation(fn);
-
-	Observation.temporarilyBind(computeValue);
-
-	return computeValue;
+	return  helperFn;
 };
 
 Helper.prototype.closingTag = function() {

@@ -63,24 +63,24 @@ var core = {
 		}
 
 		var value,
-			helperOptionArg;
-
-		if(exprData instanceof expression.Call) {
-			helperOptionArg =  {
+			helperOptions =  {
 				stringOnly: stringOnly,
 				context: scope.peek("this"),
 				scope: scope,
 				nodeList: nodeList,
 				exprData: exprData
 			};
-			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			// set up renderers
+			utils.convertToScopes(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+
+		if(exprData instanceof expression.Call) {
 
 			// store the helperOptions on a special context so they can be read manually
 			// by call expressions for user-defined functions like
 			// {{#bar(scope.helperOptions)}} ... {{else}} ... {{/bar}}
-			scope = scope.add({ helperOptions: helperOptionArg }, { special: true });
+			scope = scope.add({ helperOptions: helperOptions }, { special: true });
 
-			value = exprData.value(scope, helperOptionArg);
+			value = exprData.value(scope, helperOptions);
 
 			// if this is a helper function being called with a Call Expression, return what it rendered
 			if(exprData.isHelper) {
@@ -93,19 +93,12 @@ var core = {
 		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
 			// Brackets get wrapped in Helpers when used in attributes
 			// like `<p class="{{ foo[bar] }}" />`
-			value = exprData.methodExpr.value(scope);
+			value = exprData.methodExpr.value(scope, helperOptions);
 		} else {
-			var readOptions = {
-				// will return a function instead of calling it.
-				// allowing it to be turned into a compute if necessary.
-				isArgument: true,
-				args: [scope.peek("this"), scope],
-				asCompute: true
-			};
-			value = exprData.helperValue(scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			value = exprData.value(scope, helperOptions);
 
 			if(value.isHelper) {
-				return exprData.evaluator(value, scope, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+				return value;
 			}
 		}
 
@@ -114,9 +107,6 @@ var core = {
 			// If it's computed, return a function that just reads the compute.
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
-			// Setup renderers.
-			helperOptionArg = {};
-			utils.convertToScopes(helperOptionArg, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
@@ -131,16 +121,16 @@ var core = {
 
 					if(canReflect.getKeyValue(finalValue, "length")) {
 						if (stringOnly) {
-							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg);
+							return utils.getItemsStringContent(finalValue, isObserveList, helperOptions);
 						} else {
-							return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+							return frag(utils.getItemsFragContent(finalValue, helperOptions, scope));
 						}
 					} else {
-						return helperOptionArg.inverse(scope);
+						return helperOptions.inverse(scope);
 					}
 				}
 				else {
-					return finalValue ? helperOptionArg.fn(finalValue || scope) : helperOptionArg.inverse(scope);
+					return finalValue ? helperOptions.fn(finalValue || scope) : helperOptions.inverse(scope);
 				}
 			};
 		} else {
