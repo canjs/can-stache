@@ -314,6 +314,11 @@ var registerHelper = function(name, callback){
 	}
 	//!steal-remove-end
 
+	// mark passed in helper so it will be automatically passed
+	// helperOptions (.fn, .inverse, etc) when called as Call Expressions
+	callback.requiresOptionsArgument = true;
+
+	// store on global helpers list
 	helpers[name] = callback;
 };
 

@@ -62,7 +62,7 @@ Call.prototype.value = function(scope, helperOptions){
 			var args = getArgs(func.isLiveBound);
 
 			if (func.requiresOptionsArgument) {
-				if(args.hashExprs && helperOptions.exprData){
+				if(args.hashExprs && helperOptions && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}
 				args.push(helperOptions);

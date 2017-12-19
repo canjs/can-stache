@@ -75,12 +75,6 @@ var core = {
 			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 		if(exprData instanceof expression.Call) {
-
-			// store the helperOptions on a special context so they can be read manually
-			// by call expressions for user-defined functions like
-			// {{#bar(scope.helperOptions)}} ... {{else}} ... {{/bar}}
-			scope = scope.add({ helperOptions: helperOptions }, { special: true });
-
 			value = exprData.value(scope, helperOptions);
 		} else if (exprData instanceof expression.Bracket) {
 			value = exprData.value(scope);
