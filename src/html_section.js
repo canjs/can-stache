@@ -58,10 +58,10 @@ HTMLSectionBuilder.scopify = function(renderer) {
 			};
 		}
 
-		// mark passed in helper functions as helpers so they will be passed
+		// mark passed in helper so they will be automatically passed
 		// helperOptions (.fn, .inverse, etc) when called as Call Expressions
 		canReflect.eachKey(options && options.helpers, function(helperValue) {
-			helperValue.isHelper = true;
+			helperValue.requiresOptionsArgument = true;
 		});
 
 		var templateContext = scope.templateContext;

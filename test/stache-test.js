@@ -46,6 +46,19 @@ makeTest('can/view/stache dom', browserDoc);
 makeTest('can/view/stache vdom', makeDocument());
 
 // HELPERS
+function overwriteGlobalHelper(name, fn, method) {
+	var origHelper = helpersCore.getHelper(name);
+
+	var newHelper = function() {
+		return fn.apply(this, arguments);
+	};
+	newHelper.requiresOptionsArgument = origHelper.requiresOptionsArgument;
+
+	helpersCore[method || 'registerHelper'](name, newHelper);
+
+	return origHelper;
+};
+
 function makeTest(name, doc, mutation) {
 	var isNormalDOM = doc === window.document;
 
@@ -165,7 +178,7 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		var stashed = stache("<h1 class='foo'>{{#helper(scope.helperOptions)}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
+		var stashed = stache("<h1 class='foo'>{{#helper()}}<span>Hello {{message}}!</span>{{/helper}}</h1>");
 
 
 		var frag = stashed({});
@@ -183,7 +196,7 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{#genericTestHelper(scope.helperOptions)}}<span>Test</span>{{/genericTestHelper}}</div>';
+		var template = '<div>{{#genericTestHelper()}}<span>Test</span>{{/genericTestHelper}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
@@ -197,7 +210,7 @@ function makeTest(name, doc, mutation) {
 			done();
 		});
 
-		var template = '<div>{{genericTestHelper2(scope.helperOptions)}}</div>';
+		var template = '<div>{{genericTestHelper2()}}</div>';
 		var viewModel = {};
 
 		stache(template)(viewModel);
@@ -1696,7 +1709,7 @@ function makeTest(name, doc, mutation) {
 			return frag;
 		});
 
-		var renderer = stache(' "<span>{{#to_upper(scope.helperOptions)}}{{next_level.text()}}{{/to_upper}}</span>"'),
+		var renderer = stache(' "<span>{{#to_upper()}}{{next_level.text()}}{{/to_upper}}</span>"'),
 			data = {
 				next_level: {
 					text: function () {
@@ -2118,38 +2131,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("avoid global helpers", function () {
-
-		var noglobals = stache("{{sometext person.name}}");
-
-		var div = doc.createElement('div'),
-			div2 = doc.createElement('div');
-		var person = new SimpleMap({
-			name: "Brian"
-		});
-		var result = noglobals({
-			person: person
-		}, {
-			sometext: function (name) {
-				return "Mr. " + name()
-			}
-		});
-		var result2 = noglobals({
-			person: person
-		}, {
-			sometext: function (name) {
-				return name() + " rules"
-			}
-		});
-		div.appendChild(result);
-		div2.appendChild(result2);
-
-		person.set("name", "Ajax")
-
-		equal(innerHTML(div), "Mr. Ajax");
-		equal(innerHTML(div2), "Ajax rules");
-
-	});
 
 	test("Each does not redraw items", function () {
 
@@ -3523,7 +3504,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
-		var tmpl = "{{#foo(scope.helperOptions)}}<span>{{bar}}</span>{{/foo}}";
+		var tmpl = "{{#foo()}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
 			bar : 'baz'
 		}), {
@@ -3537,9 +3518,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Calling .fn with falsey value as the context will render correctly (#658)", function(){
-		var tmpl = "{{#zero(scope.helperOptions)}}<span>{{ this }}</span>{{/zero}}" +
-					"{{#emptyString(scope.helperOptions)}}<span>{{ this }}</span>{{/emptyString}}" +
-					"{{#nullVal(scope.helperOptions)}}<span>{{ this }}</span>{{/nullVal}}";
+		var tmpl = "{{#zero()}}<span>{{ this }}</span>{{/zero}}" +
+					"{{#emptyString()}}<span>{{ this }}</span>{{/emptyString}}" +
+					"{{#nullVal()}}<span>{{ this }}</span>{{/nullVal}}";
 
 		var frag = stache(tmpl)({ foo: 'bar' }, {
 			zero : function(opts){
@@ -4026,7 +4007,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helper evaluated 1st time...
-		stache('{{#listHasLength(scope.helperOptions)}}{{/listHasLength}}')(state, helpers);
+		stache('{{#listHasLength()}}{{/listHasLength}}')(state, helpers);
 
 		// Helper evaluated 2nd time...
 		state.set('list', new DefineList([]));
@@ -4058,7 +4039,7 @@ function makeTest(name, doc, mutation) {
 		};
 
 		// Helpers evaluated 1st time...
-		stache('{{#bindViaNestedAttrs(scope.helperOptions)}}{{/bindViaNestedAttrs}}')(state, helpers);
+		stache('{{#bindViaNestedAttrs()}}{{/bindViaNestedAttrs}}')(state, helpers);
 
 		// Helpers evaluated 2nd time...
 		state.set('parent', new SimpleMap({
@@ -4113,7 +4094,7 @@ function makeTest(name, doc, mutation) {
 		deepEqual(getText(t.template, t.data), 'Not 10 ducks');
 	});
 
-	test("Handlerbars helper: switch - changing to default (#1857)", function(){
+	test("Handlebars helper: switch - changing to default (#1857)", function(){
 		var template = stache('{{#switch ducks}}{{#case "10"}}10 ducks{{/case}}' +
 		'{{#default}}Not 10 ducks{{/default}}{{/switch}}');
 		var map = new SimpleMap({
@@ -4377,11 +4358,9 @@ function makeTest(name, doc, mutation) {
 	test('eq called twice (#1931)', function() {
 		expect(1);
 
-		var oldIs = stache.getHelper('is');
-
-		stache.registerHelper('is', function() {
+		var origEq = overwriteGlobalHelper('eq', function() {
 			ok(true, 'comparator invoked only once during setup');
-			return oldIs.apply(this, arguments);
+			return origEq.apply(this, arguments);
 		});
 
 		var a = new SimpleObservable(0),
@@ -4393,7 +4372,7 @@ function makeTest(name, doc, mutation) {
 		b.set(1);
 		queues.batch.stop();
 
-		stache.registerHelper('is', oldIs);
+		overwriteGlobalHelper('eq', origEq);
 	});
 
 	test("#each with else works (#1979)", function(){
@@ -6123,7 +6102,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("#switch and #case work with call expressions", function(){
-		var template = stache("{{#switch(type)}}{{#case('admin', scope.helperOptions))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
+		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
 		var map = new DefineMap({
 			type: "admin"
 		});
@@ -6173,15 +6152,6 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	var overwriteGlobalHelper = function(name, fn, method) {
-		var origHelper = helpersCore.getHelper(name);
-
-		helpersCore[method || 'registerHelper'](name, function() {
-			return fn.apply(this, arguments);
-		});
-
-		return origHelper;
-	};
 	test("#each with call expression should be optimized for performance", function(){
 		var div = doc.createElement('div');
 		var count = 0;

@@ -136,150 +136,170 @@ var eachHelper = function(items) {
 	}
 };
 eachHelper.isLiveBound = true;
+eachHelper.requiresOptionsArgument = true;
 
-var builtInHelpers = {
-	"each": eachHelper,
-	"index":  function(offset, options) {
-		if (!options) {
-			options = offset;
-			offset = 0;
-		}
-		var index = options.scope.peek("scope.index");
-		return ""+((typeof(index) === "function" ? index() : index) + offset);
-	},
-	'if': function (expr, options) {
-		var value;
-		// if it's a function, wrap its value in a compute
-		// that will only change values from true to false
-		if (expr && canReflect.isValueLike(expr)) {
-			value = canReflect.getValue(new TruthyObservable(expr));
-		} else {
-			value = !! resolve(expr);
-		}
+var indexHelper = function(offset, options) {
+	if (!options) {
+		options = offset;
+		offset = 0;
+	}
+	var index = options.scope.peek("scope.index");
+	return ""+((typeof(index) === "function" ? index() : index) + offset);
+};
+indexHelper.requiresOptionsArgument = true;
 
-		if (value) {
-			return options.fn(options.scope || this);
-		} else {
-			return options.inverse(options.scope || this);
-		}
-	},
-	'is': function() {
-		var lastValue, curValue,
-			options = arguments[arguments.length - 1];
+var ifHelper = function (expr, options) {
+	var value;
+	// if it's a function, wrap its value in a compute
+	// that will only change values from true to false
+	if (expr && canReflect.isValueLike(expr)) {
+		value = canReflect.getValue(new TruthyObservable(expr));
+	} else {
+		value = !! resolve(expr);
+	}
 
-		if (arguments.length - 2 <= 0) {
-			return options.inverse();
-		}
-
-		var args = arguments;
-		var callFn = new Observation(function(){
-			for (var i = 0; i < args.length - 1; i++) {
-				curValue = resolve(args[i]);
-				curValue = typeof curValue === "function" ? curValue() : curValue;
-
-				if (i > 0) {
-					if (curValue !== lastValue) {
-						return false;
-					}
-				}
-				lastValue = curValue;
-			}
-			return true;
-		});
-
-		return callFn.get() ? options.fn() : options.inverse();
-	},
-	'eq': function() {
-		return helpers.is.apply(this, arguments);
-	},
-	'unless': function (expr, options) {
-		return helpers['if'].apply(this, [expr, assign(assign({}, options), {
-			fn: options.inverse,
-			inverse: options.fn
-		})]);
-	},
-	'with': function (expr, options) {
-		var ctx = expr;
-		if(!options) {
-			// hash-only case if no current context expression
-			options = expr;
-			expr = true;
-			ctx = options.hash;
-		} else {
-			expr = resolve(expr);
-			if(options.hash && !isEmptyObject(options.hash)) {
-				// presumably rare case of both a context object AND hash keys
-				// Leaving it undocumented for now, but no reason not to support it.
-				ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);
-			}
-		}
-		return options.fn(ctx || {});
-	},
-	'console': console,
-	'data': function(attr){
-		// options will either be the second or third argument.
-		// Get the argument before that.
-		var data = arguments.length === 2 ? this : arguments[1];
-		return function(el){
-			domData.set.call( el, attr, data || this.context );
-		};
-	},
-	'switch': function(expression, options){
-		resolve(expression);
-		var found = false;
-
-		var caseHelper = function(value, options) {
-			if(!found && resolve(expression) === resolve(value)) {
-				found = true;
-				return options.fn(options.scope.peek('this') || this);
-			}
-		};
-		caseHelper.isHelper = true;
-
-		var newScope = options.scope.add({
-			case: caseHelper,
-			get default() { return !found; }
-		}, { notContext: true });
-
-		return options.fn(newScope, options);
-	},
-	'joinBase': function(firstExpr/* , expr... */){
-		var args = [].slice.call(arguments);
-		var options = args.pop();
-
-		var moduleReference = args.map( function(expr){
-			var value = resolve(expr);
-			return typeof value === "function" ? value() : value;
-		}).join("");
-
-		var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
-		var parentAddress = templateModule ? templateModule.uri: undefined;
-
-		var isRelative = moduleReference[0] === ".";
-
-		if(isRelative && parentAddress) {
-			return joinURIs(parentAddress, moduleReference);
-		} else {
-			var baseURL = (typeof System !== "undefined" &&
-				(System.renderingBaseURL || System.baseURL)) ||	getBaseURL();
-
-			// Make sure one of them has a needed /
-			if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
-				baseURL += "/";
-			}
-
-			return joinURIs(baseURL, moduleReference);
-		}
+	if (value) {
+		return options.fn(options.scope || this);
+	} else {
+		return options.inverse(options.scope || this);
 	}
 };
+ifHelper.requiresOptionsArgument = true;
 
-builtInHelpers.eachOf = builtInHelpers.each;
-builtInHelpers.debugger = debuggerHelper;
+var isHelper = function() {
+	var lastValue, curValue,
+		options = arguments[arguments.length - 1];
 
+	if (arguments.length - 2 <= 0) {
+		return options.inverse();
+	}
+
+	var args = arguments;
+	var callFn = new Observation(function(){
+		for (var i = 0; i < args.length - 1; i++) {
+			curValue = resolve(args[i]);
+			curValue = typeof curValue === "function" ? curValue() : curValue;
+
+			if (i > 0) {
+				if (curValue !== lastValue) {
+					return false;
+				}
+			}
+			lastValue = curValue;
+		}
+		return true;
+	});
+
+	return callFn.get() ? options.fn() : options.inverse();
+};
+isHelper.requiresOptionsArgument = true;
+
+var unlessHelper = function (expr, options) {
+	return ifHelper.apply(this, [expr, assign(assign({}, options), {
+		fn: options.inverse,
+		inverse: options.fn
+	})]);
+};
+unlessHelper.requiresOptionsArgument = true;
+
+var withHelper = function (expr, options) {
+	var ctx = expr;
+	if(!options) {
+		// hash-only case if no current context expression
+		options = expr;
+		expr = true;
+		ctx = options.hash;
+	} else {
+		expr = resolve(expr);
+		if(options.hash && !isEmptyObject(options.hash)) {
+			// presumably rare case of both a context object AND hash keys
+			// Leaving it undocumented for now, but no reason not to support it.
+			ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);
+		}
+	}
+	return options.fn(ctx || {});
+};
+withHelper.requiresOptionsArgument = true;
+
+var dataHelper = function(attr) {
+	// options will either be the second or third argument.
+	// Get the argument before that.
+	var data = arguments.length === 2 ? this : arguments[1];
+	return function(el){
+		domData.set.call( el, attr, data || this.context );
+	};
+};
+
+var switchHelper = function(expression, options){
+	resolve(expression);
+	var found = false;
+
+	var caseHelper = function(value, options) {
+		if(!found && resolve(expression) === resolve(value)) {
+			found = true;
+			return options.fn(options.scope.peek('this') || this);
+		}
+	};
+	caseHelper.requiresOptionsArgument = true;
+
+	var newScope = options.scope.add({
+		case: caseHelper,
+		get default() { return !found; }
+	}, { notContext: true });
+
+	return options.fn(newScope, options);
+};
+switchHelper.requiresOptionsArgument = true;
+
+var joinBaseHelper = function(firstExpr/* , expr... */){
+	var args = [].slice.call(arguments);
+	var options = args.pop();
+
+	var moduleReference = args.map( function(expr){
+		var value = resolve(expr);
+		return typeof value === "function" ? value() : value;
+	}).join("");
+
+	var templateModule = canReflect.getKeyValue(options.scope.templateContext.helpers, 'module');
+	var parentAddress = templateModule ? templateModule.uri: undefined;
+
+	var isRelative = moduleReference[0] === ".";
+
+	if(isRelative && parentAddress) {
+		return joinURIs(parentAddress, moduleReference);
+	} else {
+		var baseURL = (typeof System !== "undefined" &&
+			(System.renderingBaseURL || System.baseURL)) ||	getBaseURL();
+
+		// Make sure one of them has a needed /
+		if(moduleReference[0] !== "/" && baseURL[baseURL.length - 1] !== "/") {
+			baseURL += "/";
+		}
+
+		return joinURIs(baseURL, moduleReference);
+	}
+};
+joinBaseHelper.requiresOptionsArgument = true;
+
+var builtInHelpers = {
+	'debugger': debuggerHelper,
+	each: eachHelper,
+	eachOf: eachHelper,
+	index: indexHelper,
+	'if': ifHelper,
+	is: isHelper,
+	eq: isHelper,
+	unless: unlessHelper,
+	'with': withHelper,
+	console: console,
+	data: dataHelper,
+	'switch': switchHelper,
+	joinBase: joinBaseHelper,
+
+};
 
 var addBuiltInHelpers = function() {
 	canReflect.each(builtInHelpers, function(helper, helperName) {
-		helper.isHelper = true;
 		helpers[helperName] = helper;
 	});
 };
@@ -294,7 +314,11 @@ var registerHelper = function(name, callback){
 	}
 	//!steal-remove-end
 
-	callback.isHelper = true;
+	// mark passed in helper so it will be automatically passed
+	// helperOptions (.fn, .inverse, etc) when called as Call Expressions
+	callback.requiresOptionsArgument = true;
+
+	// store on global helpers list
 	helpers[name] = callback;
 };
 

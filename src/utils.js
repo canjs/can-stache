@@ -41,15 +41,18 @@ module.exports = {
 	},
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
-	convertToScopes: function(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
-		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly) : noop;
-		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly) : noop;
+	createRenderers: function(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
+		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : noop;
+		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : noop;
 		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.
-	makeRendererConvertScopes: function (renderer, parentScope, nodeList, observeObservables) {
+	makeRendererConvertScopes: function (renderer, parentScope, nodeList, observeObservables, metadata) {
 		var rendererWithScope = function(ctx, parentNodeList){
+			if (metadata) {
+				metadata.rendered = true;
+			}
 			return renderer(ctx || parentScope, parentNodeList);
 		};
 		var convertedRenderer = function (newScope, newOptions, parentNodeList) {

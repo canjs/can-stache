@@ -52,26 +52,17 @@ Call.prototype.args = function(scope){
 };
 
 Call.prototype.value = function(scope, helperOptions){
-	var method = this.methodExpr.value(scope);
-	var initialValue = method && method.initialValue;
-	var isLiveBound = initialValue && initialValue.isLiveBound;
-	var isHelper = initialValue && initialValue.isHelper;
-
-	// if this was a helper function, mark it as a helper so that
-	// mustache_core knows that it rendered something that should be displayed
-	// this will skip the logic for handling things like {{#foo()}}...{{/foo}}
-	this.isHelper = isHelper;
-
+	var method = this.methodExpr.value(scope, { proxyMethods: false });
 	var getArgs = this.args(scope);
 
 	var computeFn = function(newVal){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = getArgs(isLiveBound);
+			var args = getArgs(func.isLiveBound);
 
-			if(isHelper && helperOptions) {
-				if(args.hashExprs && helperOptions.exprData){
+			if (func.requiresOptionsArgument) {
+				if(args.hashExprs && helperOptions && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}
 				args.push(helperOptions);
@@ -80,7 +71,7 @@ Call.prototype.value = function(scope, helperOptions){
 				args.unshift(new SetIdentifier(newVal));
 			}
 
-			return func.apply(scope.peek('this'), args);
+			return func.apply(method.root || scope.peek("this"), args);
 		}
 	};
 	//!steal-remove-start
