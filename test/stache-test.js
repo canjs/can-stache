@@ -26,7 +26,7 @@ var globals = require('can-globals');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
 var domData = require('can-util/dom/data/data');
-var domMutate = require('can-util/dom/mutate/mutate');
+var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 
 var canDev = require('can-log/dev/dev');
@@ -2459,7 +2459,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template(data),
 			img = frag.firstChild;
 
-		equal(img.getAttribute("src"), null, "there is no src");
+		equal(img.getAttribute("src"), "", "the src is empty");
 
 		data.set("image", url);
 
@@ -2480,7 +2480,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template(data),
 			img = frag.firstChild;
 
-		equal(img.getAttribute("src"), null, "there is no src");
+		equal(img.getAttribute("src"), "", "the src is empty");
 
 		data.set("image", imgData);
 		notEqual(img.getAttribute("src"), "", 'Image should have src');
@@ -2830,11 +2830,11 @@ function makeTest(name, doc, mutation) {
 		this.fixture.appendChild(div);
 		div.id = "div-remove";
 
-		domMutate.appendChild.call(div, tmp(data));
+		domMutateNode.appendChild.call(div, tmp(data));
 
 		stop();
 		setTimeout(function(){
-			domMutate.removeChild.call(div, div.firstChild);
+			domMutateNode.removeChild.call(div, div.firstChild);
 			var check = function(){
 				var handlers = data[canSymbol.for("can.meta")].handlers.get([]);
 				if(handlers.length) {
