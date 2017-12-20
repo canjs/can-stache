@@ -42,6 +42,8 @@ Helper.prototype.value = function(scope, helperOptions){
 		"" + this.methodExpr._value :
 		this.methodExpr.key,
 		helperInstance = this,
+		// proxyMethods must be false so that the `requiresOptionsArgument` and any
+		// other flags stored on the function are preserved
 		helperFn = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
 		initialValue = helperFn && helperFn.initialValue;
 

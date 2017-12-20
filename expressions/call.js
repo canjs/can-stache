@@ -52,6 +52,8 @@ Call.prototype.args = function(scope){
 };
 
 Call.prototype.value = function(scope, helperOptions){
+	// proxyMethods must be false so that the `requiresOptionsArgument` and any
+	// other flags stored on the function are preserved
 	var method = this.methodExpr.value(scope, { proxyMethods: false });
 	var getArgs = this.args(scope);
 
@@ -71,6 +73,9 @@ Call.prototype.value = function(scope, helperOptions){
 				args.unshift(new SetIdentifier(newVal));
 			}
 
+			// if this is a call like `foo.bar()` the method.root will be set to `foo`
+			// for a call like `foo()`, method.root will not be set and we will default
+			// to setting the scope as the context of the function
 			return func.apply(method.root || scope.peek("this"), args);
 		}
 	};
