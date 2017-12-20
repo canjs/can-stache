@@ -45,7 +45,8 @@ Helper.prototype.value = function(scope, helperOptions){
 		// proxyMethods must be false so that the `requiresOptionsArgument` and any
 		// other flags stored on the function are preserved
 		helperFn = expressionHelpers.getObservableValue_fromKey(methodKey, scope, { proxyMethods: false }),
-		initialValue = helperFn && helperFn.initialValue;
+		initialValue = helperFn && helperFn.initialValue,
+		thisArg = helperFn && helperFn.thisArg;
 
 	if (typeof initialValue === "function") {
 		helperFn = function helperFn() {
@@ -57,7 +58,7 @@ Helper.prototype.value = function(scope, helperOptions){
 
 			args.push(helperOptionArg);
 
-			return initialValue.apply(scope.peek("this"), args);
+			return initialValue.apply(thisArg || scope.peek("this"), args);
 		};
 		//!steal-remove-start
 		Object.defineProperty(helperFn, "name", {

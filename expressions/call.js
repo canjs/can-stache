@@ -73,10 +73,10 @@ Call.prototype.value = function(scope, helperOptions){
 				args.unshift(new SetIdentifier(newVal));
 			}
 
-			// if this is a call like `foo.bar()` the method.root will be set to `foo`
-			// for a call like `foo()`, method.root will not be set and we will default
+			// if this is a call like `foo.bar()` the method.thisArg will be set to `foo`
+			// for a call like `foo()`, method.thisArg will not be set and we will default
 			// to setting the scope as the context of the function
-			return func.apply(method.root || scope.peek("this"), args);
+			return func.apply(method.thisArg || scope.peek("this"), args);
 		}
 	};
 	//!steal-remove-start

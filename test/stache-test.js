@@ -6542,6 +6542,35 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'truthy');
 	});
+
+	QUnit.test('functions called on nested observables should have the correct context', function() {
+		var person = new DefineMap({
+			name: "Mick",
+			getName: function(msg) {
+				return msg ? msg + this.name : this.name;
+			}
+		});
+
+		var data = new DefineMap({
+			person: person
+		});
+
+		var div = doc.createElement("div");
+		var template = stache("{{person.getName()}}");
+		var frag = template(data);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'Mick', 'works with Call Expressions');
+
+		var div = doc.createElement("div");
+		var template = stache("{{person.getName 'Hello '}}");
+		var frag = template(data);
+
+		div.appendChild(frag);
+
+		equal(innerHTML(div), 'Hello Mick');
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
