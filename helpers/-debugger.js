@@ -57,6 +57,7 @@ function debuggerHelper (left, right) {
 	//!steal-remove-end
 	canLog.warn('Forgotten {{debugger}} helper');
 }
+debuggerHelper.requiresOptionsArgument = true;
 
 module.exports = {
 	helper: debuggerHelper,
