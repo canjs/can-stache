@@ -5,7 +5,7 @@
 
 Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.helpers.default] helpers.
 
-```
+```html
 {{#switch(user.type)}}
 	{{#case("admin")}}
 		<button value="edit"/>
@@ -30,16 +30,17 @@ Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.he
 
 The `switch` helper is used to render a block where one of several cases matches expr. It works just like a JavaScript switch.
 
-
-	{{#switch(page)}}
-		{{#case("cart")}}
-			<can-import from="cart">
-				<cart-page></cart-page>
-			</can-import>
-		{{/case}}
-		{{#default()}}
-			<can-import from="home">
-				<home-page></home-page>
-			</can-import>
-		{{/default}}
-	{{/switch}}
+```html
+{{#switch(page)}}
+	{{#case("cart")}}
+		<can-import from="cart">
+			<cart-page></cart-page>
+		</can-import>
+	{{/case}}
+	{{#default()}}
+		<can-import from="home">
+			<home-page></home-page>
+		</can-import>
+	{{/default}}
+{{/switch}}
+```

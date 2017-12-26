@@ -18,7 +18,7 @@ to `method`.
 
 
 All [can-stache/expressions/hash]s will be collectively
-added to the [can-stache.helperOptions]'s `hash` object.
+added to the [can-stache.helperOptions]’s `hash` object.
 
 If an `EXPRESSION` reads an observable, a
 [can-compute.computed] will be passed to `method`.
@@ -32,53 +32,65 @@ If an `EXPRESSION` reads an observable, a
 A helpers expression calls a function looked up in the [can-view-scope.Options helpers scope] followed by
 the [can-view-scope scope]. It looks like:
 
+```html
+<!-- Template -->
+<h1>{{pluralize type ages.length}}</h1>
 ```
-Template:
-	<h1>{{pluralize type ages.length}}</h1>
 
-Data:
-	{
-	  pluralize: function(type, count){
-	    return "data-pluralize"
-	  },
-	  todos: new List([22,32,42]),
-	  type: "age"
+```js
+/* Data */
+{
+	pluralize: function(type, count){
+		return "data-pluralize"
+	},
+	todos: new List([22,32,42]),
+	type: "age"
+}
+```
+
+```js
+/* Helpers */
+{
+	pluralize: function(type, count){
+		return type+(count() === 1 ? "" : "s")
 	}
+}
+```
 
-Helpers:
-	{
-      pluralize: function(type, count){
-	    return type+(count() === 1 ? "" : "s")
-	  }
-	}
-
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```
 
 Helper expression arguments that are observable are passed a compute.  This is
 in contrast to Call expressions that get passed the value.
 
-Helper expression arguments are space seperated.  If a Hash expression is an argument,
+Helper expression arguments are space separated.  If a Hash expression is an argument,
 the hash properties and values will be added to the helper options object. For example:
 
+```html
+<!-- Template -->
+<h1>{{pluralize word=type count=ages.length}}</h1>
 ```
-Template:
-	<h1>{{pluralize word=type count=ages.length}}</h1>
 
-Data:
-	{
-	  todos: new List([22,32,42]),
-	  type: "age"
+```js
+/* Data */
+{
+	todos: new List([22,32,42]),
+	type: "age"
+}
+```
+
+```js
+/* Helpers */
+{
+	pluralize: function(helperOptions){
+		return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
 	}
+}
+```
 
-Helpers:
-	{
-      pluralize: function(helperOptions){
-	    return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
-	  }
-	}
-
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```

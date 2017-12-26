@@ -31,20 +31,20 @@ called within.
 
   If the helper is called on an element like:
 
-  ```
+  ```html
   <div {{myHelper}}>
   ```
 
-  ... the callback function will be called with the `div`.  
+  …the callback function will be called with the `div`.  
 
   If the helper is called
-  outside of an element's tag like:
+  outside of an element’s tag like:
 
-  ```
+  ```html
   <div> {{myHelper}} </div>
   ```
 
-  ... the callback function will be called with a placeholder text node.  
+  …the callback function will be called with a placeholder text node.  
 
 
 @body
@@ -58,27 +58,35 @@ be used to create stache tags that have rich behavior.
 
 If the helper is called __within a tag__ like:
 
-    <ul {{sortable}}/>
+```html
+<ul {{sortable}}/>
+```
 
 The returned function is called with the `<ul>` element:
 
-    stache.registerHelper("sortable",function(){
-      return function(el){
-        $(el).slider();
-      }
-    });
+```js
+stache.registerHelper("sortable",function() {
+  return function(el){
+    $(el).slider();
+  }
+});
+```
 
 If the helper is called __between tags__ like:
 
-    <ul>{{items}}</ul>
+```html
+<ul>{{items}}</ul>
+```
 
 The returned function is called with a temporary text node:
 
-    stache.registerHelper("items",function(){
-      return function(textNode){
-		  // do something, probably replace textNode
-      }
-    });
+```js
+stache.registerHelper("items",function() {
+  return function(textNode){
+    // do something, probably replace textNode
+  }
+});
+```
 
-While this form of helper is still supported, it's more common
+While this form of helper is still supported, it’s more common
 to create similar functionality with [can-component] or [can-view-callbacks].

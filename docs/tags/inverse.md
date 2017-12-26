@@ -2,7 +2,7 @@
 @parent can-stache.tags 5
 @description Like [can-stache.tags.section], but renders
 the opposite subsection depending on the type of expression
-or the expression's return value.
+or the expression’s return value.
 
 @signature `{{^EXPRESSION}}FN{{else}}INVERSE{{/key}}`
 
@@ -11,11 +11,11 @@ when it would have rendered the `FN` block and vice-versa.
 
 For example:
 
-```
-{{^ isOver18(person) }} Can't Vote {{/isOver18}}
+```html
+{{^ isOver18(person) }} Can’t Vote {{/isOver18}}
 ```
 
-Renders `Can't Vote` if `isOver18(person)` returns `falsey`.
+Renders `Can’t Vote` if `isOver18(person)` returns `falsey`.
 
 @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression type. Behavior depends on the type of expression:
 
@@ -36,24 +36,29 @@ will render. For example:
 
 The template:
 
-    <ul>
-        {{#friends}}
-            </li>{{name}}</li>
-        {{/friends}}
-        {{^friends}}
-            <li>No friends.</li>
-        {{/friends}}
-    </ul>
+```html
+<ul>
+    {{#friends}}
+        </li>{{name}}</li>
+    {{/friends}}
+    {{^friends}}
+        <li>No friends.</li>
+    {{/friends}}
+</ul>
+```
 
 And data:
 
-    {
-        friends: []
-    }
+```js
+{
+    friends: []
+}
+```
 
 Results in:
 
-
-    <ul>
-        <li>No friends.</li>
-    </ul>
+```html
+<ul>
+    <li>No friends.</li>
+</ul>
+```

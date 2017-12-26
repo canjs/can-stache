@@ -2,7 +2,8 @@
 @parent can-stache/keys
 @description [can-stache-bindings.event Event bindings] and some helpers like [can-stache.helpers.each]
 provide special values that start with `%` to prevent potential collisions with
-other values. Special values should not be confused with [can-stache/keys/variable template variables] like [can-stache/keys/variable/self *self]
+other values. Special values should not be confused with [can-stache/keys/variable template variables]
+like [can-stache/keys/variable/self].
 
 @deprecated {3.12} The `%special` values have been deprecated in favor of [can-stache/keys/scope].
 
@@ -10,27 +11,33 @@ other values. Special values should not be confused with [can-stache/keys/variab
 
 When looping over an array, [can-define/list/list], or [can-list], you an use `%index` to write out the index of each property:
 
-    {{#each(tasks)}}
-      <li>{{%index}} {{name}}</li>
-    {{/each}}
+```html
+{{#each(tasks)}}
+  <li>{{%index}} {{name}}</li>
+{{/each}}
+```
 
 Indexes start at 0.  If you want to start at 1, you can create a helper like:
 
-    stache.registerHelper('%indexNum', function(options){
-      return options.scope.get("%index")+1;
-    })
+```js
+stache.registerHelper('%indexNum', function(options) {
+  return options.scope.get("%index") + 1;
+});
+```
 
 And use it like:
 
-    {{#each(task)}}
-      <li>{{%indexNum}} {{name}}</li>
-    {{/each}}
+```html
+{{#each(task)}}
+  <li>{{%indexNum}} {{name}}</li>
+{{/each}}
+```
 
 @signature `%key`
 
 Like `%index`, but provides the key value when looping through an object:
 
-```
+```html
 {{#each(style)}}
    {{%key}}: {{this}}
 {{/each}}
@@ -41,7 +48,7 @@ Like `%index`, but provides the key value when looping through an object:
 
 In an event binding, `%element` references the DOM element the event happened on:
 
-```
+```html
 <input ($click)="doSomething(%element.value)"/>
 ```
 
@@ -49,15 +56,15 @@ In an event binding, `%element` references the DOM element the event happened on
 
 In an event binding, `%event` references the dispatched event object:
 
-```
-<input ($click)="doSomething(%event)/>"
+```html
+<input ($click)="doSomething(%event)"/>
 ```
 
 @signature `%viewModel`
 
 In an event binding, `%viewModel` references the view model of the current element:
 
-```
+```html
 <my-component (closed)="doSomething(%viewModel)"/>
 ```
 
@@ -65,6 +72,6 @@ In an event binding, `%viewModel` references the view model of the current eleme
 
 In an event binding, `%arguments` references the arguments passed when the event was dispatched/triggered.
 
-```
+```html
 <input ($click)="doSomething(%arguments)"/>
 ```

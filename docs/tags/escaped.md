@@ -10,7 +10,7 @@ Gets the value of `EXPRESSION` and inserts the result into the output of the
 template.
 
 If the expression is clearly of a particular expression type like: `{{myHelper arg}}` or
-`{{myMethod(arg)}}`, that expression's rules will be followed.
+`{{myMethod(arg)}}`, that expression’s rules will be followed.
 
 An ambiguous expression type like `{{keyOrHelper}}` will first treat `keyOrHelper`
 as a [can-stache/expressions/key-lookup] and if there is no value in the scope of
@@ -44,15 +44,21 @@ values within the current context. For example:
 
 Rendering:
 
-    <h1>{{name}}</h1>
+```html
+<h1>{{name}}</h1>
+```
 
 With:
 
-    {name: "Austin"}
+```js
+{name: "Austin"}
+```
 
 Results in:
 
-    <h1>Austin</h1>
+```html
+<h1>Austin</h1>
+```
 
 If the key value is a String or Number, it is inserted into the template.
 If it is `null` or `undefined`, nothing is added to the template.
@@ -65,42 +71,54 @@ look up properties nested deep inside the current context. For example:
 
 Rendering:
 
-    <h1>{{book.author}}</h1>
+```html
+<h1>{{book.author}}</h1>
+```
 
 With:
 
-    {
-      book: {
-        author: "Ernest Hemingway"
-      }
-    }
+```js
+{
+  book: {
+    author: "Ernest Hemingway"
+  }
+}
+```
 
 Results in:
 
-    <h1>Ernest Hemingway</h1>
+```html
+<h1>Ernest Hemingway</h1>
+```
 
 ### Looking up values in parent contexts
 
-Sections and block helpers can create their own contexts. If a key's value
-is not found in the current context, it will look up the key's value
+Sections and block helpers can create their own contexts. If a key’s value
+is not found in the current context, it will look up the key’s value
 in parent contexts. For example:
 
 Rendering:
 
-    {{#chapters}}
-       <li>{{title}} - {{name}}</li>
-    {{chapters}}
+```html
+{{#chapters}}
+   <li>{{title}} - {{name}}</li>
+{{chapters}}
+```
 
 With:
 
-    {
-      title: "The Book of Bitovi"
-      chapters: [{name: "Breakdown"}]
-    }
+```js
+{
+  title: "The Book of Bitovi"
+  chapters: [{name: "Breakdown"}]
+}
+```
 
 Results in:
 
-    <li>The Book of Bitovi - Breakdown</li>
+```html
+<li>The Book of Bitovi - Breakdown</li>
+```
 
 ## Helper expressions
 
@@ -112,100 +130,128 @@ that may contain more complex functionality. `helper` is a [can-stache.key key] 
 
 The following example shows both cases.
 
-The Template:
+The template:
 
-    <p>{{greeting}} {{user}}</p>
+```html
+<p>{{greeting}} {{user}}</p>
+```
 
 Rendered with data:
 
-    {
-      user: function(){ return "Justin" }
-    }
+```js
+{
+  user: function(){ return "Justin" }
+}
+```
 
-And a with a registered helper like:
+And with a registered helper like:
 
-    stache.registerHelper('greeting', function(){
-      return "Hello"
-    });
+```js
+stache.registerHelper('greeting', function() {
+  return "Hello";
+});
+```
 
 Results in:
 
-    <p>Hello Justin</p>
+```html
+<p>Hello Justin</p>
+```
 
 ### Arguments
 
 Arguments can be passed from the template to helper function by
-listing space seperated strings, numbers or other [can-stache.key keys] after the
+listing space separated strings, numbers or other [can-stache.key keys] after the
 `helper` name.  For example:
 
 The template:
 
-    <p>{{madLib "Lebron James" verb 4}}</p>
+```html
+<p>{{madLib "Lebron James" verb 4}}</p>
+```
 
 Rendered with:
 
-    {verb: "swept"}
+```js
+{verb: "swept"}
+```
 
-Will call a `madLib` helper with the following arguements:
+Will call a `madLib` helper with the following arguments:
 
-    stache.registerHelper('madLib',
-      function(subject, verb, number, options){
-        // subject -> "Lebron James"
-        // verb -> "swept"
-        // number -> 4
-    });
+```js
+stache.registerHelper('madLib',
+  function(subject, verb, number, options){
+    // subject -> "Lebron James"
+    // verb -> "swept"
+    // number -> 4
+});
+```
 
-If an argument `key` value is a [can-map] property, the Observe's
+If an argument `key` value is a [can-map] property, the Observe’s
 property is converted to a getter/setter [can-compute.computed]. For example:
 
 The template:
 
-    <p>What! My name is: {{mr user.name}}</p>
+```html
+<p>What! My name is: {{mr user.name}}</p>
+```
 
 Rendered with:
 
-    {user: new Map({name: "Slim Shady"})}
+```js
+{user: new Map({name: "Slim Shady"})}
+```
 
 Needs the helper to check if name is a function or not:
 
-    stache.registerHelper('mr',function(name){
-      return "Mr. "+ (typeof name === "function" ?
-                      name():
-                      name)
-    })
+```js
+stache.registerHelper('mr',function(name){
+  return "Mr. "+ (typeof name === "function" ?
+                  name():
+                  name)
+});
+```
 
 This behavior enables two way binding helpers and is explained in more detail
 on the [can-stache.helper helper functions] docs.
 
 ### Hash
 
-If enumerated arguments isn't an appropriate way to configure the behavior
-of a helper, it's possible to pass a hash of key-value pairs to the
-[can-stache.helperOptions helper option argument]'s
+If enumerated arguments isn’t an appropriate way to configure the behavior
+of a helper, it’s possible to pass a hash of key-value pairs to the
+[can-stache.helperOptions helper option argument]’s
 hash object.  Properties and values are specified
 as `hashProperty=hashValue`.  For example:
 
 The template:
 
-    <p>My {{excuse who=pet how="shreded"}}</p>
-`
+```html
+<p>My {{excuse who=pet how="shredded"}}</p>
+```
+
 And the helper:
 
-    stache.registerHelper("excuse",function(options){
-      return ["My",
-        options.hash.who || "dog".
-        options.hash.how || "ate",
-        "my",
-        options.hash.what || "homework"].join(" ")
-    })
+```js
+stache.registerHelper("excuse",function(options) {
+  return ["My",
+    options.hash.who || "dog".
+    options.hash.how || "ate",
+    "my",
+    options.hash.what || "homework"].join(" ");
+});
+```
 
-Render with:
+Rendered with:
 
-    {pet: "cat"}
+```js
+{pet: "cat"}
+```
 
 Results in:
 
-    <p>My cat shareded my homework</p>
+```html
+<p>My cat shredded my homework</p>
+```
 
 ### Returning an element callback function
 

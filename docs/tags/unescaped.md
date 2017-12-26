@@ -10,7 +10,7 @@ output of the template.
 Behaves just like [can-stache.tags.escaped] but does not
 escape the result.
 
-```js
+```html
 <div> {{{ toMarkdown(content) }}} </div>
 ```
 

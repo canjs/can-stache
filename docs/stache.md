@@ -79,7 +79,7 @@ map.subject = "Earth";
 document.body.innerHTML //-> <h1>Hello Earth</h1>
 ```
 
-There's a whole lot of behavior that `stache` provides.  The following walks through
+There’s a whole lot of behavior that `stache` provides.  The following walks through
 the most important stuff:
 
 - [can-stache.magicTagTypes] - The different tag types like `{{key}}` and `{{#key}}...{{/key}}`
@@ -92,11 +92,11 @@ the most important stuff:
 ## See also
 
 [can-view-scope] is used by `stache` internally to hold and lookup values.  This is similar to
-how JavaScript's closures hold variables, except you can use it programmatically.
+how JavaScript’s closures hold variables, except you can use it programmatically.
 
 [can-component] and [can-view-callbacks.tag can-view-callbacks.tag] allow you to define custom
 elements for use within a stache template.  [can-view-callbacks.attr can-view-callbacks.attr] allow
 you to define custom attributes.
 
-[can-stache-bindings] sets up __element and bindings__ between a stache template's [can-view-scope],
-component [can-component.prototype.ViewModel viewModels], or an element's attributes.
+[can-stache-bindings] sets up __element and bindings__ between a stache template’s [can-view-scope],
+component [can-component.prototype.ViewModel viewModels], or an element’s attributes.

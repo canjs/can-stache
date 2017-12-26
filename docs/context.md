@@ -28,21 +28,25 @@ JavaScript looks for `last` in the `inner` context and then walks up the
 scope to the `outer` context to find a `last` variable.
 
 
-Lets look at what happens with the scope the following example:
+Let’s look at what happens with the scope the following example:
 
+```html
+<!-- Template -->
+<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
 ```
-Template:
-	<h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
 
-Data:
-	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
-    }
+```js
+/* Data */
+{
+	person: { first: "Alexis" },
+	last: "Abril",
+	message: "Hello"
+}
+```
 
-Result:
-	<h1>Hello Alexis Abril</h1>
+```html
+<!-- Result -->
+<h1>Hello Alexis Abril</h1>
 ```
 
 1. The template is rendered with `Data` as the only item in the scope. `scope:[Data]`
@@ -50,7 +54,7 @@ Result:
 3. `{{#person}}` adds the `person` context to the top of the scope. `scope:[Data,Data.person]`
 4. `{{first}}` is looked up in the scope.  It will be found on `Data.person`.
 5. `{{last}}` is looked up in the scope.  
-   1. `last` is looked in `Data.person`, it's not found.
+   1. `last` is looked in `Data.person`, it’s not found.
    2. `last` is looked up in `Data` and returned.
 6. `{{/person}}` removes `person` from the scope. `scope:[Data]`
 
@@ -60,19 +64,23 @@ The context used to lookup a value can be controlled with adding `../` or `./` b
 key. For instance, if we wanted to make sure `last` was only going to lookup on `person`,
 we could change the template to:
 
+```html
+<!-- Template -->
+<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
 ```
-Template:
-	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
 
-Data:
-	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
-	}
+```js
+/* Data */
+{
+	person: { first: "Alexis" },
+	last: "Abril",
+	message: "Hello"
+}
+```
 
-Result:
-	<h1>Hello Alexis</h1>
+```html
+<!-- Result -->
+<h1>Hello Alexis</h1>
 ```
 
 [can-stache.tags.section Sections], [can-stache.Helpers Helpers],
@@ -87,50 +95,58 @@ In order to prevent walking up the scope, you can explicitly choose the context 
 
 As mentioned above, you can explicitly read from the current context using `./` before the key:
 
+```html
+<!-- Template -->
+<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
 ```
-Template:
-	<h1>{{message}} {{#person}}{{first}} {{./last}}{{/person}}</h1>
 
-Data:
-	{
-	  person: { first: "Alexis" },
-	  last: "Abril",
-	  message: "Hello"
-    }
+```js
+/* Data */
+{
+	person: { first: "Alexis" },
+	last: "Abril",
+	message: "Hello"
+}
+```
 
-Result:
-	<h1>Hello Alexis</h1>
+```html
+<!-- Result -->
+<h1>Hello Alexis</h1>
 ```
 
 You can also explicitly read from the parent context using `../`:
 
-```
-Template:
-	<h1>{{#person}}{{../message}} {{first}}{{/person}}</h1>
-
-Data:
-	{
-	  person: { first: "Alexis", message: "Hello" },
-	  message: "Hi"
-	}
-
-Result:
-	<h1>Hi Alexis</h1>
+```html
+<!-- Template -->
+<h1>{{#person}}{{../message}} {{first}}{{/person}}</h1>
 ```
 
-You can also create unique scope variables using [Hash Expressions](https://canjs.com/doc/can-stache/expressions/hash.html).
-
-in the [`{{#each}}`](http://localhost/canjs/doc/can-stache.helpers.each.html#___eachEXPRESSIONHASH_EXPRESSION__FN__else__INVERSE___each__) helper:
-
+```js
+/* Data */
+{
+	person: { first: "Alexis", message: "Hello" },
+	message: "Hi"
+}
 ```
+
+```html
+<!-- Result -->
+<h1>Hi Alexis</h1>
+```
+
+You can also create unique scope variables using [can-stache/expressions/hash Hash Expressions].
+
+In the [can-stache.helpers.each#___each_EXPRESSION_HASH_EXPRESSION___FN__else__INVERSE___each__ {{#each}}] helper:
+
+```html
 {{#each(todos, todo=value num=index)}}
 	<li data-index="{{num}}">{{todo.name}}</li>
 {{/each}}
 ```
 
-and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___withHASHES__BLOCK___with__) helper:
+…and the [can-stache.helpers.with#___with_HASHES___BLOCK___with__ {{#with}}] helper:
 
-```
+```html
 {{#with(street=person.address.street city=person.address.city)}}
     Street: {{street}}
 	City: {{city}}
@@ -139,7 +155,7 @@ and the [`{{#with}}`](https://canjs.com/doc/can-stache.helpers.with.html#___with
 
 You can also always read from the root scope using `scope.root`. This allows you to read data from the context you passed to your renderer function even in loops or recursive templates:
 
-```
+```html
 <span>{{scope.root.message}}{{name}}</span>
 {{#./child}}
 	<div>
