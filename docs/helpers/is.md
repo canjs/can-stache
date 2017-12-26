@@ -7,7 +7,7 @@ Render something if two values are equal.
 
 Renders the `FN` if every `EXPRESSION` argument is equal (`===`).
 
-```
+```html
 {{#is(user.type, "admin")}} <button/> {{else}} Login {{/is}}
 {{#is(task.ownerId, task.assignedId, user.id)}} Delegate! {{/is}}
 ```
@@ -26,8 +26,10 @@ if one of the `EXPRESSION` arguments is not equal to one of the others.
 
 The `is` helper compares expr1 and expr2 and renders the blocks accordingly.
 
-	{{#is(expr1, expr2)}}
-		// truthy
-	{{else}}
-		// falsey
-	{{/is}}
+```html
+{{#is(expr1, expr2)}}
+	// truthy
+{{else}}
+	// falsey
+{{/is}}
+```

@@ -19,44 +19,52 @@ Insertion tags render a value into result.
 
 Inserts the escaped value of `expression` into the result. This is the most common tag.
 
+```html
+<!-- Template -->
+<div>{{name}}</div>
 ```
-Template:
-	<div>{{name}}</div>
 
-Data:
-	{ name: "<b>Justin</b>" }
+```js
+/* Data */
+{ name: "<b>Justin</b>" }
+```
 
-Result:
-	<div>&lt;b&gt;Justin&lt;/b&gt;</div>
+```html
+<!-- Result -->
+<div>&lt;b&gt;Justin&lt;/b&gt;</div>
 ```
 
 #### [can-stache.tags.unescaped]
 
 Inserts the unescaped value of `expression` into the result.
 
+```html
+<!-- Template -->
+<div>{{{name}}}</div>
 ```
-Template:
-	<div>{{{name}}}</div>
 
-Data:
-	{ name: "<b>Justin</b>" }
+```js
+/* Data */
+{ name: "<b>Justin</b>" }
+```
 
-Result:
-	<div><b>Justin</b></div>
+```html
+<!-- Result -->
+<div><b>Justin</b></div>
 ```
 
 #### [can-stache.tags.partial]
 
 Renders another template with the same context as the current context.
 
-```
+```js
 var template = stache("<h1>{{>title}}</h1>");
 
 
 var frag = template(
 	{message: "Hello"},
 	{
-		partials: { title: 	stache("<blink>{{message}}</blink>”) }
+		partials: { title: 	stache("<blink>{{message}}</blink>") }
 	});
 
 	frag //-> <h1><blink>Hello</blink></h1>
@@ -68,15 +76,19 @@ Other ways to load and reference partials are discussed [can-stache.tags.partial
 
 Ignores the magic tag.
 
+```html
+<!-- Template -->
+<h1>{{!message}}</h1>
 ```
-Template:
-	<h1>{{!message}}</h1>
 
-Data:
-	{ message: "<blink>Hello</blink>" };
+```js
+/* Data */
+{ message: "<blink>Hello</blink>" };
+```
 
-Result:
-	<h1></h1>
+```html
+<!-- Result -->
+<h1></h1>
 ```
 
 ### Section Tags
@@ -90,70 +102,89 @@ Renders the subsection or inverse subsection depending on the value of expressio
 
 If `expression` is truthy, renders the subsection:
 
+```html
+<!-- Template -->
+<h1>{{#shown}}Hello{{/shown}}</h1>
 ```
-Template:
-	<h1>{{#shown}}Hello{{/shown}}</h1>
 
-Data:
-	{ shown: true };
+```js
+/* Data */
+{ shown: true };
+```
 
-Result:
-	<h1>Hello</h1>
+```html
+<!-- Result -->
+<h1>Hello</h1>
 ```
 
 The subsection is rendered with the `expression` value as the top of the scope:
 
-```
-Template:
-	<h1>{{#person}}Hello {{first}}  {{person.last}}{{/person}}</h1>
-
-Data:
-	{ person: {first: "Alexis", last: "Abril"} };
-
-Result:
-	<h1>Hello Alexis Abril</h1>
+```html
+<!-- Template -->
+<h1>{{#person}}Hello {{first}}  {{person.last}}{{/person}}</h1>
 ```
 
+```js
+/* Data */
+{ person: {first: "Alexis", last: "Abril"} };
+```
+
+```html
+<!-- Result -->
+<h1>Hello Alexis Abril</h1>
+```
 
 If `expression` is falsey, renders the inverse subsection if present:
 
+```html
+<!-- Template -->
+<h1>{{#shown}}Hello{{else}}Goodbye{{/shown}}</h1>
 ```
-Template:
-	<h1>{{#shown}}Hello{{else}}Goodbye{{/shown}}</h1>
 
-Data:
-	{ shown: false };
+```js
+/* Data */
+{ shown: false };
+```
 
-Result:
-	<h1>Goodbye</h1>
+```html
+<!-- Result -->
+<h1>Goodbye</h1>
 ```
 
 If `expression` is array-like and its `length` is greater than 0, the subsection
 is rendered with each item in the array as the top of the scope:
 
+```html
+<!-- Template -->
+<p>{{#items}}{{.}} {{/items}}</p>
 ```
-Template:
-	<p>{{#items}}{{.}} {{/items}}</p>
 
-Data:
-	{items: [2,4,8,16]}
+```js
+/* Data */
+{items: [2,4,8,16]}
+```
 
-Result:
-	<p>2 4 8 16 </p>
+```html
+<!-- Result -->
+<p>2 4 8 16 </p>
 ```
 
 If `expression` is array-like and its `length` is 0, the inverse subsection
 is rendered:
 
+```html
+<!-- Template -->
+<p>{{#items}}{{.}} {{else}}No items{{/items}}</p>
 ```
-Template:
-	<p>{{#items}}{{.}} {{else}}No items{{/items}}</p>
 
-Data:
-	{items: []}
+```js
+/* Data */
+{items: []}
+```
 
-Result:
-	<p>No items</p>
+```html
+<!-- Result -->
+<p>No items</p>
 ```
 
 #### [can-stache.tags.inverse {{^expression}} ... {{/expression}}]
@@ -164,13 +195,17 @@ the subsection when [can-stache.tags.section] would render the inverse subsectio
 and it renders the inverse subsection when [can-stache.tags.section] would
 render the subsection.
 
+```html
+<!-- Template -->
+<h1>{{^shown}}Hello{{/shown}}</h1>
 ```
-Template:
-	<h1>{{^shown}}Hello{{/shown}}</h1>
 
-Data:
-	{ shown: false };
+```js
+/* Data */
+{ shown: false };
+```
 
-Result:
-	<h1>Hello</h1>
+```html
+<!-- Result -->
+<h1>Hello</h1>
 ```

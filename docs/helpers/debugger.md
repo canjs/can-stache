@@ -6,7 +6,7 @@ In development, breaks at the given point in the template to inspect the current
 @signature `{{debugger()}}`
 The zero argument debugger breaks any time the helper evaluates.
 
-```
+```html
 <!-- break each render -->
 {{debugger()}}
 ```
@@ -14,7 +14,7 @@ The zero argument debugger breaks any time the helper evaluates.
 @signature `{{debugger(CONDITION)}}`
 The one argument debugger breaks any time the helper evaluates and the argument evaluates to a truthy value.
 
-```
+```html
 <!-- break each render when value is truthy -->
 {{debugger(value)}}
 ```
@@ -24,7 +24,7 @@ The one argument debugger breaks any time the helper evaluates and the argument 
 @signature `{{debugger(LEFT, RIGHT)}}`
 The two argument debugger breaks any time the helper evaluates and the two evaluated arguments are equal to each other.
 
-```
+```html
 <!-- break each render when leftValue === rightValue -->
 {{debugger(leftValue, rightValue)}}
 ```

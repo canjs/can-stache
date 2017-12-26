@@ -2,7 +2,7 @@
 @parent can-stache/keys
 
 Return whatever value is at a key, regardless
-if it's a function or a compute.
+if it’s a function or a compute.
 
 The default behavior in Stache lookups is to execute functions to get their return values.  `@` before a token in a path `@A.B` prevents A from being called for its return value (so 'B' is evaluated from the properties of A itself). Likewise, `@` elsewhere in a path like `A@B` prevents B from being called for its return value and returns whatever B itself is on the return from A.
 
@@ -10,7 +10,7 @@ The default behavior in Stache lookups is to execute functions to get their retu
 
 Lookup a `key` value in the scope and return whatever is there.
 
-```
+```html
 <paginator {next}="@key"/>
 <paginator {next}="@loadNextItem"/>
 ```
@@ -19,7 +19,7 @@ Lookup a `key` value in the scope and return whatever is there.
 
 Lookup `prop` property on `key` and return whatever is there.
 
-```
+```html
 <grid {get-data}="key@prop"/>
 <grid {get-data}="Todo@getList"/>
 ```
@@ -32,7 +32,7 @@ The following illustrates what `some@key` would return given
 different data structures:
 
 
-```
+```js
 // A non-observable JS object:
 {some: {key: "value"}}
    //-> "value"
@@ -61,16 +61,16 @@ have `this` set to what is expected.
 
 If the AT key is used at the start of a key like:
 
-```
+```html
 {{method(@key)}}
 ```
 
 This will return whatever is at the `key` property on the first context in the scope
 to have a non-undefined `key` value.
 
-The following illustrates what `@some.key` would return because `some` will not be executed if it's a function:
+The following illustrates what `@some.key` would return because `some` will not be executed if it’s a function:
 
-```
+```js
 // A non-observable JS object with intermediate functions:
 {some: function(){ return {key: "value"}}}
    //-> undefined
@@ -82,6 +82,6 @@ The following illustrates what `@some.key` would return because `some` will not 
 
 The AT key can be used multiple times within a value lookup expression like:
 
-```
+```html
 {{method(models@Todo@getList)}}
 ```

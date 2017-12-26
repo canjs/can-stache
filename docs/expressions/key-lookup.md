@@ -7,7 +7,7 @@ A [can-stache.key KeyLookup expression] specifies a value in the [can-view-scope
 [can-view-scope.Options HelperOptions scope] that will be looked up.  KeyLookup expressions
 can be the entire stache expression like:
 
-```
+```html
 {{key}}
 ```
 
@@ -15,7 +15,7 @@ Or they can makeup the method, helper, arguments and hash value parts of
 [can-stache/expressions/call],
 [can-stache/expressions/helper], and [can-stache/expressions/hash]s:
 
-```
+```html
 {{method(arg1,arg2}}          Call
 {{helper arg1 arg2}}          Helper
 {{method( prop=hashValue )}}  Hash
@@ -25,7 +25,7 @@ Or they can makeup the method, helper, arguments and hash value parts of
 
 Looks up `key` on the return value of `CALL_EXPRESSION`.
 
-```
+```html
 {{#each(Todo.getList(complete=completed).value)}}
 ```
 
@@ -83,12 +83,12 @@ In general:
  - Keys in helper expression arguments that find observable data return
    a [can-compute.computed] that represents the value.
  - Keys in other expressions return the value.
- - If no observable data is found, the key's value is returned in all expressions.
+ - If no observable data is found, the key’s value is returned in all expressions.
 
 The following illustrates what `some.key` would return given
 different data structures as a [can-stache/expressions/helper] and in all other expressions.
 
-```
+```js
 // A non-observable JS object:
 {some: {key: "value"}};
    // Helper -> "value"

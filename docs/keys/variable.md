@@ -9,7 +9,7 @@
 
 A placeholder for a value that is local to the template.
 
-```
+```html
 <drivers-licenses {^selected}="*selectedDriver"/>
 <edit-driver {driver}="*selectedDriver"/>
 ```
@@ -26,7 +26,7 @@ components. `<component-a>` exports its `propA` value to the
 template variable `*variable`.  This is, in turn, used to update
 the value of `propB` in `<component-b>`.
 
-```
+```html
 <component-a {^prop-a}="*variable"/>
 <component-b {prop-b}="*variable"/>
 ```
@@ -35,7 +35,7 @@ Template variables are global to the template. Similar to JavaScript `var`
 variables, template variables do not have block level scope.  The following
 does not work:
 
-```
+```html
 {{#each(something)}}
 	<component-a {^prop-a}="*variable"/>
 	<component-b {prop-b}="*variable"/>
@@ -44,15 +44,15 @@ does not work:
 
 To work around this, an `localContext` helper could be created as follows:
 
-```
-stache.regsiterHelper("localContext", function(options){
+```js
+stache.registerHelper("localContext", function(options) {
   return options.fn(new Map());
 });
 ```
 
 And used like:
 
-```
+```html
 {{#each(something)}}
 	{{#localContext}}
 	  <component-a {^prop-a}="./variable"/>

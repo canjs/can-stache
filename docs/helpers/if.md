@@ -6,7 +6,7 @@ Renders `FN` if `EXPRESSION` is truthy or `INVERSE` if `EXPRESSION`
 is falsey. Both `FN` and `INVERSE` will be rendered with the
 current scope.
 
-```
+```html
 {{#if(person.isAwake())}} Hello {{/if}}
 ```
 
@@ -21,41 +21,53 @@ if `EXPRESSION` is falsey and [can-stache.helpers.else] is used.
 
 ## Use
 
-`{{#if(key)}}` provides explicit conditional truthy tests. For example,
+`{{#if(key)}}` provides explicit conditional truthy tests.
 
-The template:
+For example, this template:
 
-    {{#if(user.isFemale)}}
-      {{#if(user.isMarried)}}
-        Mrs
-      {{/if}}
-      {{#if(user.isSingle)}}
-        Miss
-      {{/if}}
-    {{/if}}
+```html
+{{#if(user.isFemale)}}
+  {{#if(user.isMarried)}}
+    Mrs
+  {{/if}}
+  {{#if(user.isSingle)}}
+    Miss
+  {{/if}}
+{{/if}}
+```
 
 Rendered with:
 
-    {user: {isFemale: true, isMarried: true}}
+```js
+{user: {isFemale: true, isMarried: true}}
+```
 
 Results in:
 
-    Mrs
+```html
+Mrs
+```
 
 If can be used with [can-stache.helpers.else {{else}}] too. For example,
 
-    {{#if(user.isFemale)}}
-      {{#if(user.isMarried)}}
-        Mrs
-      {{else}}
-        Miss
-      {{/if}}
-    {{/if}}
+```html
+{{#if(user.isFemale)}}
+  {{#if(user.isMarried)}}
+    Mrs
+  {{else}}
+    Miss
+  {{/if}}
+{{/if}}
+```
 
 Rendered with:
 
-    {user: {isFemale: true, isMarried: false}}
+```js
+{user: {isFemale: true, isMarried: false}}
+```
 
 Results in:
 
-    Miss
+```html
+Miss
+```

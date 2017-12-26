@@ -5,7 +5,7 @@
 
 `console.log`s the current context or the result of the provided expressions.
 
-```
+```html
 {{log()}}
 {{log(person.name, person.age)}}
 ```

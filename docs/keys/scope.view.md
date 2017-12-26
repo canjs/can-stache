@@ -6,7 +6,7 @@
 
 The entirety of the current template is always stored as a [can-stache.tags.named-partial named partial] `scope.view`
 
-```
+```html
 <div>
 	{{>scope.view}}
 </div>
@@ -21,7 +21,7 @@ Note that we use a key expression to set local scope. Also note it is
 a dot slash on the child key expression.
 The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
-```
+```js
 var grandpaWorm = new DefineMap({
 	name: "Earthworm Jim",
 	child: {
@@ -45,7 +45,8 @@ var view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
-```
+
+```html
 <span>Earthworm Jim</span>
 <div>
 	<span>Grey Worm</span>
@@ -57,7 +58,7 @@ The view variable will be the document fragment:
 
 A template variable can be passed in
 
-```
+```js
 var grandpaWorm = new DefineMap({
 	child: {
 		name: "Earthworm Jim",
@@ -81,11 +82,12 @@ var renderer = stache(`
 	{{/child}}
 `);
 
-var view = renderer(granpaWorm);
+var view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
-```
+
+```js
 <p>Earthworm Jim</p>
 <p>false</p>
 <div>

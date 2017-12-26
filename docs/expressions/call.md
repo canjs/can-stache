@@ -24,39 +24,47 @@ to `method`.
 A call expression calls a function looked up in the [can-view-scope scope] followed by
 the [can-view-scope.Options helpers scope]. It looks like:
 
-```
-Template:
-	<h1>{{pluralize(type,ages.length)}}</h1>
-
-Data:
-	{
-	  pluralize: function(type, count){
-	    return type+(count === 1 ? "" : "s")
-	  },
-	  todos: new List([22,32,42]),
-	  type: "age"
-	}
-
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Template -->
+<h1>{{pluralize(type,ages.length)}}</h1>
 ```
 
-Call expression arguments are comma (,) separated.  If a Hash expression is an argument,
+```js
+/* Data */
+{
+	pluralize: function(type, count){
+		return type+(count === 1 ? "" : "s")
+	},
+	todos: new List([22,32,42]),
+	type: "age"
+}
+```
+
+```html
+<!-- Result -->
+<h1>Ages</h1>
+```
+
+Call expression arguments are comma (,) separated.  If a [can-stache/expressions/hash] is an argument,
 an object with the hash properties and values will be passed. For example:
 
+```html
+<!-- Template -->
+<h1>{{pluralize(word=type count=ages.length)}}</h1>
 ```
-Template:
-	<h1>{{pluralize(word=type count=ages.length)}}</h1>
 
-Data:
-	{
-	  pluralize: function(options){
-	    return options.word+(options.count === 1 ? "" : "s")
-	  },
-	  todos: new List([22,32,42]),
-	  type: "age"
-	}
+```js
+/* Data */
+{
+	pluralize: function(options){
+		return options.word+(options.count === 1 ? "" : "s")
+	},
+	todos: new List([22,32,42]),
+	type: "age"
+}
+```
 
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```

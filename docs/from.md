@@ -9,15 +9,15 @@ specified by id.  This is used typically for demo purposes.
 
 For example, with a `<script>` tag as follows in your HTML:
 
-```
+```html
 <script type='text/stache' id='my-template'>
-<h1>{{message}}</h1>
+  <h1>{{message}}</h1>
 </script>
 ```
 
 Load and render that template like:
 
-```
+```js
 var template = stache.from("my-template");
 template({message: "Hello There!"});
 ```

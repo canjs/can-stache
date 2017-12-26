@@ -10,7 +10,7 @@ When a [can-stache.helper helper function]
 is called by a [can-stache/expressions/helper], a `helperOptions`
 object is passed with the following properties:
 
-```
+```js
 stache.registerHelper("myHelper", function(helperOptions){
   helperOptions.fn      //-> sectionRenderer(){}
   helperOptions.inverse //-> sectionRenderer(){}
@@ -35,13 +35,13 @@ stache.registerHelper("myHelper", function(helperOptions){
   @option {Object} hash An object containing all of the
   [can-stache.expressions Hash expression] keys and values. For example:
 
-  ```
+  ```html
   {{helper arg1 arg2 name=value other=3 position="top"}}
   ```
 
   might provide a `hash` like:
 
-  ```
+  ```js
   {
 		name: compute("Mr. Pig"),
 		other: 3,

@@ -7,7 +7,7 @@ Renders `FN` if `EXPRESSION` is falsey or `INVERSE` if `EXPRESSION`
 is truthy. Both `FN` and `INVERSE` will be rendered with the
 current scope.
 
-```
+```html
 {{#unless(person.isAwake())}} Shhhhh! {{/unless}}
 ```
 
@@ -25,6 +25,8 @@ if `EXPRESSION` is truthy and [can-stache.helpers.else] is used.
 The `unless` helper evaluates the inverse of the value
 of the key and renders the block between the helper and the slash.
 
-    {{#unless(expr)}}
-      // unless
-    {{/unless}}
+```html
+{{#unless(expr)}}
+  // unless
+{{/unless}}
+```

@@ -8,15 +8,17 @@ a module loader, or script tags in the markup.
 
 Raw text can be templated by passing the text containing your template.  For example:
 
-	var text = "My body lies over the {{.}}",
-		template = stache(text),
-		fragment = template("ocean");
+```js
+var text = "My body lies over the {{.}}";
+var template = stache(text);
+var fragment = template("ocean");
 
-	document.body.appendChild(fragment);
+document.body.appendChild(fragment);
+```
 
 ## Module Loaders
 
-For [http://stealjs.com StealJS], use [steal-stache] to import stache templates directly.
+For [StealJS](https://stealjs.com/), use [steal-stache] to import stache templates directly.
 
 
 ## Script Tags

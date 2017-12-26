@@ -8,7 +8,7 @@ Lookup a value in only the current context.
 Only looks up `key` in the current context.  Returns `undefined` if
 not found.
 
-```
+```html
 {{#each(todo)}}
   <input {($checked)}="./complete"/> {{./name}}
 {{/each}}
@@ -24,26 +24,32 @@ only look up in the current context.
 
 The following template:
 
-    {{first}} {{last}}
-      {{#children}}
-        {{first}} {{./last}}
-      {{/children}}
+```html
+{{first}} {{last}}
+  {{#children}}
+    {{first}} {{./last}}
+  {{/children}}
+```
 
 Rendered with:
 
-    {
-      first: "Barry", last: "Meyer",
-      children: [
-        {first: "Kim", last: "Sully"},
-        {first: "Justin"},
-      ]
-    }
+```js
+{
+  first: "Barry", last: "Meyer",
+  children: [
+    {first: "Kim", last: "Sully"},
+    {first: "Justin"},
+  ]
+}
+```
 
 Writes out:
 
-    Barry Meyer
-        Kim Sully
-        Justin
+```html
+Barry Meyer
+    Kim Sully
+    Justin
+```
 
-Notice that `{{./last}}` returns nothing because there's no `last` property
+Notice that `{{./last}}` returns nothing because there’s no `last` property
 in the `{first: "Justin"}` object.

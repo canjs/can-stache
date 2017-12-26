@@ -5,7 +5,7 @@
 
 Renders `BLOCK` if no [can-stache.helpers.case] blocks within the [can-stache.helpers.switch] resolved.
 
-```
+```html
 {{#switch(user.type)}}
 	{{#case("admin")}}
 		<button value="edit"/>

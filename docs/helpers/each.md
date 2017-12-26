@@ -5,10 +5,10 @@
 
 @signature `{{#each(EXPRESSION)}}FN{{else}}INVERSE{{/each}}`
 
-Render `FN` for each item in `EXPRESSION`'s return value.  If `EXPRESSION`
+Render `FN` for each item in `EXPRESSION`’s return value.  If `EXPRESSION`
 is falsey or an empty list, render `INVERSE`.
 
-```
+```html
 {{#each(todos)}}
   <li>{{name}}</li>
 {{else}}
@@ -38,7 +38,7 @@ if `EXPRESSION` is falsey or an empty list or object.
 Like a normal `{{#each(EXPRESSION)}}`, but uses [can-stache/expressions/hash] to
 add the current `value`, `key`, or `index` to the current scope.
 
-```
+```html
 {{#each(todos, todo=value num=index)}}
     <li data-index="{{num}}">{{todo.name}}</li>
 {{/each}}
@@ -61,9 +61,9 @@ if `EXPRESSION` is falsey or an empty list or object.
 @signature `{{#each(EXPRESSION)}}FN{{else}}INVERSE{{/each}}`
 
 Like a normal `{{#each(EXPRESSION)}}`, but adds each item in `EXPRESSION` as
-`KEY` in `FN`'s [can-view-scope].
+`KEY` in `FN`’s [can-view-scope].
 
-```
+```html
 {{#each(todos, todo=value)}}
     <li>{{todo.name}}</li>
 {{/each}}
@@ -73,8 +73,8 @@ Like a normal `{{#each(EXPRESSION)}}`, but adds each item in `EXPRESSION` as
 expression that returns a list or object like data structure.
 
 @param {can-stache.key} key The name that:
- - each item in `EXPRESSION`'s list, or
- - each property value in `EXPRESSION`'s object
+ - each item in `EXPRESSION`’s list, or
+ - each property value in `EXPRESSION`’s object
 should take on in `FN`.
 
 @param {can-stache.sectionRenderer} FN A subsection that will be rendered with each
@@ -89,50 +89,62 @@ if `EXPRESSION` is falsey or an empty list or object.
 ## Use
 
 Use the `each` helper to iterate over a array
-of items and render the block between the helper and the slash. For example,
+of items and render the block between the helper and the slash.
 
-The template:
+For example, this template:
 
-    <ul>
-      {{#each(friends)}}
-        <li>{{name}}</li>
-      {{/each}}
-    </ul>
+```html
+<ul>
+  {{#each(friends)}}
+    <li>{{name}}</li>
+  {{/each}}
+</ul>
+```
 
 Rendered with:
 
-    {friends: [{name: "Austin"},{name: "Justin"}]}
+```js
+{friends: [{name: "Austin"},{name: "Justin"}]}
+```
 
 Renders:
 
-    <ul>
-      <li>Austin</li>
-      <li>Justin</li>
-    </ul>
+```html
+<ul>
+  <li>Austin</li>
+  <li>Justin</li>
+</ul>
+```
 
 ## Object iteration
 
 When iterating over [can-map] it will only iterate over the
-map's [can-map.keys] and none of the hidden properties of a Map. For example,
+map’s [can-map.keys] and none of the hidden properties of a Map.
 
-The template:
+For example, this template:
 
-    <ul>
-      {{#each(person)}}
-        <li>{{.}}</li>
-      {{/each}}
-    </ul>
+```html
+<ul>
+  {{#each(person)}}
+    <li>{{.}}</li>
+  {{/each}}
+</ul>
+```
 
 Rendered with:
 
-    {person: {name: 'Josh', age: 27}}
+```js
+{person: {name: 'Josh', age: 27}}
+```
 
 Renders:
 
-    <ul>
-      <li>Josh</li>
-      <li>27</li>
-    </ul>
+```html
+<ul>
+  <li>Josh</li>
+  <li>27</li>
+</ul>
+```
 
 ## Understanding when to use #each with lists
 
@@ -149,4 +161,4 @@ For example, assuming "list" is a [can-define/list/list] instance:
 
 1) You have a large list, with minimal updates planned after initial render. In this case, `{{#list}}` might be more advantageous as there will be a faster initial render. However, if any part of the list changes, the entire `{{#list}}` area will be re-processed.
 
-2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use `{{#each(list)}}`, even though it will be slower on initial render(we're setting up more bindings), you'll have faster updates as there are now many sections.
+2) You have a large list, with many updates planned after initial render. A grid with many columns of editable fields, for instance. In this case, you many want to use `{{#each(list)}}`, even though it will be slower on initial render (we’re setting up more bindings), you’ll have faster updates as there are now many sections.

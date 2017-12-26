@@ -6,7 +6,7 @@
 
 A placeholder for a value that is local to the template.
 
-```
+```html
 <drivers-licenses selected:to="scope.vars.selectedDriver"/>
 <edit-driver driver:from="scope.vars.selectedDriver"/>
 ```
@@ -20,7 +20,7 @@ components. `<component-a>` exports its `propA` value to the
 template variable `scope.vars.variable`.  This is, in turn, used to update
 the value of `propB` in `<component-b>`.
 
-```
+```html
 <component-a propA:to="scope.vars.variable"/>
 <component-b propB:from="scope.vars.variable"/>
 ```
@@ -29,7 +29,7 @@ Template variables are global to the template. Similar to JavaScript `var`
 variables, template variables do not have block level scope.  The following
 does not work:
 
-```
+```html
 {{#each something}}
 	<component-a propA:to="scope.vars.variable"/>
 	<component-b propB:from="scope.vars.variable"/>
@@ -38,15 +38,15 @@ does not work:
 
 To work around this, an `localContext` helper could be created as follows:
 
-```
-stache.regsiterHelper("localContext", function(options){
+```js
+stache.regsiterHelper("localContext", function(options) {
   return options.fn(new Map());
 });
 ```
 
 And used like:
 
-```
+```html
 {{#each something}}
 	{{#localContext}}
 	  <component-a propA:to="./variable"/>

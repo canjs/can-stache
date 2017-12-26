@@ -7,7 +7,7 @@ Specify a JavaScript primitive type.
 
 Specifies a string.
 
-```
+```html
 {{myHelper( "this is a string" )}}
 ```
 
@@ -15,7 +15,7 @@ Specifies a string.
 
 Specifies a number.
 
-```
+```html
 {{myHelper( 5.2 )}}
 ```
 
@@ -23,7 +23,7 @@ Specifies a number.
 
 Specifies a JavaScript `null`, `undefined`, `true`, or `false` value.
 
-```
+```html
 {{myHelper( false )}}
 ```
 
@@ -33,7 +33,7 @@ Specifies a JavaScript `null`, `undefined`, `true`, or `false` value.
 
 Literal expressions are usually passed as arguments to [can-stache/expressions/call] or [can-stache/expressions/helper]s like:
 
-```js
+```html
 {{task.filter("completed", true)}}
 {{pluralize "dog" 2}}
 ```

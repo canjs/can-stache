@@ -214,7 +214,12 @@ Will recurse on `nodes` and your output will be something like this:
 (hangs from too much recursion)
 ```
 
-This is because when it’s rendering that named partial with “Problem Child” as the context, the template sees `nodes` here: `{{#each(nodes)}}`, then it checks the current context (Problem Child), doesn't find anything called `nodes`, then moves up the scope to its parent context to check for `nodes`. Since `nodes` is on the parent (and contains the Problem Child), it uses that for the `#each()` and you’re stuck in infinite recursion.
+This is because when it’s rendering that named partial with “Problem Child” as
+the context, the template sees `nodes` here: `{{#each(nodes)}}`, then it checks
+the current context (Problem Child), doesn’t find anything called `nodes`, then
+moves up the scope to its parent context to check for `nodes`. Since `nodes` is
+on the parent (and contains the Problem Child), it uses that for the `#each()`
+and you’re stuck in infinite recursion.
 
 To avoid that, it’s best practice to always be specific about the context for your expressions within a named partial:
 
