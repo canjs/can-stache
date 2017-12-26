@@ -6175,6 +6175,48 @@ function makeTest(name, doc, mutation) {
 		overwriteGlobalHelper('each', origEach);
 	});
 
+	test("#each(asyncGetter) should only call async getter once (#402)", function(){
+		var div = doc.createElement('div');
+		var count = 0;
+		var RESOLVE;
+
+		var promise = new Promise(function(resolve) {
+			RESOLVE = resolve;
+		});
+
+		var Data = DefineMap.extend({
+			items: {
+				get: function(last, resolve) {
+					count++;
+					// setTimeout is needed to cause binging to set up and tear down
+					setTimeout(function() {
+						resolve([ "one", "two", "three" ]);
+						RESOLVE();
+					}, 10);
+					return null;
+				}
+			}
+		});
+		var data = new Data();
+
+		var template = stache("{{#each(items)}}{{this}} {{/each}}");
+
+		var frag = template(data);
+		div.appendChild(frag);
+
+		QUnit.equal(innerHTML(div), "", "initially empty");
+
+		QUnit.stop();
+		promise.then(function() {
+			// setTimeout so DOM will update
+			setTimeout(function() {
+				QUnit.equal(innerHTML(div), "one two three ", "one two three ");
+				QUnit.equal(count, 1, "AsyncObservable should only be called once");
+				QUnit.start();
+			}, 10);
+		});
+	});
+
 	test("#with works with hash expression in call expression", function(){
 		var template = stache("{{#with(bar=foo qux=baz)}}{{bar}} {{qux}}{{/with}}");
 		var map = new DefineMap({

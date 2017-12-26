@@ -52,16 +52,17 @@ Call.prototype.args = function(scope){
 };
 
 Call.prototype.value = function(scope, helperOptions){
+	var callExpression = this;
+
 	// proxyMethods must be false so that the `requiresOptionsArgument` and any
 	// other flags stored on the function are preserved
 	var method = this.methodExpr.value(scope, { proxyMethods: false });
-	var getArgs = this.args(scope);
 
 	var computeFn = function(newVal){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = getArgs(func.isLiveBound);
+			var args = callExpression.args(scope)(func.isLiveBound);
 
 			if (func.requiresOptionsArgument) {
 				if(args.hashExprs && helperOptions && helperOptions.exprData){
