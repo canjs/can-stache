@@ -5,7 +5,7 @@ All `console` methods are available as stache helpers. A few of these are shown 
 
 @signature `{{console.log([EXPRESSION])}}`
 
-`console.log`s the the result of the provided expressions.
+Uses `console.log` to show the result of the provided expressions.
 
 ```js
 var view = stache("{{console.log(person.name, 'is', person.age, 'year(s) old')}}");
@@ -28,7 +28,7 @@ You can also use `console.info`, `console.warn`, `console.error` in the same way
 
 @signature `console.time / console.timeEnd`
 
-[`console.time()`](https://developer.mozilla.org/en-US/docs/Web/API/Console/time) and [`console.timeEnd()`](https://developer.mozilla.org/en-US/docs/Web/API/Console/timeEnd) can be used to track how long an operation takes to run:
+[console.time()](https://developer.mozilla.org/en-US/docs/Web/API/Console/time) and [console.timeEnd()](https://developer.mozilla.org/en-US/docs/Web/API/Console/timeEnd) can be used to track how long an operation takes to run:
 
 ```js
 var view = stache(`
@@ -65,19 +65,23 @@ This will log something like this to the console:
 
 <table style="width: 40%; border: 1px solid black;">
 	<thead style="background-color: #ddd;">
-		<td style="padding: 4px; border: 1px solid black">(index)</td>
-		<td style="padding: 4px; border: 1px solid black">Value</td>
+		<tr>
+			<th style="padding: 4px; border: 1px solid black">(index)</th>
+			<th style="padding: 4px; border: 1px solid black">Value</th>
+		</tr>
 	</thead>
-	<tr>
-		<td style="padding: 4px; border: 1px solid black">0</td>
-		<td style="padding: 4px; border: 1px solid black">"hammer"</td>
-	</tr>
-	<tr style="background-color: rgba(83, 134, 198, 0.2);">
-		<td style="padding: 4px; border: 1px solid black">1</td>
-		<td style="padding: 4px; border: 1px solid black">"apple"</td>
-	</tr>
-	<tr>
-		<td style="padding: 4px; border: 1px solid black">2</td>
-		<td style="padding: 4px; border: 1px solid black">"dog"</td>
-	</tr>
+	<tbody>
+		<tr>
+			<td style="padding: 4px; border: 1px solid black">0</td>
+			<td style="padding: 4px; border: 1px solid black">"hammer"</td>
+		</tr>
+		<tr style="background-color: rgba(83, 134, 198, 0.2);">
+			<td style="padding: 4px; border: 1px solid black">1</td>
+			<td style="padding: 4px; border: 1px solid black">"apple"</td>
+		</tr>
+		<tr>
+			<td style="padding: 4px; border: 1px solid black">2</td>
+			<td style="padding: 4px; border: 1px solid black">"dog"</td>
+		</tr>
+	</tbody>
 </table>
