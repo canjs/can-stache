@@ -2,13 +2,13 @@
 
 @parent can-stache.tags 7
 
-@description A comment that doesn't get inserted into the rendered result.
+@description A comment that doesn’t get inserted into the rendered result.
 
 @signature `{{!EXPRESSION}}`
 
 The comment tag operates similarly to a `<!-- -->` tag in HTML. It exists in your template but never shows up.
 
-```
+```html
 {{!getFoo()}}
 ```
 

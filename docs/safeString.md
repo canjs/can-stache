@@ -8,7 +8,7 @@ inserted into the page.
 
 By default, stache tries to prevent some common forms of [cross site scripting attacks](https://en.wikipedia.org/wiki/Cross-site_scripting) by escaping content passed
 to tags like [can-stache.tags.escaped] and the result of helpers.  However,
-one will often need to create helpers that return HTML content that shouldn't be escaped.
+one will often need to create helpers that return HTML content that shouldn’t be escaped.
 
 `stache.safeString` can be used to indicate that a returned string from a helper is safe:
 
@@ -18,7 +18,7 @@ stache.registerHelper("myHelper", function(){
 })
 ```
 
-@param {String} str A string you don't want to become escaped.
+@param {String} str A string you don’t want to become escaped.
 @return {String} A string flagged by `stache` as safe, which will
 not become escaped, even if you use [can-stache.tags.escaped].
 
@@ -46,13 +46,13 @@ stache.registerHelper('link', function(text, url) {
 
 Rendering:
 
-```
+```html
 <div>{{link "Google", "http://google.com"}}</div>
 ```
 
 Results in:
 
-```
+```html
 <div><a href="http://google.com">Google</a></div>
 ```
 

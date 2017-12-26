@@ -6,7 +6,7 @@ types.  These can be used in various combinations to call [can-stache.registerHe
 or [can-component.prototype.ViewModel viewModel methods].  The following is an example of all the expressions
 combined:
 
-```
+```html
 {{helper key1 "string" method(key2, 1, prop1=key3) prop2=key4}}
 ```
 
@@ -30,7 +30,7 @@ A [can-stache/expressions/literal] specifies JS primitive values like:
 
 They are usually passed as arguments to Call or Helper expressions like:
 
-```
+```html
 {{pluralize "dog" 2}}
 {{task.filter("completed", true)}}
 ```
@@ -41,14 +41,14 @@ A [can-stache/expressions/key-lookup] specifies a value in the [can-view-scope s
 [can-view-scope.Options HelperOptions scope] that will be looked up. KeyLookup expressions
 can be the entire stache expression like:
 
-```
+```html
 {{key}}
 ```
 
 Or they can make up the method, helper, arguments, and hash value parts of
 Call, Helper, and Hash expressions:
 
-```
+```html
 {{method(arg1,arg2}}          Call
 {{helper arg1 arg2}}          Helper
 {{method( prop=hashValue )}}  Hash
@@ -76,20 +76,23 @@ The rules are as follows:
 ## Hash expressions
 
 A [can-stache/expressions/hash] specifies a property value on a object argument in a call expression
-and property value on the the hash object in a helper expression's [can-stache.helperOptions] argument.
+and property value on the the hash object in a helper expression’s [can-stache.helperOptions] argument.
 
 For example, in a call expression:
 
+```html
+<!-- Template -->
+{{methodA(prop=key)}}
+  {{methodB(propX=key propY='literal', propZ=5)}}
 ```
-Template:
-	{{methodA(prop=key)}}
-    {{methodB(propX=key propY='literal', propZ=5)}}
-Data:
-	{
-	  methodA: function(arg){},
-      methodB: function(arg1, arg2),
-	  key: compute("value")
-	}
+
+```js
+/* Data */
+{
+  methodA: function(arg) {},
+  methodB: function(arg1, arg2) {},
+  key: compute("value")
+}
 ```
 
  - `methodA` will be called with `{prop: "value"}` as `arg`.
@@ -97,16 +100,19 @@ Data:
 
 In a helper expression:
 
+```html
+<!-- Template -->
+{{methodA prop=key}}
+  {{methodB(propX=key propY='literal' propZ=5)}}
 ```
-Template:
-	{{methodA prop=key}}
-    {{methodB(propX=key propY='literal' propZ=5)}}
-Data:
-	{
-	  methodA: function(options){},
-      methodB: function(options){},
-	  key: compute("value")
-	}
+
+```js
+/* Data */
+{
+  methodA: function(options) {},
+  methodB: function(options) {},
+  key: compute("value")
+}
 ```
 
  - `methodA` will be called with `{prop: compute("value")}` as `options.hash`.
@@ -117,149 +123,181 @@ Data:
 A [can-stache/expressions/call] calls a function looked up in the [can-view-scope scope] followed by
 the [can-view-scope.Options helpers scope]. It looks like:
 
+```html
+<!-- Template -->
+<h1>{{pluralize(type, ages.length)}}</h1>
 ```
-Template:
-	<h1>{{pluralize(type, ages.length)}}</h1>
 
-Data:
-	{
-	  pluralize: function(type, count){
-	    return type+(count === 1 ? "" : "s")
-	  },
-	  ages: new List([22,32,42]),
-	  type: "age"
-	}
+```js
+/* Data */
+{
+  pluralize: function(type, count){
+    return type+(count === 1 ? "" : "s")
+  },
+  ages: new List([22,32,42]),
+  type: "age"
+}
+```
 
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```
 
 Call expression arguments are comma (,) separated.  If a Hash expression is an argument,
 an object with the hash properties and values will be passed. For example:
 
-```
-Template:
-	<h1>{{pluralize(word=type count=ages.length)}}</h1>
-
-Data:
-	{
-	  pluralize: function(options){
-	    return options.word+(options.count === 1 ? "" : "s")
-	  },
-	  ages: new List([22,32,42]),
-	  type: "age"
-	}
-
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Template -->
+<h1>{{pluralize(word=type count=ages.length)}}</h1>
 ```
 
+```js
+/* Data */
+{
+  pluralize: function(options){
+    return options.word+(options.count === 1 ? "" : "s")
+  },
+  ages: new List([22,32,42]),
+  type: "age"
+}
+```
+
+```html
+<!-- Result -->
+<h1>Ages</h1>
+
+```
 
 ## Helper expressions
 
 A [can-stache/expressions/helper] calls a function looked up in the [can-view-scope.Options helpers scope] followed by
 the [can-view-scope scope]. It looks like:
 
+```html
+<!-- Template -->
+<h1>{{pluralize type ages.length}}</h1>
 ```
-Template:
-	<h1>{{pluralize type ages.length}}</h1>
 
-Data:
-	{
-	  pluralize: function(type, count){
-	    return "data-pluralize"
-	  },
-	  todos: new List([22,32,42]),
-	  type: "age"
-	}
+```js
+/* Data */
+{
+  pluralize: function(type, count){
+    return "data-pluralize"
+  },
+  todos: new List([22,32,42]),
+  type: "age"
+}
+```
 
-Helpers:
-	{
-      pluralize: function(type, count){
-	    return type+(count() === 1 ? "" : "s")
-	  }
-	}
+```js
+/* Helpers */
+{
+    pluralize: function(type, count){
+    return type+(count() === 1 ? "" : "s")
+  }
+}
+```
 
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```
 
 Helper expression arguments that are observable are passed a compute.  This is
 in contrast to Call expressions that get passed the value.
 
-Helper expression arguments are space seperated.  If a Hash expression is an argument,
+Helper expression arguments are space separated.  If a Hash expression is an argument,
 the hash properties and values will be added to the helper options object. For example:
 
+```html
+<!-- Template -->
+<h1>{{pluralize word=type count=ages.length}}</h1>
 ```
-Template:
-	<h1>{{pluralize word=type count=ages.length}}</h1>
 
-Data:
-	{
-	  todos: new List([22,32,42]),
-	  type: "age"
-	}
+```js
+/* Data */
+{
+  todos: new List([22,32,42]),
+  type: "age"
+}
+```
 
-Helpers:
-	{
-      pluralize: function(helperOptions){
-	    return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
-	  }
-	}
+```js
+/* Helpers */
+{
+    pluralize: function(helperOptions){
+    return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
+  }
+}
+```
 
-Result:
-	<h1>Ages</h1>
+```html
+<!-- Result -->
+<h1>Ages</h1>
 ```
 
 ## Bracket expressions
 
 A [can-stache/expressions/bracket] can be used to look up a dynamic property in the [can-view-scope scope]. This looks like:
 
+```html
+<!-- Template -->
+<h1>{{[key]}}</h1>
 ```
-Template:
-	<h1>{{[key]}}</h1>
 
-Data:
-	{
-		key: "name",
-		name: "Kevin"
-	}
+```js
+/* Data */
+{
+  key: "name",
+  name: "Kevin"
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
 ```
 
 This can be useful for looking up values using keys containing non-alphabetic characters:
 
+```html
+<!-- Template -->
+<h1>{{["person:name"]}}</h1>
 ```
-Template:
-	<h1>{{["person:name"]}}</h1>
 
-Data:
-	{
-		"person:name": "Kevin"
-	}
+```js
+/* Data */
+{
+  "person:name": "Kevin"
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
 ```
 
 Bracket expressions can also be used to look up a value in the result of another expression:
 
-```
-Template:
+```html
+<!-- Template -->
 {{getPerson()[key]}}
+```
 
-Data:
-	{
-		key: "name",
-		getPerson: function() {
-			return {
-				name: "Kevin"
-			};
-		}
-	}
+```js
+/* Data */
+{
+  key: "name",
+  getPerson: function() {
+    return {
+      name: "Kevin"
+    };
+  }
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
 ```

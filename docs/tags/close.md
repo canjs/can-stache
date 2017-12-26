@@ -5,4 +5,4 @@
 
 Ends a [can-stache.tags.section] block.
 
-@param {String} [helperKeyOrMethod] A name that matches the opening key, method or helper name. It's also possible to simply write `{{/}}` to end a block.
+@param {String} [helperKeyOrMethod] A name that matches the opening key, method or helper name. It’s also possible to simply write `{{/}}` to end a block.

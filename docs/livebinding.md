@@ -11,52 +11,62 @@ DOM to reflect those changes.
 
 In this example, we have a simple user welcome screen.
 
-	<h1>Welcome {{user}}!</h1>
-	<p>
-		{{#if(messages)}}
-			You have {{messages}} new messages.
-		{{else}}
-			You no messages.
-		{{/messages}}
-	</p>
+```html
+<!-- Template -->
+<h1>Welcome {{user}}!</h1>
+<p>
+	{{#if(messages)}}
+		You have {{messages}} new messages.
+	{{else}}
+		You no messages.
+	{{/messages}}
+</p>
+```
 
-	var data = new DefineMap({
-		user: 'Tina Fey',
-		messages: 0
-	});
+```js
+var data = new DefineMap({
+	user: 'Tina Fey',
+	messages: 0
+});
 
-	var template = stache( document.getElementById("template").innerHTML );
-	var frag = template( data );
-	document.body.appendChild( frag );
-
+var template = stache( document.getElementById("template").innerHTML );
+var frag = template( data );
+document.body.appendChild( frag );
+```
 
 The template evaluates the `messages` and adds the hooks for live binding automatically.
 Since we have no message it will render:
 
-	<h1>Welcome Tina Fey!</h1>
-	<p>You no messages.</p>
+```html
+<h1>Welcome Tina Fey!</h1>
+<p>You no messages.</p>
+```
 
 Now say we have a request that updates
 the `messages` attribute to have `5` messages.
 
-	data.message = 5;
-
+```js
+data.message = 5;
+```
 
 After the template receives this update, it will automatically
 update the paragraph tag to reflect the new value.
 
-	<p>You have 5 new message.</p>
-
+```html
+<p>You have 5 new message.</p>
+```
 
 For more information visit the [can-define/map/map] documentation.
 
 ### Binding between components
 
 If you are looking for information on bindings between components like this:
-```
+
+```html
 on:event="key()" for event binding.
 prop:from="key" for one-way binding to a child.
 prop:to="key" for one-way binding to a parent.
 prop:bind="key" for two-way binding.
 ```
+
 See [can-stache-bindings].

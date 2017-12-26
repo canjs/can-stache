@@ -10,7 +10,7 @@ Looks up another template with `key` and renders it with the current scope or
 
 ```js
 stache.registerPartial("address.stache", "<p>{{street}} {{city}}</p>");
-var template = stache("{{#each(people)}} {{>address.stache address}} {{/each}}")
+var template = stache("{{#each(people)}} {{>address.stache address}} {{/each}}");
 ```
 
 @param {can-stache/expressions/key-lookup|String} key A key used to lookup a
@@ -29,7 +29,7 @@ If the key returns `undefined`, the key itself is used as the __renderer functio
 Once the __renderer function name__ is known, the __renderer function__ is looked for
 by the same name.  A __renderer function__ is looked for in the following places:
 
- 1. In [can-view-scope.Options]'s `partials` property.
+ 1. In [can-view-scope.Options]’s `partials` property.
  2. In partials registered with [can-stache.registerPartial].
  3. For an element whose `id` matches __renderer function name__.  Its `innerHTML` will be converted to a template.
 
@@ -54,27 +54,27 @@ Partials render at runtime, so recursive partials are possible but make sure you
 
 Partials are typically registered [can-stache.registerPartial] like:
 
-```
+```js
 stache.registerPartial("address.stache", "<p>{{street}} {{city}}</p>");
 ```
 
 And called within another template like:
 
-```
+```js
 var template = stache("{{#person.address}} {{>address.stache}} {{/person.address}}");
 ```
 
 With data like `{person: {address: {street: "123 Evergreen", city: "Chicago"}}}`,
 rendering `template` would produce:
 
-```
+```html
 <p>123 Evergreen Chicago</p>
 ```
 
 The 2nd argument to `{{>key}}` can specify a different context for the partial to be rendered
 with.  The following example renders the same thing as above:
 
-```
+```js
 var template = stache("{{#person}} {{>address.stache address}} {{/person}}");
 ```
 
@@ -84,19 +84,22 @@ var template = stache("{{#person}} {{>address.stache address}} {{/person}}");
 
 `{{>key}}` can be used to call [can-stache.renderer] functions in the scope.  For example:
 
-
+```html
+<!-- Template -->
+{{#item}}{{>myPartial}}{{/item}}
 ```
-DATA
-	{
-		item: {name: "Justin"},
-		myPartial: stache("{{name}}")
-	}
 
-TEMPLATE:
-    {{#item}}{{>myPartial}}{{/item}}
+```js
+/* Data */
+{
+  item: {name: "Justin"},
+  myPartial: stache("{{name}}")
+}
+```
 
-RESULT:
-	Justin
+```html
+<!-- Result -->
+Justin
 ```
 
 ## Script tags as partials
@@ -105,7 +108,7 @@ RESULT:
 
 For example, if you've embedded a partial like:
 
-```
+```html
 <script type='text/stache' id='todo-stache'>
   <li>{{name}}</li>
 </script>
@@ -113,6 +116,6 @@ For example, if you've embedded a partial like:
 
 This can be rendered like:
 
-```
+```html
 {{#each(todos)}}{{>todo-stache}}{{/each}}
 ```

@@ -9,20 +9,25 @@ strings are passed as arguments.
 
 The following template:
 
-    <p>{{madLib "Lebron James" verb 4}}</p>
+```html
+<p>{{madLib "Lebron James" verb 4}}</p>
+```
 
 Rendered with
 
-    {verb: "swept"}
+```js
+{verb: "swept"}
+```
 
-Will call a `madLib` helper with the following arguements.
+Will call a `madLib` helper with the following arguments.
 
-    stache.addHelper('madLib',
-      function(subject, verb, number){
-        // subject -> "Lebron James"
-        // verb -> "swept"
-        // number -> 4
-    });
+```js
+stache.addHelper('madLib', function(subject, verb, number) {
+  // subject -> "Lebron James"
+  // verb -> "swept"
+  // number -> 4
+});
+```
 
 Unlike [can-stache.helper] simple helpers will always pass the actual
 value (instead of a compute).
@@ -50,28 +55,36 @@ be used to create mustache tags that have rich behavior.
 
 If the helper is called __within a tag__ like:
 
-    <ul {{sortable}}/>
+```html
+<ul {{sortable}}/>
+```
 
 The returned function is called with the `<ul>` element:
 
-    stache.addHelper("sortable",function(){
-      return function(el){
-        $(el).slider();
-      }
-    });
+```js
+stache.addHelper("sortable",function(){
+  return function(el){
+    $(el).slider();
+  }
+});
+```
 
 If the helper is called __between tags__ like:
 
-    <ul>{{items}}</ul>
+```html
+<ul>{{items}}</ul>
+```
 
 The returned function is called with a temporary element. The
 following helper would be called with a temporary `<li>` element:
 
-    stache.addHelper("items",function(){
-      return function(li){
+```js
+stache.addHelper("items",function(){
+  return function(li){
 
-      }
-    });
+  }
+});
+```
 
 The temporary element depends on the parent element. The default temporary element
 is a `<span>` element.

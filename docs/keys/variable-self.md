@@ -8,7 +8,7 @@
 
 The entirety of the current template is always stored as a [can-stache.tags.named-partial named partial] `*self`
 
-```
+```html
 <div>
 	{{>*self}}
 </div>
@@ -18,12 +18,12 @@ The entirety of the current template is always stored as a [can-stache.tags.name
 
 ## Use
 
-This can be used to recursively render a template given a stop condition. 
-Note that we use a key expression to set local scope. Also note it is 
+This can be used to recursively render a template given a stop condition.
+Note that we use a key expression to set local scope. Also note it is
 a dot slash on the child key expression.
 The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
-```
+```js
 var grandpaWorm = new DefineMap({
 	name: "Earthworm Jim",
 	child: {
@@ -47,7 +47,8 @@ var view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
-```
+
+```html
 <span>Earthworm Jim</span>
 <div>
 	<span>Grey Worm</span>
@@ -59,7 +60,7 @@ The view variable will be the document fragment:
 
 A template variable can be passed in
 
-```
+```js
 var grandpaWorm = new DefineMap({
 	child: {
 		name: "Earthworm Jim",
@@ -83,11 +84,12 @@ var renderer = stache(`
 	{{/child}}
 `);
 
-var view = renderer(granpaWorm);
+var view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
-```
+
+```html
 <p>Earthworm Jim</p>
 <p>false</p>
 <div>
@@ -100,4 +102,5 @@ The view variable will be the document fragment:
 </div>
 ```
 
-For a more detailed explaination of using partials recursively see [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion]
+For a more detailed explanation of using partials recursively, see
+[can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion].

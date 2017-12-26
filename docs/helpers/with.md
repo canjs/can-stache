@@ -7,7 +7,7 @@ Changes the context within a block.
 
 Renders `BLOCK` with the result of `EXPRESSION` added to the top of the [can-view-scope].
 
-```
+```html
 {{#with(person.address)}}
 	Street: {{street}}
 	City: {{city}}
@@ -17,13 +17,13 @@ Renders `BLOCK` with the result of `EXPRESSION` added to the top of the [can-vie
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a value.
 
 @param {can-stache.sectionRenderer} BLOCK A template that is rendered
-with the context of the `EXPRESSION`'s value.
+with the context of the `EXPRESSION`’s value.
 
 @signature `{{#with(HASHES)}}BLOCK{{/with}}`
 
 Renders `BLOCK` with the key-value pairs from a [can-stache/expressions/hash] added to the top of the [can-view-scope].
 
-```
+```html
 {{#with(innerStreet=person.address.street innerCity=person.address.city)}}
     Street: {{innerStreet}}
     City: {{innerCity}}
@@ -42,50 +42,64 @@ with the hashes added to the context.
 `{{#with()}}` renders a subsection with a new context added to the [can-view-scope].
 For example:
 
+```html
+<!-- Template -->
+{{#with(person.address)}}
+	Street: {{street}}
+	City: {{city}}
+{{/with}}
 ```
-TEMPLATE:
-	{{#with(person.address)}}
-		Street: {{street}}
-		City: {{city}}
-	{{/with}}
-DATA:
-	{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
 
-RESULT:
-	Street: 123 Evergreen
-	City: Springfield
+```js
+/* Data */
+{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
+```
+
+```html
+<!-- Result -->
+Street: 123 Evergreen
+City: Springfield
 ```
 
 The new context can be a lookup expression, or a set of hashes which are taken together to be a new context.
 
-```
-TEMPLATE:
-	{{#with(innerStreet=person.address.street innerCity=person.address.city)}}
-		Street: {{innerStreet}}
-		City: {{innerCity}}
-	{{/with}}
-DATA:
-	{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
-
-RESULT:
-	Street: 123 Evergreen
-	City: Springfield
+```html
+<!-- Template -->
+{{#with(innerStreet=person.address.street innerCity=person.address.city)}}
+	Street: {{innerStreet}}
+	City: {{innerCity}}
+{{/with}}
 ```
 
+```js
+/* Data */
+{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
+```
+
+```html
+<!-- Result -->
+Street: 123 Evergreen
+City: Springfield
+```
 
 The difference between `{{#with()}}` and the default [can-stache.tags.section]
 is that the subsection `BLOCK` is rendered no matter what:
 
+```html
+<!-- Template -->
+{{#with(person.address)}}
+	Street: {{street}}
+	City: {{city}}
+{{/with}}
 ```
-TEMPLATE:
-	{{#with(person.address)}}
-		Street: {{street}}
-		City: {{city}}
-	{{/with}}
-DATA:
-	{person: {}}
 
-RESULT:
-	Street:
-	City:
+```js
+/* Data */
+{person: {}}
+```
+
+```html
+<!-- Result -->
+Street:
+City:
 ```

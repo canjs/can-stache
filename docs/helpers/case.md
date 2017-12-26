@@ -5,7 +5,7 @@
 
 Renders the `BLOCK` when `EXPRESSION` matches the `EXPRESSION` provided in the parent [can-stache.helpers.switch].
 
-```
+```html
 {{#switch(user.type)}}
 	{{#case("admin")}}
 		<button value="edit"/>
@@ -22,7 +22,7 @@ Renders the `BLOCK` when `EXPRESSION` matches the `EXPRESSION` provided in the p
 @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An expression or key that references a value.
 
 @param {can-stache.sectionRenderer} BLOCK A subsection that will be rendered if
-the case `EXPRESSION` matches the switch's `EXPRESSION`.
+the case `EXPRESSION` matches the switch’s `EXPRESSION`.
 
 @body
 

@@ -5,18 +5,18 @@ Returns a url using [can-route.url route.url].
 
 @signature `routeUrl( hashes... [,merge] )`
 
-Calls [can-route.url] with  `hashes` as it's `data` argument and an
+Calls [can-route.url] with  `hashes` as its `data` argument and an
 optional `merge`.
 
 This can be used on its own to create `<a>` `href`s like:
 
-```
+```html
 <a href="{{ routeUrl(page='todos' id=todo.id) }}">details</a>
 ```
 
 Or in conjunction with other helpers:
 
-```
+```html
 {{makeLink "details" routeUrl(page='todos', true)}}
 ```
 
@@ -24,7 +24,7 @@ Or in conjunction with other helpers:
 
 Passes the hashes to `route.url` and returns the result.
 
-```
+```html
 <a href="{{routeUrl(page='todos' id=todo.id)}}">details</a>
 ```
 
@@ -41,26 +41,26 @@ current [can-route] properties.
 
 Use the `routeUrl` helper like:
 
-```
+```html
 <a href='{{routeUrl page="recipe" id=5}}'>{{recipe.name}}</a>
 ```
 
 This produces (with no pretty routing rules):
 
-```
+```html
 <a href='#!&page=recipe&id=5'>{{recipe.name}}</a>
 ```
 
 This functionality could also be written as a call expression:
 
-```
+```html
 <a href='{{ routeUrl(page="recipe" id=5) }}'>{{recipe.name}}</a>
 ```
 
 Using call expressions/parenthesis lets you pass the `merge` option to `route`.  This
 lets you write a url that only changes specified properties:
 
-```
+```html
 <a href='{{ routeUrl(id=5, true) }}'>{{recipe.name}}</a>
 ```
 
@@ -68,13 +68,13 @@ lets you write a url that only changes specified properties:
 
 
 The following demo uses `routeUrl` and [can-stache.helpers.routeCurrent] to
-create links that update [can-route]'s `page` attribute:
+create links that update [can-route]’s `page` attribute:
 
 @demo demos/can-stache/route-url.html
 
 It also writes out the current url like:
 
-```
+```html
 {{ routeUrl(undefined,true) }}
 ```
 

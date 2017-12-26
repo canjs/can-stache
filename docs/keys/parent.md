@@ -7,7 +7,7 @@ Start looking for values in the parent context.
 
 Look for values starting in the parent context.
 
-```
+```html
 {{#each(todos)}}
 	<div class='{{#if(../isEditing(this))}}editing{{/if}}'>
 		{{./name}}
@@ -22,15 +22,19 @@ Look for values starting in the parent context.
 Adding `../` before a key will lookup the key starting in the parent
 context.  By changing the previous template to:
 
-    {{first}} {{last}}
-      {{#children}}
-        {{first}} {{../last}}
-      {{/children}}
+```html
+{{first}} {{last}}
+  {{#children}}
+    {{first}} {{../last}}
+  {{/children}}
+```
 
 It will write out:
 
-    Barry Meyer
-        Kim Meyer
-        Justin Meyer
+```html
+Barry Meyer
+    Kim Meyer
+    Justin Meyer
+```
 
 You can use `.././last` to lookup `last` _only_ in the parent context.

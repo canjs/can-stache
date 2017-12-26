@@ -6,9 +6,9 @@
 
 Creates a helper that can do two-way conversion between two
 values.  This is especially useful with
-[can-stache-bindings.twoWay {($two-way)} bindings] like:
+[can-stache-bindings.twoWay two-way bindings] like:
 
-```handlebars
+```html
 <input {($value)}='numberToString(~age)'/>
 ```
 
@@ -46,7 +46,7 @@ stache.registerConverter("numberToString", {
 
 These helpers are useful for avoiding creating [can-define/map/map] getters and setters that do similar conversions on the view model.  Instead,
 a converter can keep your viewModels more ignorant of the demands of the
-view.  Especially as the view's most common demand is that everything
+view.  Especially as the view’s most common demand is that everything
 must be converted to a string.
 
 That being said, the following is a richer example of a converter,

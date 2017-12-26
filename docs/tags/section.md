@@ -2,7 +2,7 @@
 @parent can-stache.tags 3
 
 Renders a subsection one or more times depending on the type of expression
-or the expression's return value.
+or the expression’s return value.
 
 @signature `{{#KEY_EXPRESSION}}FN{{else}}INVERSE{{/KEY_EXPRESSION}}`
 
@@ -15,7 +15,7 @@ empty, the `INVERSE` section will be rendered. The [can-stache.helpers.each] hel
 should generally be used for observable array-like objects as it has some performance
 advantages.  
 
-```
+```html
 {{#items}}<li>{{name}}</li>{{/items}}
 ```
 
@@ -25,7 +25,7 @@ the truthy value.
 If `KEY_EXPRESSION` returns a fasley value, the `INVERSE` section will be rendered with
 the fasley value.
 
-```
+```html
 {{#address}} {{street}} {{city}} {{/address}}
 ```
 
@@ -43,7 +43,7 @@ The closing tag can end with `{{/}}`.
 Works like `{{#KEY_EXPRESSION}}`, but uses the return value of
 the `CALL_EXPRESSION`.
 
-```
+```html
 {{#getTasksForPerson(person)}}<li>{{name}}</li>{{/getTasksForPerson}}
 ```
 
@@ -65,7 +65,7 @@ Calls a [can-stache.registerHelper registered helper] or a function in the
 that can call the `FN` or `INVERSE` helpers to build the content that
 should replace these tags.
 
-```
+```html
 <p>{{#countTo(number)}}{{num}}{{/countTo}}</p>
 ```
 
@@ -102,14 +102,19 @@ that a *falsey* value.
 
 If the value is falsey, the section will **NOT** render the block.
 
-    {
-      friends: false
-    }
+```js
+/* Data */
+{
+  friends: false
+}
+```
 
-    {{#friends}}
-      Never shown!
-    {{/friends}}
-
+```html
+<!-- Result -->
+{{#friends}}
+  Never shown!
+{{/friends}}
+```
 
 ### Arrays
 
@@ -119,25 +124,32 @@ array of items, rendering the items in the block.
 For example, a list of friends will iterate
 over each of those items within a section.
 
-    {
-        friends: [
-            { name: "Austin" },
-            { name: "Justin" }
-        ]
-    }
+```html
+<!-- Template -->
+<ul>
+    {{#friends}}
+        <li>{{name}}</li>
+    {{/friends}}
+</ul>
+```
 
-    <ul>
-        {{#friends}}
-            <li>{{name}}</li>
-        {{/friends}}
-    </ul>
+```js
+/* Data */
+{
+    friends: [
+        { name: "Austin" },
+        { name: "Justin" }
+    ]
+}
+```
 
-would render:
-
-    <ul>
-        <li>Austin</li>
-        <li>Justin</li>
-    </ul>
+```html
+<!-- Result -->
+<ul>
+    <li>Austin</li>
+    <li>Justin</li>
+</ul>
+```
 
 Reminder: Sections will reset the current context to the value for which it is iterating.
 See the [basics of contexts](#Basics) for more information.
@@ -147,17 +159,25 @@ See the [basics of contexts](#Basics) for more information.
 When the value is a non-falsey object but not a list, it is considered truthy and will be used
 as the context for a single rendering of the block.
 
-    {
-        friends: { name: "Jon" }
-    }
+```html
+<!-- Template -->
+{{#friends}}
+    Hi {{name}}
+{{/friends}}
+```
 
-    {{#friends}}
-        Hi {{name}}
-    {{/friends}}
+```js
+/* Data */
+{
+    friends: { name: "Jon" }
+}
+```
 
-would render:
+```html
+<!-- Result -->
+Hi Jon!
 
-    Hi Jon!
+```
 
 ## Helper expression
 
@@ -181,12 +201,12 @@ stache.registerHelper('countTo', function(number, options){
 
 Could be called like:
 
-```
+```html
 <p>
   {{#countTo number}}
     {{num}}
   {{else}}
-    Can't count to {{num}}!
+    Can’t count to {{num}}!
   {{/countTo}}
 </p>
 ```
@@ -199,20 +219,20 @@ Called with data like:
 
 Produces:
 
-```
+```html
 <p> 1 2 3 </p>
 ```
 
 Called with data like:
 
-```
+```js
 {number: -5}
 ```
 
 Produces:
 
-```
-<p> Can't count to -5! </p>
+```html
+<p> Can’t count to -5! </p>
 ```
 
 Notice how `options` has `.fn` and `.inverse`.

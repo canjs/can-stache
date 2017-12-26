@@ -5,7 +5,7 @@
 
 Evaluates `key` and looks up the result in the [can-view-scope scope].
 
-```
+```html
 {{[key]}}
 ```
 
@@ -15,7 +15,7 @@ Evaluates `key` and looks up the result in the [can-view-scope scope].
 
 Evaluates `key` and looks up the result in the return value of `CALL_EXPRESSION`.
 
-```
+```html
 {{method()[key]}}
 ```
 
@@ -29,51 +29,64 @@ Evaluates `key` and looks up the result in the return value of `CALL_EXPRESSION`
 
 A bracket expression can be used to look up a dynamic property in the [can-view-scope scope]. This looks like:
 
+```html
+<!-- Template -->
+<h1>{{[key]}}</h1>
 ```
-Template:
-	<h1>{{[key]}}</h1>
 
-Data:
-	{
-		key: "name",
-		name: "Kevin"
-	}
+```js
+/* Data */
+{
+	key: "name",
+	name: "Kevin"
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
 ```
 
 This can be useful for looking up values using keys containing non-alphabetic characters:
 
+```html
+<!-- Template -->
+<h1>{{["person:"]}}</h1>
 ```
-Template:
-	<h1>{{["person:name"]}}</h1>
 
-Data:
-	{
-		"person:name": "Kevin"
-	}
+```js
+/* Data */
+{
+  "person:name": "Kevin"
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
+
 ```
 
 Bracket expressions can also be used to look up a value in the result of another expression:
 
-```
-Template:
+```html
+<!-- Template -->
 {{getPerson()[key]}}
+```
 
-Data:
-	{
-		key: "name",
-		getPerson: function() {
-			return {
-				name: "Kevin"
-			};
-		}
-	}
+```js
+/* Data */
+{
+  key: "name",
+  getPerson: function() {
+    return {
+      name: "Kevin"
+    };
+  }
+}
+```
 
-Result:
-	<h1>Kevin</h1>
+```html
+<!-- Result -->
+<h1>Kevin</h1>
 ```

@@ -9,7 +9,7 @@ Pass a compute instead of a value if an observable is found within
 This makes non-helper expression arguments behave similarly to helper
 expression arguments.
 
-```
+```html
 {{#each(~todos)}} ... {{/each}}
 ```
 
@@ -20,7 +20,7 @@ expression arguments.
 The following illustrates what `~some.key` would return given
 different data structures:
 
-```
+```js
 // A non-observable JS object:
 {some: {key: "value"}}
    //-> "value"

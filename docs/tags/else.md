@@ -3,12 +3,12 @@
 
 @signature `{{#helper()}}BLOCK{{else}}INVERSE{{/helper}}`
 
-Creates an `inverse` block for a [can-stache.helper helper function]'s
-[can-stache.helperOptions options argument]'s `inverse` property.
+Creates an `inverse` block for a [can-stache.helper helper function]’s
+[can-stache.helperOptions options argument]’s `inverse` property.
 
 @param {can-stache.sectionRenderer} INVERSE A partial stache template
-converted into a function and set as the [can-stache.helper helper function]'s
-[can-stache.helperOptions options argument]'s `inverse` property.
+converted into a function and set as the [can-stache.helper helper function]’s
+[can-stache.helperOptions options argument]’s `inverse` property.
 
 @body
 

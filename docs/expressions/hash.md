@@ -26,7 +26,7 @@ Might call `method` with:
 ```
 
 In a [can-stache/expressions/helper], `Hash` expressions
-add to the [can-stache.helperOptions]'s `hash` object with the specified `PROPERTY_NAME` properties
+add to the [can-stache.helperOptions]’s `hash` object with the specified `PROPERTY_NAME` properties
 and `EXPRESSION` values.
 
 The following template:
@@ -45,7 +45,7 @@ Might call `method` with:
 
 
 @param {String} PROPERTY_NAME The property name on the call expression
-argument object or [can-stache.helperOptions]'s `hash` object.
+argument object or [can-stache.helperOptions]’s `hash` object.
 
 @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An expression that provides a
 value for the property name.
@@ -55,20 +55,23 @@ value for the property name.
 ## Use
 
 A hash expression specifies a property value on a object argument in a call expression
-and property value on the the hash object in a helper expression's [can-stache.helperOptions] argument.
+and property value on the the hash object in a helper expression’s [can-stache.helperOptions] argument.
 
 For example, in a call expression:
 
+```html
+<!-- Template -->
+{{methodA(prop=key)}}
+	{{methodB(propX=key propY='literal', propZ=5)}}
 ```
-Template:
-	{{methodA(prop=key)}}
-    {{methodB(propX=key propY='literal', propZ=5)}}
-Data:
-	{
-	  methodA: function(arg){},
-      methodB: function(arg1, arg2){},
-	  key: compute("value")
-	}
+
+```js
+/* Data */
+{
+	methodA: function(arg){},
+		methodB: function(arg1, arg2){},
+	key: compute("value")
+}
 ```
 
  - `methodA` will be called with `{prop: "value"}` as `arg`.
@@ -76,16 +79,19 @@ Data:
 
 In a helper expression:
 
+```html
+<!-- Template -->
+{{methodA prop=key}}
+	{{methodB(propX=key propY='literal' propZ=5)}}
 ```
-Template:
-	{{methodA prop=key}}
-    {{methodB(propX=key propY='literal' propZ=5)}}
-Data:
-	{
-	  methodA: function(options){},
-      methodB: function(options){},
-	  key: compute("value")
-	}
+
+```js
+/* Data */
+{
+	methodA: function(options){},
+	methodB: function(options){},
+	key: compute("value")
+}
 ```
 
  - `methodA` will be called with `{prop: compute("value")}` as `options.hash`.
