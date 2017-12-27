@@ -9,7 +9,18 @@ var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 
-var noop = function () {};
+// this creates a noop that marks that a renderer was called
+// this is for situations where a helper function calls a renderer
+// that was not provided such as
+// {{#if false}} ... {{/if}}
+// with no {{else}}
+var createNoOpRenderer = function (metadata) {
+	return function noop() {
+		if (metadata) {
+			metadata.rendered = true;
+		}
+	}
+};
 
 module.exports = {
 	// Returns if something looks like an array.  This works for can.List
@@ -42,8 +53,8 @@ module.exports = {
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
 	createRenderers: function(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
-		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : noop;
-		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : noop;
+		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
+		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
 		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
