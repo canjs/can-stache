@@ -6613,6 +6613,17 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'Hello Mick');
 	});
+
+	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
+		var view = stache("<span>{{^if(isTrue())}}did not work{{/if}}</span>");
+		var frag = view({
+			isTrue: function() { return true; }
+		});
+		var span = frag.firstChild;
+		var tn = span.firstChild;
+		equal(tn, undefined, "No textnode rendered");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
