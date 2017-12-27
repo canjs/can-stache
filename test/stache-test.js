@@ -6623,6 +6623,14 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), "", "No textnode rendered");
 	});
 
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function() {
+		var scope = new Scope({ foo: "classVal" });
+		var template = stache("<div class='{{foo}}'>Hello</div>");
+		var frag = template(scope);
+
+		QUnit.equal(scope.get("scope.lineNumber"), 1);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

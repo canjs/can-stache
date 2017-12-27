@@ -135,7 +135,7 @@ var core = {
 	 * @return {function(this:HTMLElement,can-view-scope,can.view.Options)} A renderer function
 	 * live binds a partial.
 	 */
-	makeLiveBindingPartialRenderer: function(expressionString, state, lineNo){
+	makeLiveBindingPartialRenderer: function(expressionString, state){
 		expressionString = expressionString.trim();
 		var exprData,
 				partialName = expressionString.split(/\s+/).shift();
@@ -146,7 +146,7 @@ var core = {
 
 		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
-			scope.set('scope.lineNumber', lineNo);
+			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
@@ -214,9 +214,10 @@ var core = {
 	 * Return a renderer function that evaluates to a string.
 	 * @param {String} mode
 	 * @param {can.stache.Expression} expression
+	 * @param {Object} state The html state of where the expression was found.
 	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
 	 */
-	makeStringBranchRenderer: function(mode, expressionString, lineNo){
+	makeStringBranchRenderer: function(mode, expressionString, state){
 		var exprData = core.expression.parse(expressionString),
 			// Use the full mustache expression as the cache key.
 			fullExpression = mode+expressionString;
@@ -229,7 +230,7 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
-			scope.set('scope.lineNumber', lineNo);
+			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
@@ -272,7 +273,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The html state of where the expression was found.
 	 */
-	makeLiveBindingBranchRenderer: function(mode, expressionString, state, lineNo){
+	makeLiveBindingBranchRenderer: function(mode, expressionString, state){
 		// Pre-process the expression.
 		var exprData = core.expression.parse(expressionString);
 		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
@@ -283,7 +284,7 @@ var core = {
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
-			scope.set('scope.lineNumber', lineNo);
+			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = expressionString;
@@ -385,7 +386,7 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The state of HTML where the expression was found.
 	 */
-	splitModeFromExpression: function(expression, state, lineNo){
+	splitModeFromExpression: function(expression, state){
 		expression = expression.trim();
 		var mode = expression.charAt(0);
 
