@@ -241,9 +241,10 @@ var core = {
 	 * Return a renderer function that evaluates to a string.
 	 * @param {String} mode
 	 * @param {can.stache.Expression} expression
+	 * @param {Object} state The html state of where the expression was found.
 	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
 	 */
-	makeStringBranchRenderer: function(mode, expressionString, lineNo){
+	makeStringBranchRenderer: function(mode, expressionString, state, lineNo){
 		var exprData = core.expression.parse(expressionString),
 			// Use the full mustache expression as the cache key.
 			fullExpression = mode+expressionString;
