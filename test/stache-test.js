@@ -6613,6 +6613,16 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'Hello Mick');
 	});
+
+	QUnit.test('scope has the helpersOptions with helpers and nodeList', function(){
+		var view = stache('{{myScopeHelper(scope)}}');
+		stache.registerHelper('myScopeHelper', function(scope){
+			var options = scope.helperOptions;
+			ok(!!options.helpers);
+			ok(!!options.nodeList);
+		});
+		view({});
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
