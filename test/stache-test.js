@@ -7170,6 +7170,14 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(atFunctionTeardown(), 0, "warning not shown for {{#if @func1}}");
 	});
 
+	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string", function() {
+		var scope = new Scope({ foo: "classVal" });
+		var template = stache("<div class='{{foo}}'>Hello</div>");
+		var frag = template(scope);
+
+		QUnit.equal(scope.get("scope.lineNumber"), 1);
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
