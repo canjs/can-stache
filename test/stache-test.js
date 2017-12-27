@@ -6569,7 +6569,6 @@ function makeTest(name, doc, mutation) {
 	});
 
 	QUnit.test('#scope.helpers can be used to call a built-in helper if the scope has a property of the same name', function(){
-		var list = ['one', 'two', 'three'];
 		var template = stache('{{#scope.helpers.if truthy}}truthy{{else}}falsey{{/scope.helpers.if}}');
 		var div = doc.createElement('div');
 		var frag = template({
@@ -6605,7 +6604,7 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div), 'Mick', 'works with Call Expressions');
 
-		var div = doc.createElement("div");
+		div = doc.createElement("div");
 		var template = stache("{{person.getName 'Hello '}}");
 		var frag = template(data);
 
@@ -6615,13 +6614,13 @@ function makeTest(name, doc, mutation) {
 	});
 
 	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
-		var view = stache("<span>{{^if(isTrue())}}did not work{{/if}}</span>");
+		var div = doc.createElement("div");
+		var view = stache("{{^if(isTrue())}}did not work{{/if}}");
 		var frag = view({
 			isTrue: function() { return true; }
 		});
-		var span = frag.firstChild;
-		var tn = span.firstChild;
-		equal(tn, undefined, "No textnode rendered");
+		div.appendChild(frag);
+		equal(innerHTML(div), "", "No textnode rendered");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
