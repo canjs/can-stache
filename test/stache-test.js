@@ -5581,6 +5581,23 @@ function makeTest(name, doc, mutation) {
 		frag = template({});
 	});
 
+	test("can-template works with no content (#418)", function() {
+		var frag;
+
+		var template = stache(
+			'<my-email>' +
+				'<can-template name="subject">' +
+				'</can-template>' +
+			'</my-email>');
+
+		viewCallbacks.tag("my-email", function(el, tagData){
+			QUnit.ok(tagData.templates, "has templates");
+			QUnit.notOk(tagData.templates.subject, 'no subject template');
+		});
+
+		frag = template({});
+	});
+
 	test("#each with arrays (#215)", function(){
 		var which = canCompute(false);
 		var a = {}, b = {}, c = {};
