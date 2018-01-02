@@ -264,7 +264,9 @@ function stache (filename, template) {
 					// If we find a can-template we want to go back 2 in the stack to get it's inner content
 					// rather than the <can-template> element itself
 					var parent = state.sectionElementStack[state.sectionElementStack.length - 2];
-					parent.templates[oldNode.attrs.name] = makeRendererConvertScopes(renderer);
+					if (renderer) {// Only add the renderer if the template has content
+						parent.templates[oldNode.attrs.name] = makeRendererConvertScopes(renderer);
+					}
 					section.removeCurrentNode();
 				} else {
 					// Get the last element in the stack
