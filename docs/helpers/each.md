@@ -1,8 +1,6 @@
 @function can-stache.helpers.each {{#each(expression)}}
 @parent can-stache.htags 5
 
-@deprecated {4.0} The `as` keyword signature, `{{#each EXPRESSION as KEY}}FN{{else}}INVERSE{{/each}}`, is deprecated in favor of [can-stache/expressions/hash].
-
 @signature `{{#each(EXPRESSION)}}FN{{else}}INVERSE{{/each}}`
 
 Render `FN` for each item in `EXPRESSION`’s return value.  If `EXPRESSION`
