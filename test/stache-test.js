@@ -6648,6 +6648,24 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(scope.get("scope.lineNumber"), 1);
 	});
 
+	testHelpers.dev.devOnlyTest("should not warn for keys that exist but are `undefined` (#427)", function () {
+		var vm = {
+			_props: {
+				propWithoutValue: true
+			},
+			propWithoutValue: null
+		};
+		vm[canSymbol.for("can.hasKey")] = function(key) {
+			return this._props[key];
+		};
+
+		var teardown = testHelpers.dev.willWarn('can-stache/expressions/lookup.js: Unable to find key "propWithoutValue".');
+
+		stache('<li>{{propWithoutValue}}</li>')(vm);
+
+		QUnit.equal(teardown(), 0, 'did not get warning');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

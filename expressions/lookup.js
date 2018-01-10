@@ -24,7 +24,15 @@ Lookup.prototype.value = function(scope, readOptions){
 
 	//!steal-remove-start
 	if (typeof value.initialValue === 'undefined') {
-		dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
+		// TODO - this should use canReflect.hasKey
+		var hasKeySymbol = canSymbol.for("can.hasKey");
+		var context = value.startingScope && value.startingScope._context;
+		var propDefined = context && context[hasKeySymbol] &&
+			context[hasKeySymbol](this.key);
+
+		if (!propDefined) {
+			dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
+		}
 	}
 	//!steal-remove-end
 
