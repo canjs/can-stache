@@ -6649,16 +6649,10 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("should not warn for keys that exist but are `undefined` (#427)", function () {
-		var vm = {
-			_props: {
-				propWithoutValue: true
-			},
-			propWithoutValue: null
-		};
-		vm[canSymbol.for("can.hasKey")] = function(key) {
-			return this._props[key];
-		};
-
+		var VM = DefineMap.extend({
+			propWithoutValue: 'string'
+		});
+		var vm = new VM();
 		var teardown = testHelpers.dev.willWarn('can-stache/expressions/lookup.js: Unable to find key "propWithoutValue".');
 
 		stache('<li>{{propWithoutValue}}</li>')(vm);
