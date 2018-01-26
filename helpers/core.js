@@ -242,9 +242,22 @@ var switchHelper = function(expression, options){
 	};
 	caseHelper.requiresOptionsArgument = true;
 
+	// create default helper as a value-like function
+	// so that either {{#default}} or {{#default()}} will work
+	var defaultHelper = function() {
+		return !found;
+	};
+	canReflect.assignSymbols(defaultHelper, {
+		"can.isValueLike": true,
+		"can.isFunctionLike": false,
+		"can.getValue": function() {
+			return this();
+		}
+	});
+
 	var newScope = options.scope.add({
 		case: caseHelper,
-		get default() { return !found; }
+		default: defaultHelper
 	}, { notContext: true });
 
 	return options.fn(newScope, options);
