@@ -6118,8 +6118,8 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "bar");
 	});
 
-	test("#switch and #case work with call expressions", function(){
-		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default}}peasant{{/default}}{{/switch}}");
+	test("#switch, #case, and #default work with call expressions", function(){
+		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
 		var map = new DefineMap({
 			type: "admin"
 		});
