@@ -44,7 +44,7 @@
     "can-stache-key": "^0.1.2",
     "can-symbol": "^1.0.0",
     "can-util": "^3.10.12",
-    "can-view-callbacks": "^3.2.0",
+    "can-view-callbacks": "^4.0.0",
     "can-view-live": "^3.2.0",
     "can-view-nodelist": "^3.1.0",
     "can-view-parser": "^3.8.1",
