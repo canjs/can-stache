@@ -33,7 +33,7 @@
     "donejs"
   ],
   "dependencies": {
-    "can-attribute-encoder": "^0.3.0",
+    "can-attribute-encoder": "^1.0.0",
     "can-compute": "^3.3.1",
     "can-globals": "<2.0.0",
     "can-log": "^1.0.0",
