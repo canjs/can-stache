@@ -1,12 +1,14 @@
 var Scope = require('can-view-scope');
 var Hashes = require('./hashes');
 var SetIdentifier = require("../src/set-identifier");
-var compute = require('can-compute');
-var canReflect = require("can-reflect");
+var Observation = require('can-observation');
 var canSymbol = require("can-symbol");
-var assign = require('can-util/js/assign/assign');
-var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
+var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+var SetterObservable = require("can-simple-observable/setter/setter");
 var expressionHelpers = require("../src/expression-helpers");
+var canReflect = require("can-reflect");
+var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
+var assign = require('can-assign');
 
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
@@ -16,7 +18,7 @@ var Call = function(methodExpression, argExpressions){
 	this.methodExpr = methodExpression;
 	this.argExprs = argExpressions.map(expressionHelpers.convertToArgExpression);
 };
-Call.prototype.args = function(scope, helperOptions){
+Call.prototype.args = function(scope){
 	var hashExprs = {};
 	var args = [];
 	for(var i = 0, len = this.argExprs.length; i < len; i++) {
@@ -49,26 +51,21 @@ Call.prototype.args = function(scope, helperOptions){
 	};
 };
 
-Call.prototype.value = function(scope, helperScope, helperOptions){
+Call.prototype.value = function(scope, helperOptions){
+	var callExpression = this;
 
-	var method = this.methodExpr.value(scope, helperScope);
-	var metadata = method.metadata || {};
+	// proxyMethods must be false so that the `requiresOptionsArgument` and any
+	// other flags stored on the function are preserved
+	var method = this.methodExpr.value(scope, { proxyMethods: false });
 
-	// TODO: remove this hack
-	assign(this, metadata);
-
-	var getArgs = this.args(scope, helperScope);
-
-	var computeValue = compute(function(newVal){
-		var func = canReflect.getValue( method.fn || method );
+	var computeFn = function(newVal){
+		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = getArgs(metadata.isLiveBound);
+			var args = callExpression.args(scope)(func.isLiveBound);
 
-			if(metadata.isHelper && helperOptions) {
-				// Some helpers assume options has a helpers object that is an instance of Scope.Options
-				helperOptions.helpers = helperOptions.helpers || new Scope.Options({});
-				if(args.hashExprs && helperOptions.exprData){
+			if (func.requiresOptionsArgument) {
+				if(args.hashExprs && helperOptions && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}
 				args.push(helperOptions);
@@ -77,18 +74,38 @@ Call.prototype.value = function(scope, helperScope, helperOptions){
 				args.unshift(new SetIdentifier(newVal));
 			}
 
-			return func.apply(null, args);
+			// if this is a call like `foo.bar()` the method.thisArg will be set to `foo`
+			// for a call like `foo()`, method.thisArg will not be set and we will default
+			// to setting the scope as the context of the function
+			return func.apply(method.thisArg || scope.peek("this"), args);
 		}
+	};
+	//!steal-remove-start
+	Object.defineProperty(computeFn, "name", {
+		value: "{{" + this.sourceText() + "}}"
 	});
+	//!steal-remove-end
 
-	compute.temporarilyBind(computeValue);
-	return computeValue;
+	if (helperOptions && helperOptions.doNotWrapInObservation) {
+		return computeFn();
+	} else {
+		var computeValue = new SetterObservable(computeFn, computeFn);
+		Observation.temporarilyBind(computeValue);
+		return computeValue;
+	}
 };
-
+//!steal-remove-start
+Call.prototype.sourceText = function(){
+	var args = this.argExprs.map(function(arg){
+		return arg.sourceText();
+	});
+	return this.methodExpr.sourceText()+"("+args.join(",")+")";
+}
+//!steal-remove-end
 Call.prototype.closingTag = function() {
 	//!steal-remove-start
-	if(this.methodExpr[canSymbol.for('can-stache.originalKey')]) {
-		return this.methodExpr[canSymbol.for('can-stache.originalKey')];
+	if(this.methodExpr[sourceTextSymbol]) {
+		return this.methodExpr[sourceTextSymbol];
 	}
 	//!steal-remove-end
 	return this.methodExpr.key;

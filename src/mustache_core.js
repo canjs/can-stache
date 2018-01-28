@@ -4,8 +4,9 @@
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
-var compute = require('can-compute');
+
 var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-util/dom/frag/frag");
@@ -43,7 +44,7 @@ var core = {
 	// a function that can quickly evaluate the expression.
 	/**
 	 * @hide
-	 * Given a mode and expresion data, returns a function that evaluates that expression.
+	 * Given a mode and expression data, returns a function that evaluates that expression.
 	 * @param {can-view-scope} The scope in which the expression is evaluated.
 	 * @param {can.view.Options} The option helpers in which the expression is evaluated.
 	 * @param {String} mode Either null, #, ^. > is handled elsewhere
@@ -53,7 +54,7 @@ var core = {
 	 * @param {String} [stringOnly] A flag to indicate that only strings will be returned by subsections.
 	 * @return {Function} An 'evaluator' function that evaluates the expression.
 	 */
-	makeEvaluator: function (scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+	makeEvaluator: function (scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
 
 		if(mode === "^") {
 			var temp = truthyRenderer;
@@ -62,64 +63,38 @@ var core = {
 		}
 
 		var value,
-			helperOptionArg;
-
-		if(exprData instanceof expression.Call) {
-			helperOptionArg =  {
-				context: scope.peek("."),
+			helperOptions =  {
+				metadata: { rendered: false },
+				stringOnly: stringOnly,
+				context: scope.peek("this"),
 				scope: scope,
 				nodeList: nodeList,
-				exprData: exprData,
-				helpersScope: helperOptions
+				exprData: exprData
 			};
-			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			// set up renderers
+			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
-			value = exprData.value(scope, helperOptions, helperOptionArg);
-			if(exprData.isHelper) {
-				return value;
-			}
+		if(exprData instanceof expression.Call) {
+			value = exprData.value(scope, helperOptions);
 		} else if (exprData instanceof expression.Bracket) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else if (exprData instanceof expression.Lookup) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
 		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
 			// Brackets get wrapped in Helpers when used in attributes
 			// like `<p class="{{ foo[bar] }}" />`
-			value = exprData.methodExpr.value(scope);
-			if(exprData.isHelper) {
-				return value;
-			}
+			value = exprData.methodExpr.value(scope, helperOptions);
 		} else {
-			var readOptions = {
-				// will return a function instead of calling it.
-				// allowing it to be turned into a compute if necessary.
-				isArgument: true,
-				args: [scope.peek('.'), scope],
-				asCompute: true
-			};
-			var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-			var helper = helperAndValue.helper;
-			value = helperAndValue.value;
-
-			if(helper) {
-				return exprData.evaluator(helper, scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			value = exprData.value(scope, helperOptions);
+			if (typeof value === "function") {
+				return value;
 			}
 		}
 
-		// Return evaluators for no mode.
-		if(!mode) {
-			// If it's computed, return a function that just reads the compute.
+		// return evaluator for no mode or rendered value if a renderer was called
+		if(!mode || helperOptions.metadata.rendered) {
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
-			// Setup renderers.
-			helperOptionArg = {};
-			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
@@ -134,17 +109,16 @@ var core = {
 
 					if(canReflect.getKeyValue(finalValue, "length")) {
 						if (stringOnly) {
-							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+							return utils.getItemsStringContent(finalValue, isObserveList, helperOptions);
 						} else {
-							return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+							return frag(utils.getItemsFragContent(finalValue, helperOptions, scope));
 						}
 					} else {
-						return helperOptionArg.inverse(scope, helperOptions);
+						return helperOptions.inverse(scope);
 					}
 				}
-				// If truthy, render fn, otherwise, inverse.
 				else {
-					return finalValue ? helperOptionArg.fn(finalValue || scope, helperOptions) : helperOptionArg.inverse(scope, helperOptions);
+					return finalValue ? helperOptions.fn(finalValue || scope) : helperOptions.inverse(scope);
 				}
 			};
 		} else {
@@ -170,7 +144,7 @@ var core = {
 			exprData = core.expression.parse(expressionString);
 		}
 
-		return function(scope, options, parentSectionNodeList){
+		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
@@ -178,11 +152,11 @@ var core = {
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
-			var partialFrag = compute(function(){
+			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
-					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope, options) );
+					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
 						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
@@ -192,14 +166,14 @@ var core = {
 						scope = scope.add(newContext);
 					}
 				}
-				// Look up partials in options first.
-				var partial = options.peek("partials." + localPartialName);
-				partial = partial || ( options.inlinePartials && options.inlinePartials[ localPartialName ] );
+				// Look up partials in templateContext first
+				var partial = canReflect.getKeyValue(scope.templateContext.partials, localPartialName);
 				var renderer;
+
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(scope, options, nodeList)
-							: partial(scope, options);
+						return partial.render ? partial.render(scope, nodeList)
+							: partial(scope);
 					};
 				}
 				// Use can.view to get and render the partial.
@@ -217,18 +191,17 @@ var core = {
 
 					renderer = function() {
 						if(typeof localPartialName === "function"){
-							return localPartialName(scope, options, nodeList);
+							return localPartialName(scope, {}, nodeList);
 						} else {
-							return core.getTemplateById(localPartialName)(scope, options, nodeList);
+							return core.getTemplateById(localPartialName)(scope, {}, nodeList);
 						}
 
 					};
 				}
-				var res = Observation.ignore(renderer)();
+				var res = ObservationRecorder.ignore(renderer)();
 				return frag(res);
 			});
-
-			partialFrag.computeInstance.setPrimaryDepth(nodeList.nesting);
+			canReflect.setPriority(partialFrag,nodeList.nesting );
 
 			live.html(this, partialFrag, this.parentNode, nodeList);
 		};
@@ -255,14 +228,14 @@ var core = {
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
-				evaluator = makeEvaluator( scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+				evaluator = makeEvaluator( scope, null, mode, exprData, truthyRenderer, falseyRenderer, true);
 				if(!mode) {
 					scope.__cache[fullExpression] = evaluator;
 				}
@@ -307,7 +280,9 @@ var core = {
 			exprData = new expression.Helper(exprData,[],{});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
+			// If this is within a tag, make sure we only get string values.
+			var stringOnly = state.tag;
 			//!steal-remove-start
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
@@ -319,13 +294,11 @@ var core = {
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
-				// If this is within a tag, make sure we only get string values.
-				state.tag );
+			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
 
 			// Create a compute that can not be observed by other
 			// comptues. This is important because this renderer is likely called by
-			// parent expresions.  If this value changes, the parent expressions should
+			// parent expressions.  If this value changes, the parent expressions should
 			// not re-evaluate. We prevent that by making sure this compute is ignored by
 			// everyone else.
 			//var compute = can.compute(evaluator, null, false);
@@ -334,15 +307,16 @@ var core = {
 			if(gotObservableValue) {
 				observable = evaluator;
 			} else {
+				//!steal-remove-start
+				Object.defineProperty(evaluator,"name",{
+					value: "{{"+expressionString+"}}"
+				});
+				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}
 
-			if(observable instanceof Observation) {
-				observable.compute._primaryDepth = nodeList.nesting;
-			} else if(observable.computeInstance) {
-				observable.computeInstance.setPrimaryDepth(nodeList.nesting);
-			} else if(observable.observation) {
-				observable.observation.compute._primaryDepth = nodeList.nesting;
+			if(canReflect.setPriority(observable, nodeList.nesting) === false) {
+				throw new Error("can-stache unable to set priority on observable");
 			}
 
 			// Bind on the computeValue to set the cached value. This helps performance
@@ -351,15 +325,16 @@ var core = {
 
 			var value = canReflect.getValue(observable);
 
-			// If value is a function, it's a helper that returned a function.
-			if(typeof value === "function") {
+			// If value is a function and not a Lookup ({{foo}}),
+			// it's a helper that returned a function and should be called.
+			if(typeof value === "function" && !(exprData instanceof expression.Lookup)) {
 
 				// A helper function should do it's own binding.  Similar to how
 				// we prevented this function's compute from being noticed by parent expressions,
 				// we hide any observables read in the function by saving any observables that
 				// have been read and then setting them back which overwrites any `can.__observe` calls
 				// performed in value.
-				Observation.ignore(value)(this);
+				ObservationRecorder.ignore(value)(this);
 
 			}
 			// If the computeValue has observable dependencies, setup live binding.
@@ -511,7 +486,6 @@ var core = {
 
 		});
 	},
-	Options: utils.Options,
 	getTemplateById: function(){}
 };
 

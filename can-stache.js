@@ -15,9 +15,10 @@ var attributeEncoder = require('can-attribute-encoder');
 var dev = require('can-log/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-globals/document/document');
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var last = require('can-util/js/last/last');
 var importer = require('can-util/js/import/import');
+var canReflect = require('can-reflect');
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
@@ -205,13 +206,12 @@ function stache (filename, template) {
 				// If it's a custom tag with content, we need a section renderer.
 				section.add(state.node);
 				if(isCustomTag) {
-					addAttributesCallback(state.node, function(scope, options, parentNodeList){
+					addAttributesCallback(state.node, function(scope, parentNodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
-							options: options,
 							subtemplate: null,
 							templateType: "stache",
 							parentNodeList: parentNodeList
@@ -271,13 +271,12 @@ function stache (filename, template) {
 				} else {
 					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
-					addAttributesCallback(oldNode, function(scope, options, parentNodeList){
+					addAttributesCallback(oldNode, function(scope, parentNodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
-							options: options,
 							subtemplate: renderer  ? makeRendererConvertScopes(renderer) : renderer,
 							templateType: "stache",
 							parentNodeList: parentNodeList,
@@ -324,14 +323,13 @@ function stache (filename, template) {
 					if( !state.node.attributes ) {
 						state.node.attributes = [];
 					}
-					state.node.attributes.push(function(scope, options, nodeList){
+					state.node.attributes.push(function(scope, nodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
 						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
 							scope: scope,
-							options: options,
 							nodeList: nodeList
 						});
 					});
@@ -427,20 +425,17 @@ function stache (filename, template) {
 	});
 
 	var renderer = section.compile();
-	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, optionsScope, nodeList ) {
-		if( Object.keys( inlinePartials ).length ) {
-			optionsScope.inlinePartials = optionsScope.inlinePartials || {};
-			assign( optionsScope.inlinePartials, inlinePartials );
-		}
+	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, nodeList ) {
+		var templateContext = scope.templateContext;
+
+		canReflect.eachKey(inlinePartials, function(partial, partialName) {
+			canReflect.setKeyValue(templateContext.partials, partialName, partial);
+		});
 
 		// allow the current renderer to be called with {{>scope.view}}
-		scope.set('scope.view', scopifiedRenderer);
-
-		// allow reading from the root context using {{scope.root.<whatever>}}
-		scope.set('scope.root', scope._context);
-
+		canReflect.setKeyValue(templateContext, 'view', scopifiedRenderer);
 		//!steal-remove-start
-		scope.set('scope.filename', section.filename);
+		canReflect.setKeyValue(templateContext, 'filename', section.filename);
 		//!steal-remove-end
 
 		return renderer.apply( this, arguments );

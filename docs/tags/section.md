@@ -9,7 +9,7 @@ or the expression’s return value.
 Renders the `FN` or `INVERSE` section one or many times depending on
 the value in `KEY_EXPRESSION`.
 
-If `KEY_EXPRESSION` returns an  [can-util/js/is-array-like/is-array-like array like object],
+If `KEY_EXPRESSION` returns an  [can-reflect.isListLike array like object],
 the `FN` section will be rendered for each item in the array.  If the array like object is
 empty, the `INVERSE` section will be rendered. The [can-stache.helpers.each] helper
 should generally be used for observable array-like objects as it has some performance

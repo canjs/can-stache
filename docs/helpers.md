@@ -178,11 +178,11 @@ key1 and key2. If the result of comparison is **truthy**, the section will be re
 
 ## Registering Helpers
 
-You can register your own global helper with the `[can-stache.registerSimpleHelper registerSimpleHelper]` or `[can-stache.registerHelper registerHelper]` methods.
+You can register your own global helper with the `[can-stache.addHelper addHelper]` or `[can-stache.registerHelper registerHelper]` methods.
 
-`[can-stache.registerSimpleHelper registerSimpleHelper]` calls the registered helper function with
+`[can-stache.addHelper addHelper]` calls the registered helper function with
 values, while `[can-stache.registerHelper registerHelper]` calls the registered helper function with
-[can-compute.computed computes] if observable data is passed. `registerSimpleHelper` is
+[can-compute.computed computes] if observable data is passed. `addHelper` is
 easier to use for basic helper functionality.
 
 
@@ -192,7 +192,7 @@ returns the localized value using
 [jQuery Globalize](https://github.com/jquery/globalize).
 
 ```js
-stache.registerSimpleHelper('l10n', function(str, options){
+stache.addHelper('l10n', function(str, options){
 	return Globalize != undefined
 		? Globalize.localize(str)
 		: str;

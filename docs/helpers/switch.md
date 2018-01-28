@@ -13,7 +13,7 @@ Renders the `BLOCK` with contextual [can-stache.helpers.case] and [can-stache.he
 	{{#case("manager")}}
 		<button value="view">
 	{{/case}}
-	{{#default()}}
+	{{#default}}
 		You do not have permission!
 	{{/default}}
 {{/switch}}
@@ -37,7 +37,7 @@ The `switch` helper is used to render a block where one of several cases matches
 			<cart-page></cart-page>
 		</can-import>
 	{{/case}}
-	{{#default()}}
+	{{#default}}
 		<can-import from="home">
 			<home-page></home-page>
 		</can-import>

@@ -1,7 +1,7 @@
 var unit = require('steal-qunit');
-var Compute = require('can-compute');
 var canLog = require('can-log');
 var debug = require('./-debugger');
+var SimpleObservable = require("can-simple-observable");
 
 var helper = debug.helper;
 var resolveValue = debug.resolveValue;
@@ -25,7 +25,7 @@ unit.module('can-stache/helpers/-debugger');
 if (isDevelopment) {
 	unit.test('resolveValue should get compute values', function (assert) {
 		var value = 'cake';
-		var compute = Compute(value);
+		var compute = new SimpleObservable(value);
 		assert.equal(resolveValue(compute), value, 'computed value resolved');
 	});
 

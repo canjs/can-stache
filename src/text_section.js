@@ -1,11 +1,10 @@
-var compute = require('can-compute');
 var live = require('can-view-live');
 
 var utils = require('./utils');
 
 var attr = require("can-util/dom/attr/attr");
 
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");
@@ -37,12 +36,22 @@ assign(TextSectionBuilder.prototype,{
 	compile: function(state){
 
 		var renderer = this.stack[0].compile();
+		//!steal-remove-start
+		Object.defineProperty(renderer,"name",{
+			value: "textSectionRenderer<"+state.tag+"."+state.attr+">"
+		});
+		//!steal-remove-end
 
-		return function(scope, options){
-
-			var observation = new Observation(function(){
-				return renderer(scope, options);
-			}, null, {isObservable: false});
+		return function(scope){
+			function textSectionRender(){
+				return renderer(scope);
+			}
+			//!steal-remove-start
+			Object.defineProperty(textSectionRender,"name",{
+				value: "textSectionRender<"+state.tag+"."+state.attr+">"
+			});
+			//!steal-remove-end
+			var observation = new Observation(textSectionRender, null, {isObservable: false});
 
 			canReflect.onValue(observation, noop);
 
@@ -55,7 +64,7 @@ assign(TextSectionBuilder.prototype,{
 					live.attr(this, state.attr, observation);
 				}
 				else {
-					live.attrs(this, observation, scope, options);
+					live.attrs(this, observation, scope);
 				}
 				canReflect.offValue(observation, noop);
 			} else {
@@ -74,8 +83,8 @@ assign(TextSectionBuilder.prototype,{
 });
 
 var passTruthyFalsey = function(process, truthy, falsey){
-	return function(scope, options){
-		return process.call(this, scope, options, truthy, falsey);
+	return function(scope){
+		return process.call(this, scope, truthy, falsey);
 	};
 };
 
@@ -103,12 +112,12 @@ assign( TextSection.prototype, {
 			}
 		}
 
-		return function(scope, options){
+		return function(scope){
 			var txt = "",
 				value;
 			for(var i = 0; i < len; i++){
 				value = values[i];
-				txt += typeof value === "string" ? value : value.call(this, scope, options);
+				txt += typeof value === "string" ? value : value.call(this, scope);
 			}
 			return txt;
 		};

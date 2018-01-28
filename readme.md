@@ -8,8 +8,6 @@
 
 Live-binding Handlebars/Mustache–like templates.
 
-## Documentation
-
 Read the [can-stache API docs on CanJS.com](https://canjs.com/doc/can-stache.html).
 
 ## Changelog
@@ -23,4 +21,3 @@ The [contribution guide](https://github.com/canjs/can-stache/blob/master/CONTRIB
 ## License
 
 [MIT](https://github.com/canjs/can-stache/blob/master/LICENSE.md)
-

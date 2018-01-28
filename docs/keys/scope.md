@@ -34,6 +34,28 @@ The filename of the current template (only available in dev mode).
 {{scope.filename}}
 ```
 
+@signature `scope.find`
+
+Use [can-view-scope::find] to look up the value of a key in the first scope where it is found.
+
+```js
+var view = stache(`
+{{#each(tasks)}}
+  <li>{{name}}{{scope.find("exclamation")}}</li>
+{{/each}}
+`);
+
+var data = new DefineMap({
+	task: ["one", "two"],
+	exclamation: "!!!"
+});
+
+var frag = view(data);
+// renders:
+// <li>one!!!</li>
+// <li>two!!!</li>
+```
+
 @signature `scope.index`
 
 When looping over an array, [can-define/list/list], or [can-list], you an use `scope.index` to write out the index of each property:

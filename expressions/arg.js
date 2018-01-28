@@ -9,5 +9,10 @@ var Arg = function(expression, modifiers){
 Arg.prototype.value = function(){
 	return this.expr.value.apply(this.expr, arguments);
 };
+//!steal-remove-start
+Arg.prototype.sourceText = function(){
+	return (this.modifiers.compute ? "~" : "")+ this.expr.sourceText();
+};
+//!steal-remove-end
 
 module.exports = Arg;

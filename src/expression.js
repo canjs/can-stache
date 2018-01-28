@@ -6,21 +6,21 @@ var Literal = require("../expressions/literal");
 var Hashes = require("../expressions/hashes");
 var Bracket = require("../expressions/bracket");
 var Call = require("../expressions/call");
-var ScopeLookup = require("../expressions/scope-lookup");
 var Helper = require("../expressions/helper");
 var Lookup = require("../expressions/lookup");
-var HelperLookup = require("../expressions/helper-lookup");
-var HelperScopeLookup = require("../expressions/helper-scope-lookup");
 
 var SetIdentifier = require("./set-identifier");
 var expressionHelpers = require("../src/expression-helpers");
+
 var utils = require('./utils');
-var each = require('can-util/js/each/each');
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 var last = require('can-util/js/last/last');
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 
+var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+
+// ### Hash
 // A placeholder. This isn't actually used.
 var Hash = function(){ }; // jshint ignore:line
 
@@ -159,6 +159,7 @@ var convertKeyToLookup = function(key){
 };
 var convertToAtLookup = function(ast){
 	if(ast.type === "Lookup") {
+		canReflect.setKeyValue(ast, sourceTextSymbol, ast.key);
 		ast.key = convertKeyToLookup(ast.key);
 	}
 	return ast;
@@ -186,14 +187,11 @@ var expression = {
 
 	Literal: Literal,
 	Lookup: Lookup,
-	ScopeLookup: ScopeLookup,
 	Arg: Arg,
 	Hash: Hash,
 	Hashes: Hashes,
 	Call: Call,
 	Helper: Helper,
-	HelperLookup: HelperLookup,
-	HelperScopeLookup: HelperScopeLookup,
 	Bracket: Bracket,
 
 	SetIdentifier: SetIdentifier,
@@ -211,16 +209,14 @@ var expression = {
 	},
 	lookupRules: {
 		"default": function(ast, methodType, isArg){
-			var name = (methodType === "Helper" && !ast.root ? "Helper" : "")+(isArg ? "Scope" : "")+"Lookup";
-			return expression[name];
+			return ast.type === "Helper" ? Helper : Lookup;
 		},
 		"method": function(ast, methodType, isArg){
-			return ScopeLookup;
+			return Lookup;
 		}
 	},
 	methodRules: {
 		"default": function(ast){
-
 			return ast.type === "Call" ? Call : Helper;
 		},
 		"call": function(ast){
@@ -258,10 +254,8 @@ var expression = {
 	hydrateAst: function(ast, options, methodType, isArg){
 		var hashes;
 		if(ast.type === "Lookup") {
-			var lookup = new (options.lookupRule(ast, methodType, isArg))(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType) );
-			//!steal-remove-start
-			canReflect.setKeyValue(lookup, canSymbol.for("can-stache.originalKey"), ast[canSymbol.for("can-stache.originalKey")]);
-			//!steal-remove-end
+			var LookupRule = options.lookupRule(ast, methodType, isArg);
+			var lookup = new LookupRule(ast.key, ast.root && this.hydrateAst(ast.root, options, methodType), ast[sourceTextSymbol] );
 			return lookup;
 		}
 		else if(ast.type === "Literal") {
@@ -275,7 +269,7 @@ var expression = {
 		}
 		else if(ast.type === "Hashes") {
 			hashes = {};
-			each(ast.children, function(hash){
+			ast.children.forEach(function(hash){
 				hashes[hash.prop] = this.hydrateAst( hash.children[0], options, methodType, true );
 			}, this);
 			return new Hashes(hashes);
@@ -292,7 +286,7 @@ var expression = {
 					if(child.type === "Hashes" && ast.type === "Helper" &&
 						(ExpressionType !== Call)) {
 
-						each(child.children, function(hash){
+						child.children.forEach(function(hash){
 							hashes[hash.prop] = this.hydrateAst( hash.children[0], options, ast.type, true );
 						}, this);
 
@@ -439,11 +433,6 @@ var expression = {
 			else if(token === "(") {
 				top = stack.top();
 				if(top.type === "Lookup") {
-					//!steal-remove-start
-					//This line is just for matching stache magic tags elsewhere,
-					// because convertToAtLookup modifies the original key
-					canReflect.setKeyValue(top, canSymbol.for("can-stache.originalKey"), top.key);
-					//!steal-remove-end
 					stack.replaceTopAndPush({
 						type: "Call",
 						method: convertToAtLookup(top)

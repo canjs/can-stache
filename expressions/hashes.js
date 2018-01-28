@@ -1,7 +1,6 @@
 var canReflect = require("can-reflect");
-var compute = require("can-compute");
+var Observation = require("can-observation");
 var expressionHelpers = require("../src/expression-helpers");
-// ### Hash
 
 var Hashes = function(hashes){
 	this.hashExprs = hashes;
@@ -17,8 +16,7 @@ Hashes.prototype.value = function(scope, helperOptions){
 			value: value
 		};
 	}
-	// TODO: replace with Compute
-	return compute(function(){
+	return new Observation(function(){
 		var finalHash = {};
 		for(var prop in hash) {
 			finalHash[prop] = hash[prop].call ? canReflect.getValue( hash[prop].value ) : expressionHelpers.toComputeOrValue( hash[prop].value );
@@ -26,5 +24,14 @@ Hashes.prototype.value = function(scope, helperOptions){
 		return finalHash;
 	});
 };
+//!steal-remove-start
+Hashes.prototype.sourceText = function(){
+	var hashes = [];
+	canReflect.eachKey(this.hashExprs, function(expr, prop){
+		hashes.push( prop+"="+expr.sourceText() );
+	});
+	return hashes.join(" ");
+};
+//!steal-remove-end
 
 module.exports = Hashes;

@@ -48,9 +48,9 @@
 	var DefineMap =  require("can-define/map/map");
 	var DefineList = require("can-define/list/list");
 	var stache = require("can-stache");
-	var batch = require("can-event/batch/batch");
+	var queues = require("can-queues");
 
-
+	var BOXES = 100;
 	var template = stache(
 		"{{#each(boxes)}}" +
 		"<div class='box-view'>" +
@@ -85,7 +85,7 @@
 		}
 	});
 
-	for(var i =0; i < 100; i++) {
+	for(var i =0; i < BOXES; i++) {
 		var box = new Box({ number: i });
 		box.tick();
 		boxes.push( box );
@@ -100,18 +100,18 @@
 
 
 	var run = function(){
-		batch.start();
-		for(var n = 0; n < 100; n++) {
+		queues.batch.start();
+		for(var n = 0; n < BOXES; n++) {
     		boxes[n].tick();
     	}
-    	batch.stop();
+    	queues.batch.stop();
 	};
 
 	document.getElementById("start").addEventListener("click", function(){
 		loopCount = 0;
-			totalTime = 0;
-			//console.profile("loops");
-			benchmarkLoop(run);
+		totalTime = 0;
+		//console.profile("loops");
+		benchmarkLoop(run);
 	});
 
 
@@ -128,7 +128,7 @@
 	    if (loopCount % 100 === 0) {
 			document.getElementById("timing").innerHTML = 'Performed ' + loopCount + ' iterations in ' + totalTime + ' ms (average ' + (totalTime / loopCount).toFixed(2) + ' ms per loop).';
 	    }
-	    if(loopCount < 1000) {
+	    if(loopCount < 20) {
 	    	timeout = setTimeout(function(){
 		    	benchmarkLoop(fn);
 		    },1);
