@@ -49,7 +49,7 @@
     "can-view-nodelist": "^3.1.0",
     "can-view-parser": "^3.8.1",
     "can-view-scope": "^3.5.4",
-    "can-view-target": "^3.1.0"
+    "can-view-target": "^4.0.0"
   },
   "devDependencies": {
     "can-define": "^1.5.5",
