@@ -32,21 +32,14 @@
     "donejs"
   ],
   "dependencies": {
-<<<<<<< HEAD
     "can-assign": "^1.1.1",
     "can-attribute-encoder": "^1.0.0",
     "can-globals": "^1.0.0",
-=======
-    "can-attribute-encoder": "^0.3.0",
-    "can-compute": "^3.3.1",
-    "can-globals": "<2.0.0",
->>>>>>> master
     "can-log": "^1.0.0",
     "can-namespace": "1.0.0",
     "can-observation": "^4.0.0",
     "can-observation-recorder": "^1.0.0",
     "can-reflect": "^1.2.1",
-<<<<<<< HEAD
     "can-stache-helpers": "^1.0.0",
     "can-stache-key": "^1.0.0",
     "can-symbol": "^1.0.0",
@@ -64,24 +57,6 @@
     "can-queues": "^1.0.0",
     "can-simple-map": "^4.0.0",
     "can-simple-observable": "^2.0.0",
-=======
-    "can-route": "^3.3.3",
-    "can-stache-key": "^0.1.2",
-    "can-symbol": "^1.0.0",
-    "can-util": "^3.10.12",
-    "can-view-callbacks": "^3.2.0",
-    "can-view-live": "^3.2.0",
-    "can-view-nodelist": "^3.1.0",
-    "can-view-parser": "^3.8.1",
-    "can-view-scope": "^3.5.4",
-    "can-view-target": "^3.1.0"
-  },
-  "devDependencies": {
-    "can-define": "^1.5.5",
-    "can-event": "^3.6.0",
-    "can-list": "^3.2.0",
-    "can-map": "^3.3.0",
->>>>>>> master
     "can-test-helpers": "^1.1.0",
     "can-vdom": "^4.0.0",
     "detect-cyclic-packages": "^1.1.0",
