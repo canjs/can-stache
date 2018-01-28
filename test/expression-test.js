@@ -7,7 +7,6 @@ var SimpleObservable = require('can-simple-observable');
 var SimpleMap = require('can-simple-map');
 var DefineList = require('can-define/list/list');
 var assign = require("can-assign");
-var queues = require("can-queues");
 var testHelpers = require('can-test-helpers');
 
 QUnit.module("can-stache/src/expression");
@@ -705,6 +704,8 @@ QUnit.test("registerConverter helpers push and pull correct values", function ()
 	equal(data.get("observeVal"), 127, 'push converter called');
 });
 
+
+
 QUnit.test("registerConverter helpers push and pull multiple values", function () {
 
 	helpers.registerConverter('isInList', {
@@ -733,7 +734,6 @@ QUnit.test("registerConverter helpers push and pull multiple values", function (
 	twoWayCompute.set(5);
 	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
-
 
 QUnit.test("registerConverter helpers are chainable", function () {
 
@@ -769,6 +769,64 @@ QUnit.test("registerConverter helpers are chainable", function () {
 	equal(twoWayCompute.get(), 'FF', 'Converter called');
 	twoWayCompute.set('7F');
 	equal(data.attr("observeVal"), 127, 'push converter called');
+});
+
+QUnit.test("addLiveConverter helpers push and pull correct values", function () {
+
+	helpers.addConverter('numberToHex', {
+		get: function(val) {
+			return canReflect.getValue(val).toString(16);
+		}, set: function(val, valCompute) {
+			return canReflect.setValue(valCompute, parseInt("0x" + val));
+		}
+	});
+
+	var data = new SimpleMap({
+		observeVal: 255
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("numberToHex(observeVal)",{baseMethodType: "Call"});
+
+	var twoWayCompute = parentExpression.value(scope);
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute.get(), 'ff', 'Converter called');
+	twoWayCompute.set('7f');
+	equal(data.get("observeVal"), 127, 'push converter called');
+});
+
+QUnit.test("addConverter helpers push and pull multiple values", function () {
+
+	helpers.addConverter('isInList', {
+		get: function(valCompute, list) {
+			return !!~canReflect.getValue(list).indexOf(canReflect.getValue(valCompute));
+		}, set: function(newVal, valCompute, listObservable) {
+			var list = canReflect.getValue(listObservable);
+
+			if(!~list.indexOf(newVal)) {
+				list.push(newVal);
+			}
+		}
+	});
+
+	var data = new SimpleMap({
+		observeVal: 4,
+		list: new DefineList([1,2,3])
+	});
+	var scope = new Scope( data );
+	var parentExpression = expression.parse("isInList(observeVal, list)",{baseMethodType: "Call"});
+	var twoWayCompute = parentExpression.value(scope);
+	//twoWayCompute('34');
+
+	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
+
+
+	equal(twoWayCompute.get(), false, 'Converter called');
+	twoWayCompute.set(5);
+	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
 
 test('foo().bar', function() {

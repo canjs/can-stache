@@ -2,9 +2,10 @@ var helpers = require("./core");
 var SetIdentifier = require("../src/set-identifier");
 var canReflect = require("can-reflect");
 
-helpers.registerConverter = function(name, getterSetter) {
+
+function makeConverter(getterSetter){
 	getterSetter = getterSetter || {};
-	helpers.registerHelper(name, function(newVal, source) {
+	return function(newVal, source) {
 		var args = canReflect.toArray(arguments);
 		if(newVal instanceof SetIdentifier) {
 			return typeof getterSetter.set === "function"
@@ -15,7 +16,18 @@ helpers.registerConverter = function(name, getterSetter) {
 				? getterSetter.get.apply(this, args)
 				: args[0];
 		}
-	});
+	}
+}
+
+helpers.addConverter = function(name, getterSetter) {
+	var helper = makeConverter(getterSetter);
+	helper.isLiveBound = true;
+	helpers.registerHelper(name, helper );
 };
+
+helpers.registerConverter = function(name, getterSetter) {
+	helpers.registerHelper(name, makeConverter(getterSetter) );
+};
+
 
 module.exports = helpers;
