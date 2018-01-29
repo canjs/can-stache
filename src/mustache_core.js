@@ -10,7 +10,7 @@ var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-util/dom/frag/frag");
-var attr = require("can-util/dom/attr/attr");
+var domMutate = require("can-dom-mutate");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
@@ -358,7 +358,7 @@ var core = {
 			else {
 
 				if(state.attr) {
-					attr.set(this, state.attr, value);
+					domMutate.setAttribute(this, state.attr, value);
 				}
 				else if(state.tag) {
 					live.attrs(this, value);

@@ -25,7 +25,7 @@ var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
-var domData = require('can-util/dom/data/data');
+var domData = require('can-dom-data-state');
 var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 

@@ -34,6 +34,8 @@
   "dependencies": {
     "can-assign": "^1.1.1",
     "can-attribute-encoder": "^1.0.0",
+    "can-dom-data-state": "^1.0.0",
+    "can-dom-mutate": "^1.0.0",
     "can-globals": "^1.0.0",
     "can-log": "^1.0.0",
     "can-namespace": "1.0.0",
@@ -53,7 +55,6 @@
   },
   "devDependencies": {
     "can-define": "^2.0.0",
-    "can-dom-mutate": "^1.0.0",
     "can-queues": "^1.0.0",
     "can-simple-map": "^4.0.0",
     "can-simple-observable": "^2.0.0",

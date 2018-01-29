@@ -17,7 +17,7 @@ var TruthyObservable = require("../src/truthy-observable");
 var observationRecorder = require("can-observation-recorder");
 var helpers = require("can-stache-helpers");
 
-var domData = require('can-util/dom/data/data');
+var domData = require('can-dom-data-state');
 
 var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
