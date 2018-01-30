@@ -49,7 +49,7 @@
     "can-view-callbacks": "^4.0.0",
     "can-view-live": "^4.0.0",
     "can-view-nodelist": "^4.0.0",
-    "can-view-parser": "^4.0.0",
+    "can-view-parser": "^4.0.1",
     "can-view-scope": "^4.0.0",
     "can-view-target": "^4.0.0"
   },
