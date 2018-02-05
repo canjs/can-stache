@@ -6032,6 +6032,38 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "bar");
 	});
 
+	QUnit.only("#if works with function expressions", function() {
+		var template = stache("{{#if(player.isNew())}}Create{{else}}Update{{/if}}");
+
+		var Player = DefineMap.extend("Player", {
+			__isNew: {
+				default: true
+			},
+			isNew: function() {
+				return this.__isNew;
+			}
+		});
+
+		var VM = DefineMap.extend("VM", {
+			player: {
+				Type: Player,
+				Default: Player
+			}
+		});
+		var map = new VM();
+
+		var div = doc.createElement("div");
+		var frag = template(map);
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "Create");
+
+		map.player.__isNew = false;
+		QUnit.equal(innerHTML(div), "Update");
+
+		map.player = new Player();
+		QUnit.equal(innerHTML(div), "Create");
+	});
+
 	test("#unless works with call expressions", function(){
 		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
 		var map = new DefineMap({
