@@ -25,7 +25,34 @@ Lookup.prototype.value = function(scope, readOptions){
 	//!steal-remove-start
 	if (typeof value.initialValue === 'undefined') {
 		var context = value.startingScope && value.startingScope._context;
-		var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
+		var propDefined = false;
+
+		if(typeof context === "object") {
+			if(!value.reads) {
+				propDefined = canReflect.hasKey(context, this.key);
+			} else {
+				var reads = value.reads, i = 0, readsLength = reads.length;
+				var read;
+				do {
+					read = reads[i];
+					if(canReflect.hasKey(context, read.key)) {
+						propDefined = true;
+
+						// Get the next context and continue to see if the key is defined.
+						context = canReflect.getKeyValue(context, read.key);
+
+						if(context) {
+							propDefined = false;
+						} else {
+							break;
+						}
+					}
+					i++;
+				} while(i < readsLength);
+			}
+		}
+
+		//var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
 
 		if (!propDefined) {
 			dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
