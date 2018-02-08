@@ -6660,6 +6660,19 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'did not get warning');
 	});
 
+	testHelpers.dev.devOnlyTest("should not warn for keys dotted keys that exist", function () {
+		var VM = DefineMap.extend({
+			env: DefineMap.extend({
+				"NODE_ENV": "any"
+			})
+		});
+		var vm = new VM();
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{env.NODE_ENV}}')(vm);
+
+		QUnit.equal(teardown(), 0, "did not warning");
+	})
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
