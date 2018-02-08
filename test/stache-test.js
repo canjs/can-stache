@@ -6660,6 +6660,37 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'did not get warning');
 	});
 
+	testHelpers.dev.devOnlyTest("should not warn for keys dotted keys that exist", function () {
+		var ENV = DefineMap.extend({
+			NODE_ENV: "any"
+		});
+
+		var VM = DefineMap.extend({
+			env: "any"
+		});
+
+		// First without anything
+		var vm = new VM();
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{env.NODE_ENV}}')(vm);
+
+		QUnit.equal(teardown(), 0, "did not warning");
+
+		// Then with an env but no prop
+		vm = new VM({env: new DefineMap()})
+		teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{env.NODE_ENV}}')(vm);
+
+		QUnit.equal(teardown(), 1, "did warn");
+
+		// Then with everything
+		vm = new VM({env: new ENV()});
+		teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{env.NODE_ENV}}')(vm);
+
+		QUnit.equal(teardown(), 0, "did not warning");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
