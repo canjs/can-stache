@@ -161,15 +161,19 @@ function stache (filename, template) {
 
 			}
 		},
+		isDirectlyNested = function() {
+			var lastElement = state.sectionElementStack[state.sectionElementStack.length - 1];
+			return state.sectionElementStack.length ?
+				lastElement.type === "section" || lastElement.type === "custom": true;
+		},
 		// Copys the state object for use in renderers.
 		copyState = function(overwrites){
-			var lastElement = state.sectionElementStack[state.sectionElementStack.length - 1];
+
 			var cur = {
 				tag: state.node && state.node.tag,
 				attr: state.attr && state.attr.name,
 				// <content> elements should be considered direclty nested
-				directlyNested: state.sectionElementStack.length ?
-					lastElement.type === "section" || lastElement.type === "custom": true,
+				directlyNested: isDirectlyNested(),
 				textContentOnly: !!state.textContentOnly
 			};
 			return overwrites ? assign(cur, overwrites) : cur;
@@ -201,11 +205,12 @@ function stache (filename, template) {
 		},
 		end: function(tagName, unary, lineNo){
 			var isCustomTag =  viewCallbacks.tag(tagName);
-
+			var directlyNested = isDirectlyNested();
 			if(unary){
 				// If it's a custom tag with content, we need a section renderer.
 				section.add(state.node);
 				if(isCustomTag) {
+					// Call directlyNested now as it's stateful.
 					addAttributesCallback(state.node, function(scope, parentNodeList){
 						//!steal-remove-start
 						scope.set('scope.lineNumber', lineNo);
@@ -214,7 +219,8 @@ function stache (filename, template) {
 							scope: scope,
 							subtemplate: null,
 							templateType: "stache",
-							parentNodeList: parentNodeList
+							parentNodeList: parentNodeList,
+							directlyNested: directlyNested
 						});
 					});
 				}
@@ -224,7 +230,8 @@ function stache (filename, template) {
 				state.sectionElementStack.push({
 					type: isCustomTag ? "custom" : null,
 					tag: isCustomTag ? null : tagName,
-					templates: {}
+					templates: {},
+					directlyNested: directlyNested
 				});
 
 				// If it's a custom tag with content, we need a section renderer.
@@ -280,7 +287,8 @@ function stache (filename, template) {
 							subtemplate: renderer  ? makeRendererConvertScopes(renderer) : renderer,
 							templateType: "stache",
 							parentNodeList: parentNodeList,
-							templates: current.templates
+							templates: current.templates,
+							directlyNested: current.directlyNested
 						});
 					});
 				}
