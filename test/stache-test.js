@@ -6691,6 +6691,43 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, "did not warning");
 	});
 
+	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
+		var div = doc.createElement("div");
+		var view = stache("{{^if(isTrue())}}did not work{{/if}}");
+		var frag = view({
+			isTrue: function() { return true; }
+		});
+		div.appendChild(frag);
+		equal(innerHTML(div), "", "No textnode rendered");
+	});
+
+	QUnit.test("tag callbacks get called with directly nested data", function(){
+		var expectedResult,
+			testMessage;
+		viewCallbacks.tag("directly-nested-test", function(el, tagData){
+			QUnit.equal(tagData.directlyNested, expectedResult, testMessage);
+		});
+
+		expectedResult = true;
+		stache(testMessage = "{{#if true}}<directly-nested-test/>{{/if}}")();
+
+		expectedResult = true;
+		stache(testMessage = "<directly-nested-test/>")();
+
+		expectedResult = false;
+		stache(testMessage = "<div><directly-nested-test/></div>")();
+
+		expectedResult = true;
+		stache(testMessage = "{{#if true}}<directly-nested-test>abc</directly-nested-test>{{/if}}")();
+
+		expectedResult = true;
+		stache(testMessage = "<directly-nested-test>abc</directly-nested-test>")();
+
+		expectedResult = false;
+		stache(testMessage = "<div><directly-nested-test>abc</directly-nested-test></div>")();
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
