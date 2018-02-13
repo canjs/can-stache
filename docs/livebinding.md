@@ -23,10 +23,10 @@ In this example, we have a simple user welcome screen.
 </p>
 ```
 
-```javascript
+```js
 const data = new DefineMap({
-  user: 'Tina Fey',
-  messages: 0
+	user: 'Tina Fey',
+	messages: 0
 });
 
 const template = stache( document.getElementById("template").innerHTML );
@@ -45,7 +45,7 @@ Since we have no message it will render:
 Now say we have a request that updates
 the `messages` attribute to have `5` messages.
 
-```javascript
+```js
 data.message = 5;
 ```
 

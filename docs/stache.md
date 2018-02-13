@@ -47,7 +47,7 @@ The following
 creates a stache template, renders it with data, and inserts
 the result into the page:
 
-```javascript
+```js
 import stache from "can-stache";
 // renderer is a "renderer function"
 const renderer = stache("<h1>Hello {{subject}}</h1>");
@@ -65,7 +65,7 @@ document.body.appendChild(fragment)
 Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/list/list DefineList]s and the
 resulting HTML will update when the observable data changes.
 
-```javascript
+```js
 import DefineMap from "can-define/map/map";
 
 

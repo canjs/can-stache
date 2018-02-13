@@ -56,9 +56,9 @@ key is `name`:
 
 If this template is rendered with:
 
-```javascript
+```js
 {
-  name: "Austin"
+	name: "Austin"
 }
 ```
 
@@ -81,13 +81,13 @@ a template like:
 
 Rendered with:
 
-```javascript
+```js
 {
-  first: "Barry", last: "Meyer",
-  children: [
-    {first: "Kim", last: "Sully"},
-    {first: "Justin"},
-  ]
+	first: "Barry", last: "Meyer",
+	children: [
+		{first: "Kim", last: "Sully"},
+		{first: "Justin"},
+	]
 }
 ```
 

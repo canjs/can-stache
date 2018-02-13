@@ -6,7 +6,7 @@
 
 Registers a template so it can be rendered with `{{>name}}`.
 
-```javascript
+```js
 stache.registerPartial("item.stache", "<li>{{name}}</li>");
 
 const itemsTemplate = stache("{{#each(items)}}{{>item.stache}}{{/each}}");

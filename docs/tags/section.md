@@ -102,9 +102,9 @@ that a *falsey* value.
 
 If the value is falsey, the section will **NOT** render the block.
 
-```javascript
+```js
 {
-  friends: false
+	friends: false
 }
 ```
 
@@ -132,12 +132,12 @@ over each of those items within a section.
 </ul>
 ```
 
-```javascript
+```js
 {
-    friends: [
-        { name: "Austin" },
-        { name: "Justin" }
-    ]
+	friends: [
+		{ name: "Austin" },
+		{ name: "Justin" }
+	]
 }
 ```
 
@@ -164,9 +164,9 @@ as the context for a single rendering of the block.
 {{/friends}}
 ```
 
-```javascript
+```js
 {
-    friends: { name: "Jon" }
+	friends: { name: "Jon" }
 }
 ```
 
@@ -181,18 +181,18 @@ Hi Jon!
 
 A helper like:
 
-```javascript
+```js
 stache.registerHelper('countTo', function(number, options){
-    if(number > 0) {
-        const out = [];
-        for(let i =1; i <= number; i++){
-            const docFrag = options.fn({num: i});
-            out.push( docFrag );
-        }
-        return out;
-    } else {
-        return options.inverse({num: number});
-    }
+	if(number > 0) {
+		const out = [];
+		for(let i =1; i <= number; i++){
+			const docFrag = options.fn({num: i});
+			out.push( docFrag );
+		}
+		return out;
+	} else {
+		return options.inverse({num: number});
+	}
 });
 ```
 
@@ -210,7 +210,7 @@ Could be called like:
 
 Called with data like:
 
-```javascript
+```js
 {number: 3}
 ```
 
@@ -222,7 +222,7 @@ Produces:
 
 Called with data like:
 
-```javascript
+```js
 {number: -5}
 ```
 

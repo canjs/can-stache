@@ -8,7 +8,7 @@ a module loader, or script tags in the markup.
 
 Raw text can be templated by passing the text containing your template.  For example:
 
-```javascript
+```js
 const text = "My body lies over the {{.}}";
 const template = stache(text);
 const fragment = template("ocean");
@@ -33,7 +33,7 @@ You can embed a `<script>` tag and use its text as a stache template like:
 
 Load this template like:
 
-```javascript
+```js
 import stache from "can-stache";
 const text = document.getElementById("my-template");
 const template = stache(text);

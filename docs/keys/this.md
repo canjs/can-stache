@@ -40,7 +40,7 @@ a template like:
 
 With data like:
 
-```javascript
+```js
 {names: ["Jan","Mark","Andrew"]}
 ```
 

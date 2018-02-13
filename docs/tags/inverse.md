@@ -49,9 +49,9 @@ The template:
 
 And data:
 
-```javascript
+```js
 {
-    friends: []
+	friends: []
 }
 ```
 

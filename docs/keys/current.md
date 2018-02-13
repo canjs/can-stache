@@ -33,13 +33,13 @@ The following template:
 
 Rendered with:
 
-```javascript
+```js
 {
-  first: "Barry", last: "Meyer",
-  children: [
-    {first: "Kim", last: "Sully"},
-    {first: "Justin"},
-  ]
+	first: "Barry", last: "Meyer",
+	children: [
+		{first: "Kim", last: "Sully"},
+		{first: "Justin"},
+	]
 }
 ```
 

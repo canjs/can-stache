@@ -8,7 +8,7 @@ Render another template within the current template.
 Looks up another template with `key` and renders it with the current scope or
 `EXPRESSION` added on top of the current scope.
 
-```javascript
+```js
 stache.registerPartial("address.stache", "<p>{{street}} {{city}}</p>");
 const template = stache("{{#each(people)}} {{>address.stache address}} {{/each}}");
 ```
@@ -54,13 +54,13 @@ Partials render at runtime, so recursive partials are possible but make sure you
 
 Partials are typically registered [can-stache.registerPartial] like:
 
-```javascript
+```js
 stache.registerPartial("address.stache", "<p>{{street}} {{city}}</p>");
 ```
 
 And called within another template like:
 
-```javascript
+```js
 const template = stache("{{#person.address}} {{>address.stache}} {{/person.address}}");
 ```
 
@@ -74,7 +74,7 @@ rendering `template` would produce:
 The 2nd argument to `{{>key}}` can specify a different context for the partial to be rendered
 with.  The following example renders the same thing as above:
 
-```javascript
+```js
 const template = stache("{{#person}} {{>address.stache address}} {{/person}}");
 ```
 
@@ -89,10 +89,10 @@ const template = stache("{{#person}} {{>address.stache address}} {{/person}}");
 {{#item}}{{>myPartial}}{{/item}}
 ```
 
-```javascript
+```js
 {
-  item: {name: "Justin"},
-  myPartial: stache("{{name}}")
+	item: {name: "Justin"},
+	myPartial: stache("{{name}}")
 }
 ```
 

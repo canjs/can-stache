@@ -50,7 +50,7 @@ Rendering:
 
 With:
 
-```javascript
+```js
 {name: "Austin"}
 ```
 
@@ -77,11 +77,11 @@ Rendering:
 
 With:
 
-```javascript
+```js
 {
-  book: {
-    author: "Ernest Hemingway"
-  }
+	book: {
+		author: "Ernest Hemingway"
+	}
 }
 ```
 
@@ -107,10 +107,10 @@ Rendering:
 
 With:
 
-```javascript
+```js
 {
-  title: "The Book of Bitovi",
-  chapters: [{name: "Breakdown"}]
+	title: "The Book of Bitovi",
+	chapters: [{name: "Breakdown"}]
 }
 ```
 
@@ -138,17 +138,17 @@ The template:
 
 Rendered with data:
 
-```javascript
+```js
 {
-  user: function(){ return "Justin" }
+	user: function(){ return "Justin" }
 }
 ```
 
 And with a registered helper like:
 
-```javascript
+```js
 stache.registerHelper('greeting', function() {
-  return "Hello";
+	return "Hello";
 });
 ```
 
@@ -172,19 +172,19 @@ The template:
 
 Rendered with:
 
-```javascript
+```js
 {verb: "swept"}
 ```
 
 Will call a `madLib` helper with the following arguments:
 
-```javascript
+```js
 stache.registerHelper('madLib',
-  function(subject, verb, number, options){
-    // subject -> "Lebron James"
-    // verb -> "swept"
-    // number -> 4
-});
+	function(subject, verb, number, options){
+		// subject -> "Lebron James"
+		// verb -> "swept"
+		// number -> 4
+	});
 ```
 
 If an argument `key` value is a [can-map] property, the Observe’s
@@ -198,17 +198,17 @@ The template:
 
 Rendered with:
 
-```javascript
+```js
 {user: new Map({name: "Slim Shady"})}
 ```
 
 Needs the helper to check if name is a function or not:
 
-```javascript
+```js
 stache.registerHelper('mr',function(name){
-  return "Mr. "+ (typeof name === "function" ?
-                  name():
-                  name)
+	return "Mr. "+ (typeof name === "function" ?
+		name():
+		name)
 });
 ```
 
@@ -231,19 +231,19 @@ The template:
 
 And the helper:
 
-```javascript
+```js
 stache.registerHelper("excuse",function(options) {
-  return ["My",
-    options.hash.who || "dog".
-    options.hash.how || "ate",
-    "my",
-    options.hash.what || "homework"].join(" ");
+	return ["My",
+		options.hash.who || "dog".
+			options.hash.how || "ate",
+		"my",
+		options.hash.what || "homework"].join(" ");
 });
 ```
 
 Rendered with:
 
-```javascript
+```js
 {pet: "cat"}
 ```
 

@@ -20,30 +20,30 @@ expression arguments.
 The following illustrates what `~some.key` would return given
 different data structures:
 
-```javascript
+```js
 // A non-observable JS object:
 const data1 = {some: {key: "value"}};
-   //-> "value"
+//-> "value"
 
 // A non-observable JS object w/ a function at the end
 const data2 = {some: {key: function(){ return "value"; }}};
-   //-> "value"
+//-> "value"
 
 // A non-observable JS object with intermediate functions:
 const data3 = {some: function(){ return {key: "value"}}};
-   //-> "value"
+//-> "value"
 
 // A observable can-map
 const data4 = {some: new DefineMap({key: "value"})};
-   //-> canCompute("value")
+//-> canCompute("value")
 
 // A method on an observable can-map that reads observables
 const Some = DefineMap.extend({
-  value: "string",
-  key: function(){ return this.value; }
+	value: "string",
+	key: function(){ return this.value; }
 });
 const data5 = {some: new Some({value: "value"})};
-   //-> compute(function(){ return this.value; })
+//-> compute(function(){ return this.value; })
 ```
 
 Notice that `~` should only be used once in a value lookup expression.

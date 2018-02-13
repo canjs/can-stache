@@ -15,11 +15,11 @@ Hello!
 {{/person}}
 ```
 
-```javascript
+```js
 {
-  person: {
-    name: "Andy"
-  }
+	person: {
+		name: "Andy"
+	}
 }
 ```
 
@@ -39,7 +39,7 @@ Hello!
 {{/person}}
 ```
 
-```javascript
+```js
 {}
 ```
 
@@ -62,7 +62,7 @@ Hello!
 {{/person}}
 ```
 
-```javascript
+```js
 {}
 ```
 
@@ -86,9 +86,9 @@ primarily used when the items in the array are primitives like strings and numbe
 {{/people}}
 ```
 
-```javascript
+```js
 {
-  people: ["Andy", "Austin", "Justin"]
+	people: ["Andy", "Austin", "Justin"]
 }
 ```
 

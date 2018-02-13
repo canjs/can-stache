@@ -21,15 +21,15 @@ Note that we use a key expression to set local scope. Also note it is
 a dot slash on the child key expression.
 The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
-```javascript
+```js
 const grandpaWorm = new DefineMap({
-  name: "Earthworm Jim",
-  child: {
-    name: "Grey Worm",
-    child: {
-      name: "MyDoom"
-    }
-  }
+	name: "Earthworm Jim",
+	child: {
+		name: "Grey Worm",
+		child: {
+			name: "MyDoom"
+		}
+	}
 });
 
 const renderer = stache(`
@@ -58,18 +58,18 @@ The view variable will be the document fragment:
 
 A template variable can be passed in
 
-```javascript
+```js
 const grandpaWorm = new DefineMap({
-  child: {
-    name: "Earthworm Jim",
-    hasArms: false,
-    child: {
-      name: "Grey Worm",
-      child: {
-        name: "MyDoom"
-      }
-    }
-  }
+	child: {
+		name: "Earthworm Jim",
+		hasArms: false,
+		child: {
+			name: "Grey Worm",
+			child: {
+				name: "MyDoom"
+			}
+		}
+	}
 });
 
 const renderer = stache(`

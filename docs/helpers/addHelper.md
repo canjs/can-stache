@@ -12,9 +12,9 @@ function to invoke.
 See [can-stache.Helpers] for more details on using helpers
 and [can-stache.registerHelper] to get computes for observable values.
 
-```javascript
+```js
 stache.addHelper("upper", function(str){
-  return str.toUpperCase();
+	return str.toUpperCase();
 });
 ```
 
