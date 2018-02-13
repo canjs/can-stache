@@ -27,7 +27,6 @@ section will be rendered.
 ```
 
 ```js
-/* Data */
 {
   friends: true
 }
@@ -55,7 +54,6 @@ only uses a single tag and exists inside a helper section.
 ```
 
 ```js
-/* Data */
 {
   friends: false
 }
@@ -80,7 +78,6 @@ section will be rendered.
 ```
 
 ```js
-/* Data */
 {
   friends: []
 }
@@ -105,7 +102,6 @@ will be rendered using the inner text item by item.
 ```
 
 ```js
-/* Data */
 {
   friends: [
     { name: "Austin" },
@@ -135,7 +131,6 @@ the current context so that all tags inside will look for keys on the local cont
 ```
 
 ```js
-/* Data */
 {
   name: "Andy",
   friend: { name: "Justin" }
@@ -163,7 +158,6 @@ key1 and key2. If the result of comparison is **truthy**, the section will be re
 ```
 
 ```js
-/* Data */
 {
   name: 'John'
 }
@@ -242,7 +236,6 @@ and the data passed.
 ```
 
 ```js
-/* Data */
 { name: 'John' }
 ```
 
@@ -259,7 +252,6 @@ and the data passed.
 ```
 
 ```js
-/* Data */
 new DefineMap({ name: 'John' })
 ```
 
@@ -276,7 +268,6 @@ new DefineMap({ name: 'John' })
 ```
 
 ```js
-/* Data */
 { name: 'John' }
 ```
 
@@ -293,7 +284,6 @@ new DefineMap({ name: 'John' })
 ```
 
 ```js
-/* Data */
 new DefineMap({ name: 'John' })
 ```
 

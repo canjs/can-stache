@@ -16,7 +16,6 @@ Hello!
 ```
 
 ```js
-/* Data */
 {
 	person: {
 		name: "Andy"
@@ -41,7 +40,6 @@ Hello!
 ```
 
 ```js
-/* Data */
 {}
 ```
 
@@ -65,7 +63,6 @@ Hello!
 ```
 
 ```js
-/* Data */
 {}
 ```
 
@@ -90,7 +87,6 @@ primarily used when the items in the array are primitives like strings and numbe
 ```
 
 ```js
-/* Data */
 {
 	people: ["Andy", "Austin", "Justin"]
 }

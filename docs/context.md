@@ -16,7 +16,6 @@ In this example, `{{last}}` has no output because the context of the `{{#person}
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis" },
 	last: "Abril",
@@ -59,7 +58,6 @@ Let’s look at what happens with the scope the following example:
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis" },
 	last: "Abril",
@@ -93,7 +91,6 @@ we could change the template to:
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis", last: "*****" },
 	last: "Abril",

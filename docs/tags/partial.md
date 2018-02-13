@@ -90,7 +90,6 @@ var template = stache("{{#person}} {{>address.stache address}} {{/person}}");
 ```
 
 ```js
-/* Data */
 {
   item: {name: "Justin"},
   myPartial: stache("{{name}}")

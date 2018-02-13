@@ -25,7 +25,6 @@ Inserts the escaped value of `expression` into the result. This is the most comm
 ```
 
 ```js
-/* Data */
 { name: "<b>Justin</b>" }
 ```
 
@@ -44,7 +43,6 @@ Inserts the unescaped value of `expression` into the result.
 ```
 
 ```js
-/* Data */
 { name: "<b>Justin</b>" }
 ```
 
@@ -82,7 +80,6 @@ Ignores the magic tag.
 ```
 
 ```js
-/* Data */
 { message: "<blink>Hello</blink>" };
 ```
 
@@ -108,7 +105,6 @@ If `expression` is truthy, renders the subsection:
 ```
 
 ```js
-/* Data */
 { shown: true };
 ```
 
@@ -125,8 +121,7 @@ The subsection is rendered with the `expression` value as the top of the scope:
 ```
 
 ```js
-/* Data */
-{ person: {first: "Alexis", last: "Abril"} };
+{ person: {first: "Alexis", last: "Abril"} }
 ```
 
 ```html
@@ -142,8 +137,7 @@ If `expression` is falsey, renders the inverse subsection if present:
 ```
 
 ```js
-/* Data */
-{ shown: false };
+{ shown: false }
 ```
 
 ```html
@@ -160,7 +154,6 @@ is rendered with each item in the array as the top of the scope:
 ```
 
 ```js
-/* Data */
 {items: [2,4,8,16]}
 ```
 
@@ -178,7 +171,6 @@ is rendered:
 ```
 
 ```js
-/* Data */
 {items: []}
 ```
 
@@ -201,8 +193,7 @@ render the subsection.
 ```
 
 ```js
-/* Data */
-{ shown: false };
+{ shown: false }
 ```
 
 ```html

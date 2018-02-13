@@ -38,7 +38,6 @@ the [can-view-scope scope]. It looks like:
 ```
 
 ```js
-/* Data */
 {
 	pluralize: function(type, count){
 		return "data-pluralize"
@@ -49,7 +48,6 @@ the [can-view-scope scope]. It looks like:
 ```
 
 ```js
-/* Helpers */
 {
 	pluralize: function(type, count){
 		return type+(count() === 1 ? "" : "s")
@@ -74,7 +72,6 @@ the hash properties and values will be added to the helper options object. For e
 ```
 
 ```js
-/* Data */
 {
 	todos: new List([22,32,42]),
 	type: "age"
@@ -82,7 +79,6 @@ the hash properties and values will be added to the helper options object. For e
 ```
 
 ```js
-/* Helpers */
 {
 	pluralize: function(helperOptions){
 		return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")

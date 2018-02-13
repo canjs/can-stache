@@ -51,7 +51,6 @@ For example:
 ```
 
 ```js
-/* Data */
 {person: {address: {street: "123 Evergreen", city: "Springfield"}}}
 ```
 
@@ -72,7 +71,6 @@ The new context can be a lookup expression, or a set of hashes which are taken t
 ```
 
 ```js
-/* Data */
 {person: {address: {street: "123 Evergreen", city: "Springfield"}}}
 ```
 
@@ -94,7 +92,6 @@ is that the subsection `BLOCK` is rendered no matter what:
 ```
 
 ```js
-/* Data */
 {person: {}}
 ```
 

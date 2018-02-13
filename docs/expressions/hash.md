@@ -15,7 +15,7 @@ and `EXPRESSION` values.
 
 The following template:
 
-```js
+```
 {{ method( age=5 first=person.firstName last=person.getLastName() ) }}
 ```
 
@@ -31,7 +31,7 @@ and `EXPRESSION` values.
 
 The following template:
 
-```js
+```
 {{ method age=5 first=person.firstName last=person.getLastName() }}
 ```
 
@@ -66,10 +66,9 @@ For example, in a call expression:
 ```
 
 ```js
-/* Data */
 {
 	methodA: function(arg){},
-		methodB: function(arg1, arg2){},
+	methodB: function(arg1, arg2){},
 	key: compute("value")
 }
 ```
@@ -86,7 +85,6 @@ In a helper expression:
 ```
 
 ```js
-/* Data */
 {
 	methodA: function(options){},
 	methodB: function(options){},

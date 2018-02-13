@@ -87,7 +87,7 @@ var view = renderer(grandpaWorm);
 
 The view variable will be the document fragment:
 
-```js
+```html
 <p>Earthworm Jim</p>
 <p>false</p>
 <div>

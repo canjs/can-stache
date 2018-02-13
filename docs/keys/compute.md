@@ -22,27 +22,27 @@ different data structures:
 
 ```js
 // A non-observable JS object:
-{some: {key: "value"}}
+var data1 = {some: {key: "value"}};
    //-> "value"
 
 // A non-observable JS object w/ a function at the end
-{some: {key: function(){ return "value"; }}}
+var data2 = {some: {key: function(){ return "value"; }}};
    //-> "value"
 
 // A non-observable JS object with intermediate functions:
-{some: function(){ return {key: "value"}}}
+var data3 = {some: function(){ return {key: "value"}}};
    //-> "value"
 
 // A observable can-map
-{some: new DefineMap({key: "value"})}
+var data4 = {some: new DefineMap({key: "value"})};
    //-> canCompute("value")
 
 // A method on an observable can-map that reads observables
 var Some = DefineMap.extend({
 	value: "string",
 	key: function(){ return this.value; }
-})
-{some: new Some({value: "value"})}
+});
+var data5 = {some: new Some({value: "value"})};
    //-> compute(function(){ return this.value; })
 ```
 

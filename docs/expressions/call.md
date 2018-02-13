@@ -30,7 +30,6 @@ the [can-view-scope.Options helpers scope]. It looks like:
 ```
 
 ```js
-/* Data */
 {
 	pluralize: function(type, count){
 		return type+(count === 1 ? "" : "s")
@@ -54,7 +53,6 @@ an object with the hash properties and values will be passed. For example:
 ```
 
 ```js
-/* Data */
 {
 	pluralize: function(options){
 		return options.word+(options.count === 1 ? "" : "s")

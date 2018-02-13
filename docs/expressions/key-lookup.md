@@ -90,28 +90,28 @@ different data structures as a [can-stache/expressions/helper] and in all other 
 
 ```js
 // A non-observable JS object:
-{some: {key: "value"}};
+var data1 = {some: {key: "value"}};
    // Helper -> "value"
    // Other  -> "value"
 
 // A non-observable JS object w/ a function at the end
-{some: {key: function(){ return "value"; }}}
+var data2 = {some: {key: function(){ return "value"; }}};
    // Helper -> "value"
    // Other  -> "value"
 
-// A non-observable JS object with intermeidate functions:
-{some: function(){ return {key: "value"}}}
+// A non-observable JS object with intermediate functions:
+var data3 = {some: function(){ return {key: "value"}}};
    // Helper -> "value"
    // Other  -> "value"
 
 // A observable can-map
-{some: new Map({key: "value"})}
+var data4 = {some: new Map({key: "value"})};
    // Helper -> canCompute("value")
    // Other  -> "value"
 
 // A method on an observable can-map that reads observables
-var Some = Map.extend({key: function(){ return this.attr("value")}})
-{some: new Some({value: "value"})}
+var Some = Map.extend({key: function(){ return this.attr("value")}});
+var data5 = {some: new Some({value: "value"})};
    // Helper -> canCompute("value")
    // Other  -> "value"
 ```

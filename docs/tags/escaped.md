@@ -109,7 +109,7 @@ With:
 
 ```js
 {
-  title: "The Book of Bitovi"
+  title: "The Book of Bitovi",
   chapters: [{name: "Breakdown"}]
 }
 ```

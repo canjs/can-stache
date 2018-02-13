@@ -87,7 +87,6 @@ For example, in a call expression:
 ```
 
 ```js
-/* Data */
 {
   methodA: function(arg) {},
   methodB: function(arg1, arg2) {},
@@ -107,7 +106,6 @@ In a helper expression:
 ```
 
 ```js
-/* Data */
 {
   methodA: function(options) {},
   methodB: function(options) {},
@@ -129,7 +127,6 @@ the [can-view-scope.Options helpers scope]. It looks like:
 ```
 
 ```js
-/* Data */
 {
   pluralize: function(type, count){
     return type+(count === 1 ? "" : "s")
@@ -153,7 +150,6 @@ an object with the hash properties and values will be passed. For example:
 ```
 
 ```js
-/* Data */
 {
   pluralize: function(options){
     return options.word+(options.count === 1 ? "" : "s")
@@ -180,7 +176,6 @@ the [can-view-scope scope]. It looks like:
 ```
 
 ```js
-/* Data */
 {
   pluralize: function(type, count){
     return "data-pluralize"
@@ -191,9 +186,8 @@ the [can-view-scope scope]. It looks like:
 ```
 
 ```js
-/* Helpers */
 {
-    pluralize: function(type, count){
+  pluralize: function(type, count){
     return type+(count() === 1 ? "" : "s")
   }
 }
@@ -216,7 +210,6 @@ the hash properties and values will be added to the helper options object. For e
 ```
 
 ```js
-/* Data */
 {
   todos: new List([22,32,42]),
   type: "age"
@@ -224,7 +217,6 @@ the hash properties and values will be added to the helper options object. For e
 ```
 
 ```js
-/* Helpers */
 {
     pluralize: function(helperOptions){
     return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
@@ -247,7 +239,6 @@ A [can-stache/expressions/bracket] can be used to look up a dynamic property in 
 ```
 
 ```js
-/* Data */
 {
   key: "name",
   name: "Kevin"
@@ -267,7 +258,6 @@ This can be useful for looking up values using keys containing non-alphabetic ch
 ```
 
 ```js
-/* Data */
 {
   "person:name": "Kevin"
 }
@@ -286,7 +276,6 @@ Bracket expressions can also be used to look up a value in the result of another
 ```
 
 ```js
-/* Data */
 {
   key: "name",
   getPerson: function() {
