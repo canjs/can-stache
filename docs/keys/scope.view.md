@@ -21,27 +21,27 @@ Note that we use a key expression to set local scope. Also note it is
 a dot slash on the child key expression.
 The dot slash prevents walking up the scope. See [can-stache.tags.named-partial#TooMuchRecursion Too Much Recursion] for more details.
 
-```js
-var grandpaWorm = new DefineMap({
-	name: "Earthworm Jim",
-	child: {
-		name: "Grey Worm",
-		child: {
-			name: "MyDoom"
-		}
-	}
+```javascript
+const grandpaWorm = new DefineMap({
+  name: "Earthworm Jim",
+  child: {
+    name: "Grey Worm",
+    child: {
+      name: "MyDoom"
+    }
+  }
 });
 
-var renderer = stache(`
-	<span>{{name}}</span>
-	{{#./child}}
-		<div>
-			{{>scope.view}}
-		</div>
-	{{/child}}
+const renderer = stache(`
+  <span>{{name}}</span>
+  {{#./child}}
+    <div>
+      {{>scope.view}}
+    </div>
+  {{/child}}
 `);
 
-var view = renderer(grandpaWorm);
+const view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:
@@ -58,31 +58,31 @@ The view variable will be the document fragment:
 
 A template variable can be passed in
 
-```js
-var grandpaWorm = new DefineMap({
-	child: {
-		name: "Earthworm Jim",
-		hasArms: false,
-		child: {
-			name: "Grey Worm",
-			child: {
-				name: "MyDoom"
-			}
-		}
-	}
+```javascript
+const grandpaWorm = new DefineMap({
+  child: {
+    name: "Earthworm Jim",
+    hasArms: false,
+    child: {
+      name: "Grey Worm",
+      child: {
+        name: "MyDoom"
+      }
+    }
+  }
 });
 
-var renderer = stache(`
-	<p>{{name}}</p>
-	<p>{{hasArms}}</p>
-	{{#./child}}
-		<div>
-			{{>scope.view}}
-		</div>
-	{{/child}}
+const renderer = stache(`
+  <p>{{name}}</p>
+  <p>{{hasArms}}</p>
+  {{#./child}}
+    <div>
+      {{>scope.view}}
+    </div>
+  {{/child}}
 `);
 
-var view = renderer(grandpaWorm);
+const view = renderer(grandpaWorm);
 ```
 
 The view variable will be the document fragment:

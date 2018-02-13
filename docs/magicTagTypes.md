@@ -24,7 +24,7 @@ Inserts the escaped value of `expression` into the result. This is the most comm
 <div>{{name}}</div>
 ```
 
-```js
+```javascript
 { name: "<b>Justin</b>" }
 ```
 
@@ -42,7 +42,7 @@ Inserts the unescaped value of `expression` into the result.
 <div>{{{name}}}</div>
 ```
 
-```js
+```javascript
 { name: "<b>Justin</b>" }
 ```
 
@@ -55,17 +55,17 @@ Inserts the unescaped value of `expression` into the result.
 
 Renders another template with the same context as the current context.
 
-```js
-var template = stache("<h1>{{>title}}</h1>");
+```javascript
+const template = stache("<h1>{{>title}}</h1>");
 
 
-var frag = template(
-	{message: "Hello"},
-	{
-		partials: { title: 	stache("<blink>{{message}}</blink>") }
-	});
+const frag = template(
+  {message: "Hello"},
+  {
+    partials: { title:   stache("<blink>{{message}}</blink>") }
+  });
 
-	frag //-> <h1><blink>Hello</blink></h1>
+  frag //-> <h1><blink>Hello</blink></h1>
 ```
 
 Other ways to load and reference partials are discussed [can-stache.tags.partial here].
@@ -79,7 +79,7 @@ Ignores the magic tag.
 <h1>{{!message}}</h1>
 ```
 
-```js
+```javascript
 { message: "<blink>Hello</blink>" };
 ```
 
@@ -104,7 +104,7 @@ If `expression` is truthy, renders the subsection:
 <h1>{{#shown}}Hello{{/shown}}</h1>
 ```
 
-```js
+```javascript
 { shown: true };
 ```
 
@@ -120,7 +120,7 @@ The subsection is rendered with the `expression` value as the top of the scope:
 <h1>{{#person}}Hello {{first}}  {{person.last}}{{/person}}</h1>
 ```
 
-```js
+```javascript
 { person: {first: "Alexis", last: "Abril"} }
 ```
 
@@ -136,7 +136,7 @@ If `expression` is falsey, renders the inverse subsection if present:
 <h1>{{#shown}}Hello{{else}}Goodbye{{/shown}}</h1>
 ```
 
-```js
+```javascript
 { shown: false }
 ```
 
@@ -153,7 +153,7 @@ is rendered with each item in the array as the top of the scope:
 <p>{{#items}}{{.}} {{/items}}</p>
 ```
 
-```js
+```javascript
 {items: [2,4,8,16]}
 ```
 
@@ -170,7 +170,7 @@ is rendered:
 <p>{{#items}}{{.}} {{else}}No items{{/items}}</p>
 ```
 
-```js
+```javascript
 {items: []}
 ```
 
@@ -192,7 +192,7 @@ render the subsection.
 <h1>{{^shown}}Hello{{/shown}}</h1>
 ```
 
-```js
+```javascript
 { shown: false }
 ```
 

@@ -47,14 +47,14 @@ The following
 creates a stache template, renders it with data, and inserts
 the result into the page:
 
-```js
-var stache = require("can-stache");
+```javascript
+import stache from "can-stache";
 // renderer is a "renderer function"
-var renderer = stache("<h1>Hello {{subject}}</h1>");
+const renderer = stache("<h1>Hello {{subject}}</h1>");
 
 // "renderer functions" render a template and return a
 // document fragment.
-var fragment = renderer({subject: "World"})
+const fragment = renderer({subject: "World"});
 
 // A document fragment is a collection of elements that can be
 // used with jQuery or with normal DOM methods.
@@ -65,13 +65,13 @@ document.body.appendChild(fragment)
 Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/list/list DefineList]s and the
 resulting HTML will update when the observable data changes.
 
-```js
-var DefineMap = require("can-define/map/map");
+```javascript
+import DefineMap from "can-define/map/map";
 
 
-var renderer = stache("<h1>Hello {{subject}}</h1>");
-var map = new DefineMap({subject: "World"});
-var fragment = renderer(map)
+const renderer = stache("<h1>Hello {{subject}}</h1>");
+const map = new DefineMap({subject: "World"});
+const fragment = renderer(map);
 document.body.appendChild(fragment)
 
 map.subject = "Earth";

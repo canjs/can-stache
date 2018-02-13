@@ -24,13 +24,13 @@ to a string (`value`), and the string (`value`) to a number (`age`)
 as follows:
 
 
-```js
+```javascript
 stache.registerConverter("numberToString", {
  get: function(fooCompute) {
- 	return "" + fooCompute();
+   return "" + fooCompute();
  },
  set: function(newVal, fooCompute) {
- 	fooCompute(+newVal);
+   fooCompute(+newVal);
  }
 });
 ```
@@ -58,19 +58,19 @@ but one that should probably be part of a view model.
 
 The following might converts both ways `first` and `last` to `value`.
 
-```js
-var canBatch = require("can-event/batch/batch");
+```javascript
+import canBatch from "can-event/batch/batch";
 
 stache.registerConverter("fullName", {
  get: function(first, last) {
- 	return first() + last();
+   return first() + last();
  },
  set: function(newFullName, first, last) {
-	canBatch.start();
-	var parts = newFullName.split(" ");
-	first(parts[0]);
-	last(parts[1]);
-	canBatch.stop();
+  canBatch.start();
+  const parts = newFullName.split(" ");
+  first(parts[0]);
+  last(parts[1]);
+  canBatch.stop();
  }
 });
 ```

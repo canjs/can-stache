@@ -15,13 +15,13 @@ The following template:
 
 Rendered with
 
-```js
+```javascript
 {verb: "swept"}
 ```
 
 Will call a `madLib` helper with the following arguments.
 
-```js
+```javascript
 stache.addHelper('madLib', function(subject, verb, number) {
   // subject -> "Lebron James"
   // verb -> "swept"
@@ -61,7 +61,7 @@ If the helper is called __within a tag__ like:
 
 The returned function is called with the `<ul>` element:
 
-```js
+```javascript
 stache.addHelper("sortable",function(){
   return function(el){
     $(el).slider();
@@ -78,7 +78,7 @@ If the helper is called __between tags__ like:
 The returned function is called with a temporary element. The
 following helper would be called with a temporary `<li>` element:
 
-```js
+```javascript
 stache.addHelper("items",function(){
   return function(li){
 

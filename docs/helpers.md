@@ -26,7 +26,7 @@ section will be rendered.
 {{/if}}
 ```
 
-```js
+```javascript
 {
   friends: true
 }
@@ -53,7 +53,7 @@ only uses a single tag and exists inside a helper section.
 </ul>
 ```
 
-```js
+```javascript
 {
   friends: false
 }
@@ -77,7 +77,7 @@ section will be rendered.
 {{/unless}}
 ```
 
-```js
+```javascript
 {
   friends: []
 }
@@ -101,7 +101,7 @@ will be rendered using the inner text item by item.
 </ul>
 ```
 
-```js
+```javascript
 {
   friends: [
     { name: "Austin" },
@@ -130,7 +130,7 @@ the current context so that all tags inside will look for keys on the local cont
 {{/with}}
 ```
 
-```js
+```javascript
 {
   name: "Andy",
   friend: { name: "Justin" }
@@ -157,7 +157,7 @@ key1 and key2. If the result of comparison is **truthy**, the section will be re
 </ul>
 ```
 
-```js
+```javascript
 {
   name: 'John'
 }
@@ -185,11 +185,11 @@ in your application. The below example takes a given key and
 returns the localized value using
 [jQuery Globalize](https://github.com/jquery/globalize).
 
-```js
+```javascript
 stache.addHelper('l10n', function(str, options){
-	return Globalize != undefined
-		? Globalize.localize(str)
-		: str;
+  return Globalize != undefined
+    ? Globalize.localize(str)
+    : str;
 });
 ```
 
@@ -221,8 +221,8 @@ Helpers can also be called with observable values or non-observable values.
 
 Considering a helper like:
 
-```js
-stache.registerHelper("myHelper", function(value){ ... })
+```javascript
+stache.registerHelper("myHelper", function(value){ /* ... */ })
 ```
 
 The following details what `value` is depending on how the helper is called
@@ -235,11 +235,11 @@ and the data passed.
 {{ myHelper(name) }}
 ```
 
-```js
+```javascript
 { name: 'John' }
 ```
 
-```js
+```javascript
 /* Value */
 'John'
 ```
@@ -251,11 +251,11 @@ and the data passed.
 {{ myHelper(name) }}
 ```
 
-```js
+```javascript
 new DefineMap({ name: 'John' })
 ```
 
-```js
+```javascript
 /* Value */
 'John'
 ```
@@ -267,11 +267,11 @@ new DefineMap({ name: 'John' })
 {{ myHelper name }}
 ```
 
-```js
+```javascript
 { name: 'John' }
 ```
 
-```js
+```javascript
 /* Value */
 'John'
 ```
@@ -283,11 +283,11 @@ new DefineMap({ name: 'John' })
 {{ myHelper name }}
 ```
 
-```js
+```javascript
 new DefineMap({ name: 'John' })
 ```
 
-```js
+```javascript
 /* Value */
 compute('John')
 ```
@@ -305,11 +305,11 @@ template between an `{{else}}` tag and the closing tag.
 For example, when a route matches the string passed to our
 routing helper it will show/hide the text.
 
-```js
+```javascript
 stache.registerHelper('routing', function(str, options){
-	if (route.attr('filter') === str) {
-		return options.fn(this);
-	}
+  if (route.attr('filter') === str) {
+    return options.fn(this);
+  }
 });
 ```
 
@@ -327,19 +327,19 @@ all ending arguments using the `key=value` syntax. The hash object will be provi
 to the helper as `options.hash`. Additionally, when using [can-stache.tags.section] tags with a helper,
 you can set a custom context by passing the object instead of `this`.
 
-```js
+```javascript
 stache.registerHelper('exercise', function(group, action, num, options) {
-	if (group && group.length > 0 && action && num > 0) {
-		return options.fn({
-			group: group,
-			action: action,
-			where: options.hash.where,
-			when: options.hash.when,
-			num: num
-		});
-	} else {
-		return options.inverse(this);
-	}
+  if (group && group.length > 0 && action && num > 0) {
+    return options.fn({
+      group: group,
+      action: action,
+      where: options.hash.where,
+      when: options.hash.when,
+      num: num
+    });
+  } else {
+    return options.inverse(this);
+  }
 });
 ```
 
@@ -352,10 +352,10 @@ stache.registerHelper('exercise', function(group, action, num, options) {
 {{/exercise}}
 ```
 
-```js
+```javascript
 {
-	pets: ['cat', 'dog', 'parrot'],
-	time: 'this morning'
+  pets: ['cat', 'dog', 'parrot'],
+  time: 'this morning'
 }
 ```
 

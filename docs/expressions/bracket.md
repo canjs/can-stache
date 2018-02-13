@@ -34,10 +34,10 @@ A bracket expression can be used to look up a dynamic property in the [can-view-
 <h1>{{[key]}}</h1>
 ```
 
-```js
+```javascript
 {
-	key: "name",
-	name: "Kevin"
+  key: "name",
+  name: "Kevin"
 }
 ```
 
@@ -53,7 +53,7 @@ This can be useful for looking up values using keys containing non-alphabetic ch
 <h1>{{["person:"]}}</h1>
 ```
 
-```js
+```javascript
 {
   "person:name": "Kevin"
 }
@@ -72,7 +72,7 @@ Bracket expressions can also be used to look up a value in the result of another
 {{getPerson()[key]}}
 ```
 
-```js
+```javascript
 {
   key: "name",
   getPerson: function() {

@@ -21,7 +21,7 @@ The following template:
 
 Might call `method` with:
 
-```js
+```javascript
 {age: 5, first: "Justin", last: "Meyer"}
 ```
 
@@ -37,9 +37,9 @@ The following template:
 
 Might call `method` with:
 
-```js
+```javascript
 {
-	hash: {age: 5, first: compute("Justin"), last: compute("Meyer")}
+  hash: {age: 5, first: compute("Justin"), last: compute("Meyer")}
 }
 ```
 
@@ -65,11 +65,11 @@ For example, in a call expression:
 	{{methodB(propX=key propY='literal', propZ=5)}}
 ```
 
-```js
+```javascript
 {
-	methodA: function(arg){},
-	methodB: function(arg1, arg2){},
-	key: compute("value")
+  methodA: function(arg){},
+  methodB: function(arg1, arg2){},
+  key: compute("value")
 }
 ```
 
@@ -84,11 +84,11 @@ In a helper expression:
 	{{methodB(propX=key propY='literal' propZ=5)}}
 ```
 
-```js
+```javascript
 {
-	methodA: function(options){},
-	methodB: function(options){},
-	key: compute("value")
+  methodA: function(options){},
+  methodB: function(options){},
+  key: compute("value")
 }
 ```
 

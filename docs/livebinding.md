@@ -23,14 +23,14 @@ In this example, we have a simple user welcome screen.
 </p>
 ```
 
-```js
-var data = new DefineMap({
-	user: 'Tina Fey',
-	messages: 0
+```javascript
+const data = new DefineMap({
+  user: 'Tina Fey',
+  messages: 0
 });
 
-var template = stache( document.getElementById("template").innerHTML );
-var frag = template( data );
+const template = stache( document.getElementById("template").innerHTML );
+const frag = template( data );
 document.body.appendChild( frag );
 ```
 
@@ -45,7 +45,7 @@ Since we have no message it will render:
 Now say we have a request that updates
 the `messages` attribute to have `5` messages.
 
-```js
+```javascript
 data.message = 5;
 ```
 

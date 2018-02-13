@@ -64,7 +64,7 @@ If the helper is called __within a tag__ like:
 
 The returned function is called with the `<ul>` element:
 
-```js
+```javascript
 stache.registerHelper("sortable",function() {
   return function(el){
     $(el).slider();
@@ -80,7 +80,7 @@ If the helper is called __between tags__ like:
 
 The returned function is called with a temporary text node:
 
-```js
+```javascript
 stache.registerHelper("items",function() {
   return function(textNode){
     // do something, probably replace textNode

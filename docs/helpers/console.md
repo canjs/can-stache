@@ -7,14 +7,14 @@ All `console` methods are available as stache helpers. A few of these are shown 
 
 Uses `console.log` to show the result of the provided expressions.
 
-```js
-var view = stache("{{console.log(person.name, 'is', person.age, 'year(s) old')}}");
+```javascript
+const view = stache("{{console.log(person.name, 'is', person.age, 'year(s) old')}}");
 
 view({
-	person: {
-		name: 'Connor',
-		age: 1
-	}
+  person: {
+    name: 'Connor',
+    age: 1
+  }
 });
 ```
 
@@ -30,8 +30,8 @@ You can also use `console.info`, `console.warn`, `console.error` in the same way
 
 [console.time()](https://developer.mozilla.org/en-US/docs/Web/API/Console/time) and [console.timeEnd()](https://developer.mozilla.org/en-US/docs/Web/API/Console/timeEnd) can be used to track how long an operation takes to run:
 
-```js
-var view = stache(`
+```javascript
+const view = stache(`
     {{console.time("rendering list")}}
     <ul>
         {{#each(things)}}
@@ -53,8 +53,8 @@ rendering list: 5.56298828125ms
 
 @signature `console.table`
 
-```js
-var view = stache("{{console.table(things)}}");
+```javascript
+const view = stache("{{console.table(things)}}");
 
 view({
     things: [ "hammer", "apple", "dog" ]

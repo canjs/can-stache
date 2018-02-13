@@ -10,7 +10,7 @@ When a [can-stache.helper helper function]
 is called by a [can-stache/expressions/helper], a `helperOptions`
 object is passed with the following properties:
 
-```js
+```javascript
 stache.registerHelper("myHelper", function(helperOptions){
   helperOptions.fn      //-> sectionRenderer(){}
   helperOptions.inverse //-> sectionRenderer(){}
@@ -41,11 +41,11 @@ stache.registerHelper("myHelper", function(helperOptions){
 
   might provide a `hash` like:
 
-  ```js
+  ```javascript
   {
-		name: compute("Mr. Pig"),
-		other: 3,
-		position: "top"
+    name: compute("Mr. Pig"),
+    other: 3,
+    position: "top"
   }
   ```
 

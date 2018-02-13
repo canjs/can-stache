@@ -50,7 +50,7 @@ For example:
 {{/with}}
 ```
 
-```js
+```javascript
 {person: {address: {street: "123 Evergreen", city: "Springfield"}}}
 ```
 
@@ -70,7 +70,7 @@ The new context can be a lookup expression, or a set of hashes which are taken t
 {{/with}}
 ```
 
-```js
+```javascript
 {person: {address: {street: "123 Evergreen", city: "Springfield"}}}
 ```
 
@@ -91,7 +91,7 @@ is that the subsection `BLOCK` is rendered no matter what:
 {{/with}}
 ```
 
-```js
+```javascript
 {person: {}}
 ```
 

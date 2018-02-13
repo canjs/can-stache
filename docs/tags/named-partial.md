@@ -41,28 +41,28 @@ Named partials are sub-templates in a larger template that aren’t rendered unt
 
 Given this data:
 
-```js
+```javascript
 {
-	business: {
-		name: "Bitvoi",
-		address: { street: "Hello", city: "World" }
-	},
-	people: [
-		{
-			fullName: "James Atherton",
-			address: {
-				street: "123 45th Street",
-				city: "Moline"
-			}
-		},
-		{
-			fullName: "Someone Else",
-			address: {
-				street: "678 90th St",
-				city: "Chicago"
-			}
-		}
-	]
+  business: {
+    name: "Bitvoi",
+    address: { street: "Hello", city: "World" }
+  },
+  people: [
+    {
+      fullName: "James Atherton",
+      address: {
+        street: "123 45th Street",
+        city: "Moline"
+      }
+    },
+    {
+      fullName: "Someone Else",
+      address: {
+        street: "678 90th St",
+        city: "Chicago"
+      }
+    }
+  ]
 }
 ```
 
@@ -110,30 +110,30 @@ Named partials can also have a template block that references its own name in a 
 
 Given this data:
 
-```js
+```javascript
 {
-	yayRecursion: {
-		name: "Root",
-		nodes: [
-			{
-				name: "Leaf #1 in Root",
-				nodes: []
-			},
-			{
-				name: "Branch under Root",
-				nodes: [
-					{
-						name: "Leaf in Branch",
-						nodes: []
-					}
-				]
-			},
-			{
-				name: "Leaf #2 in Root",
-				nodes: []
-			}
-		]
-	}
+  yayRecursion: {
+    name: "Root",
+    nodes: [
+      {
+        name: "Leaf #1 in Root",
+        nodes: []
+      },
+      {
+        name: "Branch under Root",
+        nodes: [
+          {
+            name: "Leaf in Branch",
+            nodes: []
+          }
+        ]
+      },
+      {
+        name: "Leaf #2 in Root",
+        nodes: []
+      }
+    ]
+  }
 }
 ```
 
@@ -168,22 +168,22 @@ So if your data and template looks like this:
 
 Given this data:
 
-```js
+```javascript
 {
-	yayRecursion: {
-		name: "Root",
-		nodes: [
-			{
-				name: "Branch #1 in Root",
-				nodes: [
-					{
-						name: "Problem Child",
-						nodes: undefined
-					}
-				]
-			}
-		]
-	}
+  yayRecursion: {
+    name: "Root",
+    nodes: [
+      {
+        name: "Branch #1 in Root",
+        nodes: [
+          {
+            name: "Problem Child",
+            nodes: undefined
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 

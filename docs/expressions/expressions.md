@@ -86,7 +86,7 @@ For example, in a call expression:
   {{methodB(propX=key propY='literal', propZ=5)}}
 ```
 
-```js
+```javascript
 {
   methodA: function(arg) {},
   methodB: function(arg1, arg2) {},
@@ -105,7 +105,7 @@ In a helper expression:
   {{methodB(propX=key propY='literal' propZ=5)}}
 ```
 
-```js
+```javascript
 {
   methodA: function(options) {},
   methodB: function(options) {},
@@ -126,7 +126,7 @@ the [can-view-scope.Options helpers scope]. It looks like:
 <h1>{{pluralize(type, ages.length)}}</h1>
 ```
 
-```js
+```javascript
 {
   pluralize: function(type, count){
     return type+(count === 1 ? "" : "s")
@@ -149,7 +149,7 @@ an object with the hash properties and values will be passed. For example:
 <h1>{{pluralize(word=type count=ages.length)}}</h1>
 ```
 
-```js
+```javascript
 {
   pluralize: function(options){
     return options.word+(options.count === 1 ? "" : "s")
@@ -175,7 +175,7 @@ the [can-view-scope scope]. It looks like:
 <h1>{{pluralize type ages.length}}</h1>
 ```
 
-```js
+```javascript
 {
   pluralize: function(type, count){
     return "data-pluralize"
@@ -185,7 +185,7 @@ the [can-view-scope scope]. It looks like:
 }
 ```
 
-```js
+```javascript
 {
   pluralize: function(type, count){
     return type+(count() === 1 ? "" : "s")
@@ -209,14 +209,14 @@ the hash properties and values will be added to the helper options object. For e
 <h1>{{pluralize word=type count=ages.length}}</h1>
 ```
 
-```js
+```javascript
 {
   todos: new List([22,32,42]),
   type: "age"
 }
 ```
 
-```js
+```javascript
 {
     pluralize: function(helperOptions){
     return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
@@ -238,7 +238,7 @@ A [can-stache/expressions/bracket] can be used to look up a dynamic property in 
 <h1>{{[key]}}</h1>
 ```
 
-```js
+```javascript
 {
   key: "name",
   name: "Kevin"
@@ -257,7 +257,7 @@ This can be useful for looking up values using keys containing non-alphabetic ch
 <h1>{{["person:name"]}}</h1>
 ```
 
-```js
+```javascript
 {
   "person:name": "Kevin"
 }
@@ -275,7 +275,7 @@ Bracket expressions can also be used to look up a value in the result of another
 {{getPerson()[key]}}
 ```
 
-```js
+```javascript
 {
   key: "name",
   getPerson: function() {

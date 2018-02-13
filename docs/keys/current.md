@@ -33,7 +33,7 @@ The following template:
 
 Rendered with:
 
-```js
+```javascript
 {
   first: "Barry", last: "Meyer",
   children: [

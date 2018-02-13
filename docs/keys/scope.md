@@ -38,19 +38,19 @@ The filename of the current template (only available in dev mode).
 
 Use [can-view-scope::find] to look up the value of a key in the first scope where it is found.
 
-```js
-var view = stache(`
+```javascript
+const view = stache(`
 {{#each(tasks)}}
   <li>{{name}}{{scope.find("exclamation")}}</li>
 {{/each}}
 `);
 
-var data = new DefineMap({
-	task: ["one", "two"],
-	exclamation: "!!!"
+const data = new DefineMap({
+  task: ["one", "two"],
+  exclamation: "!!!"
 });
 
-var frag = view(data);
+const frag = view(data);
 // renders:
 // <li>one!!!</li>
 // <li>two!!!</li>
@@ -68,7 +68,7 @@ When looping over an array, [can-define/list/list], or [can-list], you an use `s
 
 Indexes start at 0.  If you want to start at 1, you can create a helper like:
 
-```js
+```javascript
 stache.registerHelper('scope.indexNum', function(options) {
   return options.scope.get("scope.index") + 1;
 });
@@ -104,19 +104,19 @@ The current line number that is being rendered (only available in dev mode).
 
 The root scope. This can be used for reading data from the root when in another scope:
 
-```js
-var view = stache(`
+```javascript
+const view = stache(`
 {{#each(tasks)}}
   <li>{{name}}{{scope.root.exclamation}}</li>
 {{/each}}
 `);
 
-var data = new DefineMap({
-	task: ["one", "two"],
-	exclamation: "!!!"
+const data = new DefineMap({
+  task: ["one", "two"],
+  exclamation: "!!!"
 });
 
-var frag = view(data);
+const frag = view(data);
 // renders:
 // <li>one!!!</li>
 // <li>two!!!</li>

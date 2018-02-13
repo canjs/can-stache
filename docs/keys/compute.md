@@ -20,29 +20,29 @@ expression arguments.
 The following illustrates what `~some.key` would return given
 different data structures:
 
-```js
+```javascript
 // A non-observable JS object:
-var data1 = {some: {key: "value"}};
+const data1 = {some: {key: "value"}};
    //-> "value"
 
 // A non-observable JS object w/ a function at the end
-var data2 = {some: {key: function(){ return "value"; }}};
+const data2 = {some: {key: function(){ return "value"; }}};
    //-> "value"
 
 // A non-observable JS object with intermediate functions:
-var data3 = {some: function(){ return {key: "value"}}};
+const data3 = {some: function(){ return {key: "value"}}};
    //-> "value"
 
 // A observable can-map
-var data4 = {some: new DefineMap({key: "value"})};
+const data4 = {some: new DefineMap({key: "value"})};
    //-> canCompute("value")
 
 // A method on an observable can-map that reads observables
-var Some = DefineMap.extend({
-	value: "string",
-	key: function(){ return this.value; }
+const Some = DefineMap.extend({
+  value: "string",
+  key: function(){ return this.value; }
 });
-var data5 = {some: new Some({value: "value"})};
+const data5 = {some: new Some({value: "value"})};
    //-> compute(function(){ return this.value; })
 ```
 

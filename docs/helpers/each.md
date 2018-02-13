@@ -101,7 +101,7 @@ For example, this template:
 
 Rendered with:
 
-```js
+```javascript
 {friends: [{name: "Austin"},{name: "Justin"}]}
 ```
 
@@ -131,7 +131,7 @@ For example, this template:
 
 Rendered with:
 
-```js
+```javascript
 {person: {name: 'Josh', age: 27}}
 ```
 

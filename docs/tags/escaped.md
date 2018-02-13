@@ -50,7 +50,7 @@ Rendering:
 
 With:
 
-```js
+```javascript
 {name: "Austin"}
 ```
 
@@ -77,7 +77,7 @@ Rendering:
 
 With:
 
-```js
+```javascript
 {
   book: {
     author: "Ernest Hemingway"
@@ -107,7 +107,7 @@ Rendering:
 
 With:
 
-```js
+```javascript
 {
   title: "The Book of Bitovi",
   chapters: [{name: "Breakdown"}]
@@ -138,7 +138,7 @@ The template:
 
 Rendered with data:
 
-```js
+```javascript
 {
   user: function(){ return "Justin" }
 }
@@ -146,7 +146,7 @@ Rendered with data:
 
 And with a registered helper like:
 
-```js
+```javascript
 stache.registerHelper('greeting', function() {
   return "Hello";
 });
@@ -172,13 +172,13 @@ The template:
 
 Rendered with:
 
-```js
+```javascript
 {verb: "swept"}
 ```
 
 Will call a `madLib` helper with the following arguments:
 
-```js
+```javascript
 stache.registerHelper('madLib',
   function(subject, verb, number, options){
     // subject -> "Lebron James"
@@ -198,13 +198,13 @@ The template:
 
 Rendered with:
 
-```js
+```javascript
 {user: new Map({name: "Slim Shady"})}
 ```
 
 Needs the helper to check if name is a function or not:
 
-```js
+```javascript
 stache.registerHelper('mr',function(name){
   return "Mr. "+ (typeof name === "function" ?
                   name():
@@ -231,7 +231,7 @@ The template:
 
 And the helper:
 
-```js
+```javascript
 stache.registerHelper("excuse",function(options) {
   return ["My",
     options.hash.who || "dog".
@@ -243,7 +243,7 @@ stache.registerHelper("excuse",function(options) {
 
 Rendered with:
 
-```js
+```javascript
 {pet: "cat"}
 ```
 

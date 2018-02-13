@@ -15,11 +15,11 @@ In this example, `{{last}}` has no output because the context of the `{{#person}
 <h1>{{message}} {{#person}}{{first}} {{last}}{{/person}}</h1>
 ```
 
-```js
+```javascript
 {
-	person: { first: "Alexis" },
-	last: "Abril",
-	message: "Hello"
+  person: { first: "Alexis" },
+  last: "Abril",
+  message: "Hello"
 }
 ```
 
@@ -32,16 +32,16 @@ A scope can walk up the contexts to find the property with the `scope.find(...)`
 
 This is very similar to how `last` is looked up in the following JavaScript:
 
-```js
-var message = "Hello"
+```javascript
+const message = "Hello";
 function outer(){
-	var last = "Abril";
+  const last = "Abril";
 
-	function inner(){
-		var first = "Alexis";
-		console.log(message + " "+ first + " " + last);
-	}
-	inner();
+  function inner(){
+    const first = "Alexis";
+    console.log(message + " "+ first + " " + last);
+  }
+  inner();
 }
 outer();
 ```
@@ -57,11 +57,11 @@ Let’s look at what happens with the scope the following example:
 <h1>{{message}} {{#person}}{{first}} {{scope.find('last')}}{{/person}}</h1>
 ```
 
-```js
+```javascript
 {
-	person: { first: "Alexis" },
-	last: "Abril",
-	message: "Hello"
+  person: { first: "Alexis" },
+  last: "Abril",
+  message: "Hello"
 }
 ```
 
@@ -90,11 +90,11 @@ we could change the template to:
 <h1>{{message}} {{#person}}{{first}} {{../last}}{{/person}}</h1>
 ```
 
-```js
+```javascript
 {
-	person: { first: "Alexis", last: "*****" },
-	last: "Abril",
-	message: "Hello"
+  person: { first: "Alexis", last: "*****" },
+  last: "Abril",
+  message: "Hello"
 }
 ```
 

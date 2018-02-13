@@ -88,30 +88,30 @@ In general:
 The following illustrates what `some.key` would return given
 different data structures as a [can-stache/expressions/helper] and in all other expressions.
 
-```js
+```javascript
 // A non-observable JS object:
-var data1 = {some: {key: "value"}};
+const data1 = {some: {key: "value"}};
    // Helper -> "value"
    // Other  -> "value"
 
 // A non-observable JS object w/ a function at the end
-var data2 = {some: {key: function(){ return "value"; }}};
+const data2 = {some: {key: function(){ return "value"; }}};
    // Helper -> "value"
    // Other  -> "value"
 
 // A non-observable JS object with intermediate functions:
-var data3 = {some: function(){ return {key: "value"}}};
+const data3 = {some: function(){ return {key: "value"}}};
    // Helper -> "value"
    // Other  -> "value"
 
 // A observable can-map
-var data4 = {some: new Map({key: "value"})};
+const data4 = {some: new Map({key: "value"})};
    // Helper -> canCompute("value")
    // Other  -> "value"
 
 // A method on an observable can-map that reads observables
-var Some = Map.extend({key: function(){ return this.attr("value")}});
-var data5 = {some: new Some({value: "value"})};
+const Some = Map.extend({key: function(){ return this.attr("value")}});
+const data5 = {some: new Some({value: "value"})};
    // Helper -> canCompute("value")
    // Other  -> "value"
 ```

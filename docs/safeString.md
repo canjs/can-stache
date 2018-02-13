@@ -12,7 +12,7 @@ one will often need to create helpers that return HTML content that shouldn’t 
 
 `stache.safeString` can be used to indicate that a returned string from a helper is safe:
 
-```js
+```javascript
 stache.registerHelper("myHelper", function(){
   return stache.safeString("<blink>Hello There!</blink>");
 })
@@ -31,14 +31,14 @@ usually want to return a `stache.safeString.` In this case,
 you will want to manually escape parameters with [can-util/js/string/string.esc].
 
 
-```js
-var string = require("can-util/js/string/string");
+```javascript
+import string from "can-util/js/string/string";
 
 stache.registerHelper('link', function(text, url) {
   text = string.esc(text);
   url  = string.esc(url);
 
-  var result = '<a href="' + url + '">' + text + '</a>';
+  const result = '<a href="' + url + '">' + text + '</a>';
   return stache.safeString(result);
 });
 ```
