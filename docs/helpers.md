@@ -159,7 +159,7 @@ key1 and key2. If the result of comparison is **truthy**, the section will be re
 
 ```js
 {
-	name: 'John'
+	name: "John"
 }
 ```
 
@@ -186,11 +186,11 @@ returns the localized value using
 [jQuery Globalize](https://github.com/jquery/globalize).
 
 ```js
-stache.addHelper('l10n', function(str, options){
-	return Globalize != undefined
-		? Globalize.localize(str)
-		: str;
-});
+stache.addHelper( "l10n", function( str, options ) {
+	return typeof Globalize !== "undefined" ?
+		Globalize.localize( str ) :
+		str;
+} );
 ```
 
 In the template, invoke the helper by calling the helper
@@ -222,7 +222,7 @@ Helpers can also be called with observable values or non-observable values.
 Considering a helper like:
 
 ```js
-stache.registerHelper("myHelper", function(value){ /* ... */ })
+stache.registerHelper( "myHelper", function( value ) { /* ... */ } );
 ```
 
 The following details what `value` is depending on how the helper is called
@@ -236,12 +236,12 @@ and the data passed.
 ```
 
 ```js
-{ name: 'John' }
+{ name: "John" }
 ```
 
 ```js
 /* Value */
-'John'
+"John";
 ```
 
 #### Call expression with observable data
@@ -252,12 +252,12 @@ and the data passed.
 ```
 
 ```js
-new DefineMap({ name: 'John' })
+new DefineMap( { name: "John" } );
 ```
 
 ```js
 /* Value */
-'John'
+"John";
 ```
 
 #### Helper expression with non-observable data
@@ -268,12 +268,12 @@ new DefineMap({ name: 'John' })
 ```
 
 ```js
-{ name: 'John' }
+{ name: "John" }
 ```
 
 ```js
 /* Value */
-'John'
+"John";
 ```
 
 #### Helper expression with observable data
@@ -284,12 +284,12 @@ new DefineMap({ name: 'John' })
 ```
 
 ```js
-new DefineMap({ name: 'John' })
+new DefineMap( { name: "John" } );
 ```
 
 ```js
 /* Value */
-compute('John')
+compute( "John" );
 ```
 
 
@@ -306,11 +306,11 @@ For example, when a route matches the string passed to our
 routing helper it will show/hide the text.
 
 ```js
-stache.registerHelper('routing', function(str, options){
-	if (route.attr('filter') === str) {
-		return options.fn(this);
+stache.registerHelper( "routing", function( str, options ) {
+	if ( route.attr( "filter" ) === str ) {
+		return options.fn( this );
 	}
-});
+} );
 ```
 
 ```html
@@ -328,19 +328,19 @@ to the helper as `options.hash`. Additionally, when using [can-stache.tags.secti
 you can set a custom context by passing the object instead of `this`.
 
 ```js
-stache.registerHelper('exercise', function(group, action, num, options) {
-	if (group && group.length > 0 && action && num > 0) {
-		return options.fn({
+stache.registerHelper( "exercise", function( group, action, num, options ) {
+	if ( group && group.length > 0 && action && num > 0 ) {
+		return options.fn( {
 			group: group,
 			action: action,
 			where: options.hash.where,
 			when: options.hash.when,
 			num: num
-		});
+		} );
 	} else {
-		return options.inverse(this);
+		return options.inverse( this );
 	}
-});
+} );
 ```
 
 ```html
@@ -354,8 +354,8 @@ stache.registerHelper('exercise', function(group, action, num, options) {
 
 ```js
 {
-	pets: ['cat', 'dog', 'parrot'],
-	time: 'this morning'
+	pets: [ "cat", "dog", "parrot" ],
+	time: "this morning"
 }
 ```
 

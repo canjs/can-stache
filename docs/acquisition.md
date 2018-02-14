@@ -10,10 +10,10 @@ Raw text can be templated by passing the text containing your template.  For exa
 
 ```js
 const text = "My body lies over the {{.}}";
-const template = stache(text);
-const fragment = template("ocean");
+const template = stache( text );
+const fragment = template( "ocean" );
 
-document.body.appendChild(fragment);
+document.body.appendChild( fragment );
 ```
 
 ## Module Loaders
@@ -35,6 +35,6 @@ Load this template like:
 
 ```js
 import stache from "can-stache";
-const text = document.getElementById("my-template");
-const template = stache(text);
+const text = document.getElementById( "my-template" );
+const template = stache( text );
 ```

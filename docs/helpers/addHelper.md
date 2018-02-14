@@ -13,9 +13,9 @@ See [can-stache.Helpers] for more details on using helpers
 and [can-stache.registerHelper] to get computes for observable values.
 
 ```js
-stache.addHelper("upper", function(str){
+stache.addHelper( "upper", function( str ) {
 	return str.toUpperCase();
-});
+} );
 ```
 
 @param {String} name The name of the helper.

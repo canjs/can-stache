@@ -39,7 +39,7 @@ For example, this template:
 Rendered with:
 
 ```js
-{user: {isFemale: true, isMarried: true}}
+{ user: { isFemale: true, isMarried: true } }
 ```
 
 Results in:
@@ -63,7 +63,7 @@ If can be used with [can-stache.helpers.else {{else}}] too. For example,
 Rendered with:
 
 ```js
-{user: {isFemale: true, isMarried: false}}
+{ user: { isFemale: true, isMarried: false } }
 ```
 
 Results in:

@@ -51,7 +51,7 @@ Rendering:
 With:
 
 ```js
-{name: "Austin"}
+{ name: "Austin" }
 ```
 
 Results in:
@@ -110,7 +110,7 @@ With:
 ```js
 {
 	title: "The Book of Bitovi",
-	chapters: [{name: "Breakdown"}]
+	chapters: [ { name: "Breakdown" } ]
 }
 ```
 
@@ -140,16 +140,18 @@ Rendered with data:
 
 ```js
 {
-	user: function(){ return "Justin" }
+	user: function() {
+		return "Justin";
+	}
 }
 ```
 
 And with a registered helper like:
 
 ```js
-stache.registerHelper('greeting', function() {
+stache.registerHelper( "greeting", function() {
 	return "Hello";
-});
+} );
 ```
 
 Results in:
@@ -173,18 +175,19 @@ The template:
 Rendered with:
 
 ```js
-{verb: "swept"}
+{ verb: "swept" }
 ```
 
 Will call a `madLib` helper with the following arguments:
 
 ```js
-stache.registerHelper('madLib',
-	function(subject, verb, number, options){
+stache.registerHelper( "madLib",
+	function( subject, verb, number, options ) {
+
 		// subject -> "Lebron James"
 		// verb -> "swept"
 		// number -> 4
-	});
+	} );
 ```
 
 If an argument `key` value is a [can-map] property, the Observe’s
@@ -199,17 +202,17 @@ The template:
 Rendered with:
 
 ```js
-{user: new Map({name: "Slim Shady"})}
+{ user: new Map( { name: "Slim Shady" } ) }
 ```
 
 Needs the helper to check if name is a function or not:
 
 ```js
-stache.registerHelper('mr',function(name){
-	return "Mr. "+ (typeof name === "function" ?
-		name():
-		name)
-});
+stache.registerHelper( "mr", function( name ) {
+	return "Mr. " + ( typeof name === "function" ?
+		name() :
+		name );
+} );
 ```
 
 This behavior enables two way binding helpers and is explained in more detail
@@ -232,19 +235,19 @@ The template:
 And the helper:
 
 ```js
-stache.registerHelper("excuse",function(options) {
-	return ["My",
+stache.registerHelper( "excuse", function( options ) {
+	return [ "My",
 		options.hash.who || "dog".
 			options.hash.how || "ate",
 		"my",
-		options.hash.what || "homework"].join(" ");
-});
+		options.hash.what || "homework" ].join( " " );
+} );
 ```
 
 Rendered with:
 
 ```js
-{pet: "cat"}
+{ pet: "cat" }
 ```
 
 Results in:

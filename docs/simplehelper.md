@@ -16,17 +16,18 @@ The following template:
 Rendered with
 
 ```js
-{verb: "swept"}
+{ verb: "swept" }
 ```
 
 Will call a `madLib` helper with the following arguments.
 
 ```js
-stache.addHelper('madLib', function(subject, verb, number) {
+stache.addHelper( "madLib", function( subject, verb, number ) {
+
 	// subject -> "Lebron James"
 	// verb -> "swept"
 	// number -> 4
-});
+} );
 ```
 
 Unlike [can-stache.helper] simple helpers will always pass the actual
@@ -62,11 +63,11 @@ If the helper is called __within a tag__ like:
 The returned function is called with the `<ul>` element:
 
 ```js
-stache.addHelper("sortable",function(){
-	return function(el){
-		$(el).slider();
-	}
-});
+stache.addHelper( "sortable", function() {
+	return function( el ) {
+		$( el ).slider();
+	};
+} );
 ```
 
 If the helper is called __between tags__ like:
@@ -79,11 +80,11 @@ The returned function is called with a temporary element. The
 following helper would be called with a temporary `<li>` element:
 
 ```js
-stache.addHelper("items",function(){
-	return function(li){
+stache.addHelper( "items", function() {
+	return function( li ) {
 
-	}
-});
+	};
+} );
 ```
 
 The temporary element depends on the parent element. The default temporary element

@@ -46,47 +46,47 @@ The following example adds `{first: "Justin"}` to the lookup
 data. Notice how the section has access to `first` and `last`.
 
 ```js
-stache.registerHelper("myhelper", function(options){
-	const section = options.fn({first: "Justin"});
-	return $("<h1>").append( section );
-})
+stache.registerHelper( "myhelper", function( options ) {
+	const section = options.fn( { first: "Justin" } );
+	return $( "<h1>" ).append( section );
+} );
 
 const template = stache(
-	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
+	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}" );
 
-template({last: "Meyer"}) //-> <h1>Justin Meyer</h1>
+template( { last: "Meyer" } ); //-> <h1>Justin Meyer</h1>
 ```
 
 If no `context` is provided, the current context is passed.  Notice
 how the section has access to `last`:
 
 ```js
-stache.registerHelper("myhelper", function(options){
+stache.registerHelper( "myhelper", function( options ) {
 
 	const section = options.fn();
-	return $("<h1>").append( section );
+	return $( "<h1>" ).append( section );
 
-});
+} );
 
 const template = stache(
-	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
+	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}" );
 
-template({last: "Meyer"}) //-> <h1> Meyer</h1>
+template( { last: "Meyer" } ); //-> <h1> Meyer</h1>
 ```
 
 If a [can-view-scope] is provided, it is used to render the
 section. Notice how `last` is not available in the section:
 
 ```js
-stache.registerHelper("myhelper", function(options){
+stache.registerHelper( "myhelper", function( options ) {
 
-	const section = options.fn( new Scope( {first: "Justin"}) );
-	return $("<h1>").append( section );
+	const section = options.fn( new Scope( { first: "Justin" } ) );
+	return $( "<h1>" ).append( section );
 
-});
+} );
 
 const template = stache(
-	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}");
+	"{{#myHelper}}{{first}} {{last}}{{/myHelper}}" );
 
-template({last: "Meyer"}) //-> <h1>Justin </h1>
+template( { last: "Meyer" } ); //-> <h1>Justin </h1>
 ```

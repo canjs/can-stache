@@ -88,7 +88,7 @@ primarily used when the items in the array are primitives like strings and numbe
 
 ```js
 {
-	people: ["Andy", "Austin", "Justin"]
+	people: [ "Andy", "Austin", "Justin" ]
 }
 ```
 

@@ -182,18 +182,18 @@ Hi Jon!
 A helper like:
 
 ```js
-stache.registerHelper('countTo', function(number, options){
-	if(number > 0) {
+stache.registerHelper( "countTo", function( number, options ) {
+	if ( number > 0 ) {
 		const out = [];
-		for(let i =1; i <= number; i++){
-			const docFrag = options.fn({num: i});
+		for ( let i = 1; i <= number; i++ ) {
+			const docFrag = options.fn( { num: i } );
 			out.push( docFrag );
 		}
 		return out;
 	} else {
-		return options.inverse({num: number});
+		return options.inverse( { num: number } );
 	}
-});
+} );
 ```
 
 Could be called like:
@@ -211,7 +211,7 @@ Could be called like:
 Called with data like:
 
 ```js
-{number: 3}
+{ number: 3 }
 ```
 
 Produces:
@@ -223,7 +223,7 @@ Produces:
 Called with data like:
 
 ```js
-{number: -5}
+{ number: -5 }
 ```
 
 Produces:

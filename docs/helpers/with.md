@@ -51,7 +51,7 @@ For example:
 ```
 
 ```js
-{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
+{ person: { address: { street: "123 Evergreen", city: "Springfield" } } }
 ```
 
 ```html
@@ -71,7 +71,7 @@ The new context can be a lookup expression, or a set of hashes which are taken t
 ```
 
 ```js
-{person: {address: {street: "123 Evergreen", city: "Springfield"}}}
+{ person: { address: { street: "123 Evergreen", city: "Springfield" } } }
 ```
 
 ```html
@@ -92,7 +92,7 @@ is that the subsection `BLOCK` is rendered no matter what:
 ```
 
 ```js
-{person: {}}
+{ person: {} }
 ```
 
 ```html

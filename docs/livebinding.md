@@ -24,12 +24,12 @@ In this example, we have a simple user welcome screen.
 ```
 
 ```js
-const data = new DefineMap({
-	user: 'Tina Fey',
+const data = new DefineMap( {
+	user: "Tina Fey",
 	messages: 0
-});
+} );
 
-const template = stache( document.getElementById("template").innerHTML );
+const template = stache( document.getElementById( "template" ).innerHTML );
 const frag = template( data );
 document.body.appendChild( frag );
 ```

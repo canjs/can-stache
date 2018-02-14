@@ -102,7 +102,7 @@ For example, this template:
 Rendered with:
 
 ```js
-{friends: [{name: "Austin"},{name: "Justin"}]}
+{ friends: [ { name: "Austin" }, { name: "Justin" } ] }
 ```
 
 Renders:
@@ -132,7 +132,7 @@ For example, this template:
 Rendered with:
 
 ```js
-{person: {name: 'Josh', age: 27}}
+{ person: { name: "Josh", age: 27 } }
 ```
 
 Renders:

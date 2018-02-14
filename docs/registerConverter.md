@@ -25,14 +25,14 @@ as follows:
 
 
 ```js
-stache.registerConverter("numberToString", {
-	get: function(fooCompute) {
+stache.registerConverter( "numberToString", {
+	get: function( fooCompute ) {
 		return "" + fooCompute();
 	},
-	set: function(newVal, fooCompute) {
-		fooCompute(+newVal);
+	set: function( newVal, fooCompute ) {
+		fooCompute( +newVal );
 	}
-});
+} );
 ```
 
 @param {String} converterName The name of the converter helper.
@@ -61,16 +61,16 @@ The following might converts both ways `first` and `last` to `value`.
 ```js
 import canBatch from "can-event/batch/batch";
 
-stache.registerConverter("fullName", {
-	get: function(first, last) {
+stache.registerConverter( "fullName", {
+	get: function( first, last ) {
 		return first() + last();
 	},
-	set: function(newFullName, first, last) {
+	set: function( newFullName, first, last ) {
 		canBatch.start();
-		const parts = newFullName.split(" ");
-		first(parts[0]);
-		last(parts[1]);
+		const parts = newFullName.split( " " );
+		first( parts[ 0 ] );
+		last( parts[ 1 ] );
 		canBatch.stop();
 	}
-});
+} );
 ```

@@ -18,8 +18,8 @@ For example, with a `<script>` tag as follows in your HTML:
 Load and render that template like:
 
 ```js
-const template = stache.from("my-template");
-template({message: "Hello There!"});
+const template = stache.from( "my-template" );
+template( { message: "Hello There!" } );
 ```
 
 

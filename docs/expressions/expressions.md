@@ -88,9 +88,9 @@ For example, in a call expression:
 
 ```js
 {
-	methodA: function(arg) {},
-	methodB: function(arg1, arg2) {},
-	key: compute("value")
+	methodA: function( arg ) {},
+	methodB: function( arg1, arg2 ) {},
+	key: compute( "value" )
 }
 ```
 
@@ -107,9 +107,9 @@ In a helper expression:
 
 ```js
 {
-	methodA: function(options) {},
-	methodB: function(options) {},
-	key: compute("value")
+	methodA: function( options ) {},
+	methodB: function( options ) {},
+	key: compute( "value" )
 }
 ```
 
@@ -128,10 +128,10 @@ the [can-view-scope.Options helpers scope]. It looks like:
 
 ```js
 {
-	pluralize: function(type, count){
-		return type+(count === 1 ? "" : "s")
+	pluralize: function( type, count ) {
+		return type + ( count === 1 ? "" : "s" );
 	},
-	ages: new List([22,32,42]),
+	ages: new List( [ 22, 32, 42 ] ),
 	type: "age"
 }
 ```
@@ -151,10 +151,10 @@ an object with the hash properties and values will be passed. For example:
 
 ```js
 {
-	pluralize: function(options){
-		return options.word+(options.count === 1 ? "" : "s")
+	pluralize: function( options ) {
+		return options.word + ( options.count === 1 ? "" : "s" );
 	},
-	ages: new List([22,32,42]),
+	ages: new List( [ 22, 32, 42 ] ),
 	type: "age"
 }
 ```
@@ -177,18 +177,18 @@ the [can-view-scope scope]. It looks like:
 
 ```js
 {
-	pluralize: function(type, count){
-		return "data-pluralize"
+	pluralize: function( type, count ) {
+		return "data-pluralize";
 	},
-	todos: new List([22,32,42]),
+	todos: new List( [ 22, 32, 42 ] ),
 	type: "age"
 }
 ```
 
 ```js
 {
-	pluralize: function(type, count){
-		return type+(count() === 1 ? "" : "s")
+	pluralize: function( type, count ) {
+		return type + ( count() === 1 ? "" : "s" );
 	}
 }
 ```
@@ -211,15 +211,15 @@ the hash properties and values will be added to the helper options object. For e
 
 ```js
 {
-	todos: new List([22,32,42]),
+	todos: new List( [ 22, 32, 42 ] ),
 	type: "age"
 }
 ```
 
 ```js
 {
-	pluralize: function(helperOptions){
-		return helperOptions.hash.type+(helperOptions.hash.count() === 1 ? "" : "s")
+	pluralize: function( helperOptions ) {
+		return helperOptions.hash.type + ( helperOptions.hash.count() === 1 ? "" : "s" );
 	}
 }
 ```

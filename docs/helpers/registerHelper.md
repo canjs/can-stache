@@ -11,12 +11,12 @@ function to which stache should invoke. See [can-stache.Helpers] for more detail
 and [can-stache.addHelper] to avoid converting computes;
 
 ```js
-stache.registerHelper("upper", function(str){
-	if(str.isComputed) {
+stache.registerHelper( "upper", function( str ) {
+	if ( str.isComputed ) {
 		str = str();
 	}
 	return str.toUpperCase();
-});
+} );
 ```
 
 @param {String} name The name of the helper.

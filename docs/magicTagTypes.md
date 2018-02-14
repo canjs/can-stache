@@ -56,16 +56,16 @@ Inserts the unescaped value of `expression` into the result.
 Renders another template with the same context as the current context.
 
 ```js
-const template = stache("<h1>{{>title}}</h1>");
+const template = stache( "<h1>{{>title}}</h1>" );
 
 
 const frag = template(
-	{message: "Hello"},
+	{ message: "Hello" },
 	{
-		partials: { title:   stache("<blink>{{message}}</blink>") }
-	});
+		partials: { title: stache( "<blink>{{message}}</blink>" ) }
+	} );
 
-frag //-> <h1><blink>Hello</blink></h1>
+frag; //-> <h1><blink>Hello</blink></h1>
 ```
 
 Other ways to load and reference partials are discussed [can-stache.tags.partial here].
@@ -80,7 +80,7 @@ Ignores the magic tag.
 ```
 
 ```js
-{ message: "<blink>Hello</blink>" };
+{ message: "<blink>Hello</blink>"; };
 ```
 
 ```html
@@ -105,7 +105,7 @@ If `expression` is truthy, renders the subsection:
 ```
 
 ```js
-{ shown: true };
+{ shown: true; };
 ```
 
 ```html
@@ -121,7 +121,7 @@ The subsection is rendered with the `expression` value as the top of the scope:
 ```
 
 ```js
-{ person: {first: "Alexis", last: "Abril"} }
+{ person: { first: "Alexis", last: "Abril" } }
 ```
 
 ```html
@@ -154,7 +154,7 @@ is rendered with each item in the array as the top of the scope:
 ```
 
 ```js
-{items: [2,4,8,16]}
+{ items: [ 2, 4, 8, 16 ] }
 ```
 
 ```html
@@ -171,7 +171,7 @@ is rendered:
 ```
 
 ```js
-{items: []}
+{ items: [] }
 ```
 
 ```html

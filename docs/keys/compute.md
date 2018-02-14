@@ -22,27 +22,38 @@ different data structures:
 
 ```js
 // A non-observable JS object:
-const data1 = {some: {key: "value"}};
+const data1 = { some: { key: "value" } };
+
 //-> "value"
 
 // A non-observable JS object w/ a function at the end
-const data2 = {some: {key: function(){ return "value"; }}};
+const data2 = { some: { key: function() {
+	return "value";
+} } };
+
 //-> "value"
 
 // A non-observable JS object with intermediate functions:
-const data3 = {some: function(){ return {key: "value"}}};
+const data3 = { some: function() {
+	return { key: "value" };
+} };
+
 //-> "value"
 
 // A observable can-map
-const data4 = {some: new DefineMap({key: "value"})};
+const data4 = { some: new DefineMap( { key: "value" } ) };
+
 //-> canCompute("value")
 
 // A method on an observable can-map that reads observables
-const Some = DefineMap.extend({
+const Some = DefineMap.extend( {
 	value: "string",
-	key: function(){ return this.value; }
-});
-const data5 = {some: new Some({value: "value"})};
+	key: function() {
+		return this.value;
+	}
+} );
+const data5 = { some: new Some( { value: "value" } ) };
+
 //-> compute(function(){ return this.value; })
 ```
 

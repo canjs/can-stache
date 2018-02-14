@@ -8,14 +8,14 @@
 An object with a `get` and `set` method that get converted to a two-way helper.
 
 ```js
-stache.registerConverter("numberToString", {
-	get: function(fooCompute) {
+stache.registerConverter( "numberToString", {
+	get: function( fooCompute ) {
 		return "" + fooCompute();
 	},
-	set: function(newVal, fooCompute) {
-		fooCompute(+newVal);
+	set: function( newVal, fooCompute ) {
+		fooCompute( +newVal );
 	}
-});
+} );
 ```
 
 

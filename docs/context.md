@@ -34,12 +34,12 @@ This is very similar to how `last` is looked up in the following JavaScript:
 
 ```js
 const message = "Hello";
-function outer(){
+function outer() {
 	const last = "Abril";
 
-	function inner(){
+	function inner() {
 		const first = "Alexis";
-		console.log(message + " "+ first + " " + last);
+		console.log( message + " " + first + " " + last );
 	}
 	inner();
 }

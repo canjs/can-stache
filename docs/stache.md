@@ -49,17 +49,18 @@ the result into the page:
 
 ```js
 import stache from "can-stache";
+
 // renderer is a "renderer function"
-const renderer = stache("<h1>Hello {{subject}}</h1>");
+const renderer = stache( "<h1>Hello {{subject}}</h1>" );
 
 // "renderer functions" render a template and return a
 // document fragment.
-const fragment = renderer({subject: "World"});
+const fragment = renderer( { subject: "World" } );
 
 // A document fragment is a collection of elements that can be
 // used with jQuery or with normal DOM methods.
-fragment //-> <h1>Hello World</h1>
-document.body.appendChild(fragment)
+fragment; //-> <h1>Hello World</h1>
+document.body.appendChild( fragment );
 ```
 
 Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/list/list DefineList]s and the
@@ -69,14 +70,14 @@ resulting HTML will update when the observable data changes.
 import DefineMap from "can-define/map/map";
 
 
-const renderer = stache("<h1>Hello {{subject}}</h1>");
-const map = new DefineMap({subject: "World"});
-const fragment = renderer(map);
-document.body.appendChild(fragment)
+const renderer = stache( "<h1>Hello {{subject}}</h1>" );
+const map = new DefineMap( { subject: "World" } );
+const fragment = renderer( map );
+document.body.appendChild( fragment );
 
 map.subject = "Earth";
 
-document.body.innerHTML //-> <h1>Hello Earth</h1>
+document.body.innerHTML; //-> <h1>Hello Earth</h1>
 ```
 
 There’s a whole lot of behavior that `stache` provides.  The following walks through
