@@ -2,7 +2,7 @@ var live = require('can-view-live');
 
 var utils = require('./utils');
 
-var domMutate = require("can-dom-mutate");
+var domMutate = require("can-dom-mutate/node");
 
 var assign = require('can-assign');
 
@@ -72,7 +72,7 @@ assign(TextSectionBuilder.prototype,{
 					this.nodeValue = value;
 				}
 				else if(state.attr) {
-					domMutate.setAttribute(this, state.attr, value);
+					domMutate.setAttribute.call(this, state.attr, value);
 				}
 				else {
 					live.attrs(this, value);
