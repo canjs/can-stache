@@ -25,7 +25,6 @@ Inserts the escaped value of `expression` into the result. This is the most comm
 ```
 
 ```js
-/* Data */
 { name: "<b>Justin</b>" }
 ```
 
@@ -44,7 +43,6 @@ Inserts the unescaped value of `expression` into the result.
 ```
 
 ```js
-/* Data */
 { name: "<b>Justin</b>" }
 ```
 
@@ -58,16 +56,16 @@ Inserts the unescaped value of `expression` into the result.
 Renders another template with the same context as the current context.
 
 ```js
-var template = stache("<h1>{{>title}}</h1>");
+const template = stache( "<h1>{{>title}}</h1>" );
 
 
-var frag = template(
-	{message: "Hello"},
+const frag = template(
+	{ message: "Hello" },
 	{
-		partials: { title: 	stache("<blink>{{message}}</blink>") }
-	});
+		partials: { title: stache( "<blink>{{message}}</blink>" ) }
+	} );
 
-	frag //-> <h1><blink>Hello</blink></h1>
+frag; //-> <h1><blink>Hello</blink></h1>
 ```
 
 Other ways to load and reference partials are discussed [can-stache.tags.partial here].
@@ -82,8 +80,7 @@ Ignores the magic tag.
 ```
 
 ```js
-/* Data */
-{ message: "<blink>Hello</blink>" };
+{ message: "<blink>Hello</blink>"; };
 ```
 
 ```html
@@ -108,8 +105,7 @@ If `expression` is truthy, renders the subsection:
 ```
 
 ```js
-/* Data */
-{ shown: true };
+{ shown: true; };
 ```
 
 ```html
@@ -125,8 +121,7 @@ The subsection is rendered with the `expression` value as the top of the scope:
 ```
 
 ```js
-/* Data */
-{ person: {first: "Alexis", last: "Abril"} };
+{ person: { first: "Alexis", last: "Abril" } }
 ```
 
 ```html
@@ -142,8 +137,7 @@ If `expression` is falsey, renders the inverse subsection if present:
 ```
 
 ```js
-/* Data */
-{ shown: false };
+{ shown: false }
 ```
 
 ```html
@@ -160,8 +154,7 @@ is rendered with each item in the array as the top of the scope:
 ```
 
 ```js
-/* Data */
-{items: [2,4,8,16]}
+{ items: [ 2, 4, 8, 16 ] }
 ```
 
 ```html
@@ -178,8 +171,7 @@ is rendered:
 ```
 
 ```js
-/* Data */
-{items: []}
+{ items: [] }
 ```
 
 ```html
@@ -201,8 +193,7 @@ render the subsection.
 ```
 
 ```js
-/* Data */
-{ shown: false };
+{ shown: false }
 ```
 
 ```html

@@ -11,14 +11,14 @@ is called by a [can-stache/expressions/helper], a `helperOptions`
 object is passed with the following properties:
 
 ```js
-stache.registerHelper("myHelper", function(helperOptions){
-  helperOptions.fn      //-> sectionRenderer(){}
-  helperOptions.inverse //-> sectionRenderer(){}
-  helperOptions.hash    //-> Object
-  helperOptions.context //-> *
-  helperOptions.scope   //-> Scope
-  helperOptions.option  //-> Scope.Options
-});
+stache.registerHelper( "myHelper", function( helperOptions ) {
+	helperOptions.fn;      //-> sectionRenderer(){}
+	helperOptions.inverse; //-> sectionRenderer(){}
+	helperOptions.hash;    //-> Object
+	helperOptions.context; //-> *
+	helperOptions.scope;   //-> Scope
+	helperOptions.option;  //-> Scope.Options
+} );
 ```
 
   @option {can-stache.sectionRenderer} [fn] Renders the "truthy" subsection
@@ -43,11 +43,11 @@ stache.registerHelper("myHelper", function(helperOptions){
 
   ```js
   {
-		name: compute("Mr. Pig"),
-		other: 3,
-		position: "top"
-  }
-  ```
+	name: compute( "Mr. Pig" ),
+	other: 3,
+	position: "top"
+}
+```
 
   @option {*} context The current context the stache helper is called within. Read
   [can-stache.scopeAndContext] for more information.

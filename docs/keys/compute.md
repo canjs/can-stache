@@ -22,28 +22,39 @@ different data structures:
 
 ```js
 // A non-observable JS object:
-{some: {key: "value"}}
-   //-> "value"
+const data1 = { some: { key: "value" } };
+
+//-> "value"
 
 // A non-observable JS object w/ a function at the end
-{some: {key: function(){ return "value"; }}}
-   //-> "value"
+const data2 = { some: { key: function() {
+	return "value";
+} } };
+
+//-> "value"
 
 // A non-observable JS object with intermediate functions:
-{some: function(){ return {key: "value"}}}
-   //-> "value"
+const data3 = { some: function() {
+	return { key: "value" };
+} };
+
+//-> "value"
 
 // A observable can-map
-{some: new DefineMap({key: "value"})}
-   //-> canCompute("value")
+const data4 = { some: new DefineMap( { key: "value" } ) };
+
+//-> canCompute("value")
 
 // A method on an observable can-map that reads observables
-var Some = DefineMap.extend({
+const Some = DefineMap.extend( {
 	value: "string",
-	key: function(){ return this.value; }
-})
-{some: new Some({value: "value"})}
-   //-> compute(function(){ return this.value; })
+	key: function() {
+		return this.value;
+	}
+} );
+const data5 = { some: new Some( { value: "value" } ) };
+
+//-> compute(function(){ return this.value; })
 ```
 
 Notice that `~` should only be used once in a value lookup expression.

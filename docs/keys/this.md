@@ -41,7 +41,7 @@ a template like:
 With data like:
 
 ```js
-{names: ["Jan","Mark","Andrew"]}
+{ names: [ "Jan", "Mark", "Andrew" ] }
 ```
 
 Will write out:

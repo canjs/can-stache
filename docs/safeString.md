@@ -13,9 +13,9 @@ one will often need to create helpers that return HTML content that shouldn’t 
 `stache.safeString` can be used to indicate that a returned string from a helper is safe:
 
 ```js
-stache.registerHelper("myHelper", function(){
-  return stache.safeString("<blink>Hello There!</blink>");
-})
+stache.registerHelper( "myHelper", function() {
+	return stache.safeString( "<blink>Hello There!</blink>" );
+} );
 ```
 
 @param {String} str A string you don’t want to become escaped.
@@ -32,15 +32,15 @@ you will want to manually escape parameters with [can-util/js/string/string.esc]
 
 
 ```js
-var string = require("can-util/js/string/string");
+import string from "can-util/js/string/string";
 
-stache.registerHelper('link', function(text, url) {
-  text = string.esc(text);
-  url  = string.esc(url);
+stache.registerHelper( "link", function( text, url ) {
+	text = string.esc( text );
+	url  = string.esc( url );
 
-  var result = '<a href="' + url + '">' + text + '</a>';
-  return stache.safeString(result);
-});
+	const result = "<a href=\"" + url + "\">" + text + "</a>";
+	return stache.safeString( result );
+} );
 ```
 
 

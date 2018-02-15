@@ -39,9 +39,9 @@ does not work:
 To work around this, an `localContext` helper could be created as follows:
 
 ```js
-stache.regsiterHelper("localContext", function(options) {
-  return options.fn(new Map());
-});
+stache.regsiterHelper( "localContext", function( options ) {
+	return options.fn( new Map() );
+} );
 ```
 
 And used like:

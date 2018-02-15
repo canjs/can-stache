@@ -103,9 +103,8 @@ that a *falsey* value.
 If the value is falsey, the section will **NOT** render the block.
 
 ```js
-/* Data */
 {
-  friends: false
+	friends: false
 }
 ```
 
@@ -134,12 +133,11 @@ over each of those items within a section.
 ```
 
 ```js
-/* Data */
 {
-    friends: [
-        { name: "Austin" },
-        { name: "Justin" }
-    ]
+	friends: [
+		{ name: "Austin" },
+		{ name: "Justin" }
+	]
 }
 ```
 
@@ -167,9 +165,8 @@ as the context for a single rendering of the block.
 ```
 
 ```js
-/* Data */
 {
-    friends: { name: "Jon" }
+	friends: { name: "Jon" }
 }
 ```
 
@@ -185,18 +182,18 @@ Hi Jon!
 A helper like:
 
 ```js
-stache.registerHelper('countTo', function(number, options){
-    var out = [];
-    if(number > 0) {
-        for(var i =1; i <= number; i++){
-          var docFrag = options.fn({num: i});
-          out.push( docFrag );
-        }
-        return out;
-    } else {
-        return options.inverse({num: i});
-    }
-});
+stache.registerHelper( "countTo", function( number, options ) {
+	if ( number > 0 ) {
+		const out = [];
+		for ( let i = 1; i <= number; i++ ) {
+			const docFrag = options.fn( { num: i } );
+			out.push( docFrag );
+		}
+		return out;
+	} else {
+		return options.inverse( { num: number } );
+	}
+} );
 ```
 
 Could be called like:
@@ -214,7 +211,7 @@ Could be called like:
 Called with data like:
 
 ```js
-{number: 3}
+{ number: 3 }
 ```
 
 Produces:
@@ -226,7 +223,7 @@ Produces:
 Called with data like:
 
 ```js
-{number: -5}
+{ number: -5 }
 ```
 
 Produces:

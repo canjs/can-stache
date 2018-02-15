@@ -14,13 +14,13 @@ See [can-stache.Helpers] for more details on using helpers,
 and [can-stache.registerHelper] to get computes for observable values.
 
 ```js
-stache.addLiveHelper("upper", function(str){
-	if (canReflect.isObservable(str) && canReflect.isValueLike(str)) {
-		str = canReflect.getValue(str);
+stache.addLiveHelper( "upper", function( str ) {
+	if ( canReflect.isObservable( str ) && canReflect.isValueLike( str ) ) {
+		str = canReflect.getValue( str );
 	}
 
 	return str.toUpperCase();
-});
+} );
 ```
 
 @param {String} name The name of the helper.

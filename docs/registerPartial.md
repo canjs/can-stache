@@ -7,9 +7,9 @@
 Registers a template so it can be rendered with `{{>name}}`.
 
 ```js
-stache.registerPartial("item.stache", "<li>{{name}}</li>");
+stache.registerPartial( "item.stache", "<li>{{name}}</li>" );
 
-var itemsTemplate = stache("{{#each(items)}}{{>item.stache}}{{/each}}");
+const itemsTemplate = stache( "{{#each(items)}}{{>item.stache}}{{/each}}" );
 ```
 
 @param {String} name The name of the partial.

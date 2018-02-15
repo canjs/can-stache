@@ -16,7 +16,6 @@ In this example, `{{last}}` has no output because the context of the `{{#person}
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis" },
 	last: "Abril",
@@ -34,13 +33,13 @@ A scope can walk up the contexts to find the property with the `scope.find(...)`
 This is very similar to how `last` is looked up in the following JavaScript:
 
 ```js
-var message = "Hello"
-function outer(){
-	var last = "Abril";
+const message = "Hello";
+function outer() {
+	const last = "Abril";
 
-	function inner(){
-		var first = "Alexis";
-		console.log(message + " "+ first + " " + last);
+	function inner() {
+		const first = "Alexis";
+		console.log( message + " " + first + " " + last );
 	}
 	inner();
 }
@@ -59,7 +58,6 @@ Let’s look at what happens with the scope the following example:
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis" },
 	last: "Abril",
@@ -93,7 +91,6 @@ we could change the template to:
 ```
 
 ```js
-/* Data */
 {
 	person: { first: "Alexis", last: "*****" },
 	last: "Abril",

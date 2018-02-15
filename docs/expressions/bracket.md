@@ -35,7 +35,6 @@ A bracket expression can be used to look up a dynamic property in the [can-view-
 ```
 
 ```js
-/* Data */
 {
 	key: "name",
 	name: "Kevin"
@@ -55,9 +54,8 @@ This can be useful for looking up values using keys containing non-alphabetic ch
 ```
 
 ```js
-/* Data */
 {
-  "person:name": "Kevin"
+	"person:name": "Kevin"
 }
 ```
 
@@ -75,14 +73,13 @@ Bracket expressions can also be used to look up a value in the result of another
 ```
 
 ```js
-/* Data */
 {
-  key: "name",
-  getPerson: function() {
-    return {
-      name: "Kevin"
-    };
-  }
+	key: "name",
+	getPerson: function() {
+		return {
+			name: "Kevin"
+		};
+	}
 }
 ```
 

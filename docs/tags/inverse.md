@@ -51,7 +51,7 @@ And data:
 
 ```js
 {
-    friends: []
+	friends: []
 }
 ```
 

@@ -65,11 +65,11 @@ If the helper is called __within a tag__ like:
 The returned function is called with the `<ul>` element:
 
 ```js
-stache.registerHelper("sortable",function() {
-  return function(el){
-    $(el).slider();
-  }
-});
+stache.registerHelper( "sortable", function() {
+	return function( el ) {
+		$( el ).slider();
+	};
+} );
 ```
 
 If the helper is called __between tags__ like:
@@ -81,11 +81,12 @@ If the helper is called __between tags__ like:
 The returned function is called with a temporary text node:
 
 ```js
-stache.registerHelper("items",function() {
-  return function(textNode){
-    // do something, probably replace textNode
-  }
-});
+stache.registerHelper( "items", function() {
+	return function( textNode ) {
+
+		// do something, probably replace textNode
+	};
+} );
 ```
 
 While this form of helper is still supported, it’s more common

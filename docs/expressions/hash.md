@@ -15,14 +15,14 @@ and `EXPRESSION` values.
 
 The following template:
 
-```js
+```
 {{ method( age=5 first=person.firstName last=person.getLastName() ) }}
 ```
 
 Might call `method` with:
 
 ```js
-{age: 5, first: "Justin", last: "Meyer"}
+{ age: 5, first: "Justin", last: "Meyer" }
 ```
 
 In a [can-stache/expressions/helper], `Hash` expressions
@@ -31,7 +31,7 @@ and `EXPRESSION` values.
 
 The following template:
 
-```js
+```
 {{ method age=5 first=person.firstName last=person.getLastName() }}
 ```
 
@@ -39,7 +39,7 @@ Might call `method` with:
 
 ```js
 {
-	hash: {age: 5, first: compute("Justin"), last: compute("Meyer")}
+	hash: { age: 5, first: compute( "Justin" ), last: compute( "Meyer" ) }
 }
 ```
 
@@ -66,11 +66,10 @@ For example, in a call expression:
 ```
 
 ```js
-/* Data */
 {
-	methodA: function(arg){},
-		methodB: function(arg1, arg2){},
-	key: compute("value")
+	methodA: function( arg ) {},
+	methodB: function( arg1, arg2 ) {},
+	key: compute( "value" )
 }
 ```
 
@@ -86,11 +85,10 @@ In a helper expression:
 ```
 
 ```js
-/* Data */
 {
-	methodA: function(options){},
-	methodB: function(options){},
-	key: compute("value")
+	methodA: function( options ) {},
+	methodB: function( options ) {},
+	key: compute( "value" )
 }
 ```
 
