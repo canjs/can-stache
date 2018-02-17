@@ -6730,9 +6730,9 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("Can call helpers (helper expressions) within attributes", function(){
 		var vm = {
-			name: function() { return "matthew"; }
+			name: function(first) { return first; }
 		};
-		var frag = stache("<div id='{{name}}'></div>")(vm);
+		var frag = stache("<div id='{{name \"matthew\"}}'></div>")(vm);
 		QUnit.equal(frag.firstChild.getAttribute("id"), "matthew", "able to set the attribute");
 	});
 
