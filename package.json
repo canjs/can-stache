@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "can-assign": "^1.1.1",
-    "can-attribute-encoder": "^1.0.0",
+    "can-attribute-encoder": "^1.0.3",
     "can-dom-data-state": "^1.0.0",
     "can-dom-mutate": "^1.0.0",
     "can-globals": "^1.0.0",
