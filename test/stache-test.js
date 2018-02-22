@@ -59,6 +59,16 @@ function overwriteGlobalHelper(name, fn, method) {
 	return origHelper;
 }
 
+// helpers for nested call expression tests
+function addAndOrHelpers() {
+	stache.registerHelper('or', function(value1, value2){
+		return (value1 || value2);
+	});
+	stache.registerHelper('and', function(value1, value2){
+		return (value1 && value2);
+	});
+}
+
 function makeTest(name, doc, mutation) {
 	var isNormalDOM = doc === window.document;
 
@@ -6021,6 +6031,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "bar");
 	});
 
+	test("#if works with nested call expressions", function(){
+		addAndOrHelpers();
+
+		var template = stache("{{#and(if(foo), if(bar))}}and{{else}}!and{{/and}} {{#or(if(foo), if(bar))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
+	});
+
 	test("#unless works with call expressions", function(){
 		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
 		var map = new DefineMap({
@@ -6033,6 +6066,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "foo");
 		map.foo = true;
 		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#unless works with nested call expressions", function(){
+		addAndOrHelpers();
+
+		var template = stache("{{#and(unless(foo), unless(bar))}}and{{else}}!and{{/and}} {{#or(unless(foo), unless(bar))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "!and !or");
 	});
 
 	test("log works with call expressions", function(){
@@ -6093,6 +6149,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "bar");
 	});
 
+	test("#eq works with nested call expressions", function(){
+		addAndOrHelpers();
+
+		var template = stache("{{#and(eq(foo, true), eq(bar, true))}}and{{else}}!and{{/and}} {{#or(eq(foo, true), eq(bar, true))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
+	});
+
 	test("#is works with call expressions", function(){
 		var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
 		var map = new DefineMap({
@@ -6105,6 +6184,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "foo");
 		map.foo = false;
 		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#is works with nested call expressions", function(){
+		addAndOrHelpers();
+
+		var template = stache("{{#and(is(foo, true), is(bar, true))}}and{{else}}!and{{/and}} {{#or(is(foo, true), is(bar, true))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
 	});
 
 	test("#switch, #case, and #default work with call expressions", function(){
@@ -6268,7 +6370,6 @@ function makeTest(name, doc, mutation) {
 		equal(warn1(), 0);
 		equal(warn2(), 0);
 	});
-
 
 	test('#each with call expression and arrays should work with hash expressions', function(){
 		var list = ['foo', 'bar', 'baz'];

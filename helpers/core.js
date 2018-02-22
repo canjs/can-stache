@@ -152,6 +152,10 @@ var ifHelper = function (expr, options) {
 		value = !! resolve(expr);
 	}
 
+	if(!options) {
+		return value;
+	}
+
 	if (value) {
 		return options.fn(options.scope || this);
 	} else {
@@ -165,6 +169,10 @@ var isHelper = function() {
 		options = arguments[arguments.length - 1];
 
 	if (arguments.length - 2 <= 0) {
+		if(!options) {
+			return false;
+		}
+
 		return options.inverse();
 	}
 
@@ -184,11 +192,19 @@ var isHelper = function() {
 		return true;
 	});
 
+	if(!options) {
+		return callFn.get();
+	}
+
 	return callFn.get() ? options.fn() : options.inverse();
 };
 isHelper.requiresOptionsArgument = true;
 
 var unlessHelper = function (expr, options) {
+	if(!options) {
+		return !ifHelper.apply(this, [expr]);
+	}
+
 	return ifHelper.apply(this, [expr, assign(assign({}, options), {
 		fn: options.inverse,
 		inverse: options.fn
