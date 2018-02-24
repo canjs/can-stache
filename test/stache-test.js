@@ -6736,6 +6736,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(frag.firstChild.getAttribute("id"), "matthew", "able to set the attribute");
 	});
 
+	test("value={{foo}} works (#470)", function(){
+
+		var map = new DefineMap({
+			message: "World"
+		});
+		var renderer = stache("<input value={{message}}>");
+
+		var frag = renderer(map);
+
+		var input = frag.firstChild;
+
+		equal(input.value, "World", "initial value");
+
+		map.message = "Earth";
+		equal(input.value, "Earth", "value updated by live binding");
+
+		input.value = "America";
+		equal(input.value, "America", "value updated through attribute");
+
+		map.message = "Illinois";
+		equal(input.value, "Illinois", "value re-updated by live binding");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
