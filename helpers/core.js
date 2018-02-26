@@ -244,9 +244,12 @@ var switchHelper = function(expression, options){
 
 	// create default helper as a value-like function
 	// so that either {{#default}} or {{#default()}} will work
-	var defaultHelper = function() {
-		return !found;
+	var defaultHelper = function(options) {
+		if (!found) {
+			return options ? options.scope.peek('this') : true;
+		}
 	};
+	defaultHelper.requiresOptionsArgument = true;
 	canReflect.assignSymbols(defaultHelper, {
 		"can.isValueLike": true,
 		"can.isFunctionLike": false,

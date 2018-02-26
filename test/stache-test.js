@@ -6119,7 +6119,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("#switch, #case, and #default work with call expressions", function(){
-		var template = stache("{{#switch(type)}}{{#case('admin'))}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
+		var template = stache("{{#switch(type)}}{{#case('admin')}}admin{{/case}}{{#default()}}peasant{{/default}}{{/switch}}");
 		var map = new DefineMap({
 			type: "admin"
 		});
@@ -6734,6 +6734,21 @@ function makeTest(name, doc, mutation) {
 		};
 		var frag = stache("<div id='{{name \"matthew\"}}'></div>")(vm);
 		QUnit.equal(frag.firstChild.getAttribute("id"), "matthew", "able to set the attribute");
+	});
+
+	test("#case and #default should not change context (#475)", function(){
+		var template = stache("{{#switch(type)}}{{#case('admin')}}admin: {{name}}{{/case}}{{#default()}}peasant: {{name}}{{/default}}{{/switch}}");
+		var map = new DefineMap({
+			name: "Johnny",
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "admin: Johnny", "{{#case('Johnny')}}");
+		map.type = "peasant";
+		QUnit.equal(innerHTML(div), "peasant: Johnny", "{{#default()}}");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
