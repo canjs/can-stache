@@ -222,11 +222,6 @@ var core = {
 			// Use the full mustache expression as the cache key.
 			fullExpression = mode+expressionString;
 
-		// convert a lookup like `{{value}}` to still be called as a helper if necessary.
-		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
-			exprData = new expression.Helper(exprData,[],{});
-		}
-
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
