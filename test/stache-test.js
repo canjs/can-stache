@@ -6768,6 +6768,17 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(frag.firstChild.value, "paul", "set to paul");
 	});
 
+	testHelpers.dev.devOnlyTest("Can use magic tags within attributes without warnings (#477)", function(){
+		var teardown = testHelpers.dev.willWarn(/Unable to find helper/);
+
+		var vm = new DefineMap({
+			name: ""
+		});
+		var frag = stache("<input value='{{name}}'>")(vm);
+
+		QUnit.equal(teardown(), 0, "no warning");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
