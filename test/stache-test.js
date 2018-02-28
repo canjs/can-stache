@@ -6751,6 +6751,23 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "peasant: Johnny", "{{#default()}}");
 	});
 
+	QUnit.test("Can use magic tags within attributes (#470)", function(){
+		var vm = new DefineMap({
+			name: ""
+		});
+		var frag = stache("<input value='{{name}}'>")(vm);
+		QUnit.equal(frag.firstChild.value, "", "initially empty");
+
+		vm.name = "matthew";
+		QUnit.equal(frag.firstChild.value, "matthew", "set to matthew");
+
+		frag.firstChild.value = "mark"
+		QUnit.equal(frag.firstChild.value, "mark", "set to mark");
+
+		vm.name = "paul";
+		QUnit.equal(frag.firstChild.value, "paul", "set to paul");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

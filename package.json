@@ -47,7 +47,7 @@
     "can-symbol": "^1.0.0",
     "can-util": "^3.10.6",
     "can-view-callbacks": "^4.0.0",
-    "can-view-live": "^4.0.0",
+    "can-view-live": "^4.0.3",
     "can-view-nodelist": "^4.0.0",
     "can-view-parser": "^4.0.0",
     "can-view-scope": "^4.0.0",
