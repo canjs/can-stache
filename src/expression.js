@@ -35,7 +35,7 @@ var Hash = function(){ }; // jshint ignore:line
 var keyRegExp = /[\w\.\\\-_@\/\&%]+/,
 	tokensRegExp = /('.*?'|".*?"|=|[\w\.\\\-_@\/*%\$]+|[\(\)]|,|\~|\[|\]\s*|\s*(?=\[))/g,
 	bracketSpaceRegExp = /\]\s+/,
-	literalRegExp = /^('.*?'|".*?"|[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
+	literalRegExp = /^('.*?'|".*?"|-?[0-9]+\.?[0-9]*|true|false|null|undefined)$/;
 
 var isTokenKey = function(token){
 	return keyRegExp.test(token);
