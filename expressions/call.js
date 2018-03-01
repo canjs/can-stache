@@ -21,12 +21,14 @@ var Call = function(methodExpression, argExpressions){
 Call.prototype.args = function(scope, ignoreArgLookup) {
 	var hashExprs = {};
 	var args = [];
-	for(var i = 0, len = this.argExprs.length; i < len; i++) {
+	var gotIgnoreFunction = typeof ignoreArgLookup === "function";
+
+	for (var i = 0, len = this.argExprs.length; i < len; i++) {
 		var arg = this.argExprs[i];
 		if(arg.expr instanceof Hashes){
 			assign(hashExprs, arg.expr.hashExprs);
 		}
-		if (typeof ignoreArgLookup !== "function" || !ignoreArgLookup(arg)) {
+		if (!gotIgnoreFunction || !ignoreArgLookup(i)) {
 			var value = arg.value.apply(arg, arguments);
 			args.push({
 				// always do getValue unless compute is false
