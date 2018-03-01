@@ -128,6 +128,9 @@ var eachHelper = function(items) {
 };
 eachHelper.isLiveBound = true;
 eachHelper.requiresOptionsArgument = true;
+eachHelper.ignoreArgLookup = function ignoreArgLookup(index) {
+	return index === 1;
+};
 
 var indexHelper = function(offset, options) {
 	if (!options) {

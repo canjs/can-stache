@@ -17,20 +17,24 @@ var Call = function(methodExpression, argExpressions){
 	this.methodExpr = methodExpression;
 	this.argExprs = argExpressions.map(expressionHelpers.convertToArgExpression);
 };
-Call.prototype.args = function(scope){
+Call.prototype.args = function(scope, ignoreArgLookup) {
 	var hashExprs = {};
 	var args = [];
-	for(var i = 0, len = this.argExprs.length; i < len; i++) {
+	var gotIgnoreFunction = typeof ignoreArgLookup === "function";
+
+	for (var i = 0, len = this.argExprs.length; i < len; i++) {
 		var arg = this.argExprs[i];
 		if(arg.expr instanceof Hashes){
 			assign(hashExprs, arg.expr.hashExprs);
 		}
-		var value = arg.value.apply(arg, arguments);
-		args.push({
-			// always do getValue unless compute is false
-			call: !arg.modifiers || !arg.modifiers.compute,
-			value: value
-		});
+		if (!gotIgnoreFunction || !ignoreArgLookup(i)) {
+			var value = arg.value.apply(arg, arguments);
+			args.push({
+				// always do getValue unless compute is false
+				call: !arg.modifiers || !arg.modifiers.compute,
+				value: value
+			});
+		}
 	}
 	return function(doNotWrapArguments){
 		var finalArgs = [];
@@ -61,7 +65,9 @@ Call.prototype.value = function(scope, helperOptions){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = callExpression.args(scope)(func.isLiveBound);
+			var args = callExpression.args(scope, func.ignoreArgLookup)(
+				func.isLiveBound
+			);
 
 			if (func.requiresOptionsArgument) {
 				if(args.hashExprs && helperOptions && helperOptions.exprData){

@@ -3475,6 +3475,23 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'no warnings shown');
 	});
 
+	testHelpers.dev.devOnlyTest("Logging: hashes in #each helper should not trigger warning", function () {
+		var teardown = testHelpers.dev.willWarn(
+			/can-stache\/expressions\/lookup.js: Unable to find key/
+		);
+
+		var tpl = stache("{{#each(panels, panel=value)}} {{panel.label}} {{/each}}");
+		tpl({
+			panels: [
+				{ label: "foo" },
+				{ label: "bar" },
+				{ label: "baz" },
+			]
+		});
+
+		QUnit.equal(teardown(), 0, 'no warnings shown');
+	});
+
 	test("Calling .fn without arguments should forward scope by default (#658)", function(){
 		var tmpl = "{{#foo()}}<span>{{bar}}</span>{{/foo}}";
 		var frag = stache(tmpl)(new SimpleMap({
