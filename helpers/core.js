@@ -137,6 +137,9 @@ var eachHelper = function(items) {
 };
 eachHelper.isLiveBound = true;
 eachHelper.requiresOptionsArgument = true;
+eachHelper.ignoreArgLookup = function ignoreArgLookup(arg) {
+	return arg.expr instanceof Hashes;
+};
 
 var indexHelper = function(offset, options) {
 	if (!options) {
