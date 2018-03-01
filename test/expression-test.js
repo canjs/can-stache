@@ -935,7 +935,7 @@ testHelpers.dev.devOnlyTest("All expression types have sourceText on prototype",
 
 
 testHelpers.dev.devOnlyTest("expression.sourceText - everything", function(){
-	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested.prop() outerPropA=helperC(2,valueB)"
+	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested.prop() outerPropA=helperC(2,valueB)";
 	var exprData = expression.parse(source);
 	QUnit.equal(exprData.sourceText(),source);
 });

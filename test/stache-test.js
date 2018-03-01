@@ -57,7 +57,7 @@ function overwriteGlobalHelper(name, fn, method) {
 	helpersCore[method || 'registerHelper'](name, newHelper);
 
 	return origHelper;
-};
+}
 
 function makeTest(name, doc, mutation) {
 	var isNormalDOM = doc === window.document;
@@ -302,34 +302,6 @@ function makeTest(name, doc, mutation) {
 		ok(! /top: 0px/.test( frag.firstChild.firstChild.getAttribute("style")) , "!0px");
 
 	});
-
-	var override = {
-		comments: {
-			'Standalone Without Newline': '!',
-			// \r\n isn't possible within some browsers
-			'Standalone Line Endings': "|\n|"
-		},
-		interpolation: {
-			// Stashe does not needs to escape .nodeValues of text nodes
-			'HTML Escaping' : "These characters should be HTML escaped: & \" < >\n",
-			'Triple Mustache' : "These characters should not be HTML escaped: & \" < >\n",
-			'Ampersand' : "These characters should not be HTML escaped: & \" < >\n"
-		},
-		inverted: {
-			'Standalone Line Endings': '|\n\n|',
-			'Standalone Without Newline': '^\n/'
-		},
-		partials: {
-			'Standalone Line Endings': '|\n>\n|',
-			'Standalone Without Newline': '>\n  >\n>',
-			'Standalone Without Previous Line': '  >\n>\n>',
-			'Standalone Indentation': '\\\n |\n<\n->\n|\n\n/\n'
-		},
-		sections: {
-			'Standalone Line Endings': '|\n\n|',
-			'Standalone Without Newline': '#\n/'
-		}
-	};
 
 	test('Tokens returning 0 where they should display the number', function () {
 		var template = "<div id='zero'>{{completed}}</div>";
@@ -6622,11 +6594,10 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), 'Mick', 'works with Call Expressions');
 
 		div = doc.createElement("div");
-		var template = stache("{{person.getName 'Hello '}}");
-		var frag = template(data);
+		template = stache("{{person.getName 'Hello '}}");
+		frag = template(data);
 
 		div.appendChild(frag);
-
 		equal(innerHTML(div), 'Hello Mick');
 	});
 
@@ -6643,7 +6614,7 @@ function makeTest(name, doc, mutation) {
 	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function() {
 		var scope = new Scope({ foo: "classVal" });
 		var template = stache("<div class='{{foo}}'>Hello</div>");
-		var frag = template(scope);
+		template(scope);
 
 		QUnit.equal(scope.get("scope.lineNumber"), 1);
 	});
@@ -6771,10 +6742,8 @@ function makeTest(name, doc, mutation) {
 	testHelpers.dev.devOnlyTest("Can use magic tags within attributes without warnings (#477)", function(){
 		var teardown = testHelpers.dev.willWarn(/Unable to find helper/);
 
-		var vm = new DefineMap({
-			name: ""
-		});
-		var frag = stache("<input value='{{name}}'>")(vm);
+		var vm = new DefineMap({ name: "" });
+		stache("<input value='{{name}}'>")(vm);
 
 		QUnit.equal(teardown(), 0, "no warning");
 	});

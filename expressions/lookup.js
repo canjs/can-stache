@@ -2,7 +2,6 @@ var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
-var assign = require('can-assign');
 var dev = require("can-log/dev/dev");
 
 // ### Lookup
@@ -14,6 +13,7 @@ var Lookup = function(key, root, sourceText) {
 	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
 Lookup.prototype.value = function(scope, readOptions){
+	// jshint maxdepth:6
 	var value;
 
 	if (this.rootExpr) {

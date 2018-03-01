@@ -1,12 +1,9 @@
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
-var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
 var canReflect = require('can-reflect');
 
 var utils = require('./utils');
-var mustacheCore = require('./mustache_core');
-
 var getDocument = require("can-globals/document/document");
 
 var assign = require('can-assign');

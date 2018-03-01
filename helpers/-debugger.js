@@ -1,8 +1,8 @@
 var canLog = require('can-log');
-function noop () {};
+function noop () {}
 var resolveValue = noop;
 var evaluateArgs = noop;
-var __testing = {}
+var __testing = {};
 
 //!steal-remove-start
 var canReflect = require('can-reflect');
@@ -17,7 +17,7 @@ resolveValue = function (value) {
 		return canReflect.getValue(value);
 	}
 	return value;
-}
+};
 
 evaluateArgs = function (left, right) {
 	switch (arguments.length) {
@@ -33,7 +33,7 @@ evaluateArgs = function (left, right) {
 			].join('\n'));
 			throw new Error('{{debugger}} must have less than three arguments');
 	}
-}
+};
 //!steal-remove-end
 
 function debuggerHelper (left, right) {
@@ -43,13 +43,10 @@ function debuggerHelper (left, right) {
 		return;
 	}
 
-	var options = arguments[arguments.length - 1];
-	var get = function (path) {
-		return options.scope.get(path);
-	};
-
 	canLog.log('Use `get(<path>)` to debug this template');
 	var allowDebugger = __testing.allowDebugger;
+	// forgotten debugger
+	// jshint -W087
 	if (allowDebugger) {
 		debugger;
 		return;

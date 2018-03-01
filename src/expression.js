@@ -302,7 +302,7 @@ var expression = {
 		} else if (ast.type === "Bracket") {
 			var originalKey;
 			//!steal-remove-start
-			originalKey = ast[canSymbol.for("can-stache.originalKey")]
+			originalKey = ast[canSymbol.for("can-stache.originalKey")];
 			//!steal-remove-end
 			return new Bracket(
 				this.hydrateAst(ast.children[0], options),
@@ -318,6 +318,7 @@ var expression = {
 		});
 	},
 	parseAst: function(tokens, cursor) {
+		// jshint maxdepth: 6
 		var stack = new Stack(),
 			top,
 			firstParent,

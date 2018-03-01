@@ -8,15 +8,15 @@ function makeConverter(getterSetter){
 	return function(newVal, source) {
 		var args = canReflect.toArray(arguments);
 		if(newVal instanceof SetIdentifier) {
-			return typeof getterSetter.set === "function"
-				? getterSetter.set.apply(this, [newVal.value].concat(args.slice(1)))
-				: source(newVal.value);
+			return typeof getterSetter.set === "function" ?
+				getterSetter.set.apply(this, [newVal.value].concat(args.slice(1))) :
+				source(newVal.value);
 		} else {
-			return typeof getterSetter.get === "function"
-				? getterSetter.get.apply(this, args)
-				: args[0];
+			return typeof getterSetter.get === "function" ?
+				getterSetter.get.apply(this, args) :
+				args[0];
 		}
-	}
+	};
 }
 
 helpers.addConverter = function(name, getterSetter) {

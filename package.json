@@ -17,7 +17,7 @@
     "postpublish": "git push --tags && git push",
     "testee": "testee test/test.html --browsers firefox",
     "test": "npm run detect-cycle && npm run jshint && npm run testee",
-    "jshint": "jshint ./*.js --config",
+    "jshint": "jshint . --config",
     "release:pre": "npm version prerelease && npm publish --tag pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
