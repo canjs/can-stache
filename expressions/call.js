@@ -1,4 +1,3 @@
-var Scope = require('can-view-scope');
 var Hashes = require('./hashes');
 var SetIdentifier = require("../src/set-identifier");
 var Observation = require('can-observation');
@@ -100,7 +99,7 @@ Call.prototype.sourceText = function(){
 		return arg.sourceText();
 	});
 	return this.methodExpr.sourceText()+"("+args.join(",")+")";
-}
+};
 //!steal-remove-end
 Call.prototype.closingTag = function() {
 	//!steal-remove-start

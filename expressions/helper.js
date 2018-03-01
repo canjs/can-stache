@@ -1,14 +1,10 @@
 var Literal = require('./literal');
 var Hashes = require('./hashes');
-var Observation = require('can-observation');
 var assign = require('can-assign');
 var dev = require("can-log/dev/dev");
 var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var expressionHelpers = require("../src/expression-helpers");
-var utils = require('../src/utils');
-var mustacheHelpers = require('../helpers/core');
 var canReflect = require('can-reflect');
-var ScopeKeyData = require("can-view-scope/scope-key-data");
 
 var Helper = function(methodExpression, argExpressions, hashExpressions){
 	this.methodExpr = methodExpression;

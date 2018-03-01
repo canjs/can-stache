@@ -25,7 +25,7 @@ function computeHasDependencies(compute){
 
 function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptions, readOptions) {
 	var getKey = function(){
-		return ("" + canReflect.getValue(key)).replace(".", "\\.")
+		return ("" + canReflect.getValue(key)).replace(".", "\\.");
 	};
 	var computeValue = new SetterObservable(function getDynamicKey() {
 		return observeReader.get( canReflect.getValue(root) , getKey());

@@ -4,12 +4,9 @@ var utils = require('../src/utils');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var assign = require('can-assign');
-var isIterable = require("can-util/js/is-iterable/is-iterable");
 var dev = require('can-log/dev/dev');
-var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-var Hashes = require("../expressions/hashes");
 var debuggerHelper = require('./-debugger').helper;
 var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
@@ -22,9 +19,6 @@ var domData = require('can-dom-data-state');
 var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
 };
-
-var getValueSymbol = canSymbol.for("can.getValue"),
-	isValueLikeSymbol = canSymbol.for("can.isValueLike");
 
 var resolve = function (value) {
 	if (value && canReflect.isValueLike(value)) {
@@ -47,20 +41,17 @@ var peek = observationRecorder.ignore(resolve);
 var eachHelper = function(items) {
 	var args = [].slice.call(arguments),
 		options = args.pop(),
-		argsLen = args.length,
-		argExprs = options.exprData.argExprs,
 		hashExprs = options.exprData.hashExprs,
 		resolved = peek(items),
 		hashOptions,
-		aliases,
-		key;
+		aliases;
 
 	// Check if using hash
 	if (!isEmptyObject(hashExprs)) {
 		hashOptions = {};
 		canReflect.eachKey(hashExprs, function (exprs, key) {
 			hashOptions[exprs.key] = key;
-		})
+		});
 	}
 
 	if ((

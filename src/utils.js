@@ -1,12 +1,9 @@
 var Scope = require('can-view-scope');
-var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
 var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
-var dev = require('can-log/dev/dev');
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-
 var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 
 // this creates a noop that marks that a renderer was called
@@ -19,7 +16,7 @@ var createNoOpRenderer = function (metadata) {
 		if (metadata) {
 			metadata.rendered = true;
 		}
-	}
+	};
 };
 
 module.exports = {
