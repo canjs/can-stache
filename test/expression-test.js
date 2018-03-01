@@ -972,3 +972,15 @@ test('Call Expressions can return functions instead of Observations', function()
 	equal(canReflect.getValue(nonBindingVal.value), "mark", "got correct initial value");
 	ok(!canReflect.isObservableLike(nonBindingVal.value), "value is not observable when doNotWrapInObservation is true");
 });
+
+QUnit.test("negative literals ast", function(assert) {
+	var ast = expression.ast("adjust(-10)");
+
+	var expected = {
+		children: [{ type: "Literal", value: -10 }],
+		method: { key: "@adjust", type: "Lookup" },
+		type: "Call"
+	};
+
+	assert.deepEqual(ast, expected);
+});
