@@ -43,7 +43,15 @@ function debuggerHelper (left, right) {
 		return;
 	}
 
+	// jshint +W098
+	var options = arguments[arguments.length - 1];
+	var get = function (path) {
+		return options.scope.get(path);
+	};
+	// jshint -W098
+
 	canLog.log('Use `get(<path>)` to debug this template');
+
 	var allowDebugger = __testing.allowDebugger;
 	// forgotten debugger
 	// jshint -W087
@@ -51,7 +59,9 @@ function debuggerHelper (left, right) {
 		debugger;
 		return;
 	}
+	// jshint +W087
 	//!steal-remove-end
+
 	canLog.warn('Forgotten {{debugger}} helper');
 }
 debuggerHelper.requiresOptionsArgument = true;
