@@ -41,12 +41,10 @@ var peek = observationRecorder.ignore(resolve);
 var makeSimpleHelper = function(fn) {
 	return function() {
 		var realArgs = [];
-		canReflect.eachIndex(arguments, function(val) {
-			while (val && val.isComputed) {
-				val = val();
-			}
-			realArgs.push(val);
+		canReflect.eachIndex(arguments, function (value) {
+			realArgs.push(resolve(value));
 		});
+
 		return fn.apply(this, realArgs);
 	};
 };
@@ -56,7 +54,7 @@ var makeSmartHelper = function(fn) {
 		var args = [].slice.call(arguments);
 		var options = args.pop(); // may be undefined
 
-		var value = fn.apply(this, args);
+		var value = resolve(fn.apply(this, args));
 
 		if (typeof value !== "string" && utils.isArrayLike(value)) {
 			if (canReflect.getKeyValue(value, "length")) {
