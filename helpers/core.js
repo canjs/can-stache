@@ -3,7 +3,6 @@ var nodeLists = require('can-view-nodelist');
 var utils = require('../src/utils');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var joinURIs = require('can-util/js/join-uris/join-uris');
-var assign = require('can-assign');
 var dev = require('can-log/dev/dev');
 var canReflect = require("can-reflect");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
@@ -12,6 +11,7 @@ var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
 var observationRecorder = require("can-observation-recorder");
+var frag = require("can-util/dom/frag/frag");
 var helpers = require("can-stache-helpers");
 
 var domData = require('can-dom-data-state');
@@ -37,6 +37,46 @@ var resolveHash = function(hash){
 };
 
 var peek = observationRecorder.ignore(resolve);
+
+var makeSimpleHelper = function(fn) {
+	return function() {
+		var realArgs = [];
+		canReflect.eachIndex(arguments, function(val) {
+			while (val && val.isComputed) {
+				val = val();
+			}
+			realArgs.push(val);
+		});
+		return fn.apply(this, realArgs);
+	};
+};
+
+var makeSmartHelper = function(fn) {
+	function helper() {
+		var args = [].slice.call(arguments);
+		var options = args.pop(); // may be undefined
+
+		var value = fn.apply(this, args);
+
+		if (typeof value !== "string" && utils.isArrayLike(value)) {
+			if (canReflect.getKeyValue(value, "length")) {
+				return frag(utils.getItemsFragContent(value, options, options.scope || this));
+			}
+
+			return options.inverse(options.scope || this);
+		}
+
+		if (options) {
+			return value ? options.fn(options.scope || this) : options.inverse(options.scope || this);
+		}
+
+		return !!value;
+	}
+
+	helper.requiresOptionsArgument = true;
+
+	return helper;
+};
 
 var eachHelper = function(items) {
 	var args = [].slice.call(arguments),
@@ -142,7 +182,7 @@ var indexHelper = function(offset, options) {
 };
 indexHelper.requiresOptionsArgument = true;
 
-var ifHelper = function (expr, options) {
+function ifHelperInner(expr) {
 	var value;
 	// if it's a function, wrap its value in a compute
 	// that will only change values from true to false
@@ -152,33 +192,24 @@ var ifHelper = function (expr, options) {
 		value = !! resolve(expr);
 	}
 
-	if(!options) {
-		return value;
+	return value;
+}
+
+var ifHelper = makeSmartHelper(ifHelperInner);
+
+var unlessHelper = makeSmartHelper(function () {
+	return !ifHelperInner.apply(this, arguments);
+});
+
+var isHelper = makeSmartHelper(function isHelper() {
+	if (arguments.length < 2) {
+		return false;
 	}
 
-	if (value) {
-		return options.fn(options.scope || this);
-	} else {
-		return options.inverse(options.scope || this);
-	}
-};
-ifHelper.requiresOptionsArgument = true;
-
-var isHelper = function() {
-	var lastValue, curValue,
-		options = arguments[arguments.length - 1];
-
-	if (arguments.length - 2 <= 0) {
-		if(!options) {
-			return false;
-		}
-
-		return options.inverse();
-	}
-
+	var lastValue, curValue;
 	var args = arguments;
 	var callFn = new Observation(function(){
-		for (var i = 0; i < args.length - 1; i++) {
+		for (var i = 0; i < args.length; i++) {
 			curValue = resolve(args[i]);
 			curValue = typeof curValue === "function" ? curValue() : curValue;
 
@@ -187,30 +218,15 @@ var isHelper = function() {
 					return false;
 				}
 			}
+
 			lastValue = curValue;
 		}
+
 		return true;
 	});
 
-	if(!options) {
-		return callFn.get();
-	}
-
-	return callFn.get() ? options.fn() : options.inverse();
-};
-isHelper.requiresOptionsArgument = true;
-
-var unlessHelper = function (expr, options) {
-	if(!options) {
-		return !ifHelper.apply(this, [expr]);
-	}
-
-	return ifHelper.apply(this, [expr, assign(assign({}, options), {
-		fn: options.inverse,
-		inverse: options.fn
-	})]);
-};
-unlessHelper.requiresOptionsArgument = true;
+	return callFn.get();
+});
 
 var withHelper = function (expr, options) {
 	var ctx = expr;
@@ -348,24 +364,15 @@ var registerHelper = function(name, callback){
 	helpers[name] = callback;
 };
 
-var makeSimpleHelper = function(fn) {
-	return function() {
-		var realArgs = [];
-		canReflect.eachIndex(arguments, function(val) {
-			while (val && val.isComputed) {
-				val = val();
-			}
-			realArgs.push(val);
-		});
-		return fn.apply(this, realArgs);
-	};
-};
-
 module.exports = {
 	registerHelper: registerHelper,
 
 	addHelper: function(name, callback) {
 		return registerHelper(name, makeSimpleHelper(callback));
+	},
+
+	addSmartHelper: function(name, callback) {
+		return registerHelper(name, makeSmartHelper(callback));
 	},
 
 	// add helpers that set up their own internal live-binding
