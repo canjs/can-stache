@@ -1,6 +1,7 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
 require('./expression-test');
 require('../helpers/-debugger-test');
+require('./nodelist-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');

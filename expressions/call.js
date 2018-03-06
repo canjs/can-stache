@@ -1,6 +1,5 @@
 var Hashes = require('./hashes');
 var SetIdentifier = require("../src/set-identifier");
-var Observation = require('can-observation');
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var SetterObservable = require("can-simple-observable/setter/setter");
@@ -95,7 +94,7 @@ Call.prototype.value = function(scope, helperOptions){
 		return computeFn();
 	} else {
 		var computeValue = new SetterObservable(computeFn, computeFn);
-		Observation.temporarilyBind(computeValue);
+
 		return computeValue;
 	}
 };

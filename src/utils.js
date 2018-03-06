@@ -57,12 +57,6 @@ module.exports = {
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.
 	makeRendererConvertScopes: function (renderer, parentScope, nodeList, observeObservables, metadata) {
-		var rendererWithScope = function(ctx, parentNodeList){
-			if (metadata) {
-				metadata.rendered = true;
-			}
-			return renderer(ctx || parentScope, parentNodeList);
-		};
 		var convertedRenderer = function (newScope, newOptions, parentNodeList) {
 			// prevent binding on fn.
 			// If a non-scope value is passed, add that to the parent scope.
@@ -74,8 +68,11 @@ module.exports = {
 					newScope = new Scope(newScope || {});
 				}
 			}
+			if (metadata) {
+				metadata.rendered = true;
+			}
 
-			var result = rendererWithScope(newScope, parentNodeList || nodeList );
+			var result = renderer(newScope || parentScope, parentNodeList || nodeList );
 			return result;
 		};
 		return observeObservables ? convertedRenderer :

@@ -90,7 +90,7 @@ var core = {
 				return value;
 			}
 		}
-
+		// {{#something()}}foo{{/something}}
 		// return evaluator for no mode or rendered value if a renderer was called
 		if(!mode || helperOptions.metadata.rendered) {
 			return value;
@@ -98,8 +98,16 @@ var core = {
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
+				var result;
 
-				if(typeof finalValue === "function") {
+				// if options.fn or options.inverse was called, we take the observable's return value
+				// as what should be put in the DOM.
+				if(helperOptions.metadata.rendered) {
+					result = finalValue;
+				}
+				// OTHERWISE; we will call `.fn` and `.inverse` ourselves based on what
+				// the value looks like.
+				else if(typeof finalValue === "function") {
 					return finalValue;
 				}
 				// If it's an array, render.
@@ -109,17 +117,22 @@ var core = {
 
 					if(canReflect.getKeyValue(finalValue, "length")) {
 						if (stringOnly) {
-							return utils.getItemsStringContent(finalValue, isObserveList, helperOptions);
+							result = utils.getItemsStringContent(finalValue, isObserveList, helperOptions);
 						} else {
-							return frag(utils.getItemsFragContent(finalValue, helperOptions, scope));
+							result = frag(utils.getItemsFragContent(finalValue, helperOptions, scope));
 						}
 					} else {
-						return helperOptions.inverse(scope);
+						result = helperOptions.inverse(scope);
 					}
 				}
 				else {
-					return finalValue ? helperOptions.fn(finalValue || scope) : helperOptions.inverse(scope);
+					result = finalValue ? helperOptions.fn(finalValue || scope) : helperOptions.inverse(scope);
 				}
+				// We always set the rendered result back to false.
+				// - Future calls might change from returning a value to calling `.fn`
+				// - We are calling `.fn` and `.inverse` ourselves.
+				helperOptions.metadata.rendered = false;
+				return result;
 			};
 		} else {
 			// not supported!
@@ -304,7 +317,7 @@ var core = {
 			} else {
 				//!steal-remove-start
 				Object.defineProperty(evaluator,"name",{
-					value: "{{"+expressionString+"}}"
+					value: "{{"+(mode || "")+expressionString+"}}"
 				});
 				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
