@@ -12,7 +12,7 @@
     "email": "contact@bitovi.com",
     "url": "http://bitovi.com"
   },
-	"license": "MIT",
+  "license": "MIT",
   "scripts": {
     "preversion": "npm test",
     "postpublish": "git push --tags && git push",
