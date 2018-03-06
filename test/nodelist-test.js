@@ -4,22 +4,22 @@ var stache = require('can-stache');
 QUnit.module("can-stache nodeList");
 
 QUnit.test("nodeList not cleaned (#486)", function(){
-    var template = stache(`<div>
-	  {{#showHome}}
-		  <h1> home </h1>
-	  {{else}}
-		 {{#if(startsFalse)}}
-          <my-crazy-custom-element/>
-        {{/if}}
-	  {{/eq}}
-	</div>`);
+    var template = stache("<div>"+
+	  "{{#showHome}}"+
+		  "<h1> home </h1>"+
+	  "{{else}}"+
+		 "{{#if(startsFalse)}}"+
+          "{{other}}"+
+        "{{/if}}"+
+	  "{{/eq}}"+
+	"</div>");
 
     var state = new SimpleMap({
         showHome: false,
         startsFalse: false
     });
 
-    var frag = template(state);
+    template(state);
 
     state.set("showHome", true);
     state.set("startsFalse", true);
