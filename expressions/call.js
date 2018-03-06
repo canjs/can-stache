@@ -95,7 +95,7 @@ Call.prototype.value = function(scope, helperOptions){
 		return computeFn();
 	} else {
 		var computeValue = new SetterObservable(computeFn, computeFn);
-		Observation.temporarilyBind(computeValue);
+		
 		return computeValue;
 	}
 };
