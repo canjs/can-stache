@@ -7195,6 +7195,21 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(scope.get("scope.lineNumber"), 1);
 	});
 
+	test("inline partials available in switch", function() {
+		var renderer = stache(
+			"{{<aPartial}}foo{{/aPartial}}" +
+			"<span>{{#switch(0)}}" +
+				"{{#case(0)}}" +
+				"{{>aPartial}} should be foo" +
+				"{{/case}}" +
+			"{{/switch}}</span>"
+		);
+
+		var view = renderer(new DefineMap());
+
+		equal(view.firstChild.innerHTML, "foo should be foo", "inline partial renders");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

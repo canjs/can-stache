@@ -70,7 +70,7 @@ var core = {
 				scope: scope,
 				nodeList: nodeList,
 				exprData: exprData,
-				helpersScope: helperOptions
+				helpers: helperOptions
 			};
 			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
@@ -194,7 +194,11 @@ var core = {
 				}
 				// Look up partials in options first.
 				var partial = options.peek("partials." + localPartialName);
-				partial = partial || ( options.inlinePartials && options.inlinePartials[ localPartialName ] );
+				var parent = options;
+				while(!partial && parent) {
+					partial = parent.inlinePartials && parent.inlinePartials[ localPartialName ];
+					parent = parent._parent;
+				}
 				var renderer;
 				if (partial) {
 					renderer = function() {
