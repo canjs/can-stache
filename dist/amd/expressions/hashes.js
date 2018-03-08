@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#expressions/hashes*/
+/*can-stache@3.14.11#expressions/hashes*/
 define([
     'require',
     'exports',

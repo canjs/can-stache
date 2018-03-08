@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#src/mustache_core*/
+/*can-stache@3.14.11#src/mustache_core*/
 define([
     'require',
     'exports',
@@ -43,7 +43,7 @@ define([
                     scope: scope,
                     nodeList: nodeList,
                     exprData: exprData,
-                    helpersScope: helperOptions
+                    helpers: helperOptions
                 };
                 utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
                 value = exprData.value(scope, helperOptions, helperOptionArg);
@@ -128,7 +128,11 @@ define([
                         }
                     }
                     var partial = options.peek('partials.' + localPartialName);
-                    partial = partial || options.inlinePartials && options.inlinePartials[localPartialName];
+                    var parent = options;
+                    while (!partial && parent) {
+                        partial = parent.inlinePartials && parent.inlinePartials[localPartialName];
+                        parent = parent._parent;
+                    }
                     var renderer;
                     if (partial) {
                         renderer = function () {

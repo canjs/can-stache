@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#src/html_section*/
+/*can-stache@3.14.11#src/html_section*/
 define([
     'require',
     'exports',

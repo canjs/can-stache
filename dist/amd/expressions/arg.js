@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#expressions/arg*/
+/*can-stache@3.14.11#expressions/arg*/
 define(function (require, exports, module) {
     var Arg = function (expression, modifiers) {
         this.expr = expression;
