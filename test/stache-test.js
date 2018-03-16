@@ -3446,7 +3446,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find helper "helpme".');
+		var teardown = testHelpers.dev.willWarn('Unable to find helper "helpme".');
 
 		stache('<li>{{helpme name}}</li>')({
 			name: 'Hulk Hogan'
@@ -3455,9 +3455,8 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, 'got expected warning');
 	});
 
-	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/lookup.js: Unable to find key "user.name".');
-
+	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720, #494)", function () {
+		var teardown = testHelpers.dev.willWarn('Unable to find key "user.name".');
 		stache('<li>{{user.name}}</li>')({
 			user: {}
 		});
@@ -3466,7 +3465,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template should not happen for falsey values", function () {
-		var teardown = testHelpers.dev.willWarn(/can-stache\/expressions\/lookup.js: Unable to find key/);
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 
 		stache('{{bool}} {{emptyString}}')({
 			bool: false,
@@ -3477,9 +3476,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: hashes in #each helper should not trigger warning", function () {
-		var teardown = testHelpers.dev.willWarn(
-			/can-stache\/expressions\/lookup.js: Unable to find key/
-		);
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 
 		var tpl = stache("{{#each(panels, panel=value)}} {{panel.label}} {{/each}}");
 		tpl({
