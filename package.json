@@ -43,7 +43,7 @@
     "can-observation": "^4.0.0",
     "can-observation-recorder": "^1.0.0",
     "can-reflect": "^1.2.1",
-    "can-simple-observable": "^2.0.3",
+    "can-simple-observable": "^2.0.4",
     "can-stache-ast": "^1.0.0",
     "can-stache-helpers": "^1.0.0",
     "can-stache-key": "^1.0.0",
