@@ -6740,6 +6740,21 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div), "peasant: Johnny", "{{#default()}}");
 	});
 
+	test("#case and #default with Helper Expressions should not change context (#475)", function(){
+		var template = stache("{{#switch type}}{{#case 'admin'}}admin: {{name}}{{/case}}{{#default}}peasant: {{name}}{{/default}}{{/switch}}");
+		var map = new DefineMap({
+			name: "Johnny",
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "admin: Johnny", "{{#case 'Johnny'}}");
+		map.type = "peasant";
+		QUnit.equal(innerHTML(div), "peasant: Johnny", "{{#default}}");
+	});
+
 	QUnit.test("Can use magic tags within attributes (#470)", function(){
 		var vm = new DefineMap({
 			name: ""

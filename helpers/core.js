@@ -248,7 +248,8 @@ var switchHelper = function(expression, options){
 		"can.isValueLike": true,
 		"can.isFunctionLike": false,
 		"can.getValue": function() {
-			return this();
+			// pass the helperOptions passed to {{#switch}}
+			return this(options);
 		}
 	});
 
