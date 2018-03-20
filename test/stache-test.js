@@ -6080,6 +6080,30 @@ function makeTest(name, doc, mutation) {
 		debug.__testing.allowDebugger = true;
 	});
 
+	test("debugger Lookup Expression calls debugger helper (#469)", function(){
+		debug.__testing.allowDebugger = false;
+		var log = canLog.log;
+		var warn = canLog.warn;
+
+		var logs = [
+			"Use `get(<path>)` to debug this template",
+			"Forgotten {{debugger}} helper"
+		];
+		canLog.log = canLog.warn = function(message){
+			QUnit.equal(message, logs.shift());
+		}
+
+		var template = stache("{{debugger}}");
+		var div = doc.createElement("div");
+		var frag = template();
+
+		div.appendChild(frag);
+
+		canLog.log = log;
+		canLog.warn = warn;
+		debug.__testing.allowDebugger = true;
+	});
+
 	test("#eq works with call expressions", function(){
 		var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
 		var map = new DefineMap({
