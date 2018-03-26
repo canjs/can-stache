@@ -164,12 +164,13 @@ var isHelper = function() {
 	var lastValue, curValue,
 		options = arguments[arguments.length - 1];
 
-	if (arguments.length - 2 <= 0) {
+	if (arguments.length  <= 2) {
 		return options.inverse();
 	}
 
 	var args = arguments;
-	var callFn = new Observation(function(){
+
+	function isHelper(){
 		for (var i = 0; i < args.length - 1; i++) {
 			curValue = resolve(args[i]);
 			curValue = typeof curValue === "function" ? curValue() : curValue;
@@ -182,7 +183,17 @@ var isHelper = function() {
 			lastValue = curValue;
 		}
 		return true;
+	}
+
+	//!steal-remove-start
+	Object.defineProperty(isHelper, "name", {
+		value: "is("+[].slice.call(args,0,2).map(function(arg){
+			return canReflect.getName(arg)
+		}).join(",")+")"
 	});
+	//!steal-remove-end
+
+	var callFn = new Observation(isHelper);
 
 	return callFn.get() ? options.fn() : options.inverse();
 };
