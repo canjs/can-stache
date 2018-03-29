@@ -26,7 +26,8 @@ var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
 
 var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
-var domData = require('can-dom-data-state');
+var domData = require('can-dom-data');
+var domDataState = require('can-dom-data-state');
 var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 
@@ -1062,7 +1063,7 @@ function makeTest(name, doc, mutation) {
 
 	test("hookup and live binding", function () {
 
-		var text = "<div class='{{ task.completed }}' {{ data 'task' task }}>" +
+		var text = "<div class='{{ task.completed }}' {{ domData 'task' task }}>" +
 				"{{ task.name }}" +
 				"</div>",
 			task = new SimpleMap({
@@ -1078,7 +1079,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(compiled)
 		var child = div.getElementsByTagName('div')[0];
 		ok(child.className.indexOf("false") > -1, "is incomplete")
-		ok( !! domData.get.call(child, 'task'), "has data")
+		ok( !! domData.get(child, 'task'), "has data")
 		equal(innerHTML(child), "My Name", "has name")
 
 		task.set({
@@ -2017,17 +2018,85 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(renderer(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer2(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer3(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+	});
+
+	test("domData helper should set proper data instead of a context stack", function () {
+		var partials = {
+			'nested_data': stache('<span id="has_data" {{domData "attr"}}></span>'),
+			'nested_data2': stache('{{#this}}<span id="has_data" {{domData "attr"}}></span>{{/this}}'),
+			'nested_data3': stache('{{#../bar}}<span id="has_data" {{domData "attr"}}></span>{{/../bar}}')
+		};
+
+		var renderer = stache("{{#bar}}{{> nested_data}}{{/bar}}"),
+			renderer2 = stache("{{#bar}}{{> nested_data2}}{{/bar}}"),
+			renderer3 = stache("{{#bar}}{{> nested_data3}}{{/bar}}"),
+			div = doc.createElement('div'),
+			data = new SimpleMap({
+				foo: "bar",
+				bar: new SimpleMap({})
+			}),
+			span;
+
+		div = doc.createElement('div');
+
+		div.appendChild(renderer(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
+
+		div = doc.createElement('div');
+		div.appendChild(renderer2(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
+
+		div = doc.createElement('div');
+		div.appendChild(renderer3(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+	});
+
+	test("data helper should store passed values", function () {
+		var template = "<span {{data('todo' todos[0])}}></span>";
+		var vm = new DefineMap({
+			todos: [
+				{
+					id: 1,
+					name: "Dishes"
+				}
+			]
+		});
+		var rendered = stache(template)(vm);
+		var div = doc.createElement('div');
+		div.appendChild(rendered);
+		var span = div.getElementsByTagName('span')[0];
+		strictEqual(domDataState.get.call(span, 'todo'), vm.todos[0], 'can-dom-data-state should have the correct value');
+	});
+
+	test("domData helper should store passed values", function () {
+		var template = "<span {{domData('todo' todos[0])}}></span>";
+		var vm = new DefineMap({
+			todos: [
+				{
+					id: 1,
+					name: "Dishes"
+				}
+			]
+		});
+		var rendered = stache(template)(vm);
+		var div = doc.createElement('div');
+		div.appendChild(rendered);
+		var span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'todo'), vm.todos[0], 'can-dom-data should have the correct value');
 	});
 
 	test("avoid global helpers", function () {
@@ -6803,6 +6872,18 @@ function makeTest(name, doc, mutation) {
 		stache("<input value='{{name}}'>")(vm);
 
 		QUnit.equal(teardown(), 0, "no warning");
+	});
+
+	testHelpers.dev.devOnlyTest("{{data}} helper shows deprecation warning", function () {
+		var teardown = testHelpers.dev.willWarn(/{{data}} helper has been deprecated; use {{domData}} instead/, function(message, matched) {
+			if (matched) {
+				ok(true, "received warning");
+			}
+		});
+
+		stache("<span {{data('attr')}}></span>")();
+
+		QUnit.equal(teardown(), 1, "Exactly one warning called");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

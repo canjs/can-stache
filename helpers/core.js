@@ -14,7 +14,8 @@ var TruthyObservable = require("../src/truthy-observable");
 var observationRecorder = require("can-observation-recorder");
 var helpers = require("can-stache-helpers");
 
-var domData = require('can-dom-data-state');
+var domData = require('can-dom-data');
+var domDataState = require('can-dom-data-state');
 
 var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
@@ -215,12 +216,20 @@ var withHelper = function (expr, options) {
 };
 withHelper.requiresOptionsArgument = true;
 
-var dataHelper = function(attr) {
-	// options will either be the second or third argument.
-	// Get the argument before that.
-	var data = arguments.length === 2 ? this : arguments[1];
-	return function(el){
-		domData.set.call( el, attr, data || this.context );
+var dataHelper = function(attr, value) {
+	var data = (looksLikeOptions(value) ? value.context : value) || this;
+	return function setData(el) {
+		//!steal-remove-start
+		dev.warn('The {{data}} helper has been deprecated; use {{domData}} instead: https://canjs.com/doc/can-stache.helpers.domData.html');
+		//!steal-remove-end
+		domDataState.set.call( el, attr, data );
+	};
+};
+
+var domDataHelper = function(attr, value) {
+	var data = (looksLikeOptions(value) ? value.context : value) || this;
+	return function setDomData(el) {
+		domData.set( el, attr, data );
 	};
 };
 
@@ -304,6 +313,7 @@ var builtInHelpers = {
 	'with': withHelper,
 	console: console,
 	data: dataHelper,
+	domData: domDataHelper,
 	'switch': switchHelper,
 	joinBase: joinBaseHelper,
 
