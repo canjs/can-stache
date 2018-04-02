@@ -55,7 +55,15 @@ Lookup.prototype.value = function(scope, readOptions){
 		//var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
 
 		if (!propDefined) {
-			dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
+			var message = 'Unable to find key "' + this.key + '"';
+			if (scope.templateContext.filename) {
+				message = '"' + scope.templateContext.filename + '": ' + message;
+			}
+			var contextName = context && context.constructor.name;
+			if (contextName && contextName !== 'DefineMap' && contextName !== 'Object') {
+				message = message + ' in ' + '"' + contextName + '"';
+			}
+			dev.warn(message + '.');
 		}
 	}
 	//!steal-remove-end
