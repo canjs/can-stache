@@ -39,7 +39,7 @@ does not work:
 To work around this, an `localContext` helper could be created as follows:
 
 ```js
-stache.regsiterHelper( "localContext", function( options ) {
+stache.registerHelper( "localContext", function( options ) {
 	return options.fn( new Map() );
 } );
 ```
