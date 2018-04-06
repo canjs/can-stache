@@ -297,7 +297,7 @@ var core = {
 			var nodeList = [this];
 			nodeList.expression = expressionString;
 			// register this nodeList.
-			// Regsiter it with its parent ONLY if this is directly nested.  Otherwise, it's unencessary.
+			// Register it with its parent ONLY if this is directly nested.  Otherwise, it's unnecessary.
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
@@ -305,7 +305,7 @@ var core = {
 			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
 
 			// Create a compute that can not be observed by other
-			// comptues. This is important because this renderer is likely called by
+			// computes. This is important because this renderer is likely called by
 			// parent expressions.  If this value changes, the parent expressions should
 			// not re-evaluate. We prevent that by making sure this compute is ignored by
 			// everyone else.
