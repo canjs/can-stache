@@ -1,4 +1,4 @@
-/*can-stache@3.14.12#expressions/bracket*/
+/*can-stache@3.14.13#expressions/bracket*/
 define([
     'require',
     'exports',

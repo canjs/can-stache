@@ -7398,7 +7398,7 @@ define('can-view-scope', [
     namespace.view = namespace.view || {};
     module.exports = namespace.view.Scope = Scope;
 });
-/*can-stache@3.14.12#src/utils*/
+/*can-stache@3.14.13#src/utils*/
 define('can-stache/src/utils', [
     'require',
     'exports',
@@ -8440,7 +8440,7 @@ define('can-view-live', [
     require('can-view-live/lib/text');
     module.exports = live;
 });
-/*can-stache@3.14.12#expressions/arg*/
+/*can-stache@3.14.13#expressions/arg*/
 define('can-stache/expressions/arg', function (require, exports, module) {
     var Arg = function (expression, modifiers) {
         this.expr = expression;
@@ -8452,7 +8452,7 @@ define('can-stache/expressions/arg', function (require, exports, module) {
     };
     module.exports = Arg;
 });
-/*can-stache@3.14.12#expressions/literal*/
+/*can-stache@3.14.13#expressions/literal*/
 define('can-stache/expressions/literal', function (require, exports, module) {
     var Literal = function (value) {
         this._value = value;
@@ -8462,7 +8462,7 @@ define('can-stache/expressions/literal', function (require, exports, module) {
     };
     module.exports = Literal;
 });
-/*can-stache@3.14.12#src/expression-helpers*/
+/*can-stache@3.14.13#src/expression-helpers*/
 define('can-stache/src/expression-helpers', [
     'require',
     'exports',
@@ -8542,7 +8542,7 @@ define('can-stache/src/expression-helpers', [
         toCompute: toCompute
     };
 });
-/*can-stache@3.14.12#expressions/hashes*/
+/*can-stache@3.14.13#expressions/hashes*/
 define('can-stache/expressions/hashes', [
     'require',
     'exports',
@@ -8576,7 +8576,7 @@ define('can-stache/expressions/hashes', [
     };
     module.exports = Hashes;
 });
-/*can-stache@3.14.12#expressions/bracket*/
+/*can-stache@3.14.13#expressions/bracket*/
 define('can-stache/expressions/bracket', [
     'require',
     'exports',
@@ -8596,13 +8596,13 @@ define('can-stache/expressions/bracket', [
     };
     module.exports = Bracket;
 });
-/*can-stache@3.14.12#src/set-identifier*/
+/*can-stache@3.14.13#src/set-identifier*/
 define('can-stache/src/set-identifier', function (require, exports, module) {
     module.exports = function SetIdentifier(value) {
         this.value = value;
     };
 });
-/*can-stache@3.14.12#expressions/call*/
+/*can-stache@3.14.13#expressions/call*/
 define('can-stache/expressions/call', [
     'require',
     'exports',
@@ -8768,7 +8768,7 @@ define('can-util/js/join-uris/join-uris', [
         return !href || !base ? null : (href.protocol || base.protocol) + (href.protocol || href.authority ? href.authority : base.authority) + removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : href.pathname ? (base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname : base.pathname) + (href.protocol || href.authority || href.pathname ? href.search : href.search || base.search) + href.hash;
     };
 });
-/*can-stache@3.14.12#helpers/-debugger*/
+/*can-stache@3.14.13#helpers/-debugger*/
 define('can-stache/helpers/-debugger', [
     'require',
     'exports',
@@ -8792,7 +8792,7 @@ define('can-stache/helpers/-debugger', [
         __testing: __testing
     };
 });
-/*can-stache@3.14.12#helpers/core*/
+/*can-stache@3.14.13#helpers/core*/
 define('can-stache/helpers/core', [
     'require',
     'exports',
@@ -9125,7 +9125,7 @@ define('can-stache/helpers/core', [
         helpers: assign({}, helpers)
     };
 });
-/*can-stache@3.14.12#src/lookup-value-or-helper*/
+/*can-stache@3.14.13#src/lookup-value-or-helper*/
 define('can-stache/src/lookup-value-or-helper', [
     'require',
     'exports',
@@ -9149,7 +9149,7 @@ define('can-stache/src/lookup-value-or-helper', [
     }
     module.exports = lookupValueOrHelper;
 });
-/*can-stache@3.14.12#expressions/lookup*/
+/*can-stache@3.14.13#expressions/lookup*/
 define('can-stache/expressions/lookup', [
     'require',
     'exports',
@@ -9176,7 +9176,7 @@ define('can-stache/expressions/lookup', [
     };
     module.exports = Lookup;
 });
-/*can-stache@3.14.12#expressions/scope-lookup*/
+/*can-stache@3.14.13#expressions/scope-lookup*/
 define('can-stache/expressions/scope-lookup', [
     'require',
     'exports',
@@ -9197,7 +9197,7 @@ define('can-stache/expressions/scope-lookup', [
     };
     module.exports = ScopeLookup;
 });
-/*can-stache@3.14.12#expressions/helper*/
+/*can-stache@3.14.13#expressions/helper*/
 define('can-stache/expressions/helper', [
     'require',
     'exports',
@@ -9306,7 +9306,7 @@ define('can-stache/expressions/helper', [
     };
     module.exports = Helper;
 });
-/*can-stache@3.14.12#expressions/helper-lookup*/
+/*can-stache@3.14.13#expressions/helper-lookup*/
 define('can-stache/expressions/helper-lookup', [
     'require',
     'exports',
@@ -9331,7 +9331,7 @@ define('can-stache/expressions/helper-lookup', [
     };
     module.exports = HelperLookup;
 });
-/*can-stache@3.14.12#expressions/helper-scope-lookup*/
+/*can-stache@3.14.13#expressions/helper-scope-lookup*/
 define('can-stache/expressions/helper-scope-lookup', [
     'require',
     'exports',
@@ -9356,7 +9356,7 @@ define('can-stache/expressions/helper-scope-lookup', [
     };
     module.exports = HelperScopeLookup;
 });
-/*can-stache@3.14.12#src/expression*/
+/*can-stache@3.14.13#src/expression*/
 define('can-stache/src/expression', [
     'require',
     'exports',
@@ -9827,7 +9827,7 @@ define('can-stache/src/expression', [
     };
     module.exports = expression;
 });
-/*can-stache@3.14.12#src/mustache_core*/
+/*can-stache@3.14.13#src/mustache_core*/
 define('can-stache/src/mustache_core', [
     'require',
     'exports',
@@ -10125,7 +10125,7 @@ define('can-stache/src/mustache_core', [
         return this;
     }(), require, exports, module));
 });
-/*can-stache@3.14.12#src/html_section*/
+/*can-stache@3.14.13#src/html_section*/
 define('can-stache/src/html_section', [
     'require',
     'exports',
@@ -10286,7 +10286,7 @@ define('can-stache/src/html_section', [
         return this;
     }(), require, exports, module));
 });
-/*can-stache@3.14.12#src/text_section*/
+/*can-stache@3.14.13#src/text_section*/
 define('can-stache/src/text_section', [
     'require',
     'exports',
@@ -10394,7 +10394,7 @@ define('can-stache/src/text_section', [
     });
     module.exports = TextSectionBuilder;
 });
-/*can-stache@3.14.12#helpers/converter*/
+/*can-stache@3.14.13#helpers/converter*/
 define('can-stache/helpers/converter', [
     'require',
     'exports',
@@ -10419,7 +10419,7 @@ define('can-stache/helpers/converter', [
     };
     module.exports = helpers;
 });
-/*can-stache@3.14.12#src/intermediate_and_imports*/
+/*can-stache@3.14.13#src/intermediate_and_imports*/
 define('can-stache/src/intermediate_and_imports', [
     'require',
     'exports',
@@ -10553,7 +10553,7 @@ define('can-util/js/import/import', [
         return this;
     }(), require, exports, module));
 });
-/*can-stache@3.14.12#can-stache*/
+/*can-stache@3.14.13#can-stache*/
 define('can-stache', [
     'require',
     'exports',
