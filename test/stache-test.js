@@ -6886,6 +6886,23 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 1, "Exactly one warning called");
 	});
 
+	test("missing partial error (#506)", function(){
+
+		var map = new SimpleMap({});
+
+		var renderer = stache("<div>{{>foo}}</div>");
+
+		var frag = renderer(map);
+
+		QUnit.ok(true, "no error");
+		QUnit.equal( innerHTML(frag.firstChild), "", "no content");
+
+		map.set("foo", function(){
+			return "bar";
+		});
+		QUnit.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
