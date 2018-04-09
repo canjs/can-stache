@@ -14,7 +14,7 @@ var domMutate = require("can-dom-mutate");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
-
+var getDocument = require("can-globals/document/document");
 
 // ## Types
 
@@ -206,7 +206,8 @@ var core = {
 						if(typeof localPartialName === "function"){
 							return localPartialName(scope, {}, nodeList);
 						} else {
-							return core.getTemplateById(localPartialName)(scope, {}, nodeList);
+							var domRenderer = core.getTemplateById(localPartialName);
+							return domRenderer ? domRenderer(scope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
 
 					};
