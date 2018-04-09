@@ -1,4 +1,4 @@
-/*can-stache@3.14.13#expressions/literal*/
+/*can-stache@3.14.14#expressions/literal*/
 define(function (require, exports, module) {
     var Literal = function (value) {
         this._value = value;
