@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#helpers/converter*/
+/*can-stache@3.14.12#helpers/converter*/
 define([
     'require',
     'exports',

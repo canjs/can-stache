@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#can-stache*/
+/*can-stache@3.14.12#can-stache*/
 define([
     'require',
     'exports',
@@ -336,7 +336,9 @@ define([
         stache.from = mustacheCore.getTemplateById = function (id) {
             if (!templates[id]) {
                 var el = DOCUMENT().getElementById(id);
-                templates[id] = stache('#' + id, el.innerHTML);
+                if (el) {
+                    templates[id] = stache('#' + id, el.innerHTML);
+                }
             }
             return templates[id];
         };

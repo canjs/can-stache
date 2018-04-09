@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#expressions/scope-lookup*/
+/*can-stache@3.14.12#expressions/scope-lookup*/
 define([
     'require',
     'exports',

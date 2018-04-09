@@ -1,4 +1,4 @@
-/*can-stache@3.14.10#src/lookup-value-or-helper*/
+/*can-stache@3.14.12#src/lookup-value-or-helper*/
 define([
     'require',
     'exports',

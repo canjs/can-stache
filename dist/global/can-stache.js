@@ -120,7 +120,12 @@
 	});
 })(
 	{ "can-namespace": "can" },
-	typeof self == "object" && self.Object == Object ? self : window,
+	typeof self == "object" && self.Object == Object
+		? self
+		: typeof process === "object" &&
+			Object.prototype.toString.call(process) === "[object process]"
+			? global
+			: window,
 	function(__$source__, __$global__) {
 		// jshint ignore:line
 		eval("(function() { " + __$source__ + " \n }).call(__$global__);");
@@ -288,7 +293,7 @@ define('can-attribute-encoder', [
         module.exports = namespace.encoder = encoder;
     }
 });
-/*can-view-parser@3.8.2#can-view-parser*/
+/*can-view-parser@3.8.3#can-view-parser*/
 define('can-view-parser', [
     'require',
     'exports',
@@ -657,7 +662,7 @@ define('can-view-parser', [
     };
     module.exports = namespace.HTMLParser = HTMLParser;
 });
-/*can-symbol@1.6.0#can-symbol*/
+/*can-symbol@1.6.1#can-symbol*/
 define('can-symbol', [
     'require',
     'exports',
@@ -758,7 +763,7 @@ define('can-symbol', [
         return this;
     }(), require, exports, module));
 });
-/*can-reflect@1.13.2#reflections/helpers*/
+/*can-reflect@1.15.0#reflections/helpers*/
 define('can-reflect/reflections/helpers', [
     'require',
     'exports',
@@ -783,12 +788,15 @@ define('can-reflect/reflections/helpers', [
         },
         hasLength: function (list) {
             var type = typeof list;
-            var length = list && type !== 'boolean' && typeof list !== 'number' && 'length' in list && list.length;
+            if (type === 'string' || Array.isArray(list)) {
+                return;
+            }
+            var length = list && (type !== 'boolean' && type !== 'number' && 'length' in list) && list.length;
             return typeof list !== 'function' && (length === 0 || typeof length === 'number' && length > 0 && length - 1 in list);
         }
     };
 });
-/*can-reflect@1.13.2#reflections/type/type*/
+/*can-reflect@1.15.0#reflections/type/type*/
 define('can-reflect/reflections/type/type', [
     'require',
     'exports',
@@ -982,7 +990,7 @@ define('can-reflect/reflections/type/type', [
         isPlainObject: isPlainObject
     };
 });
-/*can-reflect@1.13.2#reflections/call/call*/
+/*can-reflect@1.15.0#reflections/call/call*/
 define('can-reflect/reflections/call/call', [
     'require',
     'exports',
@@ -1027,7 +1035,7 @@ define('can-reflect/reflections/call/call', [
         }
     };
 });
-/*can-reflect@1.13.2#reflections/get-set/get-set*/
+/*can-reflect@1.15.0#reflections/get-set/get-set*/
 define('can-reflect/reflections/get-set/get-set', [
     'require',
     'exports',
@@ -1144,7 +1152,7 @@ define('can-reflect/reflections/get-set/get-set', [
     reflections['delete'] = reflections.deleteKeyValue;
     module.exports = reflections;
 });
-/*can-reflect@1.13.2#reflections/observe/observe*/
+/*can-reflect@1.15.0#reflections/observe/observe*/
 define('can-reflect/reflections/observe/observe', [
     'require',
     'exports',
@@ -1239,7 +1247,7 @@ define('can-reflect/reflections/observe/observe', [
         }
     };
 });
-/*can-reflect@1.13.2#reflections/shape/shape*/
+/*can-reflect@1.15.0#reflections/shape/shape*/
 define('can-reflect/reflections/shape/shape', [
     'require',
     'exports',
@@ -1313,14 +1321,14 @@ define('can-reflect/reflections/shape/shape', [
     var shouldUpdateOrAssign = function (obj) {
         return typeReflections.isPlainObject(obj) || Array.isArray(obj) || !!hasUpdateSymbol(obj);
     };
-    function isSerializable(obj) {
+    function isSerializedHelper(obj) {
         if (typeReflections.isPrimitive(obj)) {
             return true;
         }
         if (hasUpdateSymbol(obj)) {
             return false;
         }
-        return typeReflections.isBuiltIn(obj) && !typeReflections.isPlainObject(obj);
+        return typeReflections.isBuiltIn(obj) && !typeReflections.isPlainObject(obj) && !Array.isArray(obj);
     }
     var Object_Keys;
     try {
@@ -1337,7 +1345,7 @@ define('can-reflect/reflections/shape/shape', [
     }
     function makeSerializer(methodName, symbolsToCheck) {
         return function serializer(value, MapType) {
-            if (isSerializable(value)) {
+            if (isSerializedHelper(value)) {
                 return value;
             }
             var firstSerialize;
@@ -1755,7 +1763,7 @@ define('can-reflect/reflections/shape/shape', [
             });
             return target;
         },
-        isSerializable: isSerializable,
+        isSerialized: isSerializedHelper,
         size: function (obj) {
             var size = obj[sizeSymbol];
             var count = 0;
@@ -1769,12 +1777,7 @@ define('can-reflect/reflections/shape/shape', [
                 });
                 return count;
             } else if (obj) {
-                for (var prop in obj) {
-                    if (obj.hasOwnProperty(prop)) {
-                        count++;
-                    }
-                }
-                return count;
+                return shapeReflections.getOwnEnumerableKeys(obj).length;
             } else {
                 return undefined;
             }
@@ -1797,10 +1800,83 @@ define('can-reflect/reflections/shape/shape', [
             }
         }
     };
+    shapeReflections.isSerializable = shapeReflections.isSerialized;
     shapeReflections.keys = shapeReflections.getOwnEnumerableKeys;
     module.exports = shapeReflections;
 });
-/*can-reflect@1.13.2#reflections/get-name/get-name*/
+/*can-reflect@1.15.0#reflections/shape/schema/schema*/
+define('can-reflect/reflections/shape/schema/schema', [
+    'require',
+    'exports',
+    'module',
+    'can-symbol',
+    'can-reflect/reflections/type/type',
+    'can-reflect/reflections/get-set/get-set',
+    'can-reflect/reflections/shape/shape'
+], function (require, exports, module) {
+    var canSymbol = require('can-symbol');
+    var typeReflections = require('can-reflect/reflections/type/type');
+    var getSetReflections = require('can-reflect/reflections/get-set/get-set');
+    var shapeReflections = require('can-reflect/reflections/shape/shape');
+    var getSchemaSymbol = canSymbol.for('can.getSchema');
+    function comparator(a, b) {
+        return a.localeCompare(b);
+    }
+    function sort(obj) {
+        if (typeReflections.isPrimitive(obj)) {
+            return obj;
+        }
+        var out;
+        if (typeReflections.isListLike(obj)) {
+            out = [];
+            shapeReflections.eachKey(obj, function (item) {
+                out.push(sort(item));
+            });
+            return out;
+        }
+        if (typeReflections.isMapLike(obj)) {
+            out = {};
+            shapeReflections.getOwnKeys(obj).sort(comparator).forEach(function (key) {
+                out[key] = sort(getSetReflections.getKeyValue(obj, key));
+            });
+            return out;
+        }
+        return obj;
+    }
+    var schemaReflections = {
+        getSchema: function (type) {
+            var getSchema = type[getSchemaSymbol];
+            if (getSchema === undefined) {
+                type = type.constructor;
+                getSchema = type && type[getSchemaSymbol];
+            }
+            return getSchema !== undefined ? getSchema.call(type) : undefined;
+        },
+        getIdentity: function (value, schema) {
+            schema = schema || schemaReflections.getSchema(value);
+            if (schema === undefined) {
+                throw new Error('can-reflect.getIdentity - Unable to find a schema for the given value.');
+            }
+            var identity = schema.identity;
+            if (!identity || identity.length === 0) {
+                throw new Error('can-reflect.getIdentity - Provided schema lacks an identity property.');
+            } else if (identity.length === 1) {
+                return getSetReflections.getKeyValue(value, identity[0]);
+            } else {
+                var id = {};
+                identity.forEach(function (key) {
+                    id[key] = getSetReflections.getKeyValue(value, key);
+                });
+                return JSON.stringify(schemaReflections.cloneKeySort(id));
+            }
+        },
+        cloneKeySort: function (obj) {
+            return sort(obj);
+        }
+    };
+    module.exports = schemaReflections;
+});
+/*can-reflect@1.15.0#reflections/get-name/get-name*/
 define('can-reflect/reflections/get-name/get-name', [
     'require',
     'exports',
@@ -1821,11 +1897,15 @@ define('can-reflect/reflections/get-name/get-name', [
         Object.defineProperty(obj, getNameSymbol, { value: nameGetter });
     }
     function getName(obj) {
+        var type = typeof obj;
+        if (obj === null || type !== 'object' && type !== 'function') {
+            return '' + obj;
+        }
         var nameGetter = obj[getNameSymbol];
         if (nameGetter) {
             return nameGetter.call(obj);
         }
-        if (typeof obj === 'function') {
+        if (type === 'function') {
             return obj.name;
         }
         if (obj.constructor && obj !== obj.constructor) {
@@ -1849,7 +1929,7 @@ define('can-reflect/reflections/get-name/get-name', [
         getName: getName
     };
 });
-/*can-reflect@1.13.2#types/map*/
+/*can-reflect@1.15.0#types/map*/
 define('can-reflect/types/map', [
     'require',
     'exports',
@@ -1898,7 +1978,7 @@ define('can-reflect/types/map', [
         });
     }
 });
-/*can-reflect@1.13.2#types/set*/
+/*can-reflect@1.15.0#types/set*/
 define('can-reflect/types/set', [
     'require',
     'exports',
@@ -1963,7 +2043,7 @@ define('can-reflect/types/set', [
         });
     }
 });
-/*can-reflect@1.13.2#can-reflect*/
+/*can-reflect@1.15.0#can-reflect*/
 define('can-reflect', [
     'require',
     'exports',
@@ -1972,6 +2052,7 @@ define('can-reflect', [
     'can-reflect/reflections/get-set/get-set',
     'can-reflect/reflections/observe/observe',
     'can-reflect/reflections/shape/shape',
+    'can-reflect/reflections/shape/schema/schema',
     'can-reflect/reflections/type/type',
     'can-reflect/reflections/get-name/get-name',
     'can-namespace',
@@ -1982,6 +2063,7 @@ define('can-reflect', [
     var getSet = require('can-reflect/reflections/get-set/get-set');
     var observe = require('can-reflect/reflections/observe/observe');
     var shape = require('can-reflect/reflections/shape/shape');
+    var schema = require('can-reflect/reflections/shape/schema/schema');
     var type = require('can-reflect/reflections/type/type');
     var getName = require('can-reflect/reflections/get-name/get-name');
     var namespace = require('can-namespace');
@@ -1992,7 +2074,8 @@ define('can-reflect', [
         observe,
         shape,
         type,
-        getName
+        getName,
+        schema
     ].forEach(function (reflections) {
         for (var prop in reflections) {
             reflect[prop] = reflections[prop];
@@ -2002,7 +2085,7 @@ define('can-reflect', [
     require('can-reflect/types/set');
     module.exports = namespace.Reflect = reflect;
 });
-/*can-globals@0.4.1#can-globals-proto*/
+/*can-globals@1.0.1#can-globals-proto*/
 define('can-globals/can-globals-proto', [
     'require',
     'exports',
@@ -2135,7 +2218,7 @@ define('can-globals/can-globals-proto', [
         return this;
     }(), require, exports, module));
 });
-/*can-globals@0.4.1#can-globals-instance*/
+/*can-globals@1.0.1#can-globals-instance*/
 define('can-globals/can-globals-instance', [
     'require',
     'exports',
@@ -2157,7 +2240,7 @@ define('can-globals/can-globals-instance', [
         return this;
     }(), require, exports, module));
 });
-/*can-globals@0.4.1#global/global*/
+/*can-globals@1.0.1#global/global*/
 define('can-globals/global/global', [
     'require',
     'exports',
@@ -2175,7 +2258,7 @@ define('can-globals/global/global', [
         return this;
     }(), require, exports, module));
 });
-/*can-globals@0.4.1#document/document*/
+/*can-globals@1.0.1#document/document*/
 define('can-globals/document/document', [
     'require',
     'exports',
@@ -2195,7 +2278,7 @@ define('can-globals/document/document', [
         return this;
     }(), require, exports, module));
 });
-/*can-globals@0.4.1#is-node/is-node*/
+/*can-globals@1.0.1#is-node/is-node*/
 define('can-globals/is-node/is-node', [
     'require',
     'exports',
@@ -2213,7 +2296,7 @@ define('can-globals/is-node/is-node', [
         return this;
     }(), require, exports, module));
 });
-/*can-globals@0.4.1#is-browser-window/is-browser-window*/
+/*can-globals@1.0.1#is-browser-window/is-browser-window*/
 define('can-globals/is-browser-window/is-browser-window', [
     'require',
     'exports',
@@ -2234,7 +2317,7 @@ define('can-globals/is-browser-window/is-browser-window', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/is-plain-object/is-plain-object*/
+/*can-util@3.11.5#js/is-plain-object/is-plain-object*/
 define('can-util/js/is-plain-object/is-plain-object', function (require, exports, module) {
     'use strict';
     var core_hasOwn = Object.prototype.hasOwnProperty;
@@ -2259,7 +2342,7 @@ define('can-util/js/is-plain-object/is-plain-object', function (require, exports
     }
     module.exports = isPlainObject;
 });
-/*can-util@3.11.1#dom/events/events*/
+/*can-util@3.11.5#dom/events/events*/
 define('can-util/dom/events/events', [
     'require',
     'exports',
@@ -2374,7 +2457,7 @@ define('can-cid', [
         module.exports = namespace.cid = cid;
     }
 });
-/*can-util@3.11.1#js/is-empty-object/is-empty-object*/
+/*can-util@3.11.5#js/is-empty-object/is-empty-object*/
 define('can-util/js/is-empty-object/is-empty-object', function (require, exports, module) {
     'use strict';
     module.exports = function (obj) {
@@ -2384,7 +2467,7 @@ define('can-util/js/is-empty-object/is-empty-object', function (require, exports
         return true;
     };
 });
-/*can-util@3.11.1#dom/dispatch/dispatch*/
+/*can-util@3.11.5#dom/dispatch/dispatch*/
 define('can-util/dom/dispatch/dispatch', [
     'require',
     'exports',
@@ -2464,7 +2547,7 @@ define('can-dom-data-state', [
         module.exports = namespace.domDataState = domDataState;
     }
 });
-/*can-globals@0.4.1#mutation-observer/mutation-observer*/
+/*can-globals@1.0.1#mutation-observer/mutation-observer*/
 define('can-globals/mutation-observer/mutation-observer', [
     'require',
     'exports',
@@ -2485,7 +2568,7 @@ define('can-globals/mutation-observer/mutation-observer', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/is-array-like/is-array-like*/
+/*can-util@3.11.5#js/is-array-like/is-array-like*/
 define('can-util/js/is-array-like/is-array-like', function (require, exports, module) {
     'use strict';
     function isArrayLike(obj) {
@@ -2500,7 +2583,7 @@ define('can-util/js/is-array-like/is-array-like', function (require, exports, mo
     }
     module.exports = isArrayLike;
 });
-/*can-util@3.11.1#js/is-iterable/is-iterable*/
+/*can-util@3.11.5#js/is-iterable/is-iterable*/
 define('can-util/js/is-iterable/is-iterable', [
     'require',
     'exports',
@@ -2513,7 +2596,7 @@ define('can-util/js/is-iterable/is-iterable', [
         return obj && !!obj[canSymbol.iterator || canSymbol.for('iterator')];
     };
 });
-/*can-util@3.11.1#js/each/each*/
+/*can-util@3.11.5#js/each/each*/
 define('can-util/js/each/each', [
     'require',
     'exports',
@@ -2616,7 +2699,7 @@ define('can-cid/set/set', [
     }
     module.exports = CIDSet;
 });
-/*can-util@3.11.1#js/make-array/make-array*/
+/*can-util@3.11.5#js/make-array/make-array*/
 define('can-util/js/make-array/make-array', [
     'require',
     'exports',
@@ -2640,14 +2723,14 @@ define('can-util/js/make-array/make-array', [
     }
     module.exports = makeArray;
 });
-/*can-util@3.11.1#js/is-container/is-container*/
+/*can-util@3.11.5#js/is-container/is-container*/
 define('can-util/js/is-container/is-container', function (require, exports, module) {
     'use strict';
     module.exports = function (current) {
         return /^f|^o/.test(typeof current);
     };
 });
-/*can-util@3.11.1#js/get/get*/
+/*can-util@3.11.5#js/get/get*/
 define('can-util/js/get/get', [
     'require',
     'exports',
@@ -2662,7 +2745,7 @@ define('can-util/js/get/get', [
             return obj;
         }
         current = obj;
-        for (i = 0; i < length && isContainer(current); i++) {
+        for (i = 0; i < length && isContainer(current) && current !== null; i++) {
             container = current;
             current = container[parts[i]];
         }
@@ -2670,7 +2753,7 @@ define('can-util/js/get/get', [
     }
     module.exports = get;
 });
-/*can-util@3.11.1#js/is-array/is-array*/
+/*can-util@3.11.5#js/is-array/is-array*/
 define('can-util/js/is-array/is-array', [
     'require',
     'exports',
@@ -2684,7 +2767,7 @@ define('can-util/js/is-array/is-array', [
         return Array.isArray(arr);
     };
 });
-/*can-util@3.11.1#js/string/string*/
+/*can-util@3.11.5#js/string/string*/
 define('can-util/js/string/string', [
     'require',
     'exports',
@@ -2778,7 +2861,7 @@ define('can-util/js/string/string', [
     };
     module.exports = string;
 });
-/*can-util@3.11.1#dom/mutation-observer/document/document*/
+/*can-util@3.11.5#dom/mutation-observer/document/document*/
 define('can-util/dom/mutation-observer/document/document', [
     'require',
     'exports',
@@ -2932,7 +3015,7 @@ define('can-util/dom/mutation-observer/document/document', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/data/data*/
+/*can-util@3.11.5#dom/data/data*/
 define('can-util/dom/data/data', [
     'require',
     'exports',
@@ -2975,7 +3058,7 @@ define('can-util/dom/data/data', [
         }
     };
 });
-/*can-util@3.11.1#dom/matches/matches*/
+/*can-util@3.11.5#dom/matches/matches*/
 define('can-util/dom/matches/matches', function (require, exports, module) {
     'use strict';
     var matchesMethod = function (element) {
@@ -2986,7 +3069,7 @@ define('can-util/dom/matches/matches', function (require, exports, module) {
         return method ? method.apply(this, arguments) : false;
     };
 });
-/*can-util@3.11.1#dom/events/delegate/delegate*/
+/*can-util@3.11.5#dom/events/delegate/delegate*/
 define('can-util/dom/events/delegate/delegate', [
     'require',
     'exports',
@@ -3093,7 +3176,7 @@ define('can-util/dom/events/delegate/delegate', [
         }
     };
 });
-/*can-util@3.11.1#js/single-reference/single-reference*/
+/*can-util@3.11.5#js/single-reference/single-reference*/
 define('can-util/js/single-reference/single-reference', [
     'require',
     'exports',
@@ -3123,7 +3206,7 @@ define('can-util/js/single-reference/single-reference', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/cid/get-cid*/
+/*can-util@3.11.5#js/cid/get-cid*/
 define('can-util/js/cid/get-cid', [
     'require',
     'exports',
@@ -3144,7 +3227,7 @@ define('can-util/js/cid/get-cid', [
         }
     };
 });
-/*can-util@3.11.1#dom/events/delegate/enter-leave*/
+/*can-util@3.11.5#dom/events/delegate/enter-leave*/
 define('can-util/dom/events/delegate/enter-leave', [
     'require',
     'exports',
@@ -3196,7 +3279,7 @@ define('can-util/dom/events/delegate/enter-leave', [
         _removeDelegateListener.call(this, eventType, selector, handler);
     };
 });
-/*can-event@3.7.6#can-event*/
+/*can-event@3.7.7#can-event*/
 define('can-event', [
     'require',
     'exports',
@@ -3388,14 +3471,14 @@ define('can-event', [
     });
     module.exports = namespace.event = canEvent;
 });
-/*can-util@3.11.1#js/last/last*/
+/*can-util@3.11.5#js/last/last*/
 define('can-util/js/last/last', function (require, exports, module) {
     'use strict';
     module.exports = function (arr) {
         return arr && arr[arr.length - 1];
     };
 });
-/*can-types@1.1.6#can-types*/
+/*can-types@1.1.7#can-types*/
 define('can-types', [
     'require',
     'exports',
@@ -3450,7 +3533,7 @@ define('can-types', [
         module.exports = namespace.types = types;
     }
 });
-/*can-util@3.11.1#js/dev/dev*/
+/*can-util@3.11.5#js/dev/dev*/
 define('can-util/js/dev/dev', [
     'require',
     'exports',
@@ -3460,7 +3543,7 @@ define('can-util/js/dev/dev', [
     'use strict';
     module.exports = require('can-log/dev/dev');
 });
-/*can-util@3.11.1#js/log/log*/
+/*can-util@3.11.5#js/log/log*/
 define('can-util/js/log/log', [
     'require',
     'exports',
@@ -3470,7 +3553,7 @@ define('can-util/js/log/log', [
     'use strict';
     module.exports = require('can-log');
 });
-/*can-event@3.7.6#batch/batch*/
+/*can-event@3.7.7#batch/batch*/
 define('can-event/batch/batch', [
     'require',
     'exports',
@@ -3673,7 +3756,7 @@ define('can-assign', function (require, exports, module) {
         return d;
     };
 });
-/*can-util@3.11.1#js/assign/assign*/
+/*can-util@3.11.5#js/assign/assign*/
 define('can-util/js/assign/assign', [
     'require',
     'exports',
@@ -3741,7 +3824,7 @@ define('can-cid/map/map', [
     }
     module.exports = CIDMap;
 });
-/*can-util@3.11.1#js/cid-map/cid-map*/
+/*can-util@3.11.5#js/cid-map/cid-map*/
 define('can-util/js/cid-map/cid-map', [
     'require',
     'exports',
@@ -3751,7 +3834,7 @@ define('can-util/js/cid-map/cid-map', [
     'use strict';
     module.exports = require('can-cid/map/map');
 });
-/*can-util@3.11.1#js/cid-set/cid-set*/
+/*can-util@3.11.5#js/cid-set/cid-set*/
 define('can-util/js/cid-set/cid-set', [
     'require',
     'exports',
@@ -4161,7 +4244,7 @@ define('can-observation', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/global/global*/
+/*can-util@3.11.5#js/global/global*/
 define('can-util/js/global/global', [
     'require',
     'exports',
@@ -4175,7 +4258,7 @@ define('can-util/js/global/global', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/set-immediate/set-immediate*/
+/*can-util@3.11.5#js/set-immediate/set-immediate*/
 define('can-util/js/set-immediate/set-immediate', [
     'require',
     'exports',
@@ -4192,7 +4275,7 @@ define('can-util/js/set-immediate/set-immediate', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/child-nodes/child-nodes*/
+/*can-util@3.11.5#dom/child-nodes/child-nodes*/
 define('can-util/dom/child-nodes/child-nodes', function (require, exports, module) {
     'use strict';
     function childNodes(node) {
@@ -4211,14 +4294,14 @@ define('can-util/dom/child-nodes/child-nodes', function (require, exports, modul
     }
     module.exports = childNodes;
 });
-/*can-util@3.11.1#dom/contains/contains*/
+/*can-util@3.11.5#dom/contains/contains*/
 define('can-util/dom/contains/contains', function (require, exports, module) {
     'use strict';
     module.exports = function (child) {
         return this.contains(child);
     };
 });
-/*can-util@3.11.1#dom/mutate/mutate*/
+/*can-util@3.11.5#dom/mutate/mutate*/
 define('can-util/dom/mutate/mutate', [
     'require',
     'exports',
@@ -4374,7 +4457,7 @@ define('can-util/dom/mutate/mutate', [
         return this;
     }(), require, exports, module));
 });
-/*can-view-callbacks@3.2.4#can-view-callbacks*/
+/*can-view-callbacks@3.2.5#can-view-callbacks*/
 define('can-view-callbacks', [
     'require',
     'exports',
@@ -4474,7 +4557,7 @@ define('can-view-callbacks', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/is-of-global-document/is-of-global-document*/
+/*can-util@3.11.5#dom/is-of-global-document/is-of-global-document*/
 define('can-util/dom/is-of-global-document/is-of-global-document', [
     'require',
     'exports',
@@ -4491,7 +4574,7 @@ define('can-util/dom/is-of-global-document/is-of-global-document', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/diff/diff*/
+/*can-util@3.11.5#js/diff/diff*/
 define('can-util/js/diff/diff', function (require, exports, module) {
     'use strict';
     var slice = [].slice;
@@ -4564,7 +4647,7 @@ define('can-util/js/diff/diff', function (require, exports, module) {
         return patches;
     };
 });
-/*can-util@3.11.1#dom/events/attributes/attributes*/
+/*can-util@3.11.5#dom/events/attributes/attributes*/
 define('can-util/dom/events/attributes/attributes', [
     'require',
     'exports',
@@ -4630,7 +4713,7 @@ define('can-util/dom/events/attributes/attributes', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/events/make-mutation-event/make-mutation-event*/
+/*can-util@3.11.5#dom/events/make-mutation-event/make-mutation-event*/
 define('can-util/dom/events/make-mutation-event/make-mutation-event', [
     'require',
     'exports',
@@ -4706,7 +4789,7 @@ define('can-util/dom/events/make-mutation-event/make-mutation-event', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/events/inserted/inserted*/
+/*can-util@3.11.5#dom/events/inserted/inserted*/
 define('can-util/dom/events/inserted/inserted', [
     'require',
     'exports',
@@ -4717,7 +4800,7 @@ define('can-util/dom/events/inserted/inserted', [
     var makeMutationEvent = require('can-util/dom/events/make-mutation-event/make-mutation-event');
     makeMutationEvent('inserted', 'addedNodes');
 });
-/*can-util@3.11.1#dom/attr/attr*/
+/*can-util@3.11.5#dom/attr/attr*/
 define('can-util/dom/attr/attr', [
     'require',
     'exports',
@@ -5060,7 +5143,7 @@ define('can-util/dom/attr/attr', [
                         },
                         set: function (value) {
                             var nodeName = this.nodeName.toLowerCase();
-                            if (nodeName === 'input') {
+                            if (nodeName === 'input' || nodeName === 'textarea') {
                                 value = toString(value);
                             }
                             if (this.value !== value || nodeName === 'option') {
@@ -5523,7 +5606,7 @@ define('can-view-target', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#js/is-promise-like/is-promise-like*/
+/*can-util@3.11.5#js/is-promise-like/is-promise-like*/
 define('can-util/js/is-promise-like/is-promise-like', function (require, exports, module) {
     'use strict';
     module.exports = function (obj) {
@@ -5947,7 +6030,7 @@ define('can-stache-key', [
     observeReader.set = observeReader.write;
     module.exports = observeReader;
 });
-/*can-util@3.11.1#js/is-function/is-function*/
+/*can-util@3.11.5#js/is-function/is-function*/
 define('can-util/js/is-function/is-function', function (require, exports, module) {
     'use strict';
     var isFunction = function () {
@@ -5962,7 +6045,7 @@ define('can-util/js/is-function/is-function', function (require, exports, module
     }();
     module.exports = isFunction;
 });
-/*can-util@3.11.1#js/deep-assign/deep-assign*/
+/*can-util@3.11.5#js/deep-assign/deep-assign*/
 define('can-util/js/deep-assign/deep-assign', [
     'require',
     'exports',
@@ -6008,7 +6091,7 @@ define('can-util/js/deep-assign/deep-assign', [
     }
     module.exports = deepAssign;
 });
-/*can-construct@3.2.3#can-construct*/
+/*can-construct@3.3.1#can-construct*/
 define('can-construct', [
     'require',
     'exports',
@@ -6143,6 +6226,16 @@ define('can-construct', [
                 prototype: prototype
             });
             if (shortName !== undefined) {
+                if (Object.getOwnPropertyDescriptor) {
+                    var desc = Object.getOwnPropertyDescriptor(Constructor, 'name');
+                    if (!desc || desc.configurable) {
+                        Object.defineProperty(Constructor, 'name', {
+                            writable: true,
+                            value: shortName,
+                            configurable: true
+                        });
+                    }
+                }
                 Constructor.shortName = shortName;
             }
             Constructor.prototype.constructor = Constructor;
@@ -6284,7 +6377,7 @@ define('can-simple-map', [
     });
     module.exports = SimpleMap;
 });
-/*can-view-scope@3.5.6#template-context*/
+/*can-view-scope@3.5.8#template-context*/
 define('can-view-scope/template-context', [
     'require',
     'exports',
@@ -6297,7 +6390,7 @@ define('can-view-scope/template-context', [
     };
     module.exports = TemplateContext;
 });
-/*can-event@3.7.6#lifecycle/lifecycle*/
+/*can-event@3.7.7#lifecycle/lifecycle*/
 define('can-event/lifecycle/lifecycle', [
     'require',
     'exports',
@@ -6779,7 +6872,7 @@ define('can-compute', [
     COMPUTE.temporarilyBind = Compute.temporarilyBind;
     module.exports = namespace.compute = COMPUTE;
 });
-/*can-view-scope@3.5.6#compute_data*/
+/*can-view-scope@3.5.8#compute_data*/
 define('can-view-scope/compute_data', [
     'require',
     'exports',
@@ -6940,7 +7033,7 @@ define('can-view-scope/compute_data', [
         return new ScopeKeyData(scope, key, options || { args: [] });
     };
 });
-/*can-define-lazy-value@1.0.1#define-lazy-value*/
+/*can-define-lazy-value@1.0.2#define-lazy-value*/
 define('can-define-lazy-value', function (require, exports, module) {
     module.exports = function defineLazyValue(obj, prop, initializer, writable) {
         Object.defineProperty(obj, prop, {
@@ -6967,7 +7060,7 @@ define('can-define-lazy-value', function (require, exports, module) {
         });
     };
 });
-/*can-view-scope@3.5.6#can-view-scope*/
+/*can-view-scope@3.5.8#can-view-scope*/
 define('can-view-scope', [
     'require',
     'exports',
@@ -7074,6 +7167,15 @@ define('can-view-scope', [
             var keyReads = observeReader.reads(attr);
             if (keyInfo.isInTemplateContext) {
                 if (keyInfo.isInLegacyRefsScope) {
+                    if (keyInfo.isLegacyView) {
+                        keyReads[0].key = 'view';
+                    } else {
+                        keyReads[0] = {
+                            key: keyReads[0].key.substr(1),
+                            at: true
+                        };
+                        keyReads.unshift({ key: 'vars' });
+                    }
                 } else {
                     keyReads = keyReads.slice(1);
                 }
@@ -7296,7 +7398,7 @@ define('can-view-scope', [
     namespace.view = namespace.view || {};
     module.exports = namespace.view.Scope = Scope;
 });
-/*can-stache@3.14.10#src/utils*/
+/*can-stache@3.14.12#src/utils*/
 define('can-stache/src/utils', [
     'require',
     'exports',
@@ -7615,7 +7717,7 @@ define('can-view-nodelist', [
     };
     module.exports = namespace.nodeLists = nodeLists;
 });
-/*can-util@3.11.1#dom/fragment/fragment*/
+/*can-util@3.11.5#dom/fragment/fragment*/
 define('can-util/dom/fragment/fragment', [
     'require',
     'exports',
@@ -7679,7 +7781,7 @@ define('can-util/dom/fragment/fragment', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/frag/frag*/
+/*can-util@3.11.5#dom/frag/frag*/
 define('can-util/dom/frag/frag', [
     'require',
     'exports',
@@ -7732,7 +7834,7 @@ define('can-util/dom/frag/frag', [
         return this;
     }(), require, exports, module));
 });
-/*can-util@3.11.1#dom/events/removed/removed*/
+/*can-util@3.11.5#dom/events/removed/removed*/
 define('can-util/dom/events/removed/removed', [
     'require',
     'exports',
@@ -7743,7 +7845,7 @@ define('can-util/dom/events/removed/removed', [
     var makeMutationEvent = require('can-util/dom/events/make-mutation-event/make-mutation-event');
     makeMutationEvent('removed', 'removedNodes');
 });
-/*can-view-live@3.2.5#lib/core*/
+/*can-view-live@3.2.6#lib/core*/
 define('can-view-live/lib/core', [
     'require',
     'exports',
@@ -7844,7 +7946,7 @@ define('can-view-live/lib/core', [
     };
     module.exports = live;
 });
-/*can-view-live@3.2.5#lib/attr*/
+/*can-view-live@3.2.6#lib/attr*/
 define('can-view-live/lib/attr', [
     'require',
     'exports',
@@ -7863,7 +7965,7 @@ define('can-view-live/lib/attr', [
         attr.set(el, attributeName, canReflect.getValue(compute));
     };
 });
-/*can-view-live@3.2.5#lib/attrs*/
+/*can-view-live@3.2.6#lib/attrs*/
 define('can-view-live/lib/attrs', [
     'require',
     'exports',
@@ -7924,7 +8026,7 @@ define('can-view-live/lib/attrs', [
         setAttrs(canReflect.getValue(compute));
     };
 });
-/*can-view-live@3.2.5#lib/html*/
+/*can-view-live@3.2.6#lib/html*/
 define('can-view-live/lib/html', [
     'require',
     'exports',
@@ -7973,7 +8075,7 @@ define('can-view-live/lib/html', [
         makeAndPut(canReflect.getValue(compute));
     };
 });
-/*can-view-live@3.2.5#lib/util/queueFns*/
+/*can-view-live@3.2.6#lib/util/queueFns*/
 define('can-view-live/lib/util/queueFns', [
     'require',
     'exports',
@@ -8016,7 +8118,7 @@ define('can-view-live/lib/util/queueFns', [
         return queuedFns;
     };
 });
-/*can-view-live@3.2.5#lib/list*/
+/*can-view-live@3.2.6#lib/list*/
 define('can-view-live/lib/list', [
     'require',
     'exports',
@@ -8054,7 +8156,7 @@ define('can-view-live/lib/list', [
     var renderAndAddToNodeLists = function (newNodeLists, parentNodeList, render, context, args) {
             var itemNodeList = [];
             if (parentNodeList) {
-                nodeLists.register(itemNodeList, null, parentNodeList, true);
+                nodeLists.register(itemNodeList, null, true, true);
                 itemNodeList.parentList = parentNodeList;
                 itemNodeList.expression = '#each SUBEXPRESSION';
             }
@@ -8288,7 +8390,7 @@ define('can-view-live/lib/list', [
         updateList(isValueLike ? canReflect.getValue(compute) : compute);
     };
 });
-/*can-view-live@3.2.5#lib/text*/
+/*can-view-live@3.2.6#lib/text*/
 define('can-view-live/lib/text', [
     'require',
     'exports',
@@ -8318,7 +8420,7 @@ define('can-view-live/lib/text', [
         }
     };
 });
-/*can-view-live@3.2.5#can-view-live*/
+/*can-view-live@3.2.6#can-view-live*/
 define('can-view-live', [
     'require',
     'exports',
@@ -8338,7 +8440,7 @@ define('can-view-live', [
     require('can-view-live/lib/text');
     module.exports = live;
 });
-/*can-stache@3.14.10#expressions/arg*/
+/*can-stache@3.14.12#expressions/arg*/
 define('can-stache/expressions/arg', function (require, exports, module) {
     var Arg = function (expression, modifiers) {
         this.expr = expression;
@@ -8350,7 +8452,7 @@ define('can-stache/expressions/arg', function (require, exports, module) {
     };
     module.exports = Arg;
 });
-/*can-stache@3.14.10#expressions/literal*/
+/*can-stache@3.14.12#expressions/literal*/
 define('can-stache/expressions/literal', function (require, exports, module) {
     var Literal = function (value) {
         this._value = value;
@@ -8360,7 +8462,7 @@ define('can-stache/expressions/literal', function (require, exports, module) {
     };
     module.exports = Literal;
 });
-/*can-stache@3.14.10#src/expression-helpers*/
+/*can-stache@3.14.12#src/expression-helpers*/
 define('can-stache/src/expression-helpers', [
     'require',
     'exports',
@@ -8440,7 +8542,7 @@ define('can-stache/src/expression-helpers', [
         toCompute: toCompute
     };
 });
-/*can-stache@3.14.10#expressions/hashes*/
+/*can-stache@3.14.12#expressions/hashes*/
 define('can-stache/expressions/hashes', [
     'require',
     'exports',
@@ -8474,7 +8576,7 @@ define('can-stache/expressions/hashes', [
     };
     module.exports = Hashes;
 });
-/*can-stache@3.14.10#expressions/bracket*/
+/*can-stache@3.14.12#expressions/bracket*/
 define('can-stache/expressions/bracket', [
     'require',
     'exports',
@@ -8494,13 +8596,13 @@ define('can-stache/expressions/bracket', [
     };
     module.exports = Bracket;
 });
-/*can-stache@3.14.10#src/set-identifier*/
+/*can-stache@3.14.12#src/set-identifier*/
 define('can-stache/src/set-identifier', function (require, exports, module) {
     module.exports = function SetIdentifier(value) {
         this.value = value;
     };
 });
-/*can-stache@3.14.10#expressions/call*/
+/*can-stache@3.14.12#expressions/call*/
 define('can-stache/expressions/call', [
     'require',
     'exports',
@@ -8587,7 +8689,7 @@ define('can-stache/expressions/call', [
     };
     module.exports = Call;
 });
-/*can-util@3.11.1#js/base-url/base-url*/
+/*can-util@3.11.5#js/base-url/base-url*/
 define('can-util/js/base-url/base-url', [
     'require',
     'exports',
@@ -8640,7 +8742,7 @@ define('can-parse-uri', function (require, exports, module) {
         } : null;
     };
 });
-/*can-util@3.11.1#js/join-uris/join-uris*/
+/*can-util@3.11.5#js/join-uris/join-uris*/
 define('can-util/js/join-uris/join-uris', [
     'require',
     'exports',
@@ -8666,7 +8768,7 @@ define('can-util/js/join-uris/join-uris', [
         return !href || !base ? null : (href.protocol || base.protocol) + (href.protocol || href.authority ? href.authority : base.authority) + removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : href.pathname ? (base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname : base.pathname) + (href.protocol || href.authority || href.pathname ? href.search : href.search || base.search) + href.hash;
     };
 });
-/*can-stache@3.14.10#helpers/-debugger*/
+/*can-stache@3.14.12#helpers/-debugger*/
 define('can-stache/helpers/-debugger', [
     'require',
     'exports',
@@ -8690,7 +8792,7 @@ define('can-stache/helpers/-debugger', [
         __testing: __testing
     };
 });
-/*can-stache@3.14.10#helpers/core*/
+/*can-stache@3.14.12#helpers/core*/
 define('can-stache/helpers/core', [
     'require',
     'exports',
@@ -9023,7 +9125,7 @@ define('can-stache/helpers/core', [
         helpers: assign({}, helpers)
     };
 });
-/*can-stache@3.14.10#src/lookup-value-or-helper*/
+/*can-stache@3.14.12#src/lookup-value-or-helper*/
 define('can-stache/src/lookup-value-or-helper', [
     'require',
     'exports',
@@ -9047,7 +9149,7 @@ define('can-stache/src/lookup-value-or-helper', [
     }
     module.exports = lookupValueOrHelper;
 });
-/*can-stache@3.14.10#expressions/lookup*/
+/*can-stache@3.14.12#expressions/lookup*/
 define('can-stache/expressions/lookup', [
     'require',
     'exports',
@@ -9074,7 +9176,7 @@ define('can-stache/expressions/lookup', [
     };
     module.exports = Lookup;
 });
-/*can-stache@3.14.10#expressions/scope-lookup*/
+/*can-stache@3.14.12#expressions/scope-lookup*/
 define('can-stache/expressions/scope-lookup', [
     'require',
     'exports',
@@ -9095,7 +9197,7 @@ define('can-stache/expressions/scope-lookup', [
     };
     module.exports = ScopeLookup;
 });
-/*can-stache@3.14.10#expressions/helper*/
+/*can-stache@3.14.12#expressions/helper*/
 define('can-stache/expressions/helper', [
     'require',
     'exports',
@@ -9204,7 +9306,7 @@ define('can-stache/expressions/helper', [
     };
     module.exports = Helper;
 });
-/*can-stache@3.14.10#expressions/helper-lookup*/
+/*can-stache@3.14.12#expressions/helper-lookup*/
 define('can-stache/expressions/helper-lookup', [
     'require',
     'exports',
@@ -9229,7 +9331,7 @@ define('can-stache/expressions/helper-lookup', [
     };
     module.exports = HelperLookup;
 });
-/*can-stache@3.14.10#expressions/helper-scope-lookup*/
+/*can-stache@3.14.12#expressions/helper-scope-lookup*/
 define('can-stache/expressions/helper-scope-lookup', [
     'require',
     'exports',
@@ -9254,7 +9356,7 @@ define('can-stache/expressions/helper-scope-lookup', [
     };
     module.exports = HelperScopeLookup;
 });
-/*can-stache@3.14.10#src/expression*/
+/*can-stache@3.14.12#src/expression*/
 define('can-stache/src/expression', [
     'require',
     'exports',
@@ -9725,7 +9827,7 @@ define('can-stache/src/expression', [
     };
     module.exports = expression;
 });
-/*can-stache@3.14.10#src/mustache_core*/
+/*can-stache@3.14.12#src/mustache_core*/
 define('can-stache/src/mustache_core', [
     'require',
     'exports',
@@ -9740,279 +9842,290 @@ define('can-stache/src/mustache_core', [
     'can-util/dom/attr/attr',
     'can-symbol',
     'can-reflect',
-    'can-log/dev/dev'
+    'can-log/dev/dev',
+    'can-globals/document/document'
 ], function (require, exports, module) {
-    var live = require('can-view-live');
-    var nodeLists = require('can-view-nodelist');
-    var compute = require('can-compute');
-    var Observation = require('can-observation');
-    var utils = require('can-stache/src/utils');
-    var expression = require('can-stache/src/expression');
-    var frag = require('can-util/dom/frag/frag');
-    var attr = require('can-util/dom/attr/attr');
-    var canSymbol = require('can-symbol');
-    var canReflect = require('can-reflect');
-    var dev = require('can-log/dev/dev');
-    var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g, mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g, k = function () {
-        };
-    var core = {
-        expression: expression,
-        makeEvaluator: function (scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
-            if (mode === '^') {
-                var temp = truthyRenderer;
-                truthyRenderer = falseyRenderer;
-                falseyRenderer = temp;
-            }
-            var value, helperOptionArg;
-            if (exprData instanceof expression.Call) {
-                helperOptionArg = {
-                    context: scope.peek('.'),
-                    scope: scope,
-                    nodeList: nodeList,
-                    exprData: exprData,
-                    helpersScope: helperOptions
-                };
-                utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-                value = exprData.value(scope, helperOptions, helperOptionArg);
-                if (exprData.isHelper) {
+    (function (global, require, exports, module) {
+        var live = require('can-view-live');
+        var nodeLists = require('can-view-nodelist');
+        var compute = require('can-compute');
+        var Observation = require('can-observation');
+        var utils = require('can-stache/src/utils');
+        var expression = require('can-stache/src/expression');
+        var frag = require('can-util/dom/frag/frag');
+        var attr = require('can-util/dom/attr/attr');
+        var canSymbol = require('can-symbol');
+        var canReflect = require('can-reflect');
+        var dev = require('can-log/dev/dev');
+        var getDocument = require('can-globals/document/document');
+        var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g, mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g, k = function () {
+            };
+        var core = {
+            expression: expression,
+            makeEvaluator: function (scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+                if (mode === '^') {
+                    var temp = truthyRenderer;
+                    truthyRenderer = falseyRenderer;
+                    falseyRenderer = temp;
+                }
+                var value, helperOptionArg;
+                if (exprData instanceof expression.Call) {
+                    helperOptionArg = {
+                        context: scope.peek('.'),
+                        scope: scope,
+                        nodeList: nodeList,
+                        exprData: exprData,
+                        helpers: helperOptions
+                    };
+                    utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+                    value = exprData.value(scope, helperOptions, helperOptionArg);
+                    if (exprData.isHelper) {
+                        return value;
+                    }
+                } else if (exprData instanceof expression.Bracket) {
+                    value = exprData.value(scope);
+                    if (exprData.isHelper) {
+                        return value;
+                    }
+                } else if (exprData instanceof expression.Lookup) {
+                    value = exprData.value(scope);
+                    if (exprData.isHelper) {
+                        return value;
+                    }
+                } else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
+                    value = exprData.methodExpr.value(scope);
+                    if (exprData.isHelper) {
+                        return value;
+                    }
+                } else {
+                    var readOptions = {
+                        isArgument: true,
+                        args: [
+                            scope.peek('.'),
+                            scope
+                        ],
+                        asCompute: true
+                    };
+                    var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+                    var helper = helperAndValue.helper;
+                    value = helperAndValue.value;
+                    if (helper) {
+                        return exprData.evaluator(helper, scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+                    }
+                }
+                if (!mode) {
                     return value;
-                }
-            } else if (exprData instanceof expression.Bracket) {
-                value = exprData.value(scope);
-                if (exprData.isHelper) {
-                    return value;
-                }
-            } else if (exprData instanceof expression.Lookup) {
-                value = exprData.value(scope);
-                if (exprData.isHelper) {
-                    return value;
-                }
-            } else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
-                value = exprData.methodExpr.value(scope);
-                if (exprData.isHelper) {
-                    return value;
-                }
-            } else {
-                var readOptions = {
-                    isArgument: true,
-                    args: [
-                        scope.peek('.'),
-                        scope
-                    ],
-                    asCompute: true
-                };
-                var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-                var helper = helperAndValue.helper;
-                value = helperAndValue.value;
-                if (helper) {
-                    return exprData.evaluator(helper, scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-                }
-            }
-            if (!mode) {
-                return value;
-            } else if (mode === '#' || mode === '^') {
-                helperOptionArg = {};
-                utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-                return function () {
-                    var finalValue = canReflect.getValue(value);
-                    if (typeof finalValue === 'function') {
-                        return finalValue;
-                    } else if (typeof finalValue !== 'string' && utils.isArrayLike(finalValue)) {
-                        var isObserveList = canReflect.isObservableLike(finalValue) && canReflect.isListLike(finalValue);
-                        if (canReflect.getKeyValue(finalValue, 'length')) {
-                            if (stringOnly) {
-                                return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+                } else if (mode === '#' || mode === '^') {
+                    helperOptionArg = {};
+                    utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+                    return function () {
+                        var finalValue = canReflect.getValue(value);
+                        if (typeof finalValue === 'function') {
+                            return finalValue;
+                        } else if (typeof finalValue !== 'string' && utils.isArrayLike(finalValue)) {
+                            var isObserveList = canReflect.isObservableLike(finalValue) && canReflect.isListLike(finalValue);
+                            if (canReflect.getKeyValue(finalValue, 'length')) {
+                                if (stringOnly) {
+                                    return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
+                                } else {
+                                    return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+                                }
                             } else {
-                                return frag(utils.getItemsFragContent(finalValue, helperOptionArg, scope));
+                                return helperOptionArg.inverse(scope, helperOptions);
                             }
                         } else {
-                            return helperOptionArg.inverse(scope, helperOptions);
+                            return finalValue ? helperOptionArg.fn(finalValue || scope, helperOptions) : helperOptionArg.inverse(scope, helperOptions);
                         }
-                    } else {
-                        return finalValue ? helperOptionArg.fn(finalValue || scope, helperOptions) : helperOptionArg.inverse(scope, helperOptions);
-                    }
-                };
-            } else {
-            }
-        },
-        makeLiveBindingPartialRenderer: function (expressionString, state) {
-            expressionString = expressionString.trim();
-            var exprData, partialName = expressionString.split(/\s+/).shift();
-            if (partialName !== expressionString) {
-                exprData = core.expression.parse(expressionString);
-            }
-            return function (scope, options, parentSectionNodeList) {
-                var nodeList = [this];
-                nodeList.expression = '>' + partialName;
-                nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
-                var partialFrag = compute(function () {
-                    var localPartialName = partialName;
-                    if (exprData && exprData.argExprs.length === 1) {
-                        var newContext = canReflect.getValue(exprData.argExprs[0].value(scope, options));
-                        if (typeof newContext === 'undefined') {
-                        } else {
-                            scope = scope.add(newContext);
-                        }
-                    }
-                    var partial = options.peek('partials.' + localPartialName);
-                    partial = partial || options.inlinePartials && options.inlinePartials[localPartialName];
-                    var renderer;
-                    if (partial) {
-                        renderer = function () {
-                            return partial.render ? partial.render(scope, options, nodeList) : partial(scope, options);
-                        };
-                    } else {
-                        var scopePartialName = scope.read(localPartialName, { isArgument: true }).value;
-                        if (scopePartialName === null || !scopePartialName && localPartialName[0] === '*') {
-                            return frag('');
-                        }
-                        if (scopePartialName) {
-                            localPartialName = scopePartialName;
-                        }
-                        renderer = function () {
-                            if (typeof localPartialName === 'function') {
-                                return localPartialName(scope, options, nodeList);
+                    };
+                } else {
+                }
+            },
+            makeLiveBindingPartialRenderer: function (expressionString, state) {
+                expressionString = expressionString.trim();
+                var exprData, partialName = expressionString.split(/\s+/).shift();
+                if (partialName !== expressionString) {
+                    exprData = core.expression.parse(expressionString);
+                }
+                return function (scope, options, parentSectionNodeList) {
+                    var nodeList = [this];
+                    nodeList.expression = '>' + partialName;
+                    nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
+                    var partialFrag = compute(function () {
+                        var localPartialName = partialName;
+                        if (exprData && exprData.argExprs.length === 1) {
+                            var newContext = canReflect.getValue(exprData.argExprs[0].value(scope, options));
+                            if (typeof newContext === 'undefined') {
                             } else {
-                                return core.getTemplateById(localPartialName)(scope, options, nodeList);
+                                scope = scope.add(newContext);
                             }
-                        };
+                        }
+                        var partial = options.peek('partials.' + localPartialName);
+                        var parent = options;
+                        while (!partial && parent) {
+                            partial = parent.inlinePartials && parent.inlinePartials[localPartialName];
+                            parent = parent._parent;
+                        }
+                        var renderer;
+                        if (partial) {
+                            renderer = function () {
+                                return partial.render ? partial.render(scope, options, nodeList) : partial(scope, options);
+                            };
+                        } else {
+                            var scopePartialName = scope.read(localPartialName, { isArgument: true }).value;
+                            if (scopePartialName === null || !scopePartialName && localPartialName[0] === '*') {
+                                return frag('');
+                            }
+                            if (scopePartialName) {
+                                localPartialName = scopePartialName;
+                            }
+                            renderer = function () {
+                                if (typeof localPartialName === 'function') {
+                                    return localPartialName(scope, options, nodeList);
+                                } else {
+                                    var domRenderer = core.getTemplateById(localPartialName);
+                                    return domRenderer ? domRenderer(scope, options, nodeList) : getDocument().createDocumentFragment();
+                                }
+                            };
+                        }
+                        var res = Observation.ignore(renderer)();
+                        return frag(res);
+                    });
+                    partialFrag.computeInstance.setPrimaryDepth(nodeList.nesting);
+                    live.html(this, partialFrag, this.parentNode, nodeList);
+                };
+            },
+            makeStringBranchRenderer: function (mode, expressionString, state) {
+                var exprData = core.expression.parse(expressionString), fullExpression = mode + expressionString;
+                if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
+                    exprData = new expression.Helper(exprData, [], {});
+                }
+                var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
+                    var evaluator = scope.__cache[fullExpression];
+                    if (mode || !evaluator) {
+                        evaluator = makeEvaluator(scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+                        if (!mode) {
+                            scope.__cache[fullExpression] = evaluator;
+                        }
                     }
-                    var res = Observation.ignore(renderer)();
-                    return frag(res);
+                    var gotObservableValue = evaluator[canSymbol.for('can.onValue')], res;
+                    if (gotObservableValue) {
+                        res = canReflect.getValue(evaluator);
+                    } else {
+                        res = evaluator();
+                    }
+                    return res == null ? '' : '' + res;
+                };
+                branchRenderer.exprData = exprData;
+                return branchRenderer;
+            },
+            makeLiveBindingBranchRenderer: function (mode, expressionString, state) {
+                var exprData = core.expression.parse(expressionString);
+                if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
+                    exprData = new expression.Helper(exprData, [], {});
+                }
+                var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
+                    var nodeList = [this];
+                    nodeList.expression = expressionString;
+                    nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
+                    var evaluator = makeEvaluator(scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer, state.tag);
+                    var gotObservableValue = evaluator[canSymbol.for('can.onValue')];
+                    var observable;
+                    if (gotObservableValue) {
+                        observable = evaluator;
+                    } else {
+                        observable = new Observation(evaluator, null, { isObservable: false });
+                    }
+                    if (observable instanceof Observation) {
+                        observable.compute._primaryDepth = nodeList.nesting;
+                    } else if (observable.computeInstance) {
+                        observable.computeInstance.setPrimaryDepth(nodeList.nesting);
+                    } else if (observable.observation) {
+                        observable.observation.compute._primaryDepth = nodeList.nesting;
+                    }
+                    canReflect.onValue(observable, k);
+                    var value = canReflect.getValue(observable);
+                    if (typeof value === 'function') {
+                        Observation.ignore(value)(this);
+                    } else if (canReflect.valueHasDependencies(observable)) {
+                        if (state.attr) {
+                            live.attr(this, state.attr, observable);
+                        } else if (state.tag) {
+                            live.attrs(this, observable);
+                        } else if (state.text && typeof value !== 'object') {
+                            live.text(this, observable, this.parentNode, nodeList);
+                        } else {
+                            live.html(this, observable, this.parentNode, nodeList);
+                        }
+                    } else {
+                        if (state.attr) {
+                            attr.set(this, state.attr, value);
+                        } else if (state.tag) {
+                            live.attrs(this, value);
+                        } else if (state.text && typeof value === 'string') {
+                            this.nodeValue = value;
+                        } else if (value != null) {
+                            nodeLists.replace([this], frag(value, this.ownerDocument));
+                        }
+                    }
+                    canReflect.offValue(observable, k);
+                };
+                branchRenderer.exprData = exprData;
+                return branchRenderer;
+            },
+            splitModeFromExpression: function (expression, state) {
+                expression = expression.trim();
+                var mode = expression.charAt(0);
+                if ('#/{&^>!<'.indexOf(mode) >= 0) {
+                    expression = expression.substr(1).trim();
+                } else {
+                    mode = null;
+                }
+                if (mode === '{' && state.node) {
+                    mode = null;
+                }
+                return {
+                    mode: mode,
+                    expression: expression
+                };
+            },
+            cleanLineEndings: function (template) {
+                return template.replace(mustacheLineBreakRegExp, function (whole, returnBefore, spaceBefore, special, expression, spaceAfter, returnAfter, spaceLessSpecial, spaceLessExpression, matchIndex) {
+                    spaceAfter = spaceAfter || '';
+                    returnBefore = returnBefore || '';
+                    spaceBefore = spaceBefore || '';
+                    var modeAndExpression = splitModeFromExpression(expression || spaceLessExpression, {});
+                    if (spaceLessSpecial || '>{'.indexOf(modeAndExpression.mode) >= 0) {
+                        return whole;
+                    } else if ('^#!/'.indexOf(modeAndExpression.mode) >= 0) {
+                        spaceBefore = returnBefore + spaceBefore && ' ';
+                        return spaceBefore + special + (matchIndex !== 0 && returnAfter.length ? returnBefore + '\n' : '');
+                    } else {
+                        return spaceBefore + special + spaceAfter + (spaceBefore.length || matchIndex !== 0 ? returnBefore + '\n' : '');
+                    }
                 });
-                partialFrag.computeInstance.setPrimaryDepth(nodeList.nesting);
-                live.html(this, partialFrag, this.parentNode, nodeList);
-            };
-        },
-        makeStringBranchRenderer: function (mode, expressionString, state) {
-            var exprData = core.expression.parse(expressionString), fullExpression = mode + expressionString;
-            if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
-                exprData = new expression.Helper(exprData, [], {});
-            }
-            var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
-                var evaluator = scope.__cache[fullExpression];
-                if (mode || !evaluator) {
-                    evaluator = makeEvaluator(scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
-                    if (!mode) {
-                        scope.__cache[fullExpression] = evaluator;
+            },
+            cleanWhitespaceControl: function (template) {
+                return template.replace(mustacheWhitespaceRegExp, function (whole, spaceBefore, bracketBefore, controlBefore, expression, controlAfter, bracketAfter, spaceAfter, matchIndex) {
+                    if (controlBefore === '-') {
+                        spaceBefore = '';
                     }
-                }
-                var gotObservableValue = evaluator[canSymbol.for('can.onValue')], res;
-                if (gotObservableValue) {
-                    res = canReflect.getValue(evaluator);
-                } else {
-                    res = evaluator();
-                }
-                return res == null ? '' : '' + res;
-            };
-            branchRenderer.exprData = exprData;
-            return branchRenderer;
-        },
-        makeLiveBindingBranchRenderer: function (mode, expressionString, state) {
-            var exprData = core.expression.parse(expressionString);
-            if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
-                exprData = new expression.Helper(exprData, [], {});
-            }
-            var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
-                var nodeList = [this];
-                nodeList.expression = expressionString;
-                nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
-                var evaluator = makeEvaluator(scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer, state.tag);
-                var gotObservableValue = evaluator[canSymbol.for('can.onValue')];
-                var observable;
-                if (gotObservableValue) {
-                    observable = evaluator;
-                } else {
-                    observable = new Observation(evaluator, null, { isObservable: false });
-                }
-                if (observable instanceof Observation) {
-                    observable.compute._primaryDepth = nodeList.nesting;
-                } else if (observable.computeInstance) {
-                    observable.computeInstance.setPrimaryDepth(nodeList.nesting);
-                } else if (observable.observation) {
-                    observable.observation.compute._primaryDepth = nodeList.nesting;
-                }
-                canReflect.onValue(observable, k);
-                var value = canReflect.getValue(observable);
-                if (typeof value === 'function') {
-                    Observation.ignore(value)(this);
-                } else if (canReflect.valueHasDependencies(observable)) {
-                    if (state.attr) {
-                        live.attr(this, state.attr, observable);
-                    } else if (state.tag) {
-                        live.attrs(this, observable);
-                    } else if (state.text && typeof value !== 'object') {
-                        live.text(this, observable, this.parentNode, nodeList);
-                    } else {
-                        live.html(this, observable, this.parentNode, nodeList);
+                    if (controlAfter === '-') {
+                        spaceAfter = '';
                     }
-                } else {
-                    if (state.attr) {
-                        attr.set(this, state.attr, value);
-                    } else if (state.tag) {
-                        live.attrs(this, value);
-                    } else if (state.text && typeof value === 'string') {
-                        this.nodeValue = value;
-                    } else if (value != null) {
-                        nodeLists.replace([this], frag(value, this.ownerDocument));
-                    }
-                }
-                canReflect.offValue(observable, k);
-            };
-            branchRenderer.exprData = exprData;
-            return branchRenderer;
-        },
-        splitModeFromExpression: function (expression, state) {
-            expression = expression.trim();
-            var mode = expression.charAt(0);
-            if ('#/{&^>!<'.indexOf(mode) >= 0) {
-                expression = expression.substr(1).trim();
-            } else {
-                mode = null;
+                    return spaceBefore + bracketBefore + expression + bracketAfter + spaceAfter;
+                });
+            },
+            Options: utils.Options,
+            getTemplateById: function () {
             }
-            if (mode === '{' && state.node) {
-                mode = null;
-            }
-            return {
-                mode: mode,
-                expression: expression
-            };
-        },
-        cleanLineEndings: function (template) {
-            return template.replace(mustacheLineBreakRegExp, function (whole, returnBefore, spaceBefore, special, expression, spaceAfter, returnAfter, spaceLessSpecial, spaceLessExpression, matchIndex) {
-                spaceAfter = spaceAfter || '';
-                returnBefore = returnBefore || '';
-                spaceBefore = spaceBefore || '';
-                var modeAndExpression = splitModeFromExpression(expression || spaceLessExpression, {});
-                if (spaceLessSpecial || '>{'.indexOf(modeAndExpression.mode) >= 0) {
-                    return whole;
-                } else if ('^#!/'.indexOf(modeAndExpression.mode) >= 0) {
-                    spaceBefore = returnBefore + spaceBefore && ' ';
-                    return spaceBefore + special + (matchIndex !== 0 && returnAfter.length ? returnBefore + '\n' : '');
-                } else {
-                    return spaceBefore + special + spaceAfter + (spaceBefore.length || matchIndex !== 0 ? returnBefore + '\n' : '');
-                }
-            });
-        },
-        cleanWhitespaceControl: function (template) {
-            return template.replace(mustacheWhitespaceRegExp, function (whole, spaceBefore, bracketBefore, controlBefore, expression, controlAfter, bracketAfter, spaceAfter, matchIndex) {
-                if (controlBefore === '-') {
-                    spaceBefore = '';
-                }
-                if (controlAfter === '-') {
-                    spaceAfter = '';
-                }
-                return spaceBefore + bracketBefore + expression + bracketAfter + spaceAfter;
-            });
-        },
-        Options: utils.Options,
-        getTemplateById: function () {
-        }
-    };
-    var makeEvaluator = core.makeEvaluator, splitModeFromExpression = core.splitModeFromExpression;
-    module.exports = core;
+        };
+        var makeEvaluator = core.makeEvaluator, splitModeFromExpression = core.splitModeFromExpression;
+        module.exports = core;
+    }(function () {
+        return this;
+    }(), require, exports, module));
 });
-/*can-stache@3.14.10#src/html_section*/
+/*can-stache@3.14.12#src/html_section*/
 define('can-stache/src/html_section', [
     'require',
     'exports',
@@ -10173,7 +10286,7 @@ define('can-stache/src/html_section', [
         return this;
     }(), require, exports, module));
 });
-/*can-stache@3.14.10#src/text_section*/
+/*can-stache@3.14.12#src/text_section*/
 define('can-stache/src/text_section', [
     'require',
     'exports',
@@ -10281,7 +10394,7 @@ define('can-stache/src/text_section', [
     });
     module.exports = TextSectionBuilder;
 });
-/*can-stache@3.14.10#helpers/converter*/
+/*can-stache@3.14.12#helpers/converter*/
 define('can-stache/helpers/converter', [
     'require',
     'exports',
@@ -10306,7 +10419,7 @@ define('can-stache/helpers/converter', [
     };
     module.exports = helpers;
 });
-/*can-stache@3.14.10#src/intermediate_and_imports*/
+/*can-stache@3.14.12#src/intermediate_and_imports*/
 define('can-stache/src/intermediate_and_imports', [
     'require',
     'exports',
@@ -10401,7 +10514,7 @@ define('can-stache/src/intermediate_and_imports', [
         };
     };
 });
-/*can-util@3.11.1#js/import/import*/
+/*can-util@3.11.5#js/import/import*/
 define('can-util/js/import/import', [
     'require',
     'exports',
@@ -10440,7 +10553,7 @@ define('can-util/js/import/import', [
         return this;
     }(), require, exports, module));
 });
-/*can-stache@3.14.10#can-stache*/
+/*can-stache@3.14.12#can-stache*/
 define('can-stache', [
     'require',
     'exports',
@@ -10778,7 +10891,9 @@ define('can-stache', [
         stache.from = mustacheCore.getTemplateById = function (id) {
             if (!templates[id]) {
                 var el = DOCUMENT().getElementById(id);
-                templates[id] = stache('#' + id, el.innerHTML);
+                if (el) {
+                    templates[id] = stache('#' + id, el.innerHTML);
+                }
             }
             return templates[id];
         };
@@ -10795,4 +10910,4 @@ define('can-stache', [
 	global._define = global.define;
 	global.define = global.define.orig;
 }
-)(typeof self == "object" && self.Object == Object ? self : window);
+)(typeof self == "object" && self.Object == Object ? self : (typeof process === "object" && Object.prototype.toString.call(process) === "[object process]") ? global : window);
