@@ -206,7 +206,7 @@ var core = {
 						if(typeof localPartialName === "function"){
 							return localPartialName(scope, {}, nodeList);
 						} else {
-							var domRenderer = core.getTemplateById(localPartialName)
+							var domRenderer = core.getTemplateById(localPartialName);
 							return domRenderer ? domRenderer(scope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
 
