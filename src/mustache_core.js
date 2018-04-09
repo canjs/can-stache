@@ -13,7 +13,7 @@ var attr = require("can-util/dom/attr/attr");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
-
+var getDocument = require("can-globals/document/document");
 
 // ## Types
 
@@ -223,7 +223,8 @@ var core = {
 						if(typeof localPartialName === "function"){
 							return localPartialName(scope, options, nodeList);
 						} else {
-							return core.getTemplateById(localPartialName)(scope, options, nodeList);
+							var domRenderer = core.getTemplateById(localPartialName)
+							return domRenderer ? domRenderer(scope, options, nodeList) : getDocument().createDocumentFragment();
 						}
 
 					};

@@ -7210,6 +7210,15 @@ function makeTest(name, doc, mutation) {
 		equal(view.firstChild.innerHTML, "foo should be foo", "inline partial renders");
 	});
 
+	test("missing partial error (#4101)", function(){
+		var renderer = stache("<div>{{>foo}}</div>");
+
+		var frag = renderer();
+
+		QUnit.ok(true, "no error");
+		QUnit.equal( innerHTML(frag.firstChild), "", "no content");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
