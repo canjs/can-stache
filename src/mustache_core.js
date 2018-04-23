@@ -95,6 +95,7 @@ var core = {
 		if(!mode || helperOptions.metadata.rendered) {
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
+
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
@@ -104,11 +105,6 @@ var core = {
 				// as what should be put in the DOM.
 				if(helperOptions.metadata.rendered) {
 					result = finalValue;
-				}
-				// OTHERWISE; we will call `.fn` and `.inverse` ourselves based on what
-				// the value looks like.
-				else if(typeof finalValue === "function") {
-					return finalValue;
 				}
 				// If it's an array, render.
 				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {

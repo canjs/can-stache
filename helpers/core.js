@@ -59,6 +59,9 @@ var eachHelper = function(items) {
 		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
 			( utils.isArrayLike(resolved) && canReflect.isValueLike(items))
 	) && !options.stringOnly) {
+		// Tells that a helper has been called, this function should be returned through
+		// checking its value.
+		options.metadata.rendered = true;
 		return function(el){
 			// make a child nodeList inside the can.view.live.html nodeList
 			// so that if the html is re
