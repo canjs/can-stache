@@ -116,10 +116,19 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 
 	//!steal-remove-start
 	if ( !helper ) {
+		var filename = scope.peek('scope.filename');
+		var lineNumber = scope.peek('scope.lineNumber');
+
 		if(looksLikeAHelper) {
-			dev.warn('can-stache/src/expression.js: Unable to find helper "' + methodKey + '".');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'Unable to find helper "' + methodKey + '".');
 		} else {
-			dev.warn('can-stache/src/expression.js: Unable to find key or helper "' + methodKey + '".');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'Unable to find key or helper "' + methodKey + '".');
 		}
 	}
 	//!steal-remove-end
