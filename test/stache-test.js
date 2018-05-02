@@ -6285,27 +6285,38 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
-		var teardown = testHelpers.dev.willWarn(/children.stache:2: "age" is not in the current scope/);
+		var nameTeardown = testHelpers.dev.willWarn(/children\.stache:3: "name" is not in the current scope/);
+		var nameSuggestionsTeardown = testHelpers.dev.willWarn(/Use "\.\.\/name" or "scope\.find\('name'\)" instead/);
+		var ageTeardown = testHelpers.dev.willWarn(/children\.stache:3: "age" is not in the current scope/);
+		var ageSuggestionsTeardown = testHelpers.dev.willWarn(/Use "scope\.root\.age" or "\.\.\/\.\.\/age" or "scope\.find\('age'\)" instead/);
 
 		var data = new DefineMap({
 			name: 'Justin',
 			age: 33,
 			children: [{
-				name: 'TBD'
+				name: 'TBD',
+				likes: [
+					"sleeping", "pooping", "eating"
+				]
 			}]
 		});
 
 		var renderer = stache("children.stache",
 			"<ul>\n" +
 				"{{#each children}}\n" +
-					"<li>{{name}} is {{age}} years old</li>\n" +
+					"{{#each likes}}\n" +
+						"<li>{{name}} is {{age}} years old and enjoys {{this}}</li>\n" +
+					"{{/each}}\n" +
 				"{{/each}}\n" +
 			"</ul>"
 		);
 
 		renderer(data);
 
-		QUnit.equal(teardown(), 1, "Warning should be given");
+		QUnit.equal(nameTeardown(), 3, "Warnings should be given for 'name'");
+		QUnit.equal(nameSuggestionsTeardown(), 3, "Correct suggestions should be given for 'name'");
+		QUnit.equal(ageTeardown(), 3, "Warnings should be given for 'age'");
+		QUnit.equal(ageSuggestionsTeardown(), 3, "Correct suggestions should be given for 'age'");
 	});
 
 	testHelpers.dev.devOnlyTest("scope walking warning should not read value twice (#336)", function() {
