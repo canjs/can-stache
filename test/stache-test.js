@@ -3619,9 +3619,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find helper "helpme".');
+		var teardown = testHelpers.dev.willWarn('foo.stache:1: Unable to find helper "helpme".');
 
-		stache('<li>{{helpme name}}</li>')({
+		stache('foo.stache', '<li>{{helpme name}}</li>')({
 			name: 'Hulk Hogan'
 		});
 
@@ -3629,9 +3629,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/src/expression.js: Unable to find key or helper "user.name".');
+		var teardown = testHelpers.dev.willWarn('bar.stache:1: Unable to find key or helper "user.name".');
 
-		stache('<li>{{user.name}}</li>')({
+		stache('bar.stache', '<li>{{user.name}}</li>')({
 			user: {}
 		});
 
