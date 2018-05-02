@@ -55,7 +55,12 @@ Lookup.prototype.value = function(scope, readOptions){
 		//var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
 
 		if (!propDefined) {
-			dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
+			var filename = scope.peek('scope.filename');
+			var lineNumber = scope.peek('scope.lineNumber');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'Unable to find key "' + this.key + '".');
 		}
 	}
 	//!steal-remove-end
