@@ -64,7 +64,12 @@ Helper.prototype.value = function(scope, helperOptions){
 	}
 	//!steal-remove-start
 	else {
-		dev.warn('can-stache/expressions/helper.js: Unable to find helper "' + methodKey + '".');
+		var filename = scope.peek('scope.filename');
+		var lineNumber = scope.peek('scope.lineNumber');
+		dev.warn(
+			(filename ? filename + ':' : '') +
+			(lineNumber ? lineNumber + ': ' : '') +
+			'Unable to find helper "' + methodKey + '".');
 	}
 	//!steal-remove-end
 
