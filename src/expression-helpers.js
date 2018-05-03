@@ -8,6 +8,29 @@ var canSymbol = require("can-symbol");
 var dev = require("can-util/js/dev/dev");
 
 //!steal-remove-start
+function getExplicitKeys(key, originalScope, actualScope) {
+	var explicitKeys = [ "scope.find('" + key + "')" ];
+	var path = key;
+	var cur = originalScope;
+
+	while (cur._parent) {
+		cur = cur._parent;
+		if (!cur._meta.special && !cur._meta.notContext) {
+			path = "../" + path;
+		}
+
+		if (cur === actualScope) {
+			explicitKeys.unshift( path );
+
+			if (cur._parent._context === originalScope.templateContext) {
+				explicitKeys.unshift( "scope.root." + key );
+			}
+
+			return explicitKeys;
+		}
+	}
+}
+
 // warn on keys like {{foo}} if foo is not in the current scope
 // don't warn on things like {{./foo}} or {{../foo}} or {{foo.bar}} or {{%index}} or {{this}}
 function displayScopeWalkingWarning(key, computeData) {
@@ -28,13 +51,16 @@ function displayScopeWalkingWarning(key, computeData) {
 		if (scopeWasWalked && !readFromNonContext && !readFromSpecialContext) {
 			var filename = computeData.scope.peek('scope.filename');
 			var lineNumber = computeData.scope.peek('scope.lineNumber');
+			var displayKey = key.replace(/^@/g, "").replace(/@/g, ".");
+			var explicitKeys = getExplicitKeys(displayKey, computeData.startingScope, computeData.scope);
 
 			dev.warn(
 				(filename ? filename + ':' : '') +
 				(lineNumber ? lineNumber + ': ' : '') +
-				'"' + key + '" ' +
-				'is not in the current scope, so it is being read from the parent scope.\n' +
-				'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n\n'
+				'"' + displayKey + '" ' +
+				'is not in the current scope, so it is being read from a parent scope.\n' +
+				'This will not happen automatically in an upcoming release. See https://canjs.com/doc/can-stache.scopeAndContext.html#PreventingScopeWalking.\n' +
+				'Use "' + explicitKeys.join('" or "') + '" instead.\n\n'
 			);
 		}
 	}
