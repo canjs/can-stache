@@ -49,8 +49,8 @@ function displayScopeWalkingWarning(key, computeData) {
 
 		// if scope was walked and value isn't an alias, display dev warning
 		if (scopeWasWalked && !readFromNonContext && !readFromSpecialContext) {
-			var filename = computeData.scope.peek('scope.filename');
-			var lineNumber = computeData.scope.peek('scope.lineNumber');
+			var filename = computeData.startingScope.peek('scope.filename');
+			var lineNumber = computeData.startingScope.peek('scope.lineNumber');
 			var displayKey = key.replace(/^@/g, "").replace(/@/g, ".");
 			var explicitKeys = getExplicitKeys(displayKey, computeData.startingScope, computeData.scope);
 
