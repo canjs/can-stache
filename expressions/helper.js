@@ -71,8 +71,8 @@ Helper.prototype.helperAndValue = function(scope, helperOptions){
 		// it also handles when `bar` is a function in `foo.bar` in any of the above
 		if(typeof computeData.initialValue === "function") {
 			//!steal-remove-start
-			var filename = scope.peek('scope.filename');
-			var lineNumber = scope.peek('scope.lineNumber');
+			var filename = computeData.startingScope.peek('scope.filename');
+			var lineNumber = computeData.startingScope.peek('scope.lineNumber');
 			dev.warn(
 				(filename ? filename + ':' : '') +
 				(lineNumber ? lineNumber + ': ' : '') +
