@@ -372,7 +372,7 @@ var core = {
 					this.nodeValue = value;
 				}
 				else if( value != null ){
-					nodeLists.replace([this], frag(value, this.ownerDocument));
+					//nodeLists.replace([this], frag(value, this.ownerDocument));
 				}
 			}
 			// Unbind the compute.

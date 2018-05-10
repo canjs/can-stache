@@ -6904,6 +6904,29 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
 	});
 
+	test("child observations not called unnecessarily", function() {
+		var template = stache("{{#if show}}<div>{{foo}}</div>{{/if}}");
+
+		var show = new SimpleObservable(true);
+		var bar = new SimpleObservable("bar");
+
+		var fooCalls = 0;
+		var foo = new Observation(function(){
+			fooCalls++;
+			return bar.get();
+		});
+
+		var map = new SimpleMap({show: show, foo: foo});
+		var frag = template(map);
+
+		queues.batch.start();
+		show.set(false);
+		bar.set(undefined);
+		queues.batch.stop();
+
+		QUnit.equal(fooCalls, 1, "foo only called once");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
