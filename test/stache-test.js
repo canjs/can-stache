@@ -3526,7 +3526,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
-		var teardown = testHelpers.dev.willWarn('bar.stache:1: Unable to find key "user.name".');
+		var teardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "user.name"./);
 
 		stache('bar.stache', '<li>{{user.name}}</li>')({
 			user: {}
@@ -6743,7 +6743,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'did not get warning');
 	});
 
-	testHelpers.dev.devOnlyTest("should not warn for keys dotted keys that exist", function () {
+	testHelpers.dev.devOnlyTest("should not warn for dotted keys that exist", function () {
 		var ENV = DefineMap.extend({
 			NODE_ENV: "any"
 		});
@@ -6757,7 +6757,7 @@ function makeTest(name, doc, mutation) {
 		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 		stache('{{env.NODE_ENV}}')(vm);
 
-		QUnit.equal(teardown(), 0, "did not warning");
+		QUnit.equal(teardown(), 0, "did not warn");
 
 		// Then with an env but no prop
 		vm = new VM({env: new DefineMap()})
@@ -6771,7 +6771,68 @@ function makeTest(name, doc, mutation) {
 		teardown = testHelpers.dev.willWarn(/Unable to find key/);
 		stache('{{env.NODE_ENV}}')(vm);
 
-		QUnit.equal(teardown(), 0, "did not warning");
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", function () {
+		var VM = DefineMap.extend({
+			name: "string",
+			list: {
+				default: function() {
+					return [ "one", "two" ]
+				}
+			}
+		});
+
+		// First without anything
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{#each list}}{{scope.vm.name}}{{/each}}')(scope);
+
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["foo/" + key] = {};
+			paths["../bar/" + key] = {};
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name}}{{/with}}</p>')({
+			name: 'app',
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["../baz/" + key] = {};
+			return paths;
+		};
+
+		considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name".* Did you mean\?/);
+		var bazOptionTeardown = testHelpers.dev.willWarn(/"..\/baz\/name" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name}}{{/with}}</p>')({
+			name: 'app',
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(bazOptionTeardown(), 1, 'got baz/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
 	});
 
 	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
