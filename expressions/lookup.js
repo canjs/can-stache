@@ -52,15 +52,38 @@ Lookup.prototype.value = function(scope, readOptions){
 			}
 		}
 
-		//var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
-
 		if (!propDefined) {
 			var filename = scope.peek('scope.filename');
 			var lineNumber = scope.peek('scope.lineNumber');
-			dev.warn(
+
+			var key = this.key;
+			var correctPaths = scope.getPathsForKey(key);
+			var pathKeys = Object.keys( correctPaths );
+
+			var warning = [
 				(filename ? filename + ':' : '') +
 				(lineNumber ? lineNumber + ': ' : '') +
-				'Unable to find key "' + this.key + '".');
+				'Unable to find key "' + key.replace(/@/g, ".") + '".' +
+				(
+					pathKeys.length ?
+						" Did you mean" + (pathKeys.length > 1 ? " one of these" : "") + "?\n" :
+						"\n"
+				)
+			];
+
+			if (pathKeys.length) {
+				pathKeys.forEach(function(specificKey) {
+					warning.push('\t"' + specificKey + '" which will read from');
+					warning.push(correctPaths[specificKey]);
+					warning.push("\n");
+				});
+			}
+
+			warning.push("\n");
+
+			dev.warn.apply(dev,
+				warning
+			);
 		}
 	}
 	//!steal-remove-end
