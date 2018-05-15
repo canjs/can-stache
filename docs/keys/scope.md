@@ -41,12 +41,12 @@ Use [can-view-scope::find] to look up the value of a key in the first scope wher
 ```js
 const view = stache( `
 {{#each(tasks)}}
-  <li>{{name}}{{scope.find("exclamation")}}</li>
+  <li>{{this}}{{scope.find("exclamation")}}</li>
 {{/each}}
 ` );
 
 const data = new DefineMap( {
-	task: [ "one", "two" ],
+	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
 
@@ -108,12 +108,12 @@ The root scope. This can be used for reading data from the root when in another 
 ```js
 const view = stache( `
 {{#each(tasks)}}
-  <li>{{name}}{{scope.root.exclamation}}</li>
+  <li>{{this}}{{scope.root.exclamation}}</li>
 {{/each}}
 ` );
 
 const data = new DefineMap( {
-	task: [ "one", "two" ],
+	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
 
@@ -122,6 +122,32 @@ const frag = view( data );
 // renders:
 // <li>one!!!</li>
 // <li>two!!!</li>
+```
+
+@signature `scope.top`
+
+The "top" context that is a viewModel.
+
+```js
+const view = stache( `
+{{#each(tasks)}}
+	<li>{{this}}{{scope.top.exclamation}}</li>
+{{/each}}
+` );
+
+const parentVm = new DefineMap( {
+	exclamation: "*&!#?!"
+} );
+
+const vm = new DefineMap( {
+	tasks: [ "one", "two" ],
+	exclamation: "!!!"
+} );
+
+var scope = new Scope(parentVm, null, { viewModel: true })
+    .add(vm, { viewModel: true });
+
+const frag = view( scope );
 ```
 
 @signature `scope.vars`
@@ -138,4 +164,29 @@ In an event binding, `scope.viewModel` references the view model of the current 
 
 ```html
 <my-component on:closed="doSomething(scope.viewModel)"/>
+```
+
+@signature `scope.vm`
+
+The first context that is a viewModel.
+
+```js
+const view = stache( `
+{{#each(tasks)}}
+  <li>{{this}}{{scope.vm.exclamation}}</li>
+{{/each}}
+` );
+
+const vm = new DefineMap( {
+	tasks: [ "one", "two" ],
+	exclamation: "!!!"
+} );
+
+const scope = new Scope(vm, null, { viewModel: true });
+
+const frag = view( scope );
+
+// renders:
+// <li>one!!!</li>
+// <li>two!!!</li>
 ```
