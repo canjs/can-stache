@@ -6774,6 +6774,25 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, "did not warn");
 	});
 
+	testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", function () {
+		var VM = DefineMap.extend({
+			name: "string",
+			list: {
+				default: function() {
+					return [ "one", "two" ]
+				}
+			}
+		});
+
+		// First without anything
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{#each list}}{{scope.vm.name}}{{/each}}')(scope);
+
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
 	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function () {
 		var origGetPaths = Scope.prototype.getPathsForKey;
 		Scope.prototype.getPathsForKey = function(key) {

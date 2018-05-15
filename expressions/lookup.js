@@ -13,7 +13,6 @@ var Lookup = function(key, root, sourceText) {
 	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
 Lookup.prototype.value = function(scope, readOptions){
-	// jshint maxdepth:6
 	var value;
 
 	if (this.rootExpr) {
@@ -23,34 +22,8 @@ Lookup.prototype.value = function(scope, readOptions){
 	}
 
 	//!steal-remove-start
-	if (typeof value.initialValue === 'undefined') {
-		var context = value.startingScope && value.startingScope._context;
-		var propDefined = false;
-
-		if(typeof context === "object") {
-			if(!value.reads) {
-				propDefined = canReflect.hasKey(context, this.key);
-			} else {
-				var reads = value.reads, i = 0, readsLength = reads.length;
-				var read;
-				do {
-					read = reads[i];
-					if(canReflect.hasKey(context, read.key)) {
-						propDefined = true;
-
-						// Get the next context and continue to see if the key is defined.
-						context = canReflect.getKeyValue(context, read.key);
-
-						if(context) {
-							propDefined = false;
-						} else {
-							break;
-						}
-					}
-					i++;
-				} while(i < readsLength);
-			}
-		}
+	if (typeof value.initialValue === 'undefined' && this.key !== "debugger") {
+		var propDefined = canReflect.hasKey(scope, this.key);
 
 		if (!propDefined) {
 			var filename = scope.peek('scope.filename');
