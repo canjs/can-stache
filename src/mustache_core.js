@@ -5,12 +5,14 @@
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 
+
 var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-util/dom/frag/frag");
 var domMutate = require("can-dom-mutate");
+var domMutateNode = require('can-dom-mutate/node');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
@@ -160,6 +162,8 @@ var core = {
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
+
+			console.log("wha..");
 
 			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
@@ -356,7 +360,9 @@ var core = {
 					live.text(this, observable, this.parentNode, nodeList);
 				}
 				else {
+					var stopTrap = observable.trapBindings && observable.trapBindings();
 					live.html(this, observable, this.parentNode, nodeList);
+					stopTrap && ObservationRecorder.addBindings(stopTrap());
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
@@ -371,7 +377,10 @@ var core = {
 				else if(state.text && typeof value === "string") {
 					this.nodeValue = value;
 				}
-				else if( value != null ){
+				else if( value != null ) {
+					var parentNode = this.parentNode;
+					var fragment = frag(value, getDocument());
+					domMutateNode.replaceChild.call(parentNode, fragment, this);
 					//nodeLists.replace([this], frag(value, this.ownerDocument));
 				}
 			}

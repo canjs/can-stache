@@ -67,9 +67,13 @@ var eachHelper = function(items) {
 			// so that if the html is re
 			var nodeList = [el];
 			nodeList.expression = "live.list";
+
+
 			nodeLists.register(nodeList, null, options.nodeList, true);
+			//nodeLists.register(nodeList, null, options.nodeList, true);
 			// runs nest replacements
-			nodeLists.update(options.nodeList, [el]);
+
+			//nodeLists.update(options.nodeList, [el]);
 
 			var cb = function (item, index, parentNodeList) {
 				var aliases = {};

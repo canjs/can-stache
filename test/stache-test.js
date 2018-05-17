@@ -1259,7 +1259,7 @@ function makeTest(name, doc, mutation) {
 		}, {
 			complete: true
 		}]);
-		var completed = function () {
+		var completed = function completed() {
 			l.get('length');
 			var num = 0;
 			l.forEach(function (item) {
@@ -3017,7 +3017,6 @@ function makeTest(name, doc, mutation) {
 	test("directly nested subitems and each (#605)", function () {
 
 		var template = stache("<div>" +
-
 		"{{#item}}" +
 		"<p>This is the item:</p>" +
 		"{{#each subitems}}" +
@@ -6905,16 +6904,19 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("child observations not called unnecessarily", function() {
-		var template = stache("{{#if show}}<div>{{foo}}</div>{{/if}}");
+		// TODO remove, for debugging
+		//queues.log();
+
+		var template = stache("{{#if(show)}}<div>{{foo()}}</div>{{/if}}");
 
 		var show = new SimpleObservable(true);
 		var bar = new SimpleObservable("bar");
 
 		var fooCalls = 0;
-		var foo = new Observation(function(){
+		function foo(){
 			fooCalls++;
 			return bar.get();
-		});
+		}
 
 		var map = new SimpleMap({show: show, foo: foo});
 		var frag = template(map);
