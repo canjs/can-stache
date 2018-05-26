@@ -1,12 +1,11 @@
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var utils = require('../src/utils');
-var getBaseURL = require('can-util/js/base-url/base-url');
-var joinURIs = require('can-util/js/join-uris/join-uris');
+var getBaseURL = require('can-globals/base-url/base-url');
+var joinURIs = require('can-join-uris');
 var assign = require('can-assign');
 var dev = require('can-log/dev/dev');
 var canReflect = require("can-reflect");
-var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 var debuggerHelper = require('./-debugger').helper;
 var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
@@ -48,7 +47,7 @@ var eachHelper = function(items) {
 		aliases;
 
 	// Check if using hash
-	if (!isEmptyObject(hashExprs)) {
+	if (canReflect.size(hashExprs) > 0) {
 		hashOptions = {};
 		canReflect.eachKey(hashExprs, function (exprs, key) {
 			hashOptions[exprs.key] = key;
@@ -57,7 +56,7 @@ var eachHelper = function(items) {
 
 	if ((
 		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
-			( utils.isArrayLike(resolved) && canReflect.isValueLike(items))
+			( canReflect.isListLike(resolved) && canReflect.isValueLike(items) )
 	) && !options.stringOnly) {
 		// Tells that a helper has been called, this function should be returned through
 		// checking its value.
@@ -74,7 +73,7 @@ var eachHelper = function(items) {
 			var cb = function (item, index, parentNodeList) {
 				var aliases = {};
 
-				if (!isEmptyObject(hashOptions)) {
+				if (canReflect.size(hashOptions) > 0) {
 					if (hashOptions.value) {
 						aliases[hashOptions.value] = item;
 					}
@@ -102,7 +101,7 @@ var eachHelper = function(items) {
 	var expr = resolve(items),
 		result;
 
-	if (!!expr && utils.isArrayLike(expr)) {
+	if (!!expr && canReflect.isListLike(expr)) {
 		result = utils.getItemsFragContent(expr, options, options.scope);
 		return options.stringOnly ? result.join('') : result;
 	} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
@@ -111,7 +110,7 @@ var eachHelper = function(items) {
 			var value = new KeyObservable(expr, key);
 			aliases = {};
 
-			if (!isEmptyObject(hashOptions)) {
+			if (canReflect.size(hashOptions) > 0) {
 				if (hashOptions.value) {
 					aliases[hashOptions.value] = value;
 				}
@@ -209,7 +208,7 @@ var withHelper = function (expr, options) {
 		ctx = options.hash;
 	} else {
 		expr = resolve(expr);
-		if(options.hash && !isEmptyObject(options.hash)) {
+		if(options.hash && canReflect.size(options.hash) > 0) {
 			// presumably rare case of both a context object AND hash keys
 			// Leaving it undocumented for now, but no reason not to support it.
 			ctx = options.scope.add(options.hash, { notContext: true }).add(ctx);

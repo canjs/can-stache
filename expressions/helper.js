@@ -2,7 +2,6 @@ var Literal = require('./literal');
 var Hashes = require('./hashes');
 var assign = require('can-assign');
 var dev = require("can-log/dev/dev");
-var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require('can-reflect');
 
@@ -88,7 +87,7 @@ Helper.prototype.sourceText = function(){
 			return arg.sourceText();
 		}).join(" ") );
 	}
-	if(!isEmptyObject(this.hashExprs)){
+	if(canReflect.size(this.hashExprs) > 0){
 		text.push( Hashes.prototype.sourceText.call(this) );
 	}
 	return text.join(" ");

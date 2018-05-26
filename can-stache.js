@@ -9,15 +9,16 @@ var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('./helpers/core');
 require('./helpers/converter');
 var getIntermediateAndImports = require('can-stache-ast').parse;
-var makeRendererConvertScopes = require('./src/utils').makeRendererConvertScopes;
+var utils = require('./src/utils');
+var makeRendererConvertScopes = utils.makeRendererConvertScopes;
+var last = utils.last;
 
 var attributeEncoder = require('can-attribute-encoder');
 var dev = require('can-log/dev/dev');
 var namespace = require('can-namespace');
 var DOCUMENT = require('can-globals/document/document');
 var assign = require('can-assign');
-var last = require('can-util/js/last/last');
-var importer = require('can-util/js/import/import');
+var importer = require('can-import-module');
 var canReflect = require('can-reflect');
 // Make sure that we can also use our modules with Stache as a plugin
 
