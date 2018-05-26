@@ -34,8 +34,8 @@ var DOCUMENT = require('can-globals/document/document');
 
 var canDev = require('can-log/dev/dev');
 var string = require('can-string');
-var joinURIs = require('can-util/js/join-uris/join-uris');
-var getBaseURL = require('can-util/js/base-url/base-url');
+var joinURIs = require('can-join-uris');
+var getBaseURL = require('can-globals/base-url/base-url');
 var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
@@ -2636,7 +2636,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement('div');
 		var frag = templateEscape({});
 		div.appendChild(frag);
-		
+
 		equal(getChildNodes(div).length, 1, 'rendered a DOM node');
 		equal(div.childNodes.item(0).nodeName, 'A', 'rendered an anchor tag');
 		equal(innerHTML(div.childNodes.item(0)), text, 'rendered the text properly');
