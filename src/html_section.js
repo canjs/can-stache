@@ -7,7 +7,7 @@ var utils = require('./utils');
 var getDocument = require("can-globals/document/document");
 
 var assign = require('can-assign');
-var last = require('can-util/js/last/last');
+var last = utils.last;
 
 var decodeHTML = typeof document !== "undefined" && (function(){
 	var el = getDocument().createElement('div');

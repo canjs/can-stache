@@ -26,15 +26,14 @@ var nodeLists = require('can-view-nodelist');
 var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
 
-var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
+var getChildNodes = require('can-child-nodes');
 var domData = require('can-dom-data');
 var domDataState = require('can-dom-data-state');
 var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 
 var canDev = require('can-log/dev/dev');
-var string = require('can-util/js/string/string');
-var makeArray = require('can-util/js/make-array/make-array');
+var string = require('can-string');
 var joinURIs = require('can-util/js/join-uris/join-uris');
 var getBaseURL = require('can-util/js/base-url/base-url');
 var testHelpers = require('can-test-helpers');
@@ -2439,7 +2438,7 @@ function makeTest(name, doc, mutation) {
 		var divs = getChildNodes(frag);
 		equal(divs.length, 4, "there are 4 divs");
 
-		var vals = makeArray(divs).map(function (div) {
+		var vals = canReflect.toArray(divs).map(function (div) {
 			return innerHTML(div);
 		});
 
@@ -2637,7 +2636,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement('div');
 		var frag = templateEscape({});
 		div.appendChild(frag);
-
+		
 		equal(getChildNodes(div).length, 1, 'rendered a DOM node');
 		equal(div.childNodes.item(0).nodeName, 'A', 'rendered an anchor tag');
 		equal(innerHTML(div.childNodes.item(0)), text, 'rendered the text properly');
@@ -3173,7 +3172,7 @@ function makeTest(name, doc, mutation) {
 
 		var lis = div.getElementsByTagName("li");
 		deepEqual(
-			makeArray(lis).map(function (li) {
+			canReflect.toArray(lis).map(function (li) {
 				return innerHTML(li)
 			}), ["Something", "Else"],
 			'Expected HTML with first set');
@@ -3182,7 +3181,7 @@ function makeTest(name, doc, mutation) {
 
 		lis = div.getElementsByTagName("li");
 		deepEqual(
-			makeArray(lis).map(function (li) {
+			canReflect.toArray(lis).map(function (li) {
 				return innerHTML(li)
 			}), ["Foo", "Bar"],
 			'Expected HTML with first false set');
@@ -6650,7 +6649,7 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(frag);
 
-		QUnit.equal(innerHTML(div), "");
+		QUnit.equal(innerHTML(div), data.bar.bind(data).toString());
 	});
 
 	QUnit.test("{{bar 'foo'}} should call `bar` and pass 'foo'", function(){

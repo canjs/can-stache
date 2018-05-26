@@ -9,7 +9,7 @@ var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
-var frag = require("can-util/dom/frag/frag");
+var frag = require("can-fragment");
 var domMutate = require("can-dom-mutate");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
@@ -107,7 +107,7 @@ var core = {
 					result = finalValue;
 				}
 				// If it's an array, render.
-				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {
+				else if ( typeof finalValue !== "string" && canReflect.isListLike(finalValue) ) {
 					var isObserveList = canReflect.isObservableLike(finalValue) &&
 						canReflect.isListLike(finalValue);
 

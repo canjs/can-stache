@@ -18,7 +18,7 @@ is falsey or an empty list, render `INVERSE`.
 expression that typically returns a list like data structure.
 
 If the value of the EXPRESSION is a [can-define/list/list] or [can-list], the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
-element changes occur.  The list itself can also change, and a [can-util/js/diff/diff]
+element changes occur.  The list itself can also change, and a [can-diff/list/list diff]
 will be performed, which also will perform a minimal set of updates. The [can-stache/keys/special special %key key] is available within `FN`.
 
 If the value of the key is an object, `FN` will be

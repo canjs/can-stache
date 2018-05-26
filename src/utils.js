@@ -3,8 +3,6 @@ var ObservationRecorder = require('can-observation-recorder');
 var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
-var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-var isArrayLike = require('can-util/js/is-array-like/is-array-like');
 
 // this creates a noop that marks that a renderer was called
 // this is for situations where a helper function calls a renderer
@@ -20,8 +18,9 @@ var createNoOpRenderer = function (metadata) {
 };
 
 module.exports = {
-	// Returns if something looks like an array.  This works for can.List
-	isArrayLike: isArrayLike,
+	last: function(arr){
+		return arr !=null && arr[arr.length-1];
+	},
 	// A generic empty function
 	emptyHandler: function(){},
 	// Converts a string like "1" into 1. "null" into null, etc.
@@ -99,7 +98,7 @@ module.exports = {
 			hashOptions;
 
 		// Check if using hash
-		if (!isEmptyObject(hashExprs)) {
+		if (canReflect.size(hashExprs) > 0) {
 			hashOptions = {};
 			canReflect.eachKey(hashExprs, function (exprs, key) {
 				hashOptions[exprs.key] = key;
@@ -111,7 +110,7 @@ module.exports = {
 
 			var item = isObservable ? new KeyObservable(items, i) :items[i];
 
-			if (!isEmptyObject(hashOptions)) {
+			if (canReflect.size(hashOptions) > 0) {
 				if (hashOptions.value) {
 					aliases[hashOptions.value] = item;
 				}
