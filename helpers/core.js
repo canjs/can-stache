@@ -35,14 +35,20 @@ var resolveHash = function(hash){
 	}
 	return params;
 };
-
-var peek = observationRecorder.ignore(resolve);
+var bindAndRead = observationRecorder.ignore(function (value) {
+	if ( value && canReflect.isValueLike(value) ) {
+		Observation.temporarilyBind(value);
+		return canReflect.getValue(value);
+	} else {
+		return value;
+	}
+});
 
 var eachHelper = function(items) {
 	var args = [].slice.call(arguments),
 		options = args.pop(),
 		hashExprs = options.exprData.hashExprs,
-		resolved = peek(items),
+		resolved = bindAndRead(items),
 		hashOptions,
 		aliases;
 
@@ -53,6 +59,8 @@ var eachHelper = function(items) {
 			hashOptions[exprs.key] = key;
 		});
 	}
+
+
 
 	if ((
 		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||

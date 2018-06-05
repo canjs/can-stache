@@ -6964,6 +6964,31 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
 	});
 
+	test("each should premptively bind values", function(){
+		var calls = 0;
+		var template = stache("{{#each(someMethod())}}<div/>{{/each}}");
+
+		var value = new SimpleObservable(["a","b"]);
+
+		var obs = new Observation(function(){
+			calls++;
+			return canReflect.getValue(value)
+		});
+
+		var methodCalls = 0;
+
+		template({
+			someMethod: function() {
+				methodCalls++;
+				return canReflect.getValue(obs)
+			}
+		});
+
+		QUnit.equal(methodCalls, 1, "one method call");
+		QUnit.equal(calls, 1, "one observation call");
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
