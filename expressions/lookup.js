@@ -3,6 +3,7 @@ var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var dev = require("can-log/dev/dev");
+var observeReader = require("can-stache-key");
 
 // ### Lookup
 // `new Lookup(String, [Expression])`
@@ -22,42 +23,42 @@ Lookup.prototype.value = function(scope, readOptions){
 	}
 
 	//!steal-remove-start
-	if (typeof value.initialValue === 'undefined' && this.key !== "debugger") {
-		var propDefined = canReflect.hasKey(scope, this.key);
+	if (typeof value.initialValue === 'undefined' && this.key !== "debugger" && !value.parentHasKey) {
+		var filename = scope.peek('scope.filename');
+		var lineNumber = scope.peek('scope.lineNumber');
 
-		if (!propDefined) {
-			var filename = scope.peek('scope.filename');
-			var lineNumber = scope.peek('scope.lineNumber');
+		var reads = observeReader.reads(this.key);
+		var firstKey = reads[0].key;
+		var key = reads.map(function(read) {
+			return read.key + (read.at ? "()" : "");
+		}).join(".");
+		var pathsForKey = scope.getPathsForKey(firstKey);
+		var paths = Object.keys( pathsForKey );
 
-			var key = this.key;
-			var correctPaths = scope.getPathsForKey(key);
-			var pathKeys = Object.keys( correctPaths );
-
-			var warning = [
-				(filename ? filename + ':' : '') +
+		var warning = [
+			(filename ? filename + ':' : '') +
 				(lineNumber ? lineNumber + ': ' : '') +
-				'Unable to find key "' + key.replace(/@/g, ".") + '".' +
+				'Unable to find key "' + key + '".' +
 				(
-					pathKeys.length ?
-						" Did you mean" + (pathKeys.length > 1 ? " one of these" : "") + "?\n" :
+					paths.length ?
+						" Did you mean" + (paths.length > 1 ? " one of these" : "") + "?\n" :
 						"\n"
 				)
-			];
+		];
 
-			if (pathKeys.length) {
-				pathKeys.forEach(function(specificKey) {
-					warning.push('\t"' + specificKey + '" which will read from');
-					warning.push(correctPaths[specificKey]);
-					warning.push("\n");
-				});
-			}
-
-			warning.push("\n");
-
-			dev.warn.apply(dev,
-				warning
-			);
+		if (paths.length) {
+			paths.forEach(function(path) {
+				warning.push('\t"' + path + '" which will read from');
+				warning.push(pathsForKey[path]);
+				warning.push("\n");
+			});
 		}
+
+		warning.push("\n");
+
+		dev.warn.apply(dev,
+			warning
+		);
 	}
 	//!steal-remove-end
 
