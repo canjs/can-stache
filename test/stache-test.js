@@ -6783,11 +6783,28 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		// First without anything
 		var vm = new VM();
 		var scope = new Scope(vm, null, { viewModel: true });
 		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 		stache('{{#each list}}{{scope.vm.name}}{{/each}}')(scope);
+
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn for ../<key> keys that exist (#519)", function () {
+		var VM = DefineMap.extend({
+			name: "string",
+			list: {
+				default: function() {
+					return [ "one", "two" ]
+				}
+			}
+		});
+
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{#each list}}{{../name}}{{/each}}')(scope);
 
 		QUnit.equal(teardown(), 0, "did not warn");
 	});
@@ -6832,6 +6849,60 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(bazOptionTeardown(), 1, 'got baz/name option');
 
 		Scope.prototype.getPathsForKey = origGetPaths;
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for nested properties (#519)", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["foo/name.first"] = {};
+			paths["../bar/name.first"] = {};
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name.first".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name.first" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name.first" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name.first}}{{/with}}</p>')({
+			name: {},
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
+
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for functions (#529)", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			if (key === "name") {
+				paths["foo/" + key + "()"] = {};
+				paths["../bar/" + key + "()"] = {};
+			}
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name\(\)".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name\(\)" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name\(\)" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name()}}{{/with}}</p>')({
+			name: function() { return 'app'; },
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
+
 	});
 
 	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){

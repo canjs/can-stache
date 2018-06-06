@@ -51,14 +51,14 @@
     "can-simple-observable": "^2.0.3",
     "can-stache-ast": "^1.0.0",
     "can-stache-helpers": "^1.0.0",
-    "can-stache-key": "^1.1.0",
+    "can-stache-key": "^1.2.0",
     "can-string": "0.0.5",
     "can-symbol": "^1.0.0",
     "can-view-callbacks": "^4.0.0",
     "can-view-live": "^4.0.3",
     "can-view-nodelist": "^4.0.0",
     "can-view-parser": "^4.0.0",
-    "can-view-scope": "^4.2.0",
+    "can-view-scope": "^4.4.0",
     "can-view-target": "^4.0.0"
   },
   "devDependencies": {
