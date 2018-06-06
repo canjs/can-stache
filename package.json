@@ -1,6 +1,6 @@
 {
   "name": "can-stache",
-  "version": "4.5.1",
+  "version": "4.5.2",
   "description": "Live binding handlebars templates",
   "homepage": "https://canjs.com/doc/can-stache.html",
   "repository": {
