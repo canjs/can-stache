@@ -6286,9 +6286,9 @@ function makeTest(name, doc, mutation) {
 
 	testHelpers.dev.devOnlyTest("warn on implicitly walking up the scope to read key (#311)", function() {
 		var nameTeardown = testHelpers.dev.willWarn(/children\.stache:3: "name" is not in the current scope/);
-		var nameSuggestionsTeardown = testHelpers.dev.willWarn(/Use "\.\.\/name" or "scope\.find\('name'\)" instead/);
+		var nameSuggestionsTeardown = testHelpers.dev.willWarn(/Use "\.\.\/name" instead/);
 		var ageTeardown = testHelpers.dev.willWarn(/children\.stache:3: "age" is not in the current scope/);
-		var ageSuggestionsTeardown = testHelpers.dev.willWarn(/Use "scope\.root\.age" or "\.\.\/\.\.\/age" or "scope\.find\('age'\)" instead/);
+		var ageSuggestionsTeardown = testHelpers.dev.willWarn(/Use "scope\.vm\.age" or "scope\.top\.age" or "\.\.\/\.\.\/age" instead/);
 
 		var data = new DefineMap({
 			name: 'Justin',
@@ -6311,7 +6311,8 @@ function makeTest(name, doc, mutation) {
 			"</ul>"
 		);
 
-		renderer(data);
+		var scope = new Scope(data, null, { viewModel: true });
+		renderer(scope);
 
 		QUnit.equal(nameTeardown(), 3, "Warnings should be given for 'name'");
 		QUnit.equal(nameSuggestionsTeardown(), 3, "Correct suggestions should be given for 'name'");
