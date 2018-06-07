@@ -9,9 +9,11 @@ var dev = require("can-util/js/dev/dev");
 
 //!steal-remove-start
 function getExplicitKeys(key, originalScope, actualScope) {
-	var explicitKeys = [ "scope.find('" + key + "')" ];
+	var explicitKeys = [];
 	var path = key;
 	var cur = originalScope;
+	var vm = originalScope.getViewModel();
+	var top = originalScope.getTop();
 
 	while (cur._parent) {
 		cur = cur._parent;
@@ -22,8 +24,12 @@ function getExplicitKeys(key, originalScope, actualScope) {
 		if (cur === actualScope) {
 			explicitKeys.unshift( path );
 
-			if (cur._parent._context === originalScope.templateContext) {
-				explicitKeys.unshift( "scope.root." + key );
+			if (canReflect.getValue(cur._context) === top) {
+				explicitKeys.unshift( "scope.top." + key );
+			}
+
+			if (canReflect.getValue(cur._context) === vm) {
+				explicitKeys.unshift( "scope.vm." + key );
 			}
 
 			return explicitKeys;

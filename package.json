@@ -45,7 +45,7 @@
     "can-view-live": "^3.2.0",
     "can-view-nodelist": "^3.1.0",
     "can-view-parser": "^3.8.1",
-    "can-view-scope": "^3.5.4",
+    "can-view-scope": "^3.6.0",
     "can-view-target": "^3.1.0"
   },
   "devDependencies": {
