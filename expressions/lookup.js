@@ -35,18 +35,20 @@ Lookup.prototype.value = function(scope, readOptions){
 		var pathsForKey = scope.getPathsForKey(firstKey);
 		var paths = Object.keys( pathsForKey );
 
+		var includeSuggestions = paths.length && !paths.includes(firstKey);
+
 		var warning = [
 			(filename ? filename + ':' : '') +
 				(lineNumber ? lineNumber + ': ' : '') +
 				'Unable to find key "' + key + '".' +
 				(
-					paths.length ?
+					includeSuggestions ?
 						" Did you mean" + (paths.length > 1 ? " one of these" : "") + "?\n" :
 						"\n"
 				)
 		];
 
-		if (paths.length) {
+		if (includeSuggestions) {
 			paths.forEach(function(path) {
 				warning.push('\t"' + path + '" which will read from');
 				warning.push(pathsForKey[path]);

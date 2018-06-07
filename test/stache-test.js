@@ -6809,6 +6809,24 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, "did not warn");
 	});
 
+	testHelpers.dev.devOnlyTest("Warnings for nested properties should not suggest using the same key (#536)", function () {
+		var Abc = DefineMap.extend({});
+		var VM = DefineMap.extend({
+			abc: {
+				Default: Abc
+			}
+		});
+
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var warningTeardown = testHelpers.dev.willWarn(/Unable to find key/);
+		var suggestionTeardown = testHelpers.dev.willWarn(/will read from/);
+		stache('{{abc.def}}')(scope);
+
+		QUnit.equal(warningTeardown(), 1, "gave warning");
+		QUnit.equal(suggestionTeardown(), 0, "did not give suggestions");
+	});
+
 	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function () {
 		var origGetPaths = Scope.prototype.getPathsForKey;
 		Scope.prototype.getPathsForKey = function(key) {
