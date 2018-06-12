@@ -52,7 +52,7 @@
     "can-stache-ast": "^1.0.0",
     "can-stache-helpers": "^1.0.0",
     "can-stache-key": "^1.2.0",
-    "can-string": "0.0.5",
+    "can-string": "<2.0.0",
     "can-symbol": "^1.0.0",
     "can-view-callbacks": "^4.0.0",
     "can-view-live": "^4.0.3",
