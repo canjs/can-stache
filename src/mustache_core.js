@@ -9,7 +9,7 @@ var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
 var utils = require('./utils');
 var expression = require('./expression');
-var frag = require("can-util/dom/frag/frag");
+var frag = require("can-fragment");
 var domMutate = require("can-dom-mutate");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
@@ -96,6 +96,7 @@ var core = {
 		if(!mode || helperOptions.metadata.rendered) {
 			return value;
 		} else if( mode === "#" || mode === "^" ) {
+
 			return function(){
 				// Get the value
 				var finalValue = canReflect.getValue(value);
@@ -106,13 +107,8 @@ var core = {
 				if(helperOptions.metadata.rendered) {
 					result = finalValue;
 				}
-				// OTHERWISE; we will call `.fn` and `.inverse` ourselves based on what
-				// the value looks like.
-				else if(typeof finalValue === "function") {
-					return finalValue;
-				}
 				// If it's an array, render.
-				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {
+				else if ( typeof finalValue !== "string" && canReflect.isListLike(finalValue) ) {
 					var isObserveList = canReflect.isObservableLike(finalValue) &&
 						canReflect.isListLike(finalValue);
 

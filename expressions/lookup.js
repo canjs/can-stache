@@ -3,6 +3,7 @@ var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var dev = require("can-log/dev/dev");
+var observeReader = require("can-stache-key");
 
 // ### Lookup
 // `new Lookup(String, [Expression])`
@@ -13,7 +14,6 @@ var Lookup = function(key, root, sourceText) {
 	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
 Lookup.prototype.value = function(scope, readOptions){
-	// jshint maxdepth:6
 	var value;
 
 	if (this.rootExpr) {
@@ -23,40 +23,44 @@ Lookup.prototype.value = function(scope, readOptions){
 	}
 
 	//!steal-remove-start
-	if (typeof value.initialValue === 'undefined') {
-		var context = value.startingScope && value.startingScope._context;
-		var propDefined = false;
+	if (typeof value.initialValue === 'undefined' && this.key !== "debugger" && !value.parentHasKey) {
+		var filename = scope.peek('scope.filename');
+		var lineNumber = scope.peek('scope.lineNumber');
 
-		if(typeof context === "object") {
-			if(!value.reads) {
-				propDefined = canReflect.hasKey(context, this.key);
-			} else {
-				var reads = value.reads, i = 0, readsLength = reads.length;
-				var read;
-				do {
-					read = reads[i];
-					if(canReflect.hasKey(context, read.key)) {
-						propDefined = true;
+		var reads = observeReader.reads(this.key);
+		var firstKey = reads[0].key;
+		var key = reads.map(function(read) {
+			return read.key + (read.at ? "()" : "");
+		}).join(".");
+		var pathsForKey = scope.getPathsForKey(firstKey);
+		var paths = Object.keys( pathsForKey );
 
-						// Get the next context and continue to see if the key is defined.
-						context = canReflect.getKeyValue(context, read.key);
+		var includeSuggestions = paths.length && !paths.includes(firstKey);
 
-						if(context) {
-							propDefined = false;
-						} else {
-							break;
-						}
-					}
-					i++;
-				} while(i < readsLength);
-			}
+		var warning = [
+			(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'Unable to find key "' + key + '".' +
+				(
+					includeSuggestions ?
+						" Did you mean" + (paths.length > 1 ? " one of these" : "") + "?\n" :
+						"\n"
+				)
+		];
+
+		if (includeSuggestions) {
+			paths.forEach(function(path) {
+				warning.push('\t"' + path + '" which will read from');
+				warning.push(pathsForKey[path]);
+				warning.push("\n");
+			});
 		}
 
-		//var propDefined = typeof context === "object" && canReflect.hasKey(context, this.key);
+		warning.push("\n");
 
-		if (!propDefined) {
-			dev.warn('can-stache/expressions/lookup.js: Unable to find key "' + this.key + '".');
-		}
+		dev.warn.apply(dev,
+			warning
+		);
 	}
 	//!steal-remove-end
 

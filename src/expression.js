@@ -14,7 +14,7 @@ var expressionHelpers = require("../src/expression-helpers");
 
 var utils = require('./utils');
 var assign = require('can-assign');
-var last = require('can-util/js/last/last');
+var last = utils.last;
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");
 
