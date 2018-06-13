@@ -5,7 +5,6 @@ var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var SetterObservable = require("can-simple-observable/setter/setter");
 var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require("can-reflect");
-var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var assign = require('can-assign');
 
 // ### Call
@@ -37,7 +36,7 @@ Call.prototype.args = function(scope, ignoreArgLookup) {
 	}
 	return function(doNotWrapArguments){
 		var finalArgs = [];
-		if(!isEmptyObject(hashExprs)){
+		if(canReflect.size(hashExprs) > 0){
 			finalArgs.hashExprs = hashExprs;
 		}
 		for(var i = 0, len = args.length; i < len; i++) {

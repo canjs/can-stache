@@ -3,6 +3,9 @@ var stache = require("can-stache");
 var DefineList = require("can-define/list/list");
 var DefineMap = require("can-define/map/map");
 var queues = require("can-queues");
+var SimpleObservable = require("can-simple-observable");
+var Observation = require("can-observation");
+var SimpleMap = require("can-simple-map");
 
 QUnit.module("can-stache #each helper");
 
@@ -57,4 +60,66 @@ QUnit.test("#each throws error (can-stache-bindings#444)", function(){
     queues.batch.stop();
 
     QUnit.ok(true, "no errors");
+});
+
+QUnit.asyncTest("if within an each", function(){
+    var template = stache(`<div>
+    	{{# each(sortedMonthlyOSProjects ) }}
+    		{{# if(val) }}
+    			<span>Hi</span>
+    		{{/ if }}
+    	{{/ each }}
+    	</div>`);
+
+    var osProject1 = {
+        val: new SimpleObservable()
+    },
+        osProject2 = {
+            val: new SimpleObservable()
+        };
+    var calls = 0;
+
+    var sortedMonthlyOSProjects = new Observation(function(){
+        osProject1.val.get();
+        //osProject2.val.get();
+        calls++;
+        if(calls % 2 === 0) {
+            return [osProject1,osProject2];
+        } else {
+
+            return [osProject2, osProject1];
+        }
+    });
+
+    template({sortedMonthlyOSProjects: sortedMonthlyOSProjects});
+
+    setTimeout(function(){
+
+        osProject1.val.set(true);
+        QUnit.ok(true,"no errors");
+        QUnit.start();
+    },100);
+
+
+    //osProject2.val.set(false);
+
+});
+
+test("changing the list works with each", function () {
+
+    var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
+
+    var map = new SimpleMap({
+        list: new DefineList(["foo"])
+    });
+
+    var tpl = template(map).firstChild;
+    equal(tpl.getElementsByTagName('li').length, 1, "one li");
+    var fooLi = tpl.getElementsByTagName('li')[0];
+
+    map.set("list", new DefineList(["foo", "car"]));
+
+    QUnit.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
+    QUnit.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
+
 });

@@ -2,7 +2,6 @@ var Literal = require('./literal');
 var Hashes = require('./hashes');
 var assign = require('can-assign');
 var dev = require("can-log/dev/dev");
-var isEmptyObject = require('can-util/js/is-empty-object/is-empty-object');
 var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require('can-reflect');
 
@@ -64,7 +63,12 @@ Helper.prototype.value = function(scope, helperOptions){
 	}
 	//!steal-remove-start
 	else {
-		dev.warn('can-stache/expressions/helper.js: Unable to find helper "' + methodKey + '".');
+		var filename = scope.peek('scope.filename');
+		var lineNumber = scope.peek('scope.lineNumber');
+		dev.warn(
+			(filename ? filename + ':' : '') +
+			(lineNumber ? lineNumber + ': ' : '') +
+			'Unable to find helper "' + methodKey + '".');
 	}
 	//!steal-remove-end
 
@@ -83,7 +87,7 @@ Helper.prototype.sourceText = function(){
 			return arg.sourceText();
 		}).join(" ") );
 	}
-	if(!isEmptyObject(this.hashExprs)){
+	if(canReflect.size(this.hashExprs) > 0){
 		text.push( Hashes.prototype.sourceText.call(this) );
 	}
 	return text.join(" ");

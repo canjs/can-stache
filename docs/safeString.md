@@ -28,11 +28,11 @@ not become escaped, even if you use [can-stache.tags.escaped].
 
 If you write a helper that generates its own HTML, you will
 usually want to return a `stache.safeString.` In this case,
-you will want to manually escape parameters with [can-util/js/string/string.esc].
+you will want to manually escape parameters with [can-string.esc].
 
 
 ```js
-import string from "can-util/js/string/string";
+import string from "can-string";
 
 stache.registerHelper( "link", function( text, url ) {
 	text = string.esc( text );

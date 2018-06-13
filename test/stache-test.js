@@ -3,6 +3,7 @@ require('./expression-test');
 require('../helpers/-debugger-test');
 require('./nodelist-test');
 require('../helpers/-each-test');
+require('./section-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
 var clone = require('steal-clone');
@@ -26,16 +27,16 @@ var nodeLists = require('can-view-nodelist');
 var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
 
-var getChildNodes = require('can-util/dom/child-nodes/child-nodes');
-var domData = require('can-dom-data-state');
+var getChildNodes = require('can-child-nodes');
+var domData = require('can-dom-data');
+var domDataState = require('can-dom-data-state');
 var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 
 var canDev = require('can-log/dev/dev');
-var string = require('can-util/js/string/string');
-var makeArray = require('can-util/js/make-array/make-array');
-var joinURIs = require('can-util/js/join-uris/join-uris');
-var getBaseURL = require('can-util/js/base-url/base-url');
+var string = require('can-string');
+var joinURIs = require('can-join-uris');
+var getBaseURL = require('can-globals/base-url/base-url');
 var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
@@ -1063,7 +1064,7 @@ function makeTest(name, doc, mutation) {
 
 	test("hookup and live binding", function () {
 
-		var text = "<div class='{{ task.completed }}' {{ data 'task' task }}>" +
+		var text = "<div class='{{ task.completed }}' {{ domData 'task' task }}>" +
 				"{{ task.name }}" +
 				"</div>",
 			task = new SimpleMap({
@@ -1079,7 +1080,7 @@ function makeTest(name, doc, mutation) {
 		div.appendChild(compiled)
 		var child = div.getElementsByTagName('div')[0];
 		ok(child.className.indexOf("false") > -1, "is incomplete")
-		ok( !! domData.get.call(child, 'task'), "has data")
+		ok( !! domData.get(child, 'task'), "has data")
 		equal(innerHTML(child), "My Name", "has name")
 
 		task.set({
@@ -2018,17 +2019,85 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(renderer(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer2(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer3(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domData.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+	});
+
+	test("domData helper should set proper data instead of a context stack", function () {
+		var partials = {
+			'nested_data': stache('<span id="has_data" {{domData "attr"}}></span>'),
+			'nested_data2': stache('{{#this}}<span id="has_data" {{domData "attr"}}></span>{{/this}}'),
+			'nested_data3': stache('{{#../bar}}<span id="has_data" {{domData "attr"}}></span>{{/../bar}}')
+		};
+
+		var renderer = stache("{{#bar}}{{> nested_data}}{{/bar}}"),
+			renderer2 = stache("{{#bar}}{{> nested_data2}}{{/bar}}"),
+			renderer3 = stache("{{#bar}}{{> nested_data3}}{{/bar}}"),
+			div = doc.createElement('div'),
+			data = new SimpleMap({
+				foo: "bar",
+				bar: new SimpleMap({})
+			}),
+			span;
+
+		div = doc.createElement('div');
+
+		div.appendChild(renderer(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
+
+		div = doc.createElement('div');
+		div.appendChild(renderer2(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
+
+		div = doc.createElement('div');
+		div.appendChild(renderer3(data,{partials: partials}));
+		span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+	});
+
+	test("data helper should store passed values", function () {
+		var template = "<span {{data('todo' todos[0])}}></span>";
+		var vm = new DefineMap({
+			todos: [
+				{
+					id: 1,
+					name: "Dishes"
+				}
+			]
+		});
+		var rendered = stache(template)(vm);
+		var div = doc.createElement('div');
+		div.appendChild(rendered);
+		var span = div.getElementsByTagName('span')[0];
+		strictEqual(domDataState.get.call(span, 'todo'), vm.todos[0], 'can-dom-data-state should have the correct value');
+	});
+
+	test("domData helper should store passed values", function () {
+		var template = "<span {{domData('todo' todos[0])}}></span>";
+		var vm = new DefineMap({
+			todos: [
+				{
+					id: 1,
+					name: "Dishes"
+				}
+			]
+		});
+		var rendered = stache(template)(vm);
+		var div = doc.createElement('div');
+		div.appendChild(rendered);
+		var span = div.getElementsByTagName('span')[0];
+		strictEqual(domData.get(span, 'todo'), vm.todos[0], 'can-dom-data should have the correct value');
 	});
 
 	test("avoid global helpers", function () {
@@ -2370,7 +2439,7 @@ function makeTest(name, doc, mutation) {
 		var divs = getChildNodes(frag);
 		equal(divs.length, 4, "there are 4 divs");
 
-		var vals = makeArray(divs).map(function (div) {
+		var vals = canReflect.toArray(divs).map(function (div) {
 			return innerHTML(div);
 		});
 
@@ -2580,22 +2649,6 @@ function makeTest(name, doc, mutation) {
 		equal(div.childNodes.item(0).nodeName, 'A', 'rendered an anchor tag');
 		equal(innerHTML(div.childNodes.item(0)), text, 'rendered the text properly');
 		equal(div.childNodes.item(0).getAttribute('href'), url, 'rendered the href properly');
-	});
-
-	test("changing the list works with each", function () {
-		var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
-
-		var map = new SimpleMap({
-			list: new DefineList(["foo"])
-		});
-
-		var tpl = template(map).firstChild;
-		equal(tpl.getElementsByTagName('li').length, 1, "one li");
-
-		map.set("list", new DefineList(["bar", "car"]));
-
-		equal(tpl.getElementsByTagName('li').length, 2, "two lis");
-
 	});
 
 	test("nested properties binding (#525)", function () {
@@ -3104,7 +3157,7 @@ function makeTest(name, doc, mutation) {
 
 		var lis = div.getElementsByTagName("li");
 		deepEqual(
-			makeArray(lis).map(function (li) {
+			canReflect.toArray(lis).map(function (li) {
 				return innerHTML(li)
 			}), ["Something", "Else"],
 			'Expected HTML with first set');
@@ -3113,7 +3166,7 @@ function makeTest(name, doc, mutation) {
 
 		lis = div.getElementsByTagName("li");
 		deepEqual(
-			makeArray(lis).map(function (li) {
+			canReflect.toArray(lis).map(function (li) {
 				return innerHTML(li)
 			}), ["Foo", "Bar"],
 			'Expected HTML with first false set');
@@ -3447,9 +3500,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Helper not found in stache template(#726)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/helper.js: Unable to find helper "helpme".');
+		var teardown = testHelpers.dev.willWarn('foo.stache:1: Unable to find helper "helpme".');
 
-		stache('<li>{{helpme name}}</li>')({
+		stache('foo.stache', '<li>{{helpme name}}</li>')({
 			name: 'Hulk Hogan'
 		});
 
@@ -3457,9 +3510,9 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template (#720)", function () {
-		var teardown = testHelpers.dev.willWarn('can-stache/expressions/lookup.js: Unable to find key "user.name".');
+		var teardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "user.name"./);
 
-		stache('<li>{{user.name}}</li>')({
+		stache('bar.stache', '<li>{{user.name}}</li>')({
 			user: {}
 		});
 
@@ -6581,7 +6634,7 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(frag);
 
-		QUnit.equal(innerHTML(div), "");
+		QUnit.equal(innerHTML(div), data.bar.bind(data).toString());
 	});
 
 	QUnit.test("{{bar 'foo'}} should call `bar` and pass 'foo'", function(){
@@ -6674,7 +6727,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(teardown(), 0, 'did not get warning');
 	});
 
-	testHelpers.dev.devOnlyTest("should not warn for keys dotted keys that exist", function () {
+	testHelpers.dev.devOnlyTest("should not warn for dotted keys that exist", function () {
 		var ENV = DefineMap.extend({
 			NODE_ENV: "any"
 		});
@@ -6688,7 +6741,7 @@ function makeTest(name, doc, mutation) {
 		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 		stache('{{env.NODE_ENV}}')(vm);
 
-		QUnit.equal(teardown(), 0, "did not warning");
+		QUnit.equal(teardown(), 0, "did not warn");
 
 		// Then with an env but no prop
 		vm = new VM({env: new DefineMap()})
@@ -6702,7 +6755,157 @@ function makeTest(name, doc, mutation) {
 		teardown = testHelpers.dev.willWarn(/Unable to find key/);
 		stache('{{env.NODE_ENV}}')(vm);
 
-		QUnit.equal(teardown(), 0, "did not warning");
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", function () {
+		var VM = DefineMap.extend({
+			name: "string",
+			list: {
+				default: function() {
+					return [ "one", "two" ]
+				}
+			}
+		});
+
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{#each list}}{{scope.vm.name}}{{/each}}')(scope);
+
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("should not warn for ../<key> keys that exist (#519)", function () {
+		var VM = DefineMap.extend({
+			name: "string",
+			list: {
+				default: function() {
+					return [ "one", "two" ]
+				}
+			}
+		});
+
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+		stache('{{#each list}}{{../name}}{{/each}}')(scope);
+
+		QUnit.equal(teardown(), 0, "did not warn");
+	});
+
+	testHelpers.dev.devOnlyTest("Warnings for nested properties should not suggest using the same key (#536)", function () {
+		var Abc = DefineMap.extend({});
+		var VM = DefineMap.extend({
+			abc: {
+				Default: Abc
+			}
+		});
+
+		var vm = new VM();
+		var scope = new Scope(vm, null, { viewModel: true });
+		var warningTeardown = testHelpers.dev.willWarn(/Unable to find key/);
+		var suggestionTeardown = testHelpers.dev.willWarn(/will read from/);
+		stache('{{abc.def}}')(scope);
+
+		QUnit.equal(warningTeardown(), 1, "gave warning");
+		QUnit.equal(suggestionTeardown(), 0, "did not give suggestions");
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["foo/" + key] = {};
+			paths["../bar/" + key] = {};
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name}}{{/with}}</p>')({
+			name: 'app',
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["../baz/" + key] = {};
+			return paths;
+		};
+
+		considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name".* Did you mean\?/);
+		var bazOptionTeardown = testHelpers.dev.willWarn(/"..\/baz\/name" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name}}{{/with}}</p>')({
+			name: 'app',
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(bazOptionTeardown(), 1, 'got baz/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for nested properties (#519)", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			paths["foo/name.first"] = {};
+			paths["../bar/name.first"] = {};
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name.first".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name.first" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name.first" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name.first}}{{/with}}</p>')({
+			name: {},
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
+
+	});
+
+	testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for functions (#529)", function () {
+		var origGetPaths = Scope.prototype.getPathsForKey;
+		Scope.prototype.getPathsForKey = function(key) {
+			var paths = {};
+			if (key === "name") {
+				paths["foo/" + key + "()"] = {};
+				paths["../bar/" + key + "()"] = {};
+			}
+			return paths;
+		};
+
+		var considerTeardown = testHelpers.dev.willWarn(/bar.stache:1: Unable to find key "name\(\)".* Did you mean one of these\?/);
+		var fooOptionTeardown = testHelpers.dev.willWarn(/"foo\/name\(\)" which will read from/);
+		var barOptionTeardown = testHelpers.dev.willWarn(/"..\/bar\/name\(\)" which will read from/);
+
+		stache('bar.stache', '<p>{{#with user}}{{name()}}{{/with}}</p>')({
+			name: function() { return 'app'; },
+			user: {}
+		});
+
+		QUnit.equal(considerTeardown(), 1, 'got expected warning');
+		QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
+		QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+
+		Scope.prototype.getPathsForKey = origGetPaths;
+
 	});
 
 	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
@@ -6804,6 +7007,60 @@ function makeTest(name, doc, mutation) {
 		stache("<input value='{{name}}'>")(vm);
 
 		QUnit.equal(teardown(), 0, "no warning");
+	});
+
+	testHelpers.dev.devOnlyTest("{{data}} helper shows deprecation warning", function () {
+		var teardown = testHelpers.dev.willWarn(/{{data}} helper has been deprecated; use {{domData}} instead/, function(message, matched) {
+			if (matched) {
+				ok(true, "received warning");
+			}
+		});
+
+		stache("<span {{data('attr')}}></span>")();
+
+		QUnit.equal(teardown(), 1, "Exactly one warning called");
+	});
+
+	test("missing partial error (#506)", function(){
+
+		var map = new SimpleMap({});
+
+		var renderer = stache("<div>{{>foo}}</div>");
+
+		var frag = renderer(map);
+
+		QUnit.ok(true, "no error");
+		QUnit.equal( innerHTML(frag.firstChild), "", "no content");
+
+		map.set("foo", function(){
+			return "bar";
+		});
+		QUnit.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
+	});
+
+	test("each should premptively bind values", function(){
+		var calls = 0;
+		var template = stache("{{#each(someMethod())}}<div/>{{/each}}");
+
+		var value = new SimpleObservable(["a","b"]);
+
+		var obs = new Observation(function(){
+			calls++;
+			return canReflect.getValue(value)
+		});
+
+		var methodCalls = 0;
+
+		template({
+			someMethod: function() {
+				methodCalls++;
+				return canReflect.getValue(obs)
+			}
+		});
+
+		QUnit.equal(methodCalls, 1, "one method call");
+		QUnit.equal(calls, 1, "one observation call");
+
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!
