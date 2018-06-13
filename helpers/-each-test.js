@@ -63,13 +63,7 @@ QUnit.test("#each throws error (can-stache-bindings#444)", function(){
 });
 
 QUnit.asyncTest("if within an each", function(){
-    var template = stache(`<div>
-    	{{# each(sortedMonthlyOSProjects ) }}
-    		{{# if(val) }}
-    			<span>Hi</span>
-    		{{/ if }}
-    	{{/ each }}
-    	</div>`);
+    var template = stache("<div>{{# each(sortedMonthlyOSProjects ) }}{{# if(val) }}<span>Hi</span>{{/ if }}{{/ each }}</div>");
 
     var osProject1 = {
         val: new SimpleObservable()
@@ -98,7 +92,7 @@ QUnit.asyncTest("if within an each", function(){
         osProject1.val.set(true);
         QUnit.ok(true,"no errors");
         QUnit.start();
-    },100);
+    },20);
 
 
     //osProject2.val.set(false);

@@ -10,7 +10,6 @@ var debuggerHelper = require('./-debugger').helper;
 var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
-var observationRecorder = require("can-observation-recorder");
 var helpers = require("can-stache-helpers");
 
 var domData = require('can-dom-data');
@@ -199,7 +198,7 @@ var isHelper = function() {
 	//!steal-remove-start
 	Object.defineProperty(isHelper, "name", {
 		value: "is("+[].slice.call(args,0,2).map(function(arg){
-			return canReflect.getName(arg)
+			return canReflect.getName(arg);
 		}).join(",")+")"
 	});
 	//!steal-remove-end
