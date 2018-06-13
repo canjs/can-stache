@@ -10,7 +10,6 @@ var debuggerHelper = require('./-debugger').helper;
 var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
-var observationRecorder = require("can-observation-recorder");
 var helpers = require("can-stache-helpers");
 
 var domData = require('can-dom-data');
@@ -35,14 +34,14 @@ var resolveHash = function(hash){
 	}
 	return params;
 };
-var bindAndRead = observationRecorder.ignore(function (value) {
+var bindAndRead = function (value) {
 	if ( value && canReflect.isValueLike(value) ) {
 		Observation.temporarilyBind(value);
 		return canReflect.getValue(value);
 	} else {
 		return value;
 	}
-});
+};
 
 var eachHelper = function(items) {
 	var args = [].slice.call(arguments),
@@ -175,12 +174,13 @@ var isHelper = function() {
 	var lastValue, curValue,
 		options = arguments[arguments.length - 1];
 
-	if (arguments.length - 2 <= 0) {
+	if (arguments.length  <= 2) {
 		return options.inverse();
 	}
 
 	var args = arguments;
-	var callFn = new Observation(function(){
+
+	function isHelper(){
 		for (var i = 0; i < args.length - 1; i++) {
 			curValue = resolve(args[i]);
 			curValue = typeof curValue === "function" ? curValue() : curValue;
@@ -193,7 +193,17 @@ var isHelper = function() {
 			lastValue = curValue;
 		}
 		return true;
+	}
+
+	//!steal-remove-start
+	Object.defineProperty(isHelper, "name", {
+		value: "is("+[].slice.call(args,0,2).map(function(arg){
+			return canReflect.getName(arg);
+		}).join(",")+")"
 	});
+	//!steal-remove-end
+
+	var callFn = new Observation(isHelper);
 
 	return callFn.get() ? options.fn() : options.inverse();
 };

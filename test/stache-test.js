@@ -2,6 +2,7 @@
 require('./expression-test');
 require('../helpers/-debugger-test');
 require('./nodelist-test');
+require('../helpers/-each-test');
 require('./section-test');
 var stache = require('can-stache');
 var core = require('can-stache/src/mustache_core');
@@ -2648,22 +2649,6 @@ function makeTest(name, doc, mutation) {
 		equal(div.childNodes.item(0).nodeName, 'A', 'rendered an anchor tag');
 		equal(innerHTML(div.childNodes.item(0)), text, 'rendered the text properly');
 		equal(div.childNodes.item(0).getAttribute('href'), url, 'rendered the href properly');
-	});
-
-	test("changing the list works with each", function () {
-		var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
-
-		var map = new SimpleMap({
-			list: new DefineList(["foo"])
-		});
-
-		var tpl = template(map).firstChild;
-		equal(tpl.getElementsByTagName('li').length, 1, "one li");
-
-		map.set("list", new DefineList(["bar", "car"]));
-
-		equal(tpl.getElementsByTagName('li').length, 2, "two lis");
-
 	});
 
 	test("nested properties binding (#525)", function () {
