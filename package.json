@@ -55,14 +55,14 @@
     "can-string": "<2.0.0",
     "can-symbol": "^1.0.0",
     "can-view-callbacks": "^4.0.0",
-    "can-view-live": "^4.0.3",
-    "can-view-nodelist": "^4.0.0",
+    "can-view-live": "^4.1.2",
+    "can-view-nodelist": "^4.1.0",
     "can-view-parser": "^4.0.0",
     "can-view-scope": "^4.4.0",
     "can-view-target": "^4.0.0"
   },
   "devDependencies": {
-    "can-define": "^2.0.0",
+    "can-define": "^2.0.4",
     "can-queues": "^1.0.0",
     "can-simple-map": "^4.0.0",
     "can-test-helpers": "^1.1.0",
