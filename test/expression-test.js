@@ -994,12 +994,12 @@ testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads"
 
 	var scope = new Scope({
 		method: function(){
-			return 1.111
+			return 1.111;
 		}
 	});
 
 	var result = exprData.value(scope);
-	QUnit.equal( result.get(), "1.1" , "got value")
+	QUnit.equal( result.get(), "1.1" , "got value");
 
 
 	QUnit.equal(teardown(), 0, 'got expected warning');
