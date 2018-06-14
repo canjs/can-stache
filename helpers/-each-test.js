@@ -117,3 +117,28 @@ test("changing the list works with each", function () {
     QUnit.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
 
 });
+
+
+test("changing the list from undefined to defined", function () {
+
+    var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
+
+    var map = new SimpleMap({
+        list: undefined
+    });
+
+    var tpl = template(map).firstChild;
+    equal(tpl.getElementsByTagName('li').length, 0, "no li");
+
+    var list = new DefineList(["foo", "car"]);
+    map.set("list", list);
+
+    QUnit.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
+
+    var fooLi = tpl.getElementsByTagName('li')[1];
+
+    list.shift();
+    QUnit.equal(tpl.getElementsByTagName('li').length, 1, "one lis");
+    QUnit.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
+
+});
