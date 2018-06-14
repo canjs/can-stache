@@ -2,7 +2,7 @@ var Arg = require("../expressions/arg");
 var Literal = require("../expressions/literal");
 
 var canReflect = require("can-reflect");
-var observeReader = require("can-stache-key");
+var stacheKey = require("can-stache-key");
 var canSymbol = require("can-symbol");
 var Observation = require("can-observation");
 var makeComputeLike = require("can-view-scope/make-compute-like");
@@ -24,15 +24,21 @@ function computeHasDependencies(compute){
 }
 
 function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptions, readOptions) {
-	var getKey = function(){
-		return ("" + canReflect.getValue(key)).replace(".", "\\.");
+	// This needs to return something similar to a ScopeKeyData with intialValue and parentHasKey
+	var getKeys = function(){
+		return stacheKey.reads(("" + canReflect.getValue(key)).replace(".", "\\."));
 	};
+	var parentHasKey;
 	var computeValue = new SetterObservable(function getDynamicKey() {
-		return observeReader.get( canReflect.getValue(root) , getKey());
+		var readData = stacheKey.read( canReflect.getValue(root) , getKeys());
+		parentHasKey = readData.parentHasKey;
+		return readData.value;
 	}, function setDynamicKey(newVal){
-		observeReader.write(canReflect.getValue(root), observeReader.reads(getKey()), newVal);
+		stacheKey.write(canReflect.getValue(root), getKeys(), newVal);
 	});
 	Observation.temporarilyBind(computeValue);
+	computeValue.initialValue = canReflect.getValue(computeValue);
+	computeValue.parentHasKey = parentHasKey;
 	return computeValue;
 }
 
