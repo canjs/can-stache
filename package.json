@@ -47,7 +47,7 @@
     "can-namespace": "1.0.0",
     "can-observation": "^4.0.0",
     "can-observation-recorder": "^1.0.0",
-    "can-reflect": "^1.16.4",
+    "can-reflect": "^1.16.5",
     "can-simple-observable": "^2.0.3",
     "can-stache-ast": "^1.0.0",
     "can-stache-helpers": "^1.0.0",
