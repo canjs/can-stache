@@ -155,6 +155,7 @@ var core = {
 
 		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
+			scope.set('scope.filename', state.filename);
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
@@ -205,7 +206,6 @@ var core = {
 							var domRenderer = core.getTemplateById(localPartialName);
 							return domRenderer ? domRenderer(scope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
-
 					};
 				}
 				var res = ObservationRecorder.ignore(renderer)();
@@ -235,6 +235,7 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
+			scope.set('scope.filename', state.filename);
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
@@ -289,6 +290,7 @@ var core = {
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
+			scope.set('scope.filename', state.filename);
 			scope.set('scope.lineNumber', state.lineNo);
 			//!steal-remove-end
 			var nodeList = [this];
