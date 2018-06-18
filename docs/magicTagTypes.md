@@ -51,6 +51,35 @@ Inserts the unescaped value of `expression` into the result.
 <div><b>Justin</b></div>
 ```
 
+This also works for rendering [can-component] instances:
+
+```js
+import Component from "can-component";
+import stache from "can-stache";
+
+const MyGreeting = Component.extend({
+  tag: "my-greeting",
+  view: "<p>Hello {{subject}}</p>",
+  ViewModel: {
+    subject: "string"
+  }
+});
+
+const myGreetingInstance = new MyGreeting({
+  viewModel: {
+    subject: "friend"
+  }
+});
+
+const template = stache("<div>{{{componentInstance}}}</div>");
+
+const fragment = template({
+  componentInstance: myGreetingInstance
+});
+
+fragment; //-> <div><p>Hello friend</p></div>
+```
+
 #### [can-stache.tags.partial]
 
 Renders another template with the same context as the current context.
