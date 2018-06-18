@@ -984,3 +984,23 @@ QUnit.test("negative literals ast", function(assert) {
 
 	assert.deepEqual(ast, expected);
 });
+
+
+
+testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads", function () {
+	var teardown = testHelpers.dev.willWarn(/Unable to find key/);
+
+	var exprData = expression.parse("method().toFixed(1)",{baseMethodType: "Call"});
+
+	var scope = new Scope({
+		method: function(){
+			return 1.111;
+		}
+	});
+
+	var result = exprData.value(scope);
+	QUnit.equal( result.get(), "1.1" , "got value");
+
+
+	QUnit.equal(teardown(), 0, 'got expected warning');
+});
