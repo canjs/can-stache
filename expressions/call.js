@@ -57,13 +57,16 @@ Call.prototype.value = function(scope, helperOptions){
 
 	// proxyMethods must be false so that the `requiresOptionsArgument` and any
 	// other flags stored on the function are preserved
-	var method = this.methodExpr.value(scope, { proxyMethods: false });
+	var method = this.methodExpr.value(scope, { proxyMethods: false }),
+		func = canReflect.getValue( method );
+
+	var getArgs = callExpression.args(scope , func && func.ignoreArgLookup);
 
 	var computeFn = function(newVal){
 		var func = canReflect.getValue( method );
 
 		if(typeof func === "function") {
-			var args = callExpression.args(scope, func.ignoreArgLookup)(
+			var args = getArgs(
 				func.isLiveBound
 			);
 
