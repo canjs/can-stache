@@ -155,8 +155,10 @@ var core = {
 
 		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
-			scope.set('scope.filename', state.filename);
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
@@ -169,8 +171,10 @@ var core = {
 					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
-						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
-							'partial ('+ partialName +') is not defined in the scope!');
+						if (process.env.NODE_ENV !== 'production') {
+							dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
+								'partial ('+ partialName +') is not defined in the scope!');
+						}
 						//!steal-remove-end
 					}else{
 						scope = scope.add(newContext);
@@ -235,8 +239,10 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
-			scope.set('scope.filename', state.filename);
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
@@ -290,8 +296,10 @@ var core = {
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
-			scope.set('scope.filename', state.filename);
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = expressionString;
@@ -315,9 +323,11 @@ var core = {
 				observable = evaluator;
 			} else {
 				//!steal-remove-start
-				Object.defineProperty(evaluator,"name",{
-					value: "{{"+(mode || "")+expressionString+"}}"
-				});
+				if (process.env.NODE_ENV !== 'production') {
+					Object.defineProperty(evaluator,"name",{
+						value: "{{"+(mode || "")+expressionString+"}}"
+					});
+				}
 				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}

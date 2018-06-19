@@ -37,9 +37,11 @@ assign(TextSectionBuilder.prototype,{
 
 		var renderer = this.stack[0].compile();
 		//!steal-remove-start
-		Object.defineProperty(renderer,"name",{
-			value: "textSectionRenderer<"+state.tag+"."+state.attr+">"
-		});
+		if (process.env.NODE_ENV !== 'production') {
+			Object.defineProperty(renderer,"name",{
+				value: "textSectionRenderer<"+state.tag+"."+state.attr+">"
+			});
+		}
 		//!steal-remove-end
 
 		return function(scope){
@@ -47,9 +49,11 @@ assign(TextSectionBuilder.prototype,{
 				return renderer(scope);
 			}
 			//!steal-remove-start
-			Object.defineProperty(textSectionRender,"name",{
-				value: "textSectionRender<"+state.tag+"."+state.attr+">"
-			});
+			if (process.env.NODE_ENV !== 'production') {
+				Object.defineProperty(textSectionRender,"name",{
+					value: "textSectionRender<"+state.tag+"."+state.attr+">"
+				});
+			}
 			//!steal-remove-end
 			var observation = new Observation(textSectionRender, null, {isObservable: false});
 
