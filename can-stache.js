@@ -87,7 +87,7 @@ function stache (filename, template) {
 
 			if(mode === ">") {
 				// Partials use liveBindingPartialRenderers
-				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState({ lineNo: lineNo })));
+				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState({ filename: section.filename, lineNo: lineNo })));
 
 			} else if(mode === "/") {
 
@@ -133,11 +133,11 @@ function stache (filename, template) {
 				if(mode === "{" || mode === "&") {
 
 					// Adds a renderer function that just reads a value or calls a helper.
-					section.add(makeRenderer(null,stache, copyState({ lineNo: lineNo })));
+					section.add(makeRenderer(null,stache, copyState({ filename: section.filename, lineNo: lineNo })));
 
 				} else if(mode === "#" || mode === "^" || mode === "<") {
 					// Adds a renderer function and starts a section.
-					var renderer = makeRenderer(mode, stache, copyState({ lineNo: lineNo }));
+					var renderer = makeRenderer(mode, stache, copyState({ filename: section.filename, lineNo: lineNo }));
 					section.startSection(renderer);
 					section.last().startedWith = mode;
 
@@ -157,7 +157,7 @@ function stache (filename, template) {
 					}
 				} else {
 					// Adds a renderer function that only updates text.
-					section.add(makeRenderer(null, stache, copyState({text: true, lineNo: lineNo })));
+					section.add(makeRenderer(null, stache, copyState({text: true, filename: section.filename, lineNo: lineNo })));
 				}
 
 			}
@@ -410,7 +410,7 @@ function stache (filename, template) {
 					state.node.attributes = [];
 				}
 				if(!mode) {
-					state.node.attributes.push(mustacheCore.makeLiveBindingBranchRenderer(null, expression, copyState({ lineNo: lineNo })));
+					state.node.attributes.push(mustacheCore.makeLiveBindingBranchRenderer(null, expression, copyState({ filename: section.filename, lineNo: lineNo })));
 				} else if( mode === "#" || mode === "^" ) {
 					if(!state.node.section) {
 						state.node.section = new TextSectionBuilder();

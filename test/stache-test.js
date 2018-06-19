@@ -6386,6 +6386,21 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.nodeValue, 'some-file');
 	});
 
+	testHelpers.dev.devOnlyTest("scope has correct filename after calling a partial", function(){
+		var innerTemplate = stache('some-partial', '<span>{{scope.filename}}</span>');
+		var outerTemplate = stache('some-file', '{{#if foo}}{{scope.filename}}{{/if}}{{>somePartial}}');
+		var vm = new DefineMap()
+		var frag = outerTemplate(vm, {
+			partials: {
+				somePartial: innerTemplate
+			}
+		});
+		vm.set('foo', 'bar');
+
+		equal(frag.firstChild.nodeValue, 'some-file');
+		equal(frag.firstChild.nextSibling.firstChild.nodeValue, 'some-partial');
+	});
+
 	QUnit.test("using scope.index works when using #each with arrays", function() {
 		var data = {
 			itemsArray: [ "zero", "one", "two" ]
