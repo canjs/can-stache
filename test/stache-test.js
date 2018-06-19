@@ -3520,7 +3520,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template should not happen for falsey values", function () {
-		var teardown = testHelpers.dev.willWarn(/can-stache\/expressions\/lookup.js: Unable to find key/);
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 
 		stache('{{bool}} {{emptyString}}')({
 			bool: false,
@@ -3532,7 +3532,7 @@ function makeTest(name, doc, mutation) {
 
 	testHelpers.dev.devOnlyTest("Logging: hashes in #each helper should not trigger warning", function () {
 		var teardown = testHelpers.dev.willWarn(
-			/can-stache\/expressions\/lookup.js: Unable to find key/
+			/Unable to find key/
 		);
 
 		var tpl = stache("{{#each(panels, panel=value)}} {{panel.label}} {{/each}}");
