@@ -15,6 +15,19 @@ var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
 var getDocument = require("can-globals/document/document");
+var defineLazyValue = require("can-define-lazy-value");
+
+// Lazily lookup the context only if it's needed.
+function HelperOptions(scope, nodeList, exprData, stringOnly) {
+	this.metadata = { rendered: false };
+	this.stringOnly = stringOnly;
+	this.scope = scope;
+	this.nodeList = nodeList;
+	this.exprData = exprData;
+}
+defineLazyValue(HelperOptions.prototype,"context", function(){
+	return this.scope.peek("this");
+});
 
 // ## Types
 
@@ -63,14 +76,7 @@ var core = {
 		}
 
 		var value,
-			helperOptions =  {
-				metadata: { rendered: false },
-				stringOnly: stringOnly,
-				context: scope.peek("this"),
-				scope: scope,
-				nodeList: nodeList,
-				exprData: exprData
-			};
+			helperOptions = new HelperOptions(scope, nodeList, exprData, stringOnly);
 			// set up renderers
 			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
