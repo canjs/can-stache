@@ -101,14 +101,16 @@ function stache (filename, template) {
 
 				// to avoid "Blocks are nested too deeply" when linting
 				//!steal-remove-start
-				if(section instanceof HTMLSectionBuilder && process.env.NODE_ENV !== 'production') {
-					var last = state.sectionElementStack[state.sectionElementStack.length - 1];
-					if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
-						if (filename) {
-							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
-						}
-						else {
-							dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+				if (process.env.NODE_ENV !== 'production') {
+					if(section instanceof HTMLSectionBuilder) {
+						var last = state.sectionElementStack[state.sectionElementStack.length - 1];
+						if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
+							if (filename) {
+								dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
+							else {
+								dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
 						}
 					}
 				}
