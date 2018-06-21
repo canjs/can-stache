@@ -83,6 +83,7 @@ function stache (filename, template) {
 		// given section and modify the section to use that renderer.
 		// For example, if an HTMLSection is passed with mode `#` it knows to
 		// create a liveBindingBranchRenderer and pass that to section.add.
+		// jshint maxdepth:5
 		makeRendererAndUpdateSection = function(section, mode, stache, lineNo){
 
 			if(mode === ">") {
