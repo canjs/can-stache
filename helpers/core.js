@@ -196,11 +196,13 @@ var isHelper = function() {
 	}
 
 	//!steal-remove-start
-	Object.defineProperty(isHelper, "name", {
-		value: "is("+[].slice.call(args,0,2).map(function(arg){
-			return canReflect.getName(arg);
-		}).join(",")+")"
-	});
+	if (process.env.NODE_ENV !== 'production') {
+		Object.defineProperty(isHelper, "name", {
+			value: "is("+[].slice.call(args,0,2).map(function(arg){
+				return canReflect.getName(arg);
+			}).join(",")+")"
+		});
+	}
 	//!steal-remove-end
 
 	var callFn = new Observation(isHelper);
@@ -240,7 +242,9 @@ var dataHelper = function(attr, value) {
 	var data = (looksLikeOptions(value) ? value.context : value) || this;
 	return function setData(el) {
 		//!steal-remove-start
-		dev.warn('The {{data}} helper has been deprecated; use {{domData}} instead: https://canjs.com/doc/can-stache.helpers.domData.html');
+		if (process.env.NODE_ENV !== 'production') {
+			dev.warn('The {{data}} helper has been deprecated; use {{domData}} instead: https://canjs.com/doc/can-stache.helpers.domData.html');
+		}
 		//!steal-remove-end
 		domDataState.set.call( el, attr, data );
 	};
@@ -350,8 +354,10 @@ addBuiltInHelpers();
 
 var registerHelper = function(name, callback){
 	//!steal-remove-start
-	if (helpers[name]) {
-		dev.warn('The helper ' + name + ' has already been registered.');
+	if (process.env.NODE_ENV !== 'production') {
+		if (helpers[name]) {
+			dev.warn('The helper ' + name + ' has already been registered.');
+		}
 	}
 	//!steal-remove-end
 

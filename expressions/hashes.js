@@ -25,13 +25,15 @@ Hashes.prototype.value = function(scope, helperOptions){
 	});
 };
 //!steal-remove-start
-Hashes.prototype.sourceText = function(){
-	var hashes = [];
-	canReflect.eachKey(this.hashExprs, function(expr, prop){
-		hashes.push( prop+"="+expr.sourceText() );
-	});
-	return hashes.join(" ");
-};
+if (process.env.NODE_ENV !== 'production') {
+	Hashes.prototype.sourceText = function(){
+		var hashes = [];
+		canReflect.eachKey(this.hashExprs, function(expr, prop){
+			hashes.push( prop+"="+expr.sourceText() );
+		});
+		return hashes.join(" ");
+	};
+}
 //!steal-remove-end
 
 module.exports = Hashes;

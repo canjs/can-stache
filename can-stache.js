@@ -83,6 +83,7 @@ function stache (filename, template) {
 		// given section and modify the section to use that renderer.
 		// For example, if an HTMLSection is passed with mode `#` it knows to
 		// create a liveBindingBranchRenderer and pass that to section.add.
+		// jshint maxdepth:5
 		makeRendererAndUpdateSection = function(section, mode, stache, lineNo){
 
 			if(mode === ">") {
@@ -99,19 +100,24 @@ function stache (filename, template) {
 					section.endSection();
 				}
 
-				if(section instanceof HTMLSectionBuilder) {
-					//!steal-remove-start
-					var last = state.sectionElementStack[state.sectionElementStack.length - 1];
-					if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
-						if (filename) {
-							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
-						}
-						else {
-							dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+				// to avoid "Blocks are nested too deeply" when linting
+				//!steal-remove-start
+				if (process.env.NODE_ENV !== 'production') {
+					if(section instanceof HTMLSectionBuilder) {
+						var last = state.sectionElementStack[state.sectionElementStack.length - 1];
+						if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
+							if (filename) {
+								dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
+							else {
+								dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
 						}
 					}
-					//!steal-remove-end
+				}
+				//!steal-remove-end
 
+				if(section instanceof HTMLSectionBuilder) {
 					state.sectionElementStack.pop();
 				}
 			} else if(mode === "else") {
@@ -138,22 +144,23 @@ function stache (filename, template) {
 				} else if(mode === "#" || mode === "^" || mode === "<") {
 					// Adds a renderer function and starts a section.
 					var renderer = makeRenderer(mode, stache, copyState({ filename: section.filename, lineNo: lineNo }));
+					var sectionItem = {
+						type: "section"
+					};
 					section.startSection(renderer);
 					section.last().startedWith = mode;
 
 					// If we are a directly nested section, count how many we are within
 					if(section instanceof HTMLSectionBuilder) {
 						//!steal-remove-start
-						var tag = typeof renderer.exprData.closingTag === 'function' ?
-							renderer.exprData.closingTag() : '';
+						if (process.env.NODE_ENV !== 'production') {
+							var tag = typeof renderer.exprData.closingTag === 'function' ?
+								renderer.exprData.closingTag() : '';
+							sectionItem.tag = tag;
+						}
 						//!steal-remove-end
-
-						state.sectionElementStack.push({
-							type: "section",
-							//!steal-remove-start
-							tag: tag
-							//!steal-remove-end
-						});
+						
+						state.sectionElementStack.push(sectionItem);
 					}
 				} else {
 					// Adds a renderer function that only updates text.
@@ -214,7 +221,9 @@ function stache (filename, template) {
 					// Call directlyNested now as it's stateful.
 					addAttributesCallback(state.node, function(scope, parentNodeList){
 						//!steal-remove-start
-						scope.set('scope.lineNumber', lineNo);
+						if (process.env.NODE_ENV !== 'production') {
+							scope.set('scope.lineNumber', lineNo);
+						}
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
@@ -281,7 +290,9 @@ function stache (filename, template) {
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
 					addAttributesCallback(oldNode, function(scope, parentNodeList){
 						//!steal-remove-start
-						scope.set('scope.lineNumber', lineNo);
+						if (process.env.NODE_ENV !== 'production') {
+							scope.set('scope.lineNumber', lineNo);
+						}
 						//!steal-remove-end
 						viewCallbacks.tagHandler(this,tagName, {
 							scope: scope,
@@ -321,10 +332,12 @@ function stache (filename, template) {
 				var attrCallback = viewCallbacks.attr(attrName);
 
 				//!steal-remove-start
-				var decodedAttrName = attributeEncoder.decode(attrName);
-				var weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
-				if (weirdAttribute && !attrCallback) {
-					dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
+				if (process.env.NODE_ENV !== 'production') {
+					var decodedAttrName = attributeEncoder.decode(attrName);
+					var weirdAttribute = !!wrappedAttrPattern.test(decodedAttrName) || !!colonWrappedAttrPattern.test(decodedAttrName);
+					if (weirdAttribute && !attrCallback) {
+						dev.warn("unknown attribute binding " + decodedAttrName + ". Is can-stache-bindings imported?");
+					}
 				}
 				//!steal-remove-end
 
@@ -334,7 +347,9 @@ function stache (filename, template) {
 					}
 					state.node.attributes.push(function(scope, nodeList){
 						//!steal-remove-start
-						scope.set('scope.lineNumber', lineNo);
+						if (process.env.NODE_ENV !== 'production') {
+							scope.set('scope.lineNumber', lineNo);
+						}
 						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
@@ -444,7 +459,9 @@ function stache (filename, template) {
 		// allow the current renderer to be called with {{>scope.view}}
 		canReflect.setKeyValue(templateContext, 'view', scopifiedRenderer);
 		//!steal-remove-start
-		canReflect.setKeyValue(templateContext, 'filename', section.filename);
+		if (process.env.NODE_ENV !== 'production') {
+			canReflect.setKeyValue(templateContext, 'filename', section.filename);
+		}
 		//!steal-remove-end
 
 		return renderer.apply( this, arguments );

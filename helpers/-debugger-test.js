@@ -17,7 +17,9 @@ function mock (obj, methodName, newMethod) {
 
 var isDevelopment = false;
 //!steal-remove-start
-isDevelopment = true;
+if (process.env.NODE_ENV !== 'production') {
+	isDevelopment = true;
+}
 //!steal-remove-end
 
 unit.module('can-stache/helpers/-debugger');

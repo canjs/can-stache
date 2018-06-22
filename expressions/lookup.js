@@ -23,59 +23,63 @@ Lookup.prototype.value = function(scope, readOptions){
 	}
 
 	//!steal-remove-start
-	if (typeof value.initialValue === 'undefined' && this.key !== "debugger" && !value.parentHasKey) {
-		var filename = scope.peek('scope.filename');
-		var lineNumber = scope.peek('scope.lineNumber');
+	if (process.env.NODE_ENV !== 'production') {
+		if (typeof value.initialValue === 'undefined' && this.key !== "debugger" && !value.parentHasKey) {
+			var filename = scope.peek('scope.filename');
+			var lineNumber = scope.peek('scope.lineNumber');
 
-		var reads = observeReader.reads(this.key);
-		var firstKey = reads[0].key;
-		var key = reads.map(function(read) {
-			return read.key + (read.at ? "()" : "");
-		}).join(".");
-		var pathsForKey = scope.getPathsForKey(firstKey);
-		var paths = Object.keys( pathsForKey );
+			var reads = observeReader.reads(this.key);
+			var firstKey = reads[0].key;
+			var key = reads.map(function(read) {
+				return read.key + (read.at ? "()" : "");
+			}).join(".");
+			var pathsForKey = scope.getPathsForKey(firstKey);
+			var paths = Object.keys( pathsForKey );
 
-		var includeSuggestions = paths.length && !paths.includes(firstKey);
+			var includeSuggestions = paths.length && !paths.includes(firstKey);
 
-		var warning = [
-			(filename ? filename + ':' : '') +
-				(lineNumber ? lineNumber + ': ' : '') +
-				'Unable to find key "' + key + '".' +
-				(
-					includeSuggestions ?
-						" Did you mean" + (paths.length > 1 ? " one of these" : "") + "?\n" :
-						"\n"
-				)
-		];
+			var warning = [
+				(filename ? filename + ':' : '') +
+					(lineNumber ? lineNumber + ': ' : '') +
+					'Unable to find key "' + key + '".' +
+					(
+						includeSuggestions ?
+							" Did you mean" + (paths.length > 1 ? " one of these" : "") + "?\n" :
+							"\n"
+					)
+			];
 
-		if (includeSuggestions) {
-			paths.forEach(function(path) {
-				warning.push('\t"' + path + '" which will read from');
-				warning.push(pathsForKey[path]);
-				warning.push("\n");
-			});
+			if (includeSuggestions) {
+				paths.forEach(function(path) {
+					warning.push('\t"' + path + '" which will read from');
+					warning.push(pathsForKey[path]);
+					warning.push("\n");
+				});
+			}
+
+			warning.push("\n");
+
+			dev.warn.apply(dev,
+				warning
+			);
 		}
-
-		warning.push("\n");
-
-		dev.warn.apply(dev,
-			warning
-		);
 	}
 	//!steal-remove-end
 
 	return value;
 };
 //!steal-remove-start
-Lookup.prototype.sourceText = function(){
-	if(this[sourceTextSymbol]) {
-		return this[sourceTextSymbol];
-	} else if(this.rootExpr) {
-		return this.rootExpr.sourceText()+"."+this.key;
-	} else {
-		return this.key;
-	}
-};
+if (process.env.NODE_ENV !== 'production') {
+	Lookup.prototype.sourceText = function(){
+		if(this[sourceTextSymbol]) {
+			return this[sourceTextSymbol];
+		} else if(this.rootExpr) {
+			return this.rootExpr.sourceText()+"."+this.key;
+		} else {
+			return this.key;
+		}
+	};
+}
 //!steal-remove-end
 
 module.exports = Lookup;

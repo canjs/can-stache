@@ -87,9 +87,11 @@ Call.prototype.value = function(scope, helperOptions){
 		}
 	};
 	//!steal-remove-start
-	Object.defineProperty(computeFn, "name", {
-		value: "{{" + this.sourceText() + "}}"
-	});
+	if (process.env.NODE_ENV !== 'production') {
+		Object.defineProperty(computeFn, "name", {
+			value: "{{" + this.sourceText() + "}}"
+		});
+	}
 	//!steal-remove-end
 
 	if (helperOptions && helperOptions.doNotWrapInObservation) {
@@ -101,17 +103,21 @@ Call.prototype.value = function(scope, helperOptions){
 	}
 };
 //!steal-remove-start
-Call.prototype.sourceText = function(){
-	var args = this.argExprs.map(function(arg){
-		return arg.sourceText();
-	});
-	return this.methodExpr.sourceText()+"("+args.join(",")+")";
-};
+if (process.env.NODE_ENV !== 'production') {
+	Call.prototype.sourceText = function(){
+		var args = this.argExprs.map(function(arg){
+			return arg.sourceText();
+		});
+		return this.methodExpr.sourceText()+"("+args.join(",")+")";
+	};
+}
 //!steal-remove-end
 Call.prototype.closingTag = function() {
 	//!steal-remove-start
-	if(this.methodExpr[sourceTextSymbol]) {
-		return this.methodExpr[sourceTextSymbol];
+	if (process.env.NODE_ENV !== 'production') {
+		if(this.methodExpr[sourceTextSymbol]) {
+			return this.methodExpr[sourceTextSymbol];
+		}
 	}
 	//!steal-remove-end
 	return this.methodExpr.key;
