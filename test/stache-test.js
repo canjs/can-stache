@@ -7099,6 +7099,26 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(spanTwo.firstChild.nodeValue, "two");
 	});
 
+	test("AddBindings takes a map of bindings", function(){
+		var map = new Map();
+		map.set("foo", function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("foo"));
+		});
+		map.set(/bar/, function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("bar"));
+		});
+
+		stache.addBindings(map);
+		var template = stache("<span foo></span><span bar></span>");
+		var frag = template();
+
+		var firstSpan = frag.firstChild;
+		var secondSpan = firstSpan.nextSibling;
+
+		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
+		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

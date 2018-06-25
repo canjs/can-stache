@@ -21,7 +21,8 @@
 		"start": true,
 		"stop": true,
 		"global": true,
-		"Promise": true
+		"Promise": true,
+		"Map": true
 	},
 	"strict": false,
 	"curly": true,
