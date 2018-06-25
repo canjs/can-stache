@@ -7078,6 +7078,27 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	test("addHelper can take an object of helpers", function(){
+		var helpers = {
+			helperOne: function(){
+				return "one";
+			},
+			helperTwo: function(){
+				return "two";
+			}
+		};
+
+		stache.addHelper(helpers);
+		var template = stache("<span>{{helperOne()}}</span><span>{{helperTwo()}}</span>");
+		var frag = template();
+
+		var spanOne = frag.firstChild;
+		var spanTwo = spanOne.nextSibling;
+
+		QUnit.equal(spanOne.firstChild.nodeValue, "one");
+		QUnit.equal(spanTwo.firstChild.nodeValue, "two");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
