@@ -14,7 +14,6 @@ var helpers = require("can-stache-helpers");
 
 var domData = require('can-dom-data');
 var domDataState = require('can-dom-data-state');
-
 var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
 };
@@ -369,6 +368,14 @@ var registerHelper = function(name, callback){
 	helpers[name] = callback;
 };
 
+var registerHelpers = function(helpers) {
+	var name, callback;
+	for(name in helpers) {
+		callback = helpers[name];
+		registerHelper(name, makeSimpleHelper(callback));
+	}
+};
+
 var makeSimpleHelper = function(fn) {
 	return function() {
 		var realArgs = [];
@@ -386,6 +393,9 @@ module.exports = {
 	registerHelper: registerHelper,
 
 	addHelper: function(name, callback) {
+		if(typeof name === "object") {
+			return registerHelpers(name);
+		}
 		return registerHelper(name, makeSimpleHelper(callback));
 	},
 
