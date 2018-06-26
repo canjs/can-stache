@@ -302,7 +302,9 @@ var expression = {
 		} else if (ast.type === "Bracket") {
 			var originalKey;
 			//!steal-remove-start
-			originalKey = ast[canSymbol.for("can-stache.originalKey")];
+			if (process.env.NODE_ENV !== 'production') {
+				originalKey = ast[canSymbol.for("can-stache.originalKey")];
+			}
 			//!steal-remove-end
 			return new Bracket(
 				this.hydrateAst(ast.children[0], options),
@@ -460,7 +462,9 @@ var expression = {
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					var bracket = {type: "Bracket", root: top};
 					//!steal-remove-start
-					canReflect.setKeyValue(bracket, canSymbol.for("can-stache.originalKey"), top.key);
+					if (process.env.NODE_ENV !== 'production') {
+						canReflect.setKeyValue(bracket, canSymbol.for("can-stache.originalKey"), top.key);
+					}
 					//!steal-remove-end
 					stack.replaceTopAndPush(bracket);
 				} else if (top.type === "Call") {

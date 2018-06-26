@@ -56,19 +56,21 @@ Helper.prototype.value = function(scope, helperOptions){
 			return initialValue.apply(thisArg || scope.peek("this"), args);
 		};
 		//!steal-remove-start
-		Object.defineProperty(helperFn, "name", {
-			value: canReflect.getName(this)
-		});
+		if (process.env.NODE_ENV !== 'production') {
+			Object.defineProperty(helperFn, "name", {
+				value: canReflect.getName(this)
+			});
+		}
 		//!steal-remove-end
 	}
 	//!steal-remove-start
-	else {
+	else if (process.env.NODE_ENV !== 'production') {
 		var filename = scope.peek('scope.filename');
-		var lineNumber = scope.peek('scope.lineNumber');
-		dev.warn(
-			(filename ? filename + ':' : '') +
-			(lineNumber ? lineNumber + ': ' : '') +
-			'Unable to find helper "' + methodKey + '".');
+			var lineNumber = scope.peek('scope.lineNumber');
+			dev.warn(
+				(filename ? filename + ':' : '') +
+				(lineNumber ? lineNumber + ': ' : '') +
+				'Unable to find helper "' + methodKey + '".');
 	}
 	//!steal-remove-end
 
@@ -80,24 +82,28 @@ Helper.prototype.closingTag = function() {
 };
 
 //!steal-remove-start
-Helper.prototype.sourceText = function(){
-	var text = [this.methodExpr.sourceText()];
-	if(this.argExprs.length) {
-		text.push( this.argExprs.map(function(arg){
-			return arg.sourceText();
-		}).join(" ") );
-	}
-	if(canReflect.size(this.hashExprs) > 0){
-		text.push( Hashes.prototype.sourceText.call(this) );
-	}
-	return text.join(" ");
-};
+if (process.env.NODE_ENV !== 'production') {
+	Helper.prototype.sourceText = function(){
+		var text = [this.methodExpr.sourceText()];
+		if(this.argExprs.length) {
+			text.push( this.argExprs.map(function(arg){
+				return arg.sourceText();
+			}).join(" ") );
+		}
+		if(canReflect.size(this.hashExprs) > 0){
+			text.push( Hashes.prototype.sourceText.call(this) );
+		}
+		return text.join(" ");
+	};
+}
 //!steal-remove-end
-canReflect.assignSymbols(Helper.prototype,{
-	"can.getName": function() {
-		return canReflect.getName(this.constructor) + "{{" + (this.sourceText()) + "}}";
-	}
-});
+if (process.env.NODE_ENV !== 'production') {
+	canReflect.assignSymbols(Helper.prototype,{
+		"can.getName": function() {
+			return canReflect.getName(this.constructor) + "{{" + (this.sourceText()) + "}}";
+		}
+	});
+}
 //!steal-remove-end
 
 module.exports = Helper;

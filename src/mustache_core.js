@@ -15,6 +15,19 @@ var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
 var getDocument = require("can-globals/document/document");
+var defineLazyValue = require("can-define-lazy-value");
+
+// Lazily lookup the context only if it's needed.
+function HelperOptions(scope, nodeList, exprData, stringOnly) {
+	this.metadata = { rendered: false };
+	this.stringOnly = stringOnly;
+	this.scope = scope;
+	this.nodeList = nodeList;
+	this.exprData = exprData;
+}
+defineLazyValue(HelperOptions.prototype,"context", function(){
+	return this.scope.peek("this");
+});
 
 // ## Types
 
@@ -64,14 +77,7 @@ var core = {
 		}
 
 		var value,
-			helperOptions =  {
-				metadata: { rendered: false },
-				stringOnly: stringOnly,
-				context: scope.peek("this"),
-				scope: scope,
-				nodeList: nodeList,
-				exprData: exprData
-			};
+			helperOptions = new HelperOptions(scope, nodeList, exprData, stringOnly);
 			// set up renderers
 			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
@@ -156,7 +162,10 @@ var core = {
 
 		return function(scope, parentSectionNodeList){
 			//!steal-remove-start
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = ">" + partialName;
@@ -169,8 +178,10 @@ var core = {
 					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope) );
 					if(typeof newContext === "undefined") {
 						//!steal-remove-start
-						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
-							'partial ('+ partialName +') is not defined in the scope!');
+						if (process.env.NODE_ENV !== 'production') {
+							dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
+								'partial ('+ partialName +') is not defined in the scope!');
+						}
 						//!steal-remove-end
 					}else{
 						scope = scope.add(newContext);
@@ -206,7 +217,6 @@ var core = {
 							var domRenderer = core.getTemplateById(localPartialName);
 							return domRenderer ? domRenderer(scope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
-
 					};
 				}
 				var res = ObservationRecorder.ignore(renderer)();
@@ -236,7 +246,10 @@ var core = {
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			//!steal-remove-start
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
@@ -290,7 +303,10 @@ var core = {
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
-			scope.set('scope.lineNumber', state.lineNo);
+			if (process.env.NODE_ENV !== 'production') {
+				scope.set('scope.filename', state.filename);
+				scope.set('scope.lineNumber', state.lineNo);
+			}
 			//!steal-remove-end
 			var nodeList = [this];
 			nodeList.expression = expressionString;
@@ -314,9 +330,11 @@ var core = {
 				observable = evaluator;
 			} else {
 				//!steal-remove-start
-				Object.defineProperty(evaluator,"name",{
-					value: "{{"+(mode || "")+expressionString+"}}"
-				});
+				if (process.env.NODE_ENV !== 'production') {
+					Object.defineProperty(evaluator,"name",{
+						value: "{{"+(mode || "")+expressionString+"}}"
+					});
+				}
 				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}

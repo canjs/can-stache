@@ -3520,7 +3520,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	testHelpers.dev.devOnlyTest("Logging: Variable not found in stache template should not happen for falsey values", function () {
-		var teardown = testHelpers.dev.willWarn(/can-stache\/expressions\/lookup.js: Unable to find key/);
+		var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 
 		stache('{{bool}} {{emptyString}}')({
 			bool: false,
@@ -3532,7 +3532,7 @@ function makeTest(name, doc, mutation) {
 
 	testHelpers.dev.devOnlyTest("Logging: hashes in #each helper should not trigger warning", function () {
 		var teardown = testHelpers.dev.willWarn(
-			/can-stache\/expressions\/lookup.js: Unable to find key/
+			/Unable to find key/
 		);
 
 		var tpl = stache("{{#each(panels, panel=value)}} {{panel.label}} {{/each}}");
@@ -6386,6 +6386,21 @@ function makeTest(name, doc, mutation) {
 		equal(frag.firstChild.nodeValue, 'some-file');
 	});
 
+	testHelpers.dev.devOnlyTest("scope has correct filename after calling a partial", function(){
+		var innerTemplate = stache('some-partial', '<span>{{scope.filename}}</span>');
+		var outerTemplate = stache('some-file', '{{#if foo}}{{scope.filename}}{{/if}}{{>somePartial}}');
+		var vm = new DefineMap()
+		var frag = outerTemplate(vm, {
+			partials: {
+				somePartial: innerTemplate
+			}
+		});
+		vm.set('foo', 'bar');
+
+		equal(frag.firstChild.nodeValue, 'some-file');
+		equal(frag.firstChild.nextSibling.firstChild.nodeValue, 'some-partial');
+	});
+
 	QUnit.test("using scope.index works when using #each with arrays", function() {
 		var data = {
 			itemsArray: [ "zero", "one", "two" ]
@@ -7074,6 +7089,72 @@ function makeTest(name, doc, mutation) {
 
 		// Basics look correct
 		assert.equal(innerHTML(fragment.firstChild), "Hello world", "fragment has correct text content");
+	});
+
+	test("addHelper can take an object of helpers", function(){
+		var helpers = {
+			helperOne: function(){
+				return "one";
+			},
+			helperTwo: function(){
+				return "two";
+			}
+		};
+
+		stache.addHelper(helpers);
+		var template = stache("<span>{{helperOne()}}</span><span>{{helperTwo()}}</span>");
+		var frag = template();
+
+		var spanOne = frag.firstChild;
+		var spanTwo = spanOne.nextSibling;
+
+		QUnit.equal(spanOne.firstChild.nodeValue, "one");
+		QUnit.equal(spanTwo.firstChild.nodeValue, "two");
+	});
+
+	test("addBindings takes a map of bindings", function(){
+		var map = new Map();
+		map.set("foo", function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("foo"));
+		});
+		map.set(/bar/, function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("bar"));
+		});
+
+		stache.addBindings(map);
+		var template = stache("<span foo></span><span bar></span>");
+		var frag = template();
+
+		var firstSpan = frag.firstChild;
+		var secondSpan = firstSpan.nextSibling;
+
+		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
+		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
+	});
+
+	test("addBindings will use can.stacheBindings symbol if available.", function(){
+		var map = new Map();
+		map.set("foo2", function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("foo"));
+		});
+		map.set(/bar2/, function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("bar"));
+		});
+
+		var bindings = {
+			bindings: map
+		};
+		bindings[canSymbol.for("can.stacheBindings")] = map;
+		stache.addBindings(bindings);
+
+		var template = stache("<span foo2></span><span bar2></span>");
+		var frag = template();
+
+		var firstSpan = frag.firstChild;
+		var secondSpan = firstSpan.nextSibling;
+
+		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
+		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

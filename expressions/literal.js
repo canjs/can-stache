@@ -7,9 +7,11 @@ Literal.prototype.value = function(){
 	return this._value;
 };
 //!steal-remove-start
-Literal.prototype.sourceText = function(){
-	return JSON.stringify(this._value);
-};
+if (process.env.NODE_ENV !== 'production') {
+	Literal.prototype.sourceText = function(){
+		return JSON.stringify(this._value);
+	};
+}
 //!steal-remove-end
 
 module.exports = Literal;

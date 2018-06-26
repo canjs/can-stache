@@ -1,6 +1,6 @@
 {
   "name": "can-stache",
-  "version": "4.6.0-pre.2",
+  "version": "4.8.0-pre.0",
   "description": "Live binding handlebars templates",
   "homepage": "https://canjs.com/doc/can-stache.html",
   "repository": {
@@ -36,6 +36,7 @@
     "can-assign": "^1.1.1",
     "can-attribute-encoder": "^1.0.0",
     "can-child-nodes": "^1.0.0",
+    "can-define-lazy-value": "^1.0.2",
     "can-dom-data": "^1.0.1",
     "can-dom-data-state": "^1.0.0",
     "can-dom-mutate": "^1.0.0",
