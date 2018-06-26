@@ -77,7 +77,7 @@ const fragment = template({
   componentInstance: myGreetingInstance
 });
 
-fragment; //-> <div><p>Hello friend</p></div>
+fragment; //-> <div><my-greeting><p>Hello friend</p></my-greeting></div>
 ```
 
 #### [can-stache.tags.partial]
