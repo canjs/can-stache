@@ -7099,7 +7099,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(spanTwo.firstChild.nodeValue, "two");
 	});
 
-	test("AddBindings takes a map of bindings", function(){
+	test("addBindings takes a map of bindings", function(){
 		var map = new Map();
 		map.set("foo", function(el, attrData) {
 			el.appendChild(DOCUMENT().createTextNode("foo"));
@@ -7110,6 +7110,31 @@ function makeTest(name, doc, mutation) {
 
 		stache.addBindings(map);
 		var template = stache("<span foo></span><span bar></span>");
+		var frag = template();
+
+		var firstSpan = frag.firstChild;
+		var secondSpan = firstSpan.nextSibling;
+
+		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
+		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
+	});
+
+	test("addBindings will use can.stacheBindings symbol if available.", function(){
+		var map = new Map();
+		map.set("foo2", function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("foo"));
+		});
+		map.set(/bar2/, function(el, attrData) {
+			el.appendChild(DOCUMENT().createTextNode("bar"));
+		});
+
+		var bindings = {
+			bindings: map
+		};
+		bindings[canSymbol.for("can.stacheBindings")] = map;
+		stache.addBindings(bindings);
+
+		var template = stache("<span foo2></span><span bar2></span>");
 		var frag = template();
 
 		var firstSpan = frag.firstChild;
