@@ -1,3 +1,4 @@
+"use strict";
 var live = require('can-view-live');
 
 var utils = require('./utils');

@@ -1,3 +1,4 @@
+"use strict";
 var Literal = require('./literal');
 var Hashes = require('./hashes');
 var assign = require('can-assign');

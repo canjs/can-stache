@@ -1,3 +1,4 @@
+"use strict";
 var Scope = require('can-view-scope');
 var ObservationRecorder = require('can-observation-recorder');
 var observationReader = require('can-stache-key');

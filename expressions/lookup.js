@@ -1,3 +1,4 @@
+"use strict";
 var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require("can-reflect");
 var canSymbol = require("can-symbol");

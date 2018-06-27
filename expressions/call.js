@@ -1,3 +1,4 @@
+"use strict";
 var Hashes = require('./hashes');
 var SetIdentifier = require("../src/set-identifier");
 var canSymbol = require("can-symbol");

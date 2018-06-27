@@ -1,3 +1,4 @@
+"use strict";
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
 var ObservationRecorder = require('can-observation-recorder');

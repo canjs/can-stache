@@ -1,3 +1,4 @@
+"use strict";
 // ### Literal
 // For inline static values like `{{"Hello World"}}`
 var Literal = function(value){

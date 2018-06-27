@@ -1,3 +1,4 @@
+"use strict";
 var canStacheAst = require("can-stache-ast");
 var canDev = require("can-log/dev/dev");
 

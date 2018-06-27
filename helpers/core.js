@@ -1,3 +1,4 @@
+"use strict";
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var utils = require('../src/utils');

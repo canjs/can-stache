@@ -1,3 +1,4 @@
+"use strict";
 /* jshint ignore:start */
 var b = require( "steal-benchmark" );
 var stache = require( "can-stache/can-stache" );

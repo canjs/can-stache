@@ -1,3 +1,4 @@
+"use strict";
 var canLog = require('can-log');
 function noop () {}
 var resolveValue = noop;

@@ -1,3 +1,4 @@
+"use strict";
 var helpers = require("./core");
 var SetIdentifier = require("../src/set-identifier");
 var canReflect = require("can-reflect");

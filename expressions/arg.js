@@ -1,3 +1,4 @@
+"use strict";
 // ### Arg
 // `new Arg(Expression [,modifierOptions] )`
 // Used to identify an expression that should return a value.

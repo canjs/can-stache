@@ -1,3 +1,4 @@
+"use strict";
 var Arg = require("../expressions/arg");
 var Literal = require("../expressions/literal");
 

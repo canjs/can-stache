@@ -1,3 +1,4 @@
+"use strict";
 /* jshint undef: false */
 
 var parser = require('can-view-parser');

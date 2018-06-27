@@ -1,3 +1,4 @@
+"use strict";
 //
 // This provides helper utilities for Mustache processing. Currently,
 // only stache uses these helpers.  Ideally, these utilities could be used
