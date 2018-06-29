@@ -7119,7 +7119,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
 	});
 
-	test("addBindings will use can.stacheBindings symbol if available.", function(){
+	test("addBindings will use can.callbackMap symbol if available.", function(){
 		var map = new Map();
 		map.set("foo2", function(el, attrData) {
 			el.appendChild(DOCUMENT().createTextNode("foo"));
@@ -7131,7 +7131,7 @@ function makeTest(name, doc, mutation) {
 		var bindings = {
 			bindings: map
 		};
-		bindings[canSymbol.for("can.stacheBindings")] = map;
+		bindings[canSymbol.for("can.callbackMap")] = map;
 		stache.addBindings(bindings);
 
 		var template = stache("<span foo2></span><span bar2></span>");
