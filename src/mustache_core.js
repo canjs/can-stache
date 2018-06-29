@@ -45,6 +45,7 @@ defineLazyValue(HelperOptions.prototype,"context", function(){
 var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g,
 	mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g,
 	k = function(){};
+var viewInsertSymbol = canSymbol.for("can.viewInsert");
 
 
 var core = {
@@ -375,7 +376,9 @@ var core = {
 					live.text(this, observable, this.parentNode, nodeList);
 				}
 				else {
-					live.html(this, observable, this.parentNode, nodeList);
+					live.html(this, observable, this.parentNode, {
+						nodeList: nodeList
+					});
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
@@ -391,7 +394,13 @@ var core = {
 					this.nodeValue = value;
 				}
 				else if( value != null ){
-					nodeLists.replace([this], frag(value, this.ownerDocument));
+					if (typeof value[viewInsertSymbol] === "function") {
+						nodeLists.replace([this], value[viewInsertSymbol]({
+							nodeList: nodeList
+						}));
+					} else {
+						nodeLists.replace([this], frag(value, this.ownerDocument));
+					}
 				}
 			}
 			// Unbind the compute.

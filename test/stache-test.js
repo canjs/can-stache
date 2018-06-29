@@ -7075,7 +7075,20 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(methodCalls, 1, "one method call");
 		QUnit.equal(calls, 1, "one observation call");
+	});
 
+	QUnit.test("render objects with can.viewInsert symbol (#502)", function(assert) {
+		var viewInsertSymbol = canSymbol.for("can.viewInsert");
+		var objectWithSymbol = {};
+		objectWithSymbol[viewInsertSymbol] = function() {
+			return doc.createTextNode("Hello world");
+		};
+		var fragment = stache("<p>{{{objectWithSymbol}}}</p>")({
+			objectWithSymbol: objectWithSymbol
+		});
+
+		// Basics look correct
+		assert.equal(innerHTML(fragment.firstChild), "Hello world", "fragment has correct text content");
 	});
 
 	test("addHelper can take an object of helpers", function(){
