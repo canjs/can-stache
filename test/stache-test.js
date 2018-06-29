@@ -41,7 +41,6 @@ var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
-require("can-stache-bindings");
 
 var browserDoc = DOCUMENT();
 
@@ -7143,29 +7142,6 @@ function makeTest(name, doc, mutation) {
 
 		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
 		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
-	});
-
-	QUnit.test("Can register multiple converters at once with addConverter", function(){
-		QUnit.expect(2);
-		var converters = {
-			"converter-one": {
-				get: function(){
-					QUnit.ok(true, "converter-one called");
-				},
-				set: function(){}
-			},
-			"converter-two": {
-				get: function(){
-					QUnit.ok(true, "converter-two called");
-				},
-				set: function(){}
-			}
-		};
-
-		stache.addConverter(converters);
-
-		var template = stache("<div><input type='text' value:bind='converter-one(person)'><input type='text' value:bind='converter-two(person)'></div>");
-		template(new DefineMap({ person: "Matthew" }));
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

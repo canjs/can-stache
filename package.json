@@ -66,7 +66,6 @@
     "can-define": "^2.0.4",
     "can-queues": "^1.0.0",
     "can-simple-map": "^4.0.0",
-    "can-stache-bindings": "^4.2.6",
     "can-test-helpers": "^1.1.0",
     "can-vdom": "^4.0.0",
     "detect-cyclic-packages": "^1.1.0",
