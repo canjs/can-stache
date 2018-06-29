@@ -20,7 +20,18 @@ function makeConverter(getterSetter){
 	};
 }
 
+var converterPackages = new WeakMap();
 helpers.addConverter = function(name, getterSetter) {
+	if(typeof name === "object") {
+		if(!converterPackages.has(name)) {
+			converterPackages.set(name, true);
+			canReflect.eachKey(name, function(getterSetter, name) {
+				helpers.addConverter(name, getterSetter);
+			});
+		}
+		return;
+	}
+
 	var helper = makeConverter(getterSetter);
 	helper.isLiveBound = true;
 	helpers.registerHelper(name, helper );

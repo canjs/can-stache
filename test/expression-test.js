@@ -829,6 +829,36 @@ QUnit.test("addConverter helpers push and pull multiple values", function () {
 	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
 
+QUnit.test("Can register multiple converters at once with addConverter", function(){
+	QUnit.expect(2);
+	var converters = {
+		"converter-one": {
+			get: function(){
+				QUnit.ok(true, "converter-one called");
+			},
+			set: function(){}
+		},
+		"converter-two": {
+			get: function(){
+				QUnit.ok(true, "converter-two called");
+			},
+			set: function(){}
+		}
+	};
+
+	helpers.addConverter(converters);
+
+	var data = new SimpleMap({
+		person: "Matthew"
+	});
+	var scope = new Scope(data);
+	var parentExpression = expression.parse("converter-one(person)",{baseMethodType: "Call"});
+	parentExpression.value(scope).get();
+
+	parentExpression = expression.parse("converter-two(person)",{baseMethodType: "Call"});
+	parentExpression.value(scope).get();
+});
+
 test('foo().bar', function() {
 	// expression.ast
 	var ast4 = expression.ast("foo().bar");
