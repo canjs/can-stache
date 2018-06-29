@@ -4,8 +4,8 @@ require('../helpers/-debugger-test');
 require('./nodelist-test');
 require('../helpers/-each-test');
 require('./section-test');
-var stache = require('can-stache');
-var core = require('can-stache/src/mustache_core');
+var stache = require('../can-stache');
+var core = require('../src/mustache_core');
 var clone = require('steal-clone');
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
@@ -7132,7 +7132,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
 	});
 
-	test("addBindings will use can.stacheBindings symbol if available.", function(){
+	test("addBindings will use can.callbackMap symbol if available.", function(){
 		var map = new Map();
 		map.set("foo2", function(el, attrData) {
 			el.appendChild(DOCUMENT().createTextNode("foo"));
@@ -7144,7 +7144,7 @@ function makeTest(name, doc, mutation) {
 		var bindings = {
 			bindings: map
 		};
-		bindings[canSymbol.for("can.stacheBindings")] = map;
+		bindings[canSymbol.for("can.callbackMap")] = map;
 		stache.addBindings(bindings);
 
 		var template = stache("<span foo2></span><span bar2></span>");
