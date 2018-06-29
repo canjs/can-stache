@@ -1,3 +1,4 @@
+"use strict";
 // ## Expression Types
 //
 // These expression types return a value. They are assembled by `expression.parse`.

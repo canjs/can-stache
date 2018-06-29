@@ -1,3 +1,4 @@
+"use strict";
 var SettableObservable = require("can-simple-observable/settable/settable");
 var stacheKey = require("can-stache-key");
 

@@ -1,3 +1,4 @@
+"use strict";
 //!steal-remove-start
 if (process.env.NODE_ENV !== 'production') {
 	var canSymbol = require('can-symbol');

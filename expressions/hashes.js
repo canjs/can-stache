@@ -1,3 +1,4 @@
+"use strict";
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");
 var expressionHelpers = require("../src/expression-helpers");
