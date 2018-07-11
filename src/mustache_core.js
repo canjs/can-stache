@@ -395,9 +395,11 @@ var core = {
 				}
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
-						nodeLists.replace([this], value[viewInsertSymbol]({
+						var insert = value[viewInsertSymbol]({
 							nodeList: nodeList
-						}));
+						});
+						var oldNodes = nodeLists.update(nodeList, [insert]);
+						nodeLists.replace(oldNodes, insert);
 					} else {
 						nodeLists.replace([this], frag(value, this.ownerDocument));
 					}
