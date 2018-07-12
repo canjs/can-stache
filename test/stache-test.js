@@ -7157,6 +7157,23 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(secondSpan.firstChild.nodeValue, "bar");
 	});
 
+	test("able to put in helpers without overwriting them", function(){
+		var template = stache("{{foo()}}");
+
+		var foo = function(){ return "foo" };
+		var templateContext = new Scope.TemplateContext({
+			helpers: {foo: foo}
+		});
+		var scope = new Scope( templateContext ).add({});
+
+		template(scope, {
+			helpers: {
+				foo: function(){ return "bar" }
+			}
+		} );
+		QUnit.equal( templateContext.helpers.get("foo"), foo );
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

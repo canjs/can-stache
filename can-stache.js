@@ -21,6 +21,9 @@ var DOCUMENT = require('can-globals/document/document');
 var assign = require('can-assign');
 var importer = require('can-import-module');
 var canReflect = require('can-reflect');
+var Scope = require('can-view-scope');
+var TemplateContext = require("can-view-scope/template-context");
+var ObservationRecorder = require('can-observation-recorder');
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
@@ -450,9 +453,31 @@ function stache (filename, template) {
 	});
 
 	var renderer = section.compile();
-	var scopifiedRenderer = HTMLSectionBuilder.scopify(function( scope, nodeList ) {
-		var templateContext = scope.templateContext;
 
+	var scopifiedRenderer = ObservationRecorder.ignore(function(scope, options, nodeList){
+
+		// Support passing nodeList as the second argument
+		if (nodeList === undefined && canReflect.isListLike(options)) {
+			nodeList = options;
+			options = undefined;
+		}
+
+		// if an object is passed to options, assume it is the helpers object
+		if (options && !options.helpers && !options.partials && !options.tags) {
+			options = {
+				helpers: options
+			};
+		}
+		// mark passed in helper so they will be automatically passed
+		// helperOptions (.fn, .inverse, etc) when called as Call Expressions
+		canReflect.eachKey(options && options.helpers, function(helperValue) {
+			helperValue.requiresOptionsArgument = true;
+		});
+
+		// helpers, partials, tags, vars
+		var templateContext = new TemplateContext(options);
+
+		// copy inline partials over
 		canReflect.eachKey(inlinePartials, function(partial, partialName) {
 			canReflect.setKeyValue(templateContext.partials, partialName, partial);
 		});
@@ -465,8 +490,20 @@ function stache (filename, template) {
 		}
 		//!steal-remove-end
 
-		return renderer.apply( this, arguments );
+
+		// now figure out the final structure ...
+		if ( !(scope instanceof Scope) ) {
+			scope = new Scope(templateContext).add(scope);
+		} else {
+			// we are going to split ...
+			var templateContextScope = new Scope(templateContext);
+			templateContextScope._parent = scope._parent;
+			scope._parent = templateContextScope;
+		}
+
+		return renderer(scope, nodeList);
 	});
+
 	return scopifiedRenderer;
 }
 

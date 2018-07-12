@@ -2,7 +2,6 @@
 var target = require('can-view-target');
 var Scope = require('can-view-scope');
 var ObservationRecorder = require('can-observation-recorder');
-var canReflect = require('can-reflect');
 
 var utils = require('./utils');
 var getDocument = require("can-globals/document/document");
@@ -37,48 +36,6 @@ var HTMLSectionBuilder = function(filename){
 	this.stack = [new HTMLSection()];
 };
 
-HTMLSectionBuilder.scopify = function(renderer) {
-	return ObservationRecorder.ignore(function(scope, options, nodeList){
-		if ( !(scope instanceof Scope) ) {
-			scope = new Scope(scope || {});
-		}
-
-		// Support passing nodeList as the second argument
-		if (nodeList === undefined && canReflect.isListLike(options)) {
-			nodeList = options;
-			options = undefined;
-		}
-
-		// if an object is passed to options, assume it is the helpers object
-		if (options && !options.helpers && !options.partials && !options.tags) {
-			options = {
-				helpers: options
-			};
-		}
-
-		// mark passed in helper so they will be automatically passed
-		// helperOptions (.fn, .inverse, etc) when called as Call Expressions
-		canReflect.eachKey(options && options.helpers, function(helperValue) {
-			helperValue.requiresOptionsArgument = true;
-		});
-
-		var templateContext = scope.templateContext;
-
-		// loop through each option category - helpers, partials, etc
-		canReflect.eachKey(options, function(optionValues, optionKey) {
-			var container = templateContext[optionKey];
-
-			if (container) {
-				// loop through each helper/partial
-				canReflect.eachKey(optionValues, function(optionValue, optionValueKey) {
-					canReflect.setKeyValue(container, optionValueKey, optionValue);
-				});
-			}
-		});
-
-		return renderer(scope, nodeList);
-	});
-};
 
 assign(HTMLSectionBuilder.prototype,utils.mixins);
 
