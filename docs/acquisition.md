@@ -1,7 +1,7 @@
-@page can-stache.Acquisition Template Acquisition
+@page can-stache.Acquisition Loading Templates
 @parent can-stache.pages 3
 
-There are number of ways to acquire templates such as: raw text,
+There are number of ways to load templates such as: raw text,
 a module loader, or script tags in the markup.
 
 ## Raw Text
