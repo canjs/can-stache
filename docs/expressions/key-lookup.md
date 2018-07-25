@@ -4,7 +4,7 @@
 @signature `key`
 
 A [can-stache.key KeyLookup expression] specifies a value in the [can-view-scope scope] or
-[can-view-scope.Options HelperOptions scope] that will be looked up.  KeyLookup expressions
+[can-view-scope.Options.HelperOptions.scope] that will be looked up.  KeyLookup expressions
 can be the entire stache expression like:
 
 ```html
@@ -53,9 +53,7 @@ The rules are as follows:
  - __[can-stache/expressions/helper] arguments__ `{{helper key}}` - computes are passed.
  - __hash value in [can-stache/expressions/call]__ `{{method(hash=key)}}` - values are set as property values.
  - __hash value in [can-stache/expressions/helper]__ `{{method hash=key}}` - computes are set as property values.
- - __[can-stache/keys/special special operator]__ `{{%index}}` - lookup values in a special context provided by some helpers.
  - __[can-stache/keys/compute compute operator]__ `{{method(~key)}}` - pass a compute instead of a value.
- - __[can-stache/keys/at at operator]__ `{{method(@key}}` - pass a function instead of trying to read the value of the function.
  - __[can-stache/keys/current current operator]__ `{{./key}}` - only lookup key at the top of the scope.
  - __[can-stache/keys/parent parent operator]__ `{{../key}}` - lookup the value in the parent context.
  - __[can-stache/keys/this context key]__ `{{this}}` - return the current context/top of the scope.
