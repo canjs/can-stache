@@ -92,22 +92,6 @@ const data1 = { some: { key: "value" } };
 // Helper -> "value"
 // Other  -> "value"
 
-// A non-observable JS object w/ a function at the end
-const data2 = { some: { key: function() {
-	return "value";
-} } };
-
-// Helper -> "value"
-// Other  -> "value"
-
-// A non-observable JS object with intermediate functions:
-const data3 = { some: function() {
-	return { key: "value" };
-} };
-
-// Helper -> "value"
-// Other  -> "value"
-
 // A observable can-map
 const data4 = { some: new Map( { key: "value" } ) };
 
