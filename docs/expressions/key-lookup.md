@@ -77,7 +77,6 @@ Furthermore keys return different values depending on the data type.
 
 In general:
 
- - Functions are called to get their return value. (Use the [can-stache/keys/at `@` operator] to prevent this).
  - Keys in helper expression arguments that find observable data return
    a [can-compute.computed] that represents the value.
  - Keys in other expressions return the value.
