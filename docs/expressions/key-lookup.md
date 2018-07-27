@@ -77,7 +77,6 @@ Furthermore keys return different values depending on the data type.
 
 In general:
 
- - Functions are called to get their return value. (Use the [can-stache/keys/at `@` operator] to prevent this).
  - Keys in helper expression arguments that find observable data return
    a [can-compute.computed] that represents the value.
  - Keys in other expressions return the value.
@@ -89,22 +88,6 @@ different data structures as a [can-stache/expressions/helper] and in all other 
 ```js
 // A non-observable JS object:
 const data1 = { some: { key: "value" } };
-
-// Helper -> "value"
-// Other  -> "value"
-
-// A non-observable JS object w/ a function at the end
-const data2 = { some: { key: function() {
-	return "value";
-} } };
-
-// Helper -> "value"
-// Other  -> "value"
-
-// A non-observable JS object with intermediate functions:
-const data3 = { some: function() {
-	return { key: "value" };
-} };
 
 // Helper -> "value"
 // Other  -> "value"
