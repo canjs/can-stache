@@ -70,7 +70,7 @@
     "can-vdom": "^4.0.0",
     "detect-cyclic-packages": "^1.1.0",
     "jshint": "^2.9.4",
-    "steal": "^1.0.5",
+    "steal": "^2.0.2",
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.1",
