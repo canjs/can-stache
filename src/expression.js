@@ -476,7 +476,7 @@ var expression = {
 				} else if (top.type === "Call") {
 					stack.addToAndPush(["Call"], { type: "Bracket" });
 				} else if (top === " ") {
-					stack.popUntil(["Lookup"]);
+					stack.popUntil(["Lookup", "Call"]);
 					convertToHelperIfTopIsLookup(stack);
 					stack.addToAndPush(["Helper", "Call", "Hash"], {type: "Bracket"});
 				} else {
