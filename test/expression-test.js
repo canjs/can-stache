@@ -541,8 +541,7 @@ test("expression.parse - [] operator", function(){
 			[
 				new expression.Arg(
 					new expression.Call(new expression.Lookup("@foo"), [], {})
-				)
-				,
+				),
 				new expression.Arg(
 					new expression.Bracket(new expression.Lookup("bar"))
 				)
