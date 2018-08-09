@@ -532,6 +532,23 @@ test("expression.parse - [] operator", function(){
 			)
 		)
 	);
+
+	exprData = expression.parse("equal(foo(), [bar])");
+	equal(exprData.argExprs.length, 2, "there are two arguments");
+	deepEqual(exprData,
+		new expression.Call(
+			new expression.Lookup("@equal"),
+			[
+				new expression.Arg(
+					new expression.Call(new expression.Lookup("@foo"), [], {})
+				),
+				new expression.Arg(
+					new expression.Bracket(new expression.Lookup("bar"))
+				)
+			],
+			{}
+		)
+	);
 });
 
 test("Bracket expression", function(){
