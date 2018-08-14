@@ -2,7 +2,7 @@
 @parent can-stache.pages 2
 
 In addition to different magic tag types, stache supports different expression
-types.  These can be used in various combinations to call [can-stache.registerHelper helper methods]
+types.  These can be used in various combinations to call [can-stache.addLiveHelper helper methods]
 or [can-component.prototype.ViewModel viewModel methods].  The following is an example of all the expressions
 combined:
 

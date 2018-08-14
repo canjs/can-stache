@@ -172,10 +172,10 @@ key1 and key2. If the result of comparison is **truthy**, the section will be re
 
 ## Registering Helpers
 
-You can register your own global helper with the `[can-stache.addHelper addHelper]` or `[can-stache.registerHelper registerHelper]` methods.
+You can register your own global helper with the `[can-stache.addHelper addHelper]` or `[can-stache.addLiveHelper addLiveHelper]` methods.
 
 `[can-stache.addHelper addHelper]` calls the registered helper function with
-values, while `[can-stache.registerHelper registerHelper]` calls the registered helper function with
+values, while `[can-stache.addLiveHelper addLiveHelper]` calls the registered helper function with
 [can-compute.computed computes] if observable data is passed. `addHelper` is
 easier to use for basic helper functionality.
 

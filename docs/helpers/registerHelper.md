@@ -1,9 +1,10 @@
 @function can-stache.registerHelper registerHelper
 @description Register a helper.
-@parent can-stache.static
+@parent can-stache/deprecated
+
+@deprecated {4.0} Use [can-stache.addLiveHelper] instead.
 
 @signature `stache.registerHelper(name, helper)`
-
 
 Registers a helper function.
 Pass the name of the helper followed by the

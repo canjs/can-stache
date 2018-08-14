@@ -9,6 +9,7 @@
 @group can-stache/keys 4 Key Operators
 @group can-stache.htags 5 Helpers
 @group can-stache.types 6 Types
+@group can-stache/deprecated 7 Deprecated
 @package ../package.json
 
 @link ../docco/view/stache/mustache_core.html docco

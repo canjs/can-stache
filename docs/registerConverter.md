@@ -1,6 +1,9 @@
 @function can-stache.registerConverter registerConverter
 @description Register a helper for bidirectional value conversion.
-@parent can-stache.static
+@parent can-stache/deprecated
+
+@deprecated {4.0} Use [can-stache.addConverter] instead. It will always be passed
+observables, removing the need for the user to pass values with `~`.
 
 @signature `stache.registerConverter(converterName, getterSetter)`
 
@@ -9,7 +12,7 @@ values.  This is especially useful with
 [can-stache-bindings.twoWay two-way bindings] like:
 
 ```html
-<input {($value)}='numberToString(~age)'/>
+<input value:bind='numberToString(~age)'/>
 ```
 
 A converter helper provides:
@@ -25,12 +28,14 @@ as follows:
 
 
 ```js
-stache.registerConverter( "numberToString", {
-	get: function( fooCompute ) {
-		return "" + fooCompute();
+import {stache, Reflect as canReflect} from "can";
+
+stache.registerConverter( "stringToNumber", {
+	get: function( numberObservable ) {
+		return "" + canReflect.getValue(numberObservable);
 	},
-	set: function( newVal, fooCompute ) {
-		fooCompute( +newVal );
+	set: function( string, numberObservable ) {
+		canReflect.setValue(numberObservable, +string);
 	}
 } );
 ```
@@ -53,7 +58,7 @@ That being said, the following is a richer example of a converter,
 but one that should probably be part of a view model.
 
 ```handlebars
-<input {($value)}='fullName(~first, ~last)'/>
+<input value:bind='fullName(~first, ~last)'/>
 ```
 
 The following might converts both ways `first` and `last` to `value`.

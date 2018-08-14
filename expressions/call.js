@@ -75,7 +75,10 @@ Call.prototype.value = function(scope, helperOptions){
 				if(args.hashExprs && helperOptions && helperOptions.exprData){
 					helperOptions.exprData.hashExprs = args.hashExprs;
 				}
-				args.push(helperOptions);
+				// For #581
+				if(helperOptions !== undefined) {
+					args.push(helperOptions);
+				}
 			}
 			if(arguments.length) {
 				args.unshift(new SetIdentifier(newVal));
