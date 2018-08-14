@@ -60,7 +60,7 @@ The closing tag can end with `{{/}}`.
 
 @signature `{{#HELPER_EXPRESSION}}FN{{else}}INVERSE{{/HELPER_EXPRESSION}}`
 
-Calls a [can-stache.registerHelper registered helper] or a function in the
+Calls a [can-stache.addLiveHelper helper] or a function in the
 [can-view-scope] with an additional [can-stache.helperOptions] argument
 that can call the `FN` or `INVERSE` helpers to build the content that
 should replace these tags.

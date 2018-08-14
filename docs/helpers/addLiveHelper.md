@@ -4,24 +4,63 @@
 
 @signature `stache.addLiveHelper(name, helper)`
 
-Registers a helper with stache that always gets passed
-the arguments it is passed (without being converted
-to values or wrapped in computes). Pass the name of the
-helper followed by the function to invoke.
+  Adds a global helper that will be passed observable values (instead of "unwrapped")
+  values.  
 
-See [can-stache.Helpers] for more details on using helpers,
-[can-stache.addHelper] to get passed values for arguments,
-and [can-stache.registerHelper] to get computes for observable values.
+  For example, the `name` argument to `upper(name)` is passed as a
+  `ScopeKeyData`:
 
-```js
-stache.addLiveHelper( "upper", function( str ) {
-	if ( canReflect.isObservable( str ) && canReflect.isValueLike( str ) ) {
-		str = canReflect.getValue( str );
+  ```js
+  import {stache, Reflect as canReflect, DefineMap} from "can";
+
+  stache.addLiveHelper( "upper", function( str ) {
+	console.log(str); //-> ScopeKeyData{}
+  	if ( canReflect.isObservableLike( str ) &&
+		canReflect.isValueLike( str ) ) {
+  		str = canReflect.getValue( str );
+  	}
+  	return str.toUpperCase();
+  } );
+  var data = new DefineMap({name: "Justin"});
+  var frag = stache(`{{upper(name)}}`)(data);
+
+  document.body.append(frag);
+  ```
+  @codepen
+
+  Notice how [can-reflect] is used to identify if the value is
+  observable and read it.
+
+  Typically, you don't want to pass observable values to helper an instead
+  want to pass unwrapped values.  Use [can-stache.addHelper] for this.
+
+  `addLiveHelper` is used to provide advanced behavior. The observables
+  passed to the `addLiveHelper` callback can be written to.  The following updates
+  the observable passed to `incrementEverySecond()`:
+
+  ```js
+  import {stache, Reflect as canReflect, DefineMap, domMutate} from "can";
+
+  stache.addLiveHelper( "incrementEverySecond", function( value ) {
+	var interval = setInterval(function(){
+		var current = canReflect.getValue(value);
+		canReflect.setValue(value, current+1);
+	},1000);
+
+	// Listen to when the element is removed for memory safety.
+	return function(el){
+		domMutate.onNodeRemoval(el, function(){
+			clearInterval(interval);
+		})
 	}
+  } );
+  var data = new DefineMap({age: 1});
+  var frag = stache(`{{incrementEverySecond(age)}} Age is: {{age}}`)(data);
 
-	return str.toUpperCase();
-} );
-```
+  document.body.append(frag);
+  ```
+  @codepen
+
 
 @param {String} name The name of the helper.
 @param {can-stache.simpleHelper} helper The helper function.

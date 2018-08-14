@@ -1,7 +1,7 @@
 @typedef {function(this:can-stache.context,...*,can-stache.sectionOptions){}} can-stache.helper(arg,options) helper
 @parent can-stache.types
 
-@description A helper function passed to [can-stache.registerHelper].
+@description A helper function passed to [can-stache.addLiveHelper].
 
 Given the arguments, returns the content that should be shown in the DOM
 or a function that will be called on the DOM element the helper was
