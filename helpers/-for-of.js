@@ -20,7 +20,7 @@ var forHelper = function(helperOptions) {
 	// TODO: remove in prod
 	// make sure we got called with the right stuff
 	if(helperOptions.exprData.argExprs.length !== 1) {
-		throw new Error("for(in) broken syntax");
+		throw new Error("for(of) broken syntax");
 	}
 
 
@@ -29,8 +29,8 @@ var forHelper = function(helperOptions) {
 
 	// TODO: remove in prod
 	var inLookup = helperExpr.argExprs[0];
-	if(inLookup.key !== "in") {
-		throw new Error("for(in) broken syntax");
+	if(inLookup.key !== "of") {
+		throw new Error("for(of) broken syntax");
 	}
 
 	var variableName = helperExpr.methodExpr.key;
