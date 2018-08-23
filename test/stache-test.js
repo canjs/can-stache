@@ -1,9 +1,9 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
-/*require('./expression-test');
+require('./expression-test');
 require('../helpers/-debugger-test');
-require('./nodelist-test');*/
+require('./nodelist-test');
 require('../helpers/-for-in-test');
-/*require('../helpers/-each-test');
+require('../helpers/-each-test');
 require('./section-test');
 var stache = require('../can-stache');
 var core = require('../src/mustache_core');
@@ -41,13 +41,13 @@ var getBaseURL = require('can-globals/base-url/base-url');
 var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
-var helpersCore = require('can-stache/helpers/core');*/
+var helpersCore = require('can-stache/helpers/core');
 
-//var browserDoc = DOCUMENT();
+var browserDoc = DOCUMENT();
 
 
-//makeTest('can/view/stache dom', browserDoc);
-//makeTest('can/view/stache vdom', makeDocument());
+makeTest('can/view/stache dom', browserDoc);
+makeTest('can/view/stache vdom', makeDocument());
 
 // HELPERS
 function overwriteGlobalHelper(name, fn, method) {
