@@ -37,7 +37,7 @@ Lookup.prototype.value = function(scope, readOptions){
 			var pathsForKey = scope.getPathsForKey(firstKey);
 			var paths = Object.keys( pathsForKey );
 
-			var includeSuggestions = paths.length && !paths.includes(firstKey);
+			var includeSuggestions = paths.length && (paths.indexOf(firstKey) < 0);
 
 			var warning = [
 				(filename ? filename + ':' : '') +
