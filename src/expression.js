@@ -451,7 +451,15 @@ var expression = {
 			}
 			// End Call argument
 			else if(token === ",") {
-				stack.popUntil(["Call"]);
+				// The {{let foo=zed, bar=car}} helper is not in a call
+				// expression.
+				var call = stack.first(["Call"]);
+				if(call.type !== "Call") {
+					stack.popUntil(["Hash"]);
+				} else {
+					stack.popUntil(["Call"]);
+				}
+
 			}
 			// Bracket
 			else if(token === "[") {

@@ -4,9 +4,9 @@ var DefineList = require("can-define/list/list");
 require("./-for-of");
 
 
-QUnit.module("can-stache #each helper");
+QUnit.module("can-stache #for(of) helper");
 
-test("for-of basics", function(){
+test("basics", function(){
 
     var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
     var list = new DefineList([34234,2,1,3]);

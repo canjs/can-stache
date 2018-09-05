@@ -1051,3 +1051,32 @@ testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads"
 
 	QUnit.equal(teardown(), 0, 'got expected warning');
 });
+
+test("let foo=bar,zed=ted", function(){
+	//var helperAst = expression.ast("let foo=bar zed=ted");
+	var commaHelperAst = expression.ast("let foo=bar,zed=ted");
+
+	//QUnit.deepEqual( commaHelperAst, helperAst, "commas work in helpers");
+	
+	QUnit.deepEqual(commaHelperAst, {
+		"type": "Helper",
+		"method": { "type": "Lookup", "key": "let" },
+		"children": [
+			{
+				"type": "Hashes",
+				"children": [
+					{
+						"type": "Hash",
+						"prop": "foo",
+						"children": [ { "type": "Lookup", "key": "bar" } ]
+					},
+					{
+						"type": "Hash",
+						"prop": "zed",
+						"children": [ { "type": "Lookup", "key": "ted" } ]
+					}
+				]
+			}
+		]
+	});
+});
