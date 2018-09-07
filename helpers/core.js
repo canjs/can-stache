@@ -15,6 +15,10 @@ var helpers = require("can-stache-helpers");
 
 var domData = require('can-dom-data');
 var domDataState = require('can-dom-data-state');
+
+require("./-for-of");
+require("./-let");
+
 var looksLikeOptions = function(options){
 	return options && typeof options.fn === "function" && typeof options.inverse === "function";
 };

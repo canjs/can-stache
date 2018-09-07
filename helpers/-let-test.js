@@ -6,7 +6,7 @@ require("./-let");
 
 QUnit.module("can-stache let helper");
 
-test("basics without commas", function(){
+QUnit.test("basics without commas", function(){
 
 	var template = stache(
 		"{{let userName=this.name constTwo=2}}"+
@@ -23,7 +23,7 @@ test("basics without commas", function(){
 	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
 });
 
-test("basics with commas", function(){
+QUnit.test("basics with commas", function(){
 
 	var template = stache(
 		"{{let userName=this.name, constTwo=2}}"+
@@ -38,4 +38,23 @@ test("basics with commas", function(){
 	vm.name = "Ramiya";
 
 	QUnit.equal( frag.lastChild.innerHTML, "Ramiya-2", "value updated");
+});
+
+QUnit.test("make undefined variables settable", function(){
+	var template = stache(
+		"{{ let userName=undefined }}"+
+		"<div>{{userName}} {{changeUserName(scope)}}</div>"
+	);
+	var scope;
+	var frag = template({
+		changeUserName: function(passedScope){
+			scope = passedScope;
+			return "";
+		}
+	});
+
+
+	scope.set("userName","Justin");
+	QUnit.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
+
 });
