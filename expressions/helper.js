@@ -59,6 +59,7 @@ Helper.prototype.value = function(scope, helperOptions){
 		//!steal-remove-start
 		if (process.env.NODE_ENV !== 'production') {
 			Object.defineProperty(helperFn, "name", {
+				configurable: true,
 				value: canReflect.getName(this)
 			});
 		}
