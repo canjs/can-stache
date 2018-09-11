@@ -2,6 +2,8 @@
 require('./expression-test');
 require('../helpers/-debugger-test');
 require('./nodelist-test');
+require('../helpers/-for-of-test');
+require('../helpers/-let-test');
 require('../helpers/-each-test');
 require('./section-test');
 var stache = require('../can-stache');

@@ -493,7 +493,7 @@ function stache (filename, template) {
 
 		// now figure out the final structure ...
 		if ( !(scope instanceof Scope) ) {
-			scope = new Scope(templateContext).add(scope);
+			scope = new Scope(templateContext).add(scope).addLetContext();
 		} else {
 			// we are going to split ...
 			var templateContextScope = new Scope(templateContext);
