@@ -294,7 +294,7 @@ var switchHelper = function(expression, options){
 		case: caseHelper,
 		default: defaultHelper
 	}, { notContext: true });
-
+	
 	return options.fn(newScope, options);
 };
 switchHelper.requiresOptionsArgument = true;
