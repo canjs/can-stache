@@ -68,9 +68,7 @@ var forHelper = function(helperOptions) {
 				variableScope[variableName] = item;
 				return options.fn(
 					options.scope
-					.add(aliases, { notContext: true })
-					.add({ index: index }, { special: true })
-					.add(variableScope, {variable: true}),
+					.addLetContext(variableScope),
 				options.options,
 				parentNodeList
 				);
