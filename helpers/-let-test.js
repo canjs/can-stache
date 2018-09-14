@@ -2,6 +2,7 @@ var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var DefineMap = require("can-define/map/map");
 require("./-let");
+var Scope = require("can-view-scope");
 
 
 QUnit.module("can-stache let helper");
@@ -57,4 +58,10 @@ QUnit.test("make undefined variables settable", function(){
 	scope.set("userName","Justin");
 	QUnit.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
 
+});
+
+QUnit.test("custom scopes still get a let context", function(){
+	var template = stache("{{let foo='bar'}}");
+	template(new Scope({}));
+	QUnit.ok(true, "passes");
 });

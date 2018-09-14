@@ -493,7 +493,7 @@ function stache (filename, template) {
 
 		// now figure out the final structure ...
 		if ( !(scope instanceof Scope) ) {
-			scope = new Scope(templateContext).add(scope).addLetContext();
+			scope = new Scope(templateContext).add(scope);
 		} else {
 			// we are going to split ...
 			var templateContextScope = new Scope(templateContext);
@@ -501,7 +501,7 @@ function stache (filename, template) {
 			scope._parent = templateContextScope;
 		}
 
-		return renderer(scope, nodeList);
+		return renderer(scope.addLetContext(), nodeList);
 	});
 
 	return scopifiedRenderer;
