@@ -23,7 +23,6 @@ var forHelper = function(helperOptions) {
 		throw new Error("for(of) broken syntax");
 	}
 
-
 	// TODO: check if an instance of helper;
 	var helperExpr = helperOptions.exprData.argExprs[0].expr;
 
@@ -43,12 +42,17 @@ var forHelper = function(helperOptions) {
 		options = args.pop(),
 		resolved = bindAndRead(items);
 
-
-
-	if ((
-		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
-			( canReflect.isListLike(resolved) && canReflect.isValueLike(items) )
-	) && !options.stringOnly) {
+	if(options.stringOnly) {
+		var parts = [];
+		canReflect.eachIndex(resolved, function(value){
+			var variableScope = {};
+			variableScope[variableName] = value;
+			parts.push(
+				helperOptions.fn( options.scope.addLetContext(variableScope) )
+			);
+		});
+		return parts.join("");
+	} else {
 		// Tells that a helper has been called, this function should be returned through
 		// checking its value.
 		options.metadata.rendered = true;
@@ -78,37 +82,6 @@ var forHelper = function(helperOptions) {
 			});
 		};
 	}
-	/*
-	var expr = resolve(items),
-		result;
-
-	if (!!expr && canReflect.isListLike(expr)) {
-		result = utils.getItemsFragContent(expr, options, options.scope);
-		return options.stringOnly ? result.join('') : result;
-	} else if (canReflect.isObservableLike(expr) && canReflect.isMapLike(expr) || expr instanceof Object) {
-		result = [];
-		canReflect.each(expr, function(val, key){
-			var value = new KeyObservable(expr, key);
-			aliases = {};
-
-			if (canReflect.size(hashOptions) > 0) {
-				if (hashOptions.value) {
-					aliases[hashOptions.value] = value;
-				}
-				if (hashOptions.key) {
-					aliases[hashOptions.key] = key;
-				}
-			}
-			result.push(options.fn(
-				options.scope
-				.add(aliases, { notContext: true })
-				.add({ key: key }, { special: true })
-				.add(value)
-			));
-		});
-
-		return options.stringOnly ? result.join('') : result;
-	}*/
 };
 forHelper.isLiveBound = true;
 forHelper.requiresOptionsArgument = true;

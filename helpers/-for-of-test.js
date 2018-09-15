@@ -83,3 +83,29 @@ QUnit.test("create an observable let scope (#593)", function(){
 
 
 });
+
+QUnit.test("works with non observables", function(){
+	var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
+    var list = [34234,2,1,3];
+    var frag = template({
+		list: list,
+		vmProp: "1"
+	});
+
+    var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
+        return +p.innerHTML;
+    });
+
+    deepEqual(order, [134234,12,11,13]);
+});
+
+
+QUnit.test("works as string only", function(){
+	var template = stache("<div class='{{#for(value of list)}}[{{this.vmProp}}-{{value}}]{{/for}}'></div>");
+    var list = [1,2,3];
+    var frag = template({
+		list: list,
+		vmProp: "a"
+	});
+	QUnit.equal( frag.firstChild.className, "[a-1][a-2][a-3]");
+});
