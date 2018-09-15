@@ -41,8 +41,7 @@ var forHelper = function(helperOptions) {
 
 	var args = [].slice.call(arguments),
 		options = args.pop(),
-		resolved = bindAndRead(items),
-		aliases;
+		resolved = bindAndRead(items);
 
 
 
