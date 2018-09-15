@@ -41,8 +41,7 @@ var forHelper = function(helperOptions) {
 
 	var args = [].slice.call(arguments),
 		options = args.pop(),
-		resolved = bindAndRead(items),
-		aliases;
+		resolved = bindAndRead(items);
 
 
 
@@ -68,9 +67,7 @@ var forHelper = function(helperOptions) {
 				variableScope[variableName] = item;
 				return options.fn(
 					options.scope
-					.add(aliases, { notContext: true })
-					.add({ index: index }, { special: true })
-					.add(variableScope, {variable: true}),
+					.addLetContext(variableScope),
 				options.options,
 				parentNodeList
 				);
