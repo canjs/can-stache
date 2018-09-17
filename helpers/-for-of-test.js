@@ -109,3 +109,23 @@ QUnit.test("works as string only", function(){
 	});
 	QUnit.equal( frag.firstChild.className, "[a-1][a-2][a-3]");
 });
+
+QUnit.test("scope.index works", function(){
+	var template = stache("<div>{{#for(value of list)}}[{{scope.index}}]{{/for}}</div>");
+    var list = ["a","b","c"];
+    var frag = template({
+		list: list,
+		vmProp: "a"
+	});
+	QUnit.equal( frag.firstChild.innerHTML, "[0][1][2]");
+});
+
+QUnit.test("for(list) works", function(){
+	var template = stache("<div>{{#for(list)}}[{{scope.index}}]{{/for}}</div>");
+    var list = ["a","b","c"];
+    var frag = template({
+		list: list,
+		vmProp: "a"
+	});
+	QUnit.equal( frag.firstChild.innerHTML, "[0][1][2]");
+});

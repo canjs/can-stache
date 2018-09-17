@@ -3,6 +3,7 @@ var canReflect = require("can-reflect");
 var Observation = require("can-observation");
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
+var expression = require("../src/expression");
 
 var bindAndRead = function (value) {
 	if ( value && canReflect.isValueLike(value) ) {
@@ -24,17 +25,23 @@ var forHelper = function(helperOptions) {
 	}
 
 	// TODO: check if an instance of helper;
+
 	var helperExpr = helperOptions.exprData.argExprs[0].expr;
+	var variableName, valueLookup, valueObservable;
+	if(helperExpr instanceof expression.Lookup) {
 
-	// TODO: remove in prod
-	var inLookup = helperExpr.argExprs[0];
-	if(inLookup.key !== "of") {
-		throw new Error("for(of) broken syntax");
+		valueObservable = helperExpr.value(helperOptions.scope);
+
+	} else if(helperExpr instanceof expression.Helper) {
+		// TODO: remove in prod
+		var inLookup = helperExpr.argExprs[0];
+		if(inLookup.key !== "of") {
+			throw new Error("for(of) broken syntax");
+		}
+		variableName = helperExpr.methodExpr.key;
+		valueLookup = helperExpr.argExprs[1];
+		valueObservable = valueLookup.value(helperOptions.scope);
 	}
-
-	var variableName = helperExpr.methodExpr.key;
-	var valueLookup = helperExpr.argExprs[1];
-	var valueObservable = valueLookup.value(helperOptions.scope);
 
 	var items =  valueObservable;
 
@@ -44,11 +51,15 @@ var forHelper = function(helperOptions) {
 
 	if(options.stringOnly) {
 		var parts = [];
-		canReflect.eachIndex(resolved, function(value){
+		canReflect.eachIndex(resolved, function(value, index){
 			var variableScope = {};
-			variableScope[variableName] = value;
+			if(variableName !== undefined){
+				variableScope[variableName] = value;
+			}
 			parts.push(
-				helperOptions.fn( options.scope.addLetContext(variableScope) )
+				helperOptions.fn( options.scope
+					.add({ index: index }, { special: true })
+					.addLetContext(variableScope) )
 			);
 		});
 		return parts.join("");
@@ -68,9 +79,12 @@ var forHelper = function(helperOptions) {
 
 			var cb = function (item, index, parentNodeList) {
 				var variableScope = {};
-				variableScope[variableName] = item;
+				if(variableName !== undefined){
+					variableScope[variableName] = item;
+				}
 				return options.fn(
 					options.scope
+					.add({ index: index }, { special: true })
 					.addLetContext(variableScope),
 				options.options,
 				parentNodeList
