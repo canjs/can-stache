@@ -161,45 +161,6 @@ QUnit.test("Stache with single property", function() {
 	equal(frag.firstChild.nodeValue, 'baz');
 });
 
-QUnit.test("Stache with boolean property with {{#if}}", function() {
-	var nailedIt = 'Nailed it';
-	var Example = define.Constructor({
-		name: {
-			value: nailedIt
-		}
-	});
-
-	var NestedMap = define.Constructor({
-		isEnabled: {
-			value: true
-		},
-		test: {
-			Value: Example
-		},
-		examples: {
-			type: {
-				one: {
-					Value: Example
-				},
-				two: {
-					type: {
-						deep: {
-							Value: Example
-						}
-					},
-					Value: Object
-				}
-			},
-			Value: Object
-		}
-	});
-
-	var nested = new NestedMap();
-	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
-	var frag = template(nested);
-	equal(frag.firstChild.nodeValue, 'Enabled');
-});
-
 QUnit.test("stache with double property", function() {
 	var nailedIt = 'Nailed it';
 	var Example = define.Constructor({

@@ -2,6 +2,8 @@
 require('./expression-test');
 require('../helpers/-debugger-test');
 require('./nodelist-test');
+require('../helpers/-if-test');
+require('../helpers/-is-test');
 require('../helpers/-for-of-test');
 require('../helpers/-let-test');
 require('../helpers/-each-test');
@@ -617,36 +619,6 @@ function makeTest(name, doc, mutation) {
 		expected = t.expected.replace(/&quot;/g, '&#34;')
 			.replace(/\r\n/g, '\n');
 		deepEqual(getText(t.template,t.data), expected);
-	});
-
-	test("Handlebars helper: is/else (with 'eq' alias)", function() {
-		var expected;
-		var t = {
-			template: '{{#eq ducks tenDucks "10"}}10 ducks{{else}}Not 10 ducks{{/eq}}',
-			expected: "10 ducks",
-			data: {
-				ducks: '10',
-				tenDucks: function() {
-					return '10'
-				}
-			},
-			liveData: new SimpleMap({
-				ducks: '10',
-				tenDucks: function() {
-					return '10'
-				}
-			})
-		};
-
-		expected = t.expected.replace(/&quot;/g, '&#34;').replace(/\r\n/g, '\n');
-		deepEqual(getText(t.template, t.data), expected);
-
-		deepEqual(getText(t.template, t.liveData), expected);
-
-		t.data.ducks = 5;
-
-		deepEqual(getText(t.template, t.data), 'Not 10 ducks');
-
 	});
 
 	test("Handlebars helper: unless", function () {
@@ -3369,34 +3341,6 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	test("#each with #if directly nested (#750)", function(){
-		var template = stache("<ul>{{#each list}} {{#if visible}}<li>{{name}}</li>{{/if}} {{/each}}</ul>");
-		var data = new SimpleMap(
-			{
-				list: new DefineList([
-					{
-						name: 'first',
-						visible: true
-					},
-					{
-						name: 'second',
-						visible: false
-					},
-					{
-						name: 'third',
-						visible: true
-					}
-				])
-			});
-
-		var frag = template(data);
-
-		data.get('list').pop();
-
-		equal(frag.firstChild.getElementsByTagName('li').length, 1, "only first should be visible")
-
-	});
-
 	test("viewCallbacks.tag", function(){
 
 		expect(3);
@@ -4363,19 +4307,6 @@ function makeTest(name, doc, mutation) {
 
 		equal(innerHTML(div.getElementsByTagName('span')[2]), "turtle", "turtle added");
 
-	});
-
-	test("call expression with #if", function(){
-
-		var truthy = new SimpleObservable(true);
-		var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
-		var frag = template({truthy: truthy});
-
-		equal( frag.firstChild.nodeValue, "true", "set to true");
-
-		truthy.set(false);
-
-		equal( frag.firstChild.nodeValue, "false", "set to false");
 	});
 
 	test('getHelper w/o optional options argument (#1497)', function() {
@@ -6064,19 +5995,7 @@ function makeTest(name, doc, mutation) {
 		renderer({ foo: stache("baz") });
 	});
 
-	test("#if works with call expressions", function(){
-		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
-		var map = new DefineMap({
-			foo: true
-		});
-		var div = doc.createElement("div");
-		var frag = template(map);
 
-		div.appendChild(frag);
-		QUnit.equal(innerHTML(div), "foo");
-		map.foo = false;
-		QUnit.equal(innerHTML(div), "bar");
-	});
 
 	test("#unless works with call expressions", function(){
 		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
@@ -6158,34 +6077,6 @@ function makeTest(name, doc, mutation) {
 		canLog.log = log;
 		canLog.warn = warn;
 		debug.__testing.allowDebugger = true;
-	});
-
-	test("#eq works with call expressions", function(){
-		var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
-		var map = new DefineMap({
-			foo: true
-		});
-		var div = doc.createElement("div");
-		var frag = template(map);
-
-		div.appendChild(frag);
-		QUnit.equal(innerHTML(div), "foo");
-		map.foo = false;
-		QUnit.equal(innerHTML(div), "bar");
-	});
-
-	test("#is works with call expressions", function(){
-		var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
-		var map = new DefineMap({
-			foo: true
-		});
-		var div = doc.createElement("div");
-		var frag = template(map);
-
-		div.appendChild(frag);
-		QUnit.equal(innerHTML(div), "foo");
-		map.foo = false;
-		QUnit.equal(innerHTML(div), "bar");
 	});
 
 	test("#switch, #case, and #default work with call expressions", function(){
@@ -6714,15 +6605,7 @@ function makeTest(name, doc, mutation) {
 		equal(innerHTML(div), 'Hello Mick');
 	});
 
-	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
-		var div = doc.createElement("div");
-		var view = stache("{{^if(isTrue())}}did not work{{/if}}");
-		var frag = view({
-			isTrue: function() { return true; }
-		});
-		div.appendChild(frag);
-		equal(innerHTML(div), "", "No textnode rendered");
-	});
+
 
 	testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function() {
 		var scope = new Scope({ foo: "classVal" });
@@ -6925,15 +6808,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
-		var div = doc.createElement("div");
-		var view = stache("{{^if(isTrue())}}did not work{{/if}}");
-		var frag = view({
-			isTrue: function() { return true; }
-		});
-		div.appendChild(frag);
-		equal(innerHTML(div), "", "No textnode rendered");
-	});
+
 
 	QUnit.test("tag callbacks get called with directly nested data", function(){
 		var expectedResult,
