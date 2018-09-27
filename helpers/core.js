@@ -156,6 +156,7 @@ var indexHelper = function(offset, options) {
 };
 indexHelper.requiresOptionsArgument = true;
 
+//## IF HELPER
 var ifHelper = function (expr, options) {
 	var value;
 	// if it's a function, wrap its value in a compute
@@ -173,7 +174,19 @@ var ifHelper = function (expr, options) {
 	}
 };
 ifHelper.requiresOptionsArgument = true;
+ifHelper.isLiveBound = true;
 
+// ## UNLESS HELPER
+var unlessHelper = function (expr, options) {
+	return ifHelper.apply(this, [expr, assign(assign({}, options), {
+		fn: options.inverse,
+		inverse: options.fn
+	})]);
+};
+unlessHelper.requiresOptionsArgument = true;
+unlessHelper.isLiveBound = true;
+
+//## IS HELPER
 var isHelper = function() {
 	var lastValue, curValue,
 		options = arguments[arguments.length - 1];
@@ -214,14 +227,9 @@ var isHelper = function() {
 	return callFn.get() ? options.fn() : options.inverse();
 };
 isHelper.requiresOptionsArgument = true;
+isHelper.isLiveBound = true;
 
-var unlessHelper = function (expr, options) {
-	return ifHelper.apply(this, [expr, assign(assign({}, options), {
-		fn: options.inverse,
-		inverse: options.fn
-	})]);
-};
-unlessHelper.requiresOptionsArgument = true;
+
 
 var withHelper = function (expr, options) {
 	var ctx = expr;
