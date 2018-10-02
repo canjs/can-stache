@@ -60,6 +60,24 @@ test("expression.ast - helper followed by hash", function(){
 
 });
 
+test("expression.ast - root hash expressions work", function(){
+	var ast = expression.ast("prop=own_prop");
+
+	deepEqual(ast, {
+		type: "Hashes",
+		children: [
+			{
+				type: "Hash",
+				prop: "prop",
+				children: [{type: "Lookup", key: "own_prop"}]
+			}
+		]
+	});
+
+});
+
+
+
 test("expression.ast - everything", function(){
 	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
 
@@ -1057,7 +1075,7 @@ test("let foo=bar,zed=ted", function(){
 	var commaHelperAst = expression.ast("let foo=bar,zed=ted");
 
 	//QUnit.deepEqual( commaHelperAst, helperAst, "commas work in helpers");
-	
+
 	QUnit.deepEqual(commaHelperAst, {
 		"type": "Helper",
 		"method": { "type": "Lookup", "key": "let" },

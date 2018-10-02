@@ -355,14 +355,15 @@ var expression = {
 
 					}
 				}
-				firstParent = stack.firstParent(["Call","Helper","Hashes"]);
+				
+				firstParent = stack.first(["Call","Helper","Hashes","Root"]);
 				// makes sure we are adding to Hashes if there already is one
 				// otherwise we create one.
 				var hash = {type: "Hash", prop: token};
 				if(firstParent.type === "Hashes") {
 					stack.addToAndPush(["Hashes"], hash);
 				} else {
-					stack.addToAndPush(["Helper", "Call"], {
+					stack.addToAndPush(["Helper", "Call","Root"], {
 						type: "Hashes",
 						children: [hash]
 					});
