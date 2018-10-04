@@ -2,6 +2,7 @@
 
 var parser = require('can-view-parser');
 var viewCallbacks = require('can-view-callbacks');
+var canReflect = require("can-reflect");
 
 var HTMLSectionBuilder = require('./src/html_section');
 var TextSectionBuilder = require('./src/text_section');
@@ -452,11 +453,11 @@ function stache (filename, template) {
 assign(stache, mustacheHelpers);
 
 stache.safeString = function(text){
-	return {
-		toString: function () {
+	return canReflect.assignSymbols({},{
+		"can.toDOM": function(){
 			return text;
 		}
-	};
+	});
 };
 stache.async = function(source){
 	var iAi = getIntermediateAndImports(source);

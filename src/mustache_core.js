@@ -17,12 +17,9 @@ var getDocument = require("can-globals/document/document");
 
 // ## Types
 
-// A lookup is an object that is used to identify a lookup in the scope.
-/**
- * @hide
- * @typedef {{get: String}} can.stache.Lookup
- * @option {String} get A value in the scope to look up.
- */
+// DOM, safeString or the insertSymbol can opt-out of updating as text
+
+var toDOMSymbol = canSymbol.for("can.toDOM");
 
 
 // ## Helpers
@@ -30,6 +27,12 @@ var getDocument = require("can-globals/document/document");
 var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([\s\S]*)\}\}\}?)/g,
 	mustacheWhitespaceRegExp = /(\s*)(\{\{\{?)(-?)([\s\S]*?)(-?)(\}\}\}?)(\s*)/g,
 	k = function(){};
+
+function valueShouldBeInsertedAsHTML(value) {
+	return value !== null && typeof value === "object" && (
+		typeof value[toDOMSymbol] === "function" ||
+		typeof value.nodeType === "number" );
+}
 
 
 var core = {
@@ -377,10 +380,19 @@ var core = {
 				else if( state.tag )  {
 					live.attrs( this, observable );
 				}
-				else if(state.text && typeof value !== "object"){
+				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
+					//!steal-remove-start
+					if (process.env.NODE_ENV !== 'production') {
+						if(value !== null && typeof value === "object") {
+							dev.warn("Previously, the result of "+
+								expressionString+" in "+state.filename+":"+state.lineNo+
+								", was being inserted as HTML instead of TEXT. Please use stache.safeString(obj) "+
+								"if you would like the object to be treated as HTML.");
+						}
+					}
+					//!steal-remove-end
 					live.text(this, observable, this.parentNode, nodeList);
-				}
-				else {
+				} else {
 					live.html(this, observable, this.parentNode, nodeList);
 				}
 			}
