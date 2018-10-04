@@ -511,11 +511,14 @@ function stache (filename, template) {
 assign(stache, mustacheHelpers);
 
 stache.safeString = function(text){
-	return {
+
+	return canReflect.assignSymbols({
 		toString: function () {
 			return text;
 		}
-	};
+	},{
+		"can.stacheSafeString": true
+	});
 };
 stache.async = function(source){
 	var iAi = getIntermediateAndImports(source);

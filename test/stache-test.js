@@ -7065,6 +7065,18 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	QUnit.test("null does not trigger unescape (#600)", function(){
+
+		var map = new SimpleMap({
+			foo: null
+		});
+		var frag = stache("<div>{{foo}}</div>")(map);
+		map.set("foo", "<p></p>");
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

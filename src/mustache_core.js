@@ -17,6 +17,9 @@ var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
 var getDocument = require("can-globals/document/document");
 var defineLazyValue = require("can-define-lazy-value");
+var canSymbol = require("can-symbol");
+
+var stacheSafeString = canSymbol.for("can.stacheSafeString");
 
 // Lazily lookup the context only if it's needed.
 function HelperOptions(scope, nodeList, exprData, stringOnly) {
@@ -30,14 +33,7 @@ defineLazyValue(HelperOptions.prototype,"context", function(){
 	return this.scope.peek("this");
 });
 
-// ## Types
 
-// A lookup is an object that is used to identify a lookup in the scope.
-/**
- * @hide
- * @typedef {{get: String}} can.stache.Lookup
- * @option {String} get A value in the scope to look up.
- */
 
 
 // ## Helpers
@@ -47,6 +43,17 @@ var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]
 	k = function(){};
 var viewInsertSymbol = canSymbol.for("can.viewInsert");
 
+function valueShouldBeInsertedAsHTML(value) {
+	return value !== null && typeof value === "object" && (
+		value[stacheSafeString] === true ||
+		typeof value[viewInsertSymbol] === "function" ||
+		typeof value.nodeType === "number" );
+}
+
+// safeString or the insertSymbol can opt-out of updating as text
+function shouldUpdateAsText(state, value){
+	return state.text && !valueShouldBeInsertedAsHTML(value);
+}
 
 var core = {
 	expression: expression,
@@ -364,7 +371,6 @@ var core = {
 			}
 			// If the computeValue has observable dependencies, setup live binding.
 			else if( canReflect.valueHasDependencies(observable) ) {
-
 				// Depending on where the template is, setup live-binding differently.
 				if(state.attr) {
 					live.attr(this, state.attr, observable);
@@ -372,10 +378,9 @@ var core = {
 				else if( state.tag )  {
 					live.attrs( this, observable );
 				}
-				else if(state.text && typeof value !== "object"){
+				else if(shouldUpdateAsText(state, value)) {
 					live.text(this, observable, this.parentNode, nodeList);
-				}
-				else {
+				} else {
 					live.html(this, observable, this.parentNode, {
 						nodeList: nodeList
 					});
@@ -390,8 +395,8 @@ var core = {
 				else if(state.tag) {
 					live.attrs(this, value);
 				}
-				else if(state.text && typeof value === "string") {
-					this.nodeValue = value;
+				else if(shouldUpdateAsText(state, value)) {
+					this.nodeValue = live.makeString(value);
 				}
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
