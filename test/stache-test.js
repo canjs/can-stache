@@ -7077,6 +7077,35 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	testHelpers.dev.devOnlyTest("Arrays warn about escaping (#600)", 3, function () {
+
+		var map = new SimpleMap({
+			foo: ["<p></p>"]
+		});
+
+		var teardown = testHelpers.dev.willWarn(/stache.safeString/, function(message, matched) {
+			if(matched) {
+				ok(true, "received warning");
+			}
+		});
+
+
+		var frag = stache("<div>{{foo}}</div>")(map);
+		teardown();
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+
+
+		map = new SimpleMap({
+			foo: stache.safeString(["<p></p>"])
+		});
+
+		frag = stache("<div>{{foo}}</div>")(map);
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

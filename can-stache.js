@@ -512,12 +512,10 @@ assign(stache, mustacheHelpers);
 
 stache.safeString = function(text){
 
-	return canReflect.assignSymbols({
-		toString: function () {
+	return canReflect.assignSymbols({},{
+		"can.toDOM": function(){
 			return text;
 		}
-	},{
-		"can.stacheSafeString": true
 	});
 };
 stache.async = function(source){

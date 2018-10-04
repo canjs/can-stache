@@ -17,9 +17,8 @@ var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
 var getDocument = require("can-globals/document/document");
 var defineLazyValue = require("can-define-lazy-value");
-var canSymbol = require("can-symbol");
 
-var stacheSafeString = canSymbol.for("can.stacheSafeString");
+var toDOMSymbol = canSymbol.for("can.toDOM");
 
 // Lazily lookup the context only if it's needed.
 function HelperOptions(scope, nodeList, exprData, stringOnly) {
@@ -43,17 +42,17 @@ var mustacheLineBreakRegExp = /(?:(^|\r?\n)(\s*)(\{\{([\s\S]*)\}\}\}?)([^\S\n\r]
 	k = function(){};
 var viewInsertSymbol = canSymbol.for("can.viewInsert");
 
+
+// DOM, safeString or the insertSymbol can opt-out of updating as text
 function valueShouldBeInsertedAsHTML(value) {
 	return value !== null && typeof value === "object" && (
-		value[stacheSafeString] === true ||
+		typeof value[toDOMSymbol] === "function" ||
 		typeof value[viewInsertSymbol] === "function" ||
 		typeof value.nodeType === "number" );
 }
 
-// safeString or the insertSymbol can opt-out of updating as text
-function shouldUpdateAsText(state, value){
-	return state.text && !valueShouldBeInsertedAsHTML(value);
-}
+
+
 
 var core = {
 	expression: expression,
@@ -378,7 +377,17 @@ var core = {
 				else if( state.tag )  {
 					live.attrs( this, observable );
 				}
-				else if(shouldUpdateAsText(state, value)) {
+				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
+					//!steal-remove-start
+					if (process.env.NODE_ENV !== 'production') {
+						if(value !== null && typeof value === "object") {
+							dev.warn("Previously, the result of "+
+								expressionString+" in "+state.filename+":"+state.lineNo+
+								", was being inserted as HTML instead of TEXT. Please use stache.safeString(obj) "+
+								"if you would like the object to be treated as HTML.");
+						}
+					}
+					//!steal-remove-end
 					live.text(this, observable, this.parentNode, nodeList);
 				} else {
 					live.html(this, observable, this.parentNode, {
@@ -395,7 +404,7 @@ var core = {
 				else if(state.tag) {
 					live.attrs(this, value);
 				}
-				else if(shouldUpdateAsText(state, value)) {
+				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
 					this.nodeValue = live.makeString(value);
 				}
 				else if( value != null ){
