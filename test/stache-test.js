@@ -7231,6 +7231,63 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( innerHTML(frag.firstChild), "", "no content");
 	});
 
+		QUnit.test("nested expressions get the right number of arguments (#581)", function(){
+		stache.addHelper( "argumentsLength", function() {
+			QUnit.equal(arguments.length, 2, "got the right number of arguments")
+			return arguments.length;
+		} );
+
+		stache.addHelper( "echo", function(value) {
+			return value;
+		} );
+
+		stache("<p>{{ echo( argumentsLength(0,1) ) }}</p>")();
+
+	});
+
+	QUnit.test("null does not trigger unescape (#600)", function(){
+
+		var map = new CanMap({
+			foo: null
+		});
+		var frag = stache("<div>{{foo}}</div>")(map);
+		map.attr("foo", "<p></p>");
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+
+	});
+
+	testHelpers.dev.devOnlyTest("Arrays warn about escaping (#600)", 3, function () {
+		var Type = DefineMap.extend({
+			foo: "*"
+		});
+		var map = new Type({
+			foo: ["<p></p>"]
+		});
+
+		var teardown = testHelpers.dev.willWarn(/stache.safeString/, function(message, matched) {
+			if(matched) {
+				ok(true, "received warning");
+			}
+		});
+
+
+		var frag = stache("<div>{{foo}}</div>")(map);
+		teardown();
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+
+
+		map = new Type({
+			foo: stache.safeString(["<p></p>"])
+		});
+
+		frag = stache("<div>{{foo}}</div>")(map);
+
+		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
+
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
