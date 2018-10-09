@@ -39,7 +39,9 @@ if(!viewCallbacks.tag("content")) {
 
 var wrappedAttrPattern = /[{(].*[)}]/;
 var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
-var svgNamespace = "http://www.w3.org/2000/svg";
+var svgNamespace = "http://www.w3.org/2000/svg",
+xmlnsAttrNamespaceURI = "http://www.w3.org/2000/xmlns/",
+xlinkHrefAttrNamespaceURI =  "http://www.w3.org/1999/xlink";
 var namespaces = {
 	"svg": svgNamespace,
 	// this allows a partial to start with g.
@@ -54,6 +56,10 @@ var namespaces = {
 	"feColorMatrix": svgNamespace,
 	"use": svgNamespace
 },
+	attrsNamespacesURI = {
+		'xmlns': xmlnsAttrNamespaceURI,
+		'xlink:href': xlinkHrefAttrNamespaceURI
+	},
 	textContentOnlyTag = {style: true, script: true};
 
 function stache (filename, template) {
@@ -332,6 +338,7 @@ function stache (filename, template) {
 
 		},
 		attrEnd: function(attrName, lineNo){
+			var matchedAttrNamespacesURI = attrsNamespacesURI[attrName];
 			if(state.node.section) {
 				state.node.section.add("\" ");
 			} else {
@@ -339,8 +346,16 @@ function stache (filename, template) {
 					state.node.attrs = {};
 				}
 
-				state.node.attrs[state.attr.name] =
-					state.attr.section ? state.attr.section.compile(copyState()) : state.attr.value;
+				if (state.attr.section) {
+					state.node.attrs[state.attr.name] = state.attr.section.compile(copyState());
+				} else if (matchedAttrNamespacesURI) {
+					state.node.attrs[state.attr.name] = {
+						value: state.attr.value, 
+						namespaceURI: attrsNamespacesURI[attrName]
+					};
+				} else {
+					state.node.attrs[state.attr.name] = state.attr.value;
+				}
 
 				var attrCallback = viewCallbacks.attr(attrName);
 
@@ -379,11 +394,6 @@ function stache (filename, template) {
 			var section = state.node.section || state.attr.section;
 			if(section){
 				section.add(value);
-			} else if (value === svgNamespace) {
-				state.attr.value = {
-					value: value,
-					namespaceURI: 'http://www.w3.org/2000/xmlns/'
-				};
 			} else {
 				state.attr.value += value;
 			}
