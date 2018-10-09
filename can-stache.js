@@ -43,7 +43,16 @@ var svgNamespace = "http://www.w3.org/2000/svg";
 var namespaces = {
 	"svg": svgNamespace,
 	// this allows a partial to start with g.
-	"g": svgNamespace
+	"g": svgNamespace,
+	"defs": svgNamespace,
+	"path": svgNamespace,
+	"filter": svgNamespace, 
+	"feMorphology": svgNamespace,
+	"feGaussianBlur": svgNamespace,
+	"feOffset": svgNamespace,
+	"feComposite": svgNamespace,
+	"feColorMatrix": svgNamespace,
+	"use": svgNamespace
 },
 	textContentOnlyTag = {style: true, script: true};
 
@@ -370,6 +379,11 @@ function stache (filename, template) {
 			var section = state.node.section || state.attr.section;
 			if(section){
 				section.add(value);
+			} else if (value === svgNamespace) {
+				state.attr.value = {
+					value: value,
+					namespaceURI: 'http://www.w3.org/2000/xmlns/'
+				};
 			} else {
 				state.attr.value += value;
 			}

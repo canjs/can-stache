@@ -7106,6 +7106,30 @@ function makeTest(name, doc, mutation) {
 
 	});
 
+	QUnit.test("SVGs are not rendered correctly", function() {
+		var svg = '<svg width="233" height="233" viewBox="0 0 233 233" xmlns="http://www.w3.org/2000/svg">\
+				<defs>\
+					<path id="h-shape" d="M0 0h82.457v79.8h67.613V0H233v233h-82.93v-70.012H82.457V233H0z" />\
+					<filter x="-6.4%" y="-6.4%" width="112.9%" height="112.9%" filterUnits="objectBoundingBox" id="h-shape-shadow">\
+						<feMorphology radius="5" in="SourceAlpha" result="shadowSpreadInner1" />\
+						<feGaussianBlur stdDeviation="12.5" in="shadowSpreadInner1" result="shadowBlurInner1" />\
+						<feOffset in="shadowBlurInner1" result="shadowOffsetInner1" />\
+						<feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"\
+						/>\
+						<feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0" in="shadowInnerInner1" />\
+					</filter>\
+				</defs>\
+				<g fill="none" fill-rule="evenodd">\
+					<use fill="#000" filter="url(#h-shape-shadow)" xlink:href="#h-shape" />\
+					<path stroke="#000" stroke-width="10" d="M5 5v223h72.457v-70.012h77.613V228H228V5h-72.93v79.8H77.457V5H5z" stroke-linejoin="square"\
+					/>\
+				</g>\
+			</svg>';
+
+		var frag = stache(svg)({});
+		QUnit.equal(frag.children[0].getAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns'), "http://www.w3.org/2000/svg", "xmlns attr");
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
