@@ -616,6 +616,18 @@ test("Bracket expression", function(){
 	);
 	equal(compute.get(), "name",'foo["bar.baz"]');
 
+	// foo["bar.baz.quz"]
+	expr = new expression.Bracket(
+		new expression.Literal("bar.baz.quz"),
+		new expression.Lookup("foo")
+	);
+	compute = expr.value(
+		new Scope(
+			new SimpleMap({foo: {"bar.baz.quz": "name"}})
+		)
+	);
+	equal(compute.get(), "name",'foo["bar.baz.quz"]');
+
 	// foo[bar]
 	expr = new expression.Bracket(
 		new expression.Lookup("bar"),
