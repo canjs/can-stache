@@ -98,7 +98,7 @@ function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptio
         var rootValue = canReflect.getValue(root);
         // Convert possibly numeric key to string, because observeReader.get will do a charAt test on it.
         // also escape `.` so that things like ["bar.baz"] will work correctly
-        keyValue = ("" + keyValue).replace(".", "\\.");
+        keyValue = ("" + keyValue).replace(/\./g, "\\.");
 
         if (arguments.length) {
             observeReader.write(rootValue, observeReader.reads(keyValue), newVal);
