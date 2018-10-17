@@ -122,10 +122,24 @@ QUnit.test("scope.index works", function(){
 
 QUnit.test("for(list) works", function(){
 	var template = stache("<div>{{#for(list)}}[{{scope.index}}]{{/for}}</div>");
-    var list = ["a","b","c"];
-    var frag = template({
+	var list = ["a","b","c"];
+	var frag = template({
 		list: list,
 		vmProp: "a"
 	});
 	QUnit.equal( frag.firstChild.innerHTML, "[0][1][2]");
+});
+
+
+QUnit.test("for(value of object) works in a string", function(){
+	var template = stache("<div class='{{#for(value of object)}}[{{scope.key}}-{{value}}]{{/for}}'></div>");
+	var object = {
+		first: "FIRST",
+		second: "SECOND"
+	};
+	var frag = template({
+		object: object
+	});
+
+	QUnit.equal( frag.firstChild.className, "[first-FIRST][second-SECOND]");
 });

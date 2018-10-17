@@ -117,7 +117,7 @@ QUnit.test("saves the inverse of the selected value without ~ (#68)", function()
 });
 
 QUnit.test("not works also like if", function(){
-	var view = stache("<div>{{# not(this.value) }}{{truthy(this)}}{{else}}FALSEY{{/not}}</div>");
+	var view = stache("<div>{{# not(this.value) }}{{truthy(this)}}{{else}}FALSY{{/not}}</div>");
 
 	var data = new SimpleMap({
 		value: false
@@ -133,11 +133,11 @@ QUnit.test("not works also like if", function(){
 	QUnit.equal(frag.firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	QUnit.equal(frag.firstChild.innerHTML, "FALSEY");
+	QUnit.equal(frag.firstChild.innerHTML, "FALSY");
 });
 
 QUnit.test("not works inside if", function(){
-	var view = stache("<div>{{#if( not(this.value) )  }}{{truthy(this)}}{{else}}FALSEY{{/not}}</div>");
+	var view = stache("<div>{{#if( not(this.value) )  }}{{truthy(this)}}{{else}}FALSY{{/not}}</div>");
 
 	var data = new SimpleMap({
 		value: false
@@ -153,5 +153,5 @@ QUnit.test("not works inside if", function(){
 	QUnit.equal(frag.firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	QUnit.equal(frag.firstChild.innerHTML, "FALSEY");
+	QUnit.equal(frag.firstChild.innerHTML, "FALSY");
 });

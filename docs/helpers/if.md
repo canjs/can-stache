@@ -1,4 +1,4 @@
-@function can-stache.helpers.if {{#if(expression)}}
+@function can-stache.helpers.if if
 @parent can-stache.htags 2
 @signature `{{#if(EXPRESSION)}}FN{{else}}INVERSE{{/if}}`
 

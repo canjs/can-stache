@@ -1,4 +1,4 @@
-@function can-stache.helpers.let {{let expression}}
+@function can-stache.helpers.let let
 @parent can-stache.htags 5
 
 

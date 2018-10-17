@@ -11,7 +11,7 @@
 @group can-stache.types 6 Types
 @group can-stache/deprecated 7 Deprecated
 @package ../package.json
-@outline 3
+@outline 2
 
 @description Live binding templates.
 
@@ -121,7 +121,7 @@ Stache is designed to be:
 Most of the time, you are doing one of only 3 things with stache:
 
 - Writing values within HTML to the page.
-- Branching - writing some HTML to the page or some other HTML to the page.
+- Branching Logic - writing some HTML to the page or some other HTML to the page.
 - Looping - Iterating over a list of values and writing some HTML out for each value.
 
 ### Loading templates
@@ -248,19 +248,202 @@ Component.extend({
 is __critical__ to avoiding [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting) attacks. However, if you have HTML to insert and you know it is safe, you can use [can-stache.tags.unescaped]
 to insert it.
 
-### Branching
+### Branching Logic
 
-Stache provides three helpers that render content conditionally:
+Stache provides severals helpers that help render logic conditionally.
+For example, the following renders a sun if the `time` property equals `"day"`:
 
-- if
-- eq
-- switch
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
 
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<p on:click="this.toggle()">
+			Time:
+			{{# eq(this.time,"day") }}
+				SUN 🌞
+			{{ else }}
+				MOON 🌚
+			{{/ eq }}
+		</p>
+	`,
+	ViewModel: {
+		time: {default: "day"},
+		toggle(){
+			this.time = (this.time === "day" ? "night" : "day");
+		}
+	}
+});
+</script>
+```
+@codepen
+
+Notice that branching is performed using the [can-stache.tags.section],
+[can-stache.helpers.else] and
+[can-stache.tags.close] magic tags.  These define "sections" of content to render depending on
+what the helper does.  We call these the _TRUTHY_ and _FALSY_ sections. In the example above, the [can-stache.helpers.eq] helper renders the _TRUTHY_ section (`SUN 🌞`) if `this.time` equals `"day"`. If
+`this.time` is __not__ equal to `"day"`, the _FALSY_ section (`MOON 🌚`) is rendered.
+
+The following helpers are used to render conditionally:
+
+
+- [can-stache.helpers.if] - Renders the _TRUTHY_ section if the value is truthy.
+  ```html
+  EXAMPLE
+  ```
+- [can-stache.helpers.not] - Renders the _TRUTHY_ section if the value is falsy.
+- [can-stache.helpers.eq] - Renders the _TRUTHY_ section all values are equal.
+- [can-stache.helpers.and] - Renders the  _TRUTHY_ section if all values are truthy.
+- [can-stache.helpers.or] - Renders the  _TRUTHY_ section if any value is truthy.
+- [can-stache.helpers.switch] with [can-stache.helpers.case] - Renders the case section that matches the value.
+
+
+These helpers (except for [can-stache.helpers.switch]) can be combined. For example,
+we can show the sun if `this.time` equals `"day"` or `"afternoon"` as follows:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<p on:click="this.toggle()">
+			Time:
+			{{# or( eq(this.time,"day"), eq(this.time, "afternoon") ) }}
+				SUN 🌞
+			{{ else }}
+				MOON 🌚
+			{{/ eq }}
+		</p>
+	`,
+	ViewModel: {
+		time: {default: "day"},
+		toggle(){
+			this.time = (this.time === "day" ? "night" :
+				(this.time === "night" ? "afternoon" : "day"));
+		}
+	}
+});
+</script>
+```
+@codepen
+
+> NOTE: One of stache's goals is to keep your templates as simple as possible.
+> It might be better to create a `isSunUp` method in the ViewModel and use that instead.
 
 
 ### Looping
 
+Use [can-stache.helpers.for-of] to loop through values. The following writes out the name of
+each todo:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<ul>
+			{{# for(todo of this.todos) }}
+				<li>{{ todo.name }}</li>
+			{{/ for }}
+		</ul>
+	`,
+	ViewModel: {
+		todos: {
+			default(){
+				return [
+					{name: "Writing"},
+					{name: "Branching"},
+					{name: "Looping"}
+				]
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+Use [can-stache/keys/scope scope.index] to access the index of a value in the
+array. The following writes out the index with each todo's name:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<ul>
+			{{# for(todo of this.todos) }}
+				<li>{{scope.index}} {{ todo.name }}</li>
+			{{/ for }}
+		</ul>
+	`,
+	ViewModel: {
+		todos: {
+			default(){
+				return [
+					{name: "Writing"},
+					{name: "Branching"},
+					{name: "Looping"}
+				]
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+Use [can-stache.helpers.for-of] to loop through key-value objects.
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<ul>
+			{{# for(value of this.object) }}
+				<li>{{scope.key}} {{ value }}</li>
+			{{/ for }}
+		</ul>
+	`,
+	ViewModel: {
+		object: {
+			default(){
+				return {
+					first: "FIRST",
+					value: "VALUE"
+				};
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+
 ### Creating variables
+
+### Listening to events
+
+### Binding to DOM properties and attributes
+
+
 
 ### Creating helpers
 
@@ -269,6 +452,8 @@ Importing stuff into the template
 Creating helpers on the component
 
 Global Helpers
+
+### Accessing a helper if your property overwrites ...
 
 
 ## Use

@@ -1,5 +1,5 @@
 @function can-stache.helpers.unless {{#unless(expression)}}
-@parent can-stache.htags 4
+@parent can-stache/deprecated
 
 @signature `{{#unless(EXPRESSION)}}FN{{else}}INVERSE{{/unless}}`
 
