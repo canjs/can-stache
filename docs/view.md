@@ -1,12 +1,12 @@
-@typedef {function(Object,Object.<String, function>,can-view-nodelist/types/NodeList):documentFragment} can-stache.renderer(data, helpers,nodeList) renderer
+@typedef {function(Object,Object.<String, function>,can-view-nodelist/types/NodeList):documentFragment} can-stache.view(data, helpers,nodeList) view
 @parent can-stache.types
 
 @description A function returned by [can-stache] that renders a
 template into an html documentFragment.
 
-@signature `renderer(data, [helpers], [nodeList])`
+@signature `view(data, [helpers], [nodeList])`
 
-  A "renderer" function is a function returned by templates that can be used
+  A "view" function is a function returned by templates that can be used
   to render data into a documentFragment.
 
   @param {Object} data An object of data used to render the template.

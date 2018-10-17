@@ -24,7 +24,7 @@ template( { message: "Hello There!" } );
 
 
 @param {String} id The id of the element, whose `innerHTML` will be used to create a template.
-@return {can-stache.renderer} A renderer function that will render the
+@return {can-stache.view} A renderer function that will render the
 template.
 
 @body

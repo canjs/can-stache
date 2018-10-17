@@ -243,7 +243,7 @@ var core = {
 	 * @param {String} mode
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The html state of where the expression was found.
-	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
+	 * @return {function(can.view.Scope,can.view.Options, can-stache.view, can.view.renderer)}
 	 */
 	makeStringBranchRenderer: function(mode, expressionString, state){
 		var exprData = core.expression.parse(expressionString),

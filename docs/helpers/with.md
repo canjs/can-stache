@@ -1,5 +1,5 @@
 @function can-stache.helpers.with {{#with(expression)}}
-@parent can-stache.htags 17
+@parent can-stache/deprecated
 
 Changes the context within a block.
 

@@ -41,5 +41,22 @@ helpers.registerConverter = function(name, getterSetter) {
 	helpers.registerHelper(name, makeConverter(getterSetter) );
 };
 
+var converterHelpers = {
+	"not": {
+		get: function(obs, options){
+			if(helpers.looksLikeOptions(options)) {
+				return canReflect.getValue(obs) ? options.inverse() : options.fn();
+			} else {
+				return !canReflect.getValue(obs);
+			}
+
+		},
+		set: function(newVal, obs){
+			canReflect.setValue(obs, !newVal);
+		}
+	}
+};
+
+helpers.addConverter(converterHelpers);
 
 module.exports = helpers;

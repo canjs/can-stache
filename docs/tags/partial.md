@@ -14,7 +14,7 @@ const template = stache( "{{#each(people)}} {{>address.stache address}} {{/each}
 ```
 
 @param {can-stache/expressions/key-lookup|String} key A key used to lookup a
-[can-stache.renderer stache renderer function].   
+[can-stache.view stache renderer function].   
 
 The behavior is determined by what the key returns.  
 
@@ -82,7 +82,7 @@ const template = stache( "{{#person}} {{>address.stache address}} {{/person}}" )
 
 ## Functions as partials
 
-`{{>key}}` can be used to call [can-stache.renderer] functions in the scope.  For example:
+`{{>key}}` can be used to call [can-stache.view] functions in the scope.  For example:
 
 ```html
 <!-- Template -->

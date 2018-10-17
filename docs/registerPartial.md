@@ -13,7 +13,7 @@ const itemsTemplate = stache( "{{#each(items)}}{{>item.stache}}{{/each}}" );
 ```
 
 @param {String} name The name of the partial.
-@param {String|can-stache.renderer} template The string of a stache template or the
+@param {String|can-stache.view} template The string of a stache template or the
 returned result of a stache template.
 
 @body
