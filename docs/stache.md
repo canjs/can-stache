@@ -118,11 +118,18 @@ Stache is designed to be:
 
 ## Use
 
-Most of the time, you are doing one of only 3 things with stache:
+The following sections show you how to:
 
-- Writing values within HTML to the page.
-- Branching Logic - writing some HTML to the page or some other HTML to the page.
-- Looping - Iterating over a list of values and writing some HTML out for each value.
+- [Load templates](#Loadingtemplates) so they be processed into views.
+- [Writing values](#Writingvalues) within HTML to the page.
+- Writing some HTML to the page or some other HTML to the page with [branch logic](#BranchingLogic).
+- [Loop](#Looping) over a list of values and writing some HTML out for each value.
+- [Listen to events](#Listeningtoevents) on elements.
+- [Read and write](#Bindingtopropertiesandattributes) to element properties and attributes.
+- Simplifying your templates with:
+  - [Variables](#Creatingvariables)
+  - [Helpers](#Creatinghelpers)
+  - [Partials](#Creatingpartials)
 
 ### Loading templates
 
@@ -437,21 +444,345 @@ Component.extend({
 @codepen
 
 
-### Creating variables
-
 ### Listening to events
 
-### Binding to DOM properties and attributes
+[can-stache-bindings.event] documents how you can listen to events on elements or
+[can-component.prototype.ViewModel]s. The following listens to `click`s on a button:
 
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
 
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<button on:click="this.increment()">+1</button>
+		Count: {{this.count}}
+	`,
+	ViewModel: {
+		count: {default: 0},
+		increment(){
+			this.count++;
+		}
+	}
+});
+</script>
+```
+@codepen
+
+### Binding to properties and attributes
+
+[can-stache-bindings] provides directional bindings to connect
+values in stache to element or [can-component.prototype.ViewModel]
+properties or attributes.
+
+This makes it easy to:
+
+- Write out property values.
+
+  The following updates the checkboxes `checked` property
+  if the status is __not__ equal to 'critical':
+
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
+
+  Component.extend({
+  	tag: "my-demo",
+  	view: `
+  		<input type="checkbox"
+  			checked:from="not( eq(this.status, 'critical') )" />
+  			Can ignore?
+
+  		<button on:click="this.status = 'critical'">Critical</button>
+		<button on:click="this.status = 'medium'">Medium</button>
+		<button on:click="this.status = 'low'">Low</button>
+  	`,
+  	ViewModel: {
+  		status: {default: "low"}
+  	}
+  });
+  </script>
+  ```
+  @codepen
+
+- Update a value when an element property changes.
+
+  The following updates the [can-component.prototype.ViewModel]'s `name`
+  when the `<input/>` changes:
+
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
+
+  Component.extend({
+  	tag: "my-demo",
+  	view: `
+  		<input value:to="this.name" placeholder="name"/>
+  		Name: {{ this.name }}
+  	`,
+  	ViewModel: {
+  		name: {default: ""}
+  	}
+  });
+  </script>
+  ```
+  @codepen
+
+[can-stache-bindings] supports a wide variety of different bindings.  Please checkout its documentation.
+
+### Creating variables
+
+The [can-stache.helpers.let] helper lets you create local variables.  For example, we can
+create a `name` variable and write to that:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		{{ let name='' }}
+		<input value:to="name" placeholder="name"/>
+		Name: {{ name }}
+	`
+});
+</script>
+```
+@codepen
+
+Variables can help you avoid unnecessary [can-component.prototype.ViewModel] properties
+like above. This is very handy when wiring [can-component Component]s within a
+[can-stache.helpers.for-of] loop as follows:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		{{# for(todo of this.todos) }}
+			{{ let locked=true }}
+			<div>
+				<p>
+					Locked:
+					<input type='checkbox' checked:from="locked"/>
+				</p>
+				<p>
+					<input type='value' value:bind="todo.name" disabled:from="locked"/>
+				</p>
+			</div>
+		{{/ for }}
+	`,
+	ViewModel: {
+		todos: {
+			default(){
+				return [
+					{name: "Writing"},
+					{name: "Branching"},
+					{name: "Looping"}
+				];
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+Currently, you can only create variables with [can-stache.helpers.let] for the entire template or
+within [can-stache.helpers.for-of].  If there are other blocks where you would find this useful, please
+let us know!
 
 ### Creating helpers
 
-Importing stuff into the template
+Helpers can simplify your stache code.  While CanJS comes with many helpers, adding
+your own can reduce code. There are several different types of helpers, each with
+different benefits.
 
-Creating helpers on the component
+__Global Helpers__
 
-Global Helpers
+Use [can-stache.addHelper] to create a helper function that can be called from every
+template. The following makes an `upperCase` helper:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {stache, Component} from "can";
+
+stache.addHelper("upperCase", function(value){
+	return value.toUpperCase();
+})
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<h1>Hello {{ upperCase(this.subject) }}</h1>
+	`,
+	ViewModel: {
+		subject: {default: "World"}
+	}
+});
+</script>
+```
+@codepen
+
+Global helpers are easy to create and understand, but
+they might create conflicts if another CanJS library defines
+a similar helper.
+
+__Component Methods__
+
+Instead of creating a global helper, add your helper functions on
+your component [can-component.prototype.ViewModel].  The following
+adds the `upperCase` method to the [can-component.prototype.ViewModel].
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {stache, Component} from "can";
+
+function upperCase(value){
+	return value.toUpperCase();
+}
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<h1>Hello {{ this.upperCase(this.subject) }}</h1>
+	`,
+	ViewModel: {
+		subject: {default: "World"},
+
+		// View Helpers
+		upperCase: upperCase
+	}
+});
+</script>
+```
+@codepen
+
+
+<details>
+<summary>Importing Functions (older method)</summary>
+
+If you are using a module loader to import stache files, [can-view-import]
+can be used to import a function to a [can-stache/keys/scope/scope.vars] variable:
+
+```html
+<can-import from="app/helpers/upperCase"  module.default:to="scope.vars.myModule"/>
+```
+
+A replacement for this technique is being [designed here](https://github.com/canjs/can-stache/issues/610).
+
+</details>
+
+
+
+### Creating partials
+
+Partials are snippets of HTML that might be used several places. There are a few
+ways of reusing HTML.
+
+__Using Components__
+
+You can always define and use [can-component].
+
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "address-partial",
+	view: `
+		<address>{{this.street}}, {{this.city}}</address>
+	`
+});
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<h2>{{this.user1.name}}</h2>
+		<address-partial street:from="user1.street" city:from="user1.city"/>
+		<h2>{{this.user2.name}}</h2>
+		<address-partial street:from="user2.street" city:from="user2.city"/>
+	`,
+	ViewModel: {
+		user1: {
+			default(){
+				return {name: "Ramiya", street: "Stave", city: "Chicago"}
+			}
+		},
+		user2: {
+			default(){
+				return {name: "Bohdi", street: "State", city: "Chi-city"}
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+__Calling views__
+
+You can create views programmatically with `stache`, make those views available
+to another view (typically through the [can-component.prototype.ViewModel]).  The following
+creates an `addressView` and makes it available to `<my-demo>`'s [can-component.prototype.view]
+through the `addressView` property on the `ViewModel`:
+
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {stache, Component} from "can";
+
+const addressView = stache(`<address>{{this.street}}, {{this.city}}</address>`);
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<h2>{{this.user1.name}}</h2>
+		{{ addressView(street=user1.street city=user1.city) }}
+		<h2>{{this.user2.name}}</h2>
+		{{ addressView(street=user2.street city=user2.city) }}
+	`,
+	ViewModel: {
+		addressView: {
+			default(){
+				return addressView;
+			}
+		},
+		user1: {
+			default(){
+				return {name: "Ramiya", street: "Stave", city: "Chicago"}
+			}
+		},
+		user2: {
+			default(){
+				return {name: "Bohdi", street: "State", city: "Chi-city"}
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+__Inline Partials__
+
+If a single template needs the same HTML multiple places, use [can-stache.tags.named-partial {{<partialName}}]
+to create an inline partial:
+
 
 ### Accessing a helper if your property overwrites ...
 

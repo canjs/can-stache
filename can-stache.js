@@ -24,10 +24,12 @@ var canReflect = require('can-reflect');
 var Scope = require('can-view-scope');
 var TemplateContext = require("can-view-scope/template-context");
 var ObservationRecorder = require('can-observation-recorder');
+var canSymbol = require("can-symbol");
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
 require('can-view-nodelist');
+
 
 if(!viewCallbacks.tag("content")) {
 	// This was moved from the legacy view/scanner.js to here.
@@ -36,6 +38,9 @@ if(!viewCallbacks.tag("content")) {
 		return tagData.scope;
 	});
 }
+
+var isViewSymbol = canSymbol.for("can.isView");
+
 
 var wrappedAttrPattern = /[{(].*[)}]/;
 var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
@@ -503,6 +508,9 @@ function stache (filename, template) {
 
 		return renderer(scope.addLetContext(), nodeList);
 	});
+
+	// Identify is a view type
+	scopifiedRenderer[isViewSymbol] = true;
 
 	return scopifiedRenderer;
 }
