@@ -1,13 +1,10 @@
 @page can-stache.magicTagTypes Magic Tag Types
 @parent can-stache.pages 0
+@hide
 
 @body
 
-Rendering behavior is controlled with magic tags that look like `{{}}`.  There
-are two main forms of magic tags:
 
- - Insertion tags - insert their value into the result like `{{expression}}` and `{{{expression}}}`.
- - Section tags - optional render a sub-section like `{{#expression}} ... {{/expression}}`.
 
 Let’s see the general behavior of each tag type:
 

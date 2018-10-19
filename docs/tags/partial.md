@@ -1,5 +1,5 @@
 @function can-stache.tags.partial {{>key}}
-@parent can-stache.tags 6
+@parent can-stache/deprecated
 
 Render another template within the current template.
 

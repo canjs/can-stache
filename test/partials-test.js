@@ -1,0 +1,528 @@
+var stache = require('../can-stache');
+var stacheTestHelpers = require("./helpers")(document);
+var QUnit = require('steal-qunit');
+var SimpleMap = require('can-simple-map');
+var DefineList = require('can-define/list/list');
+var DefineMap = require('can-define/map/map');
+var nodeLists = require('can-view-nodelist');
+var parser = require('can-view-parser');
+var string = require('can-string');
+var canSymbol = require("can-symbol");
+
+QUnit.module("can-stache partials");
+
+QUnit.test("Deeply nested partials", function () {
+	var t = {
+		template: "{{#nest1}}{{#nest2}}{{>partial}}{{/nest2}}{{/nest1}}",
+		expected: "Hello!",
+		partials: {
+			partial: stache('{{#nest3}}{{name}}{{/nest3}}')
+		},
+		data: {
+			nest1: {
+				nest2: {
+					nest3: {
+						name: 'Hello!'
+					}
+				}
+			}
+		}
+	};
+
+	QUnit.deepEqual(stacheTestHelpers.getText(t.template,t.data, {partials: t.partials}), t.expected);
+});
+
+QUnit.test("Partials correctly set context", function () {
+	var t = {
+		template: "{{#users}}{{>partial}}{{/users}}",
+		expected: "foo - bar",
+		partials: {
+			partial: stache('{{ name }} - {{ ../company }}')
+		},
+		data: {
+			users: [{
+				name: 'foo'
+			}],
+			company: 'bar'
+		}
+	};
+
+	QUnit.deepEqual(stacheTestHelpers.getText(t.template,t.data, {partials: t.partials}), t.expected);
+});
+
+test("Using a renderer function as a partial", function(){
+	var template = stache("{{> other}}");
+	var partial = stache("hello there");
+	var map = new SimpleMap({ other: null });
+
+	var frag = template(map);
+
+	equal(frag.firstChild.nodeValue, "", "Initially it is a blank textnode");
+
+	map.set("other", partial);
+
+	equal(frag.firstChild.nodeValue, "hello there", "partial rendered");
+});
+
+test("partials are not working within an {{#each}} (#2174)", function() {
+
+	var data = new SimpleMap({
+		items : new DefineList([{
+			name : 'foo'
+		}]),
+		itemRender: stache('{{name}}')
+	});
+
+	var renderer = stache('<div>{{#each items}}{{name}}{{/each}}</div>');
+
+	var frag = renderer(data);
+
+	data.get('items').get(0).set('name', 'WORLD');
+
+	equal( frag.firstChild.innerHTML, "WORLD", "updated to world");
+
+
+	data.get('items').splice(0, 0, {
+		name : 'HELLO'
+	});
+	equal( frag.firstChild.innerHTML, "HELLOWORLD");
+});
+
+test("partials don't leak (#2174)", function() {
+
+	stache.registerHelper("somethingCrazy", function(name, options){
+		return function(el){
+			var nodeList = [el];
+			nodeList.expression = "something crazy";
+			nodeLists.register(nodeList, function(){
+				ok(true, "nodeList torn down");
+			}, options.nodeList, true);
+			nodeLists.update(options.nodeList, [el]);
+		};
+	});
+	var data = new SimpleMap({
+		items : new DefineList([{
+			name : 'foo'
+		}]),
+		itemRender: stache('{{somethingCrazy name}}')
+	});
+
+	var renderer = stache('<div>{{#each items}}{{>../itemRender}}{{/each}}</div>');
+
+	renderer(data);
+
+	data.get('items').pop();
+});
+
+test("partials should leave binding to helpers and properties (#2174)", function() {
+	stache.registerPartial('test', '<input id="one"> {{name}}');
+	var renderer = stache('{{#each items}}{{>test}}{{/each}}');
+
+	var data = new SimpleMap({ items: new DefineList([]) });
+	var frag = renderer(data);
+	data.get('items').splice(0, 0, {name: 'bob'});
+
+	// simulate the user entering text
+	frag.firstChild.nextSibling.setAttribute('value', 'user text');
+	// re-render the partial for the 0th element
+	data.set('items.0.name', 'dave');
+
+	equal(frag.firstChild.nextSibling.getAttribute('value'), 'user text');
+});
+
+test("content within {{#if}} inside partial surrounded by {{#if}} should not display outside partial (#2186)", function() {
+	stache.registerPartial('partial', '{{#showHiddenSection}}<div>Hidden</div>{{/showHiddenSection}}');
+	var renderer = stache('<div>{{#showPartial}}{{>partial}}{{/showPartial}}</div>');
+	var data = new SimpleMap({
+		showPartial: true,
+		showHiddenSection: false
+	});
+	var frag = renderer(data);
+	data.set('showHiddenSection', true);
+	data.set('showPartial', false);
+
+	equal( frag.firstChild.innerHTML, '');
+});
+
+
+test( "named partials don't render (canjs/can-stache/issues/3)", function () {
+	var renderer = stache( "{{<foo}}bar{{/foo}}<div></div>" );
+	var data = new SimpleMap( {} );
+	var frag = renderer( data );
+
+	equal( stacheTestHelpers.innerHTML( frag.firstChild ), "" );
+});
+
+test( "named partials can be inserted (canjs/can-stache/issues/3)", function () {
+	var renderer = stache( "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>" );
+	var data = new SimpleMap( {} );
+	var frag = renderer( data );
+
+	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+});
+
+test( "named partials can be inserted with an initial scope (canjs/can-stache/issues/3)", function () {
+	var renderer = stache( "{{<personPartial}}{{lname}}, {{fname}}{{/personPartial}} <span>Test:</span><div>{{>personPartial person}}</div>" );
+	var data = new SimpleMap({
+		person: {
+			fname: "Darryl",
+			lname: "Anka"
+		}
+	});
+	var frag = renderer( data );
+
+	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "Anka, Darryl" );
+});
+
+test( "named partials work with live binding (canjs/can-stache/issues/3)", function () {
+	var renderer = stache( "{{<foo}}{{.}}{{/foo}}<span>Test: {{nested.prop.test}}</span>{{#each greatJoy}}<div>{{>foo}}</div>{{/each}}" );
+	var data = new SimpleMap({
+		nested: new SimpleMap({
+			prop: new SimpleMap({
+				test: "works?"
+			})
+		}),
+		greatJoy: new DefineList([
+			"happy",
+			"thrilled",
+			"ecstatic"
+		])
+	});
+	var frag = renderer( data );
+	var div = document.createElement( "div" );
+	div.appendChild( frag );
+
+	equal( stacheTestHelpers.innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works?", "Named partial property rendered" );
+	equal( div.getElementsByTagName( "div" ).length, 3, "Named partial list rendered");
+
+	data.get( "nested").get("prop").set("test", "works!" );
+	equal( stacheTestHelpers.innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works!", "Named partial updates when attr is updated" );
+
+	data.get( "greatJoy").set(0, "quite happy" );
+	equal( stacheTestHelpers.innerHTML( div.getElementsByTagName( "div" )[ 0 ] ), "quite happy", "Named partial list updates when list item attr is updated" );
+
+	data.get( "greatJoy" ).push( "Nintendo Sixty-FOOOOOOOOOOUR" );
+	equal( div.getElementsByTagName( "div" ).length, 4, "Named partial list updates with new item" );
+});
+
+test('stache can accept an intermediate with a named partial (canjs/can-stache/issues/3)', function(){
+	var template = "{{<foo}}bar{{/foo}} <span>Test:</span><div>{{>foo}}</div>";
+	var intermediate = parser( template, {}, true );
+
+	var renderer = stache(intermediate);
+	var data = new SimpleMap( {} );
+	var frag = renderer( data );
+
+	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+});
+
+test('named partials can reference each other (canjs/can-stache/issues/3)', function(){
+	var template = "{{<foo}}hello {{>bar}}{{/foo}} {{<bar}}world{{/bar}} <span>Test:</span><div>{{>foo}}</div>";
+	var intermediate = parser( template, {}, true );
+
+	var renderer = stache(intermediate);
+	var data = new SimpleMap( {} );
+	var frag = renderer( data );
+
+	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "hello world" );
+});
+
+test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
+	var renderer = stache( "{{<foo}}<li>{{name}}<ul>{{#each descendants}}{{>foo}}{{/each}}</ul></li>{{/foo}} <ul>{{#with ychromosome}}{{>foo}}{{/with}}</ul>" );
+	var data = new SimpleMap({
+		ychromosome: {
+			name: "AJ",
+			descendants: [
+				{
+					name: "tim",
+					descendants: []
+				},
+				{
+					name: "joe",
+					descendants: [
+						{
+							name: "chad",
+							descendants: []
+						},
+						{
+							name: "goku",
+							descendants: [
+								{
+									name: "gohan",
+									descendants: []
+								}
+							]
+						}
+					]
+				},
+				{
+					name: "sam",
+					descendants: []
+				}
+			]
+		}
+	});
+	var frag = renderer( data );
+	var fraghtml = stacheTestHelpers.innerHTML( frag.lastChild );
+
+	equal( (fraghtml.match(/<li>/g) || []).length, 7 );
+	ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
+});
+
+test("Templates can refer to themselves with {{>scope.view .}} (#159)", function() {
+	var thing = new DefineMap({
+		child: {
+			hasThing: true,
+			child: {
+				hasThing: false,
+				child: {
+					hasThing: true
+				}
+			}
+		}
+	});
+
+	var renderer = stache(
+		"{{#child}}" +
+			"<span>" +
+				"{{#if hasThing}}" +
+					"{{>scope.view .}}" +
+				"{{/if}}" +
+			"</span>" +
+		"{{/child}}"
+	);
+
+	var view = renderer(thing);
+
+	equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
+	equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
+});
+
+test("Self-referential templates assume 'this'", function() {
+	var thing = new DefineMap({
+		child: {
+			hasThing: true,
+			child: {
+				hasThing: false,
+				child: {
+					hasThing: true
+				}
+			}
+		}
+	});
+
+	var renderer = stache(
+		"{{#child}}" +
+			"<span>" +
+				"{{#if hasThing}}" +
+					"{{>scope.view}}" +
+				"{{/if}}" +
+			"</span>" +
+		"{{/child}}"
+	);
+
+	var view = renderer(thing);
+
+	equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
+	equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
+});
+
+test("Self-referential templates work with partial templates", function() {
+	var thing = new DefineMap({
+		child: {
+			hasThing: true,
+			child: {
+				hasThing: false,
+				child: {
+					hasThing: true
+				}
+			}
+		}
+	});
+
+	var renderer = stache(
+		"{{<somePartial}}" +
+			"foo" +
+		"{{/somePartial}}" +
+		"{{#child}}" +
+			"<span>" +
+				"{{#if hasThing}}" +
+					"{{>somePartial}}" +
+					"{{>scope.view}}" +
+				"{{/if}}" +
+			"</span>" +
+		"{{/child}}"
+	);
+
+	var view = renderer(thing);
+
+	equal(view.firstChild.firstChild.nodeValue, "foo", "Got the second span");
+});
+
+test("Self-referential templates can be given scope", function() {
+	var thing = new DefineMap({
+		child: {
+			someProp: 1,
+			hasThing: true,
+			child: {
+				hasThing: false,
+				child: {
+					hasThing: true
+				}
+			}
+		}
+	});
+
+	var renderer = stache(
+		"{{#child}}" +
+			"<span>" +
+				"{{someProp}}" +
+				"{{#if hasThing}}" +
+					"{{>scope.view someProp}}" +
+				"{{/if}}" +
+			"</span>" +
+		"{{/child}}"
+	);
+
+	var view = renderer(thing);
+
+	equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
+});
+
+test("Partials with custom context", function () {
+	var template;
+	var div = document.createElement('div');
+
+	template = stache("{{>dude dudes}}");
+
+	var data = new SimpleMap({
+		dudes: [
+			{ name: "austin" },
+			{ name: "justin" }
+		]
+	});
+	var dom = template(data,{
+		partials: {
+			dude: stache("{{#this}}<span>{{name}}</span>{{/this}}")
+		}
+	});
+	div.appendChild(dom);
+	var spans = div.getElementsByTagName('span');
+
+	equal(spans.length, 2, 'Got two dudes');
+	equal(stacheTestHelpers.innerHTML(spans[0]), 'austin', 'custom context inside');
+	equal(stacheTestHelpers.innerHTML(spans[1]), 'justin', 'custom context inside');
+});
+
+test("Partials with nested custom context and parent lookup", function () {
+	var template;
+	var div = document.createElement('div');
+
+	template = stache("{{#theData}}{{>dude dudes}}{{/theData}}");
+
+	var dom = template({
+		theData: new SimpleMap({
+			hello: "Hello",
+			dudes: [
+				{ name: "austin" },
+				{ name: "justin" }
+			]
+		})
+	},{
+		helpers: {
+			cap: function (name) {
+				return string.capitalize(name());
+			}
+		},
+		partials: {
+			dude: stache("{{#this}}<span>{{../../hello}} {{name}}</span>{{/this}}")
+		}
+	});
+	div.appendChild(dom);
+	var spans = div.getElementsByTagName('span');
+
+	equal(spans.length, 2, 'Got two dudes');
+	equal(stacheTestHelpers.innerHTML(spans[0]), 'Hello austin', 'correct context');
+	equal(stacheTestHelpers.innerHTML(spans[1]), 'Hello justin', 'and parent lookup worked also');
+});
+
+test("Partials with custom context and helper", function () {
+	var template;
+	var div = document.createElement('div');
+
+	template = stache("{{>dude dudes}}");
+
+	var data = new SimpleMap({
+		dudes: new DefineList([
+			{ name: "austin" },
+			{ name: "justin" }
+		])
+	});
+	var dom = template(data,{
+		helpers: {
+			cap: function (name) {
+				return string.capitalize(name());
+			}
+		},
+		partials: {
+			dude: stache("{{#this}}<span>{{cap name}}</span>{{/this}}")
+		}
+	});
+	div.appendChild(dom);
+	var spans = div.getElementsByTagName('span');
+
+	equal(spans.length, 2, 'Got two dudes');
+	equal(stacheTestHelpers.innerHTML(spans[0]), 'Austin', 'correct context');
+	equal(stacheTestHelpers.innerHTML(spans[1]), 'Justin', 'and helpers worked also');
+});
+
+/*
+QUnit.test("can pass values to partials as let scope", function(){
+	var address = stache("<label>{{street}}, {{city}}</label>");
+
+	var view = stache("<div>{{>address street=user1.street city=user2.city}}</div>");
+
+	var frag = view({
+		user1: {street: "Stave", city: "Chicago"},
+		address: address
+	});
+
+	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave, Chicago");
+});*/
+
+
+QUnit.test("Using call expressions works and passes the nodeList", 2, function(){
+	var addressView = stache("<address>{{this.street}}</address>");
+
+	var addressPartial = function(data, nodeList){
+		QUnit.ok(nodeList, true, "has a nodelist");
+		return addressView.apply(this, arguments);
+	};
+	addressPartial[canSymbol.for("can.isView")] = true;
+	var view = stache("<div>{{ addressPartial(street=user.street) }}</div>");
+
+	var frag = view({
+		addressPartial: addressPartial,
+		user: {
+			street: "Stave"
+		}
+	});
+
+	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave");
+});
+
+QUnit.test("inline partials are accessible from call expressions", 1, function(){
+
+	var view = stache(
+		"{{<addressPartial}}<address>{{this.street}}</address>{{/addressPartial}}"+
+		"<div>{{ addressPartial(street=user.street) }}</div>"
+	);
+
+	var frag = view({
+		user: {
+			street: "Stave"
+		}
+	});
+
+	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave");
+});

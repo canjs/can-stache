@@ -2,12 +2,12 @@
 @parent can-views
 @collection can-core
 @release 2.1
-@group can-stache.pages 0 Pages
-@group can-stache.static 1 Methods
-@group can-stache.tags 2 Tags
-@group can-stache/expressions 3 Expressions
+@group can-stache.tags 0 Tags
+@group can-stache.htags 1 Helpers
+@group can-stache/expressions 2 Expressions
+@group can-stache.static 3 Methods
 @group can-stache/keys 4 Key Operators
-@group can-stache.htags 5 Helpers
+@group can-stache.pages 5 Pages
 @group can-stache.types 6 Types
 @group can-stache/deprecated 7 Deprecated
 @package ../package.json
@@ -116,7 +116,7 @@ Stache is designed to be:
     {{/ }}
     ```
 
-## Use
+## Basic Use
 
 The following sections show you how to:
 
@@ -210,6 +210,7 @@ Component.extend({
 });
 </script>
 ```
+@codepen
 
 You can use [can-stache.tags.escaped] on any part of an HTML element except the tag name:
 
@@ -231,6 +232,7 @@ Component.extend({
 });
 </script>
 ```
+@codepen
 
 You can call methods within [can-stache.tags.escaped] too:
 
@@ -250,6 +252,7 @@ Component.extend({
 });
 </script>
 ```
+@codepen
 
 [can-stache.tags.escaped] will escape the value being inserted into the page. This
 is __critical__ to avoiding [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting) attacks. However, if you have HTML to insert and you know it is safe, you can use [can-stache.tags.unescaped]
@@ -693,7 +696,8 @@ ways of reusing HTML.
 
 __Using Components__
 
-You can always define and use [can-component].
+You can always define and use [can-component]. The following defines and uses
+an `<address-view>` component:
 
 
 ```html
@@ -702,7 +706,7 @@ You can always define and use [can-component].
 import {Component} from "can";
 
 Component.extend({
-	tag: "address-partial",
+	tag: "address-view",
 	view: `
 		<address>{{this.street}}, {{this.city}}</address>
 	`
@@ -712,9 +716,9 @@ Component.extend({
 	tag: "my-demo",
 	view: `
 		<h2>{{this.user1.name}}</h2>
-		<address-partial street:from="user1.street" city:from="user1.city"/>
+		<address-view street:from="user1.street" city:from="user1.city"/>
 		<h2>{{this.user2.name}}</h2>
-		<address-partial street:from="user2.street" city:from="user2.city"/>
+		<address-view street:from="user2.street" city:from="user2.city"/>
 	`,
 	ViewModel: {
 		user1: {
@@ -784,97 +788,552 @@ If a single template needs the same HTML multiple places, use [can-stache.tags.n
 to create an inline partial:
 
 
-### Accessing a helper if your property overwrites ...
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		{{< addressView }}
+			<address>{{ this.street}}, {{ this.city }}</address>
+		{{/ addressView }}
+		<h2>{{ this.user1.name }}</h2>
+		{{ addressView(user1) }}
+		<h2>{{ this.user2.name }}</h2>
+		{{ addressView(user2) }}
+	`,
+	ViewModel: {
+		user1: {
+			default(){
+				return {name: "Ramiya", street: "Stave", city: "Chicago"}
+			}
+		},
+		user2: {
+			default(){
+				return {name: "Bohdi", street: "State", city: "Chi-city"}
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
 
 
-## Use
+## Other uses
+
+### Reading promises
+
+Stache can read "virtual" properties from [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and other types configured to work with
+[can-reflect.getKeyValue].
+
+The following "virtual" keys can be read from promises:
+
+- `isPending` - `true` if the promise has not been resolved or rejected.
+- `isResolved` - `true` if the promise has resolved.
+- `isRejected` - `true` if the promise was rejected.
+- `value` - the resolved value.
+- `reason` - the rejected value.
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<div>
+			{{# if(promise.isPending) }} Pending... {{/ if }}
+			{{# if(promise.isRejected) }}
+				Rejected! {{ promise.reason }}
+			{{/ if }}
+			{{# if(promise.isResolved) }}
+				Resolved: {{ promise.value }}
+			{{/ if}}
+		</div>
+		<button on:click="resolve('RESOLVED',2000)">Resolve in 2s</button>
+		<button on:click="reject('REJECTED',2000)">Reject in 2s</button>
+	`,
+	ViewModel: {
+		promise: "any",
+		resolve(value, time){
+			this.promise = new Promise((resolve)=>{
+				setTimeout(()=>{
+					resolve(value);
+				},time)
+			});
+		},
+		reject(value, time){
+			this.promise = new Promise((resolve, reject)=>{
+				setTimeout(()=>{
+					reject(value);
+				},time)
+			});
+		},
+		connectedCallback(){
+			this.resolve("RESOLVED", 2000);
+		}
+	}
+});
+</script>
+```
+@codepen
+
+### Syntax Highlighting
+
+Stache is very similar to handlebars and mustache.  Most editors have plugins for one of these
+formats.
+
+### Spacing and formatting
+
+Stache tolerates spacing similar to JavaScript. However, we try to following the following
+spacing in the following example:
+
+```html
+{{# if( this.check ) }}
+	{{ this.value }}
+{{ else }}
+	{{ this.method( arg1 ) }}
+{{/ if}}
+```
+
+You can use the following regular expressions to create this spacing:
+
+- replace `\{\{([^ #\/\^!])` with `{{ $1`
+- replace `\{\{([#\/\^!])([^ ])` with `{{$1 $2`
+- replace `([^ ])\}\}` with `$1 }}`
+
+
+### Accessing a helper if your property overwrites
+
+Sometimes you have data with properties that conflict with stache's
+helpers, but you still need to access those helpers.  To do this,
+you can access all those helpers on `scope.helpers` like `scope.helpers.eq`.
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<p on:click="this.toggle()">
+			Time:
+			{{# scope.helpers.eq(this.eq,"day") }}
+				SUN 🌞
+			{{ else }}
+				MOON 🌚
+			{{/ }}
+		</p>
+	`,
+	ViewModel: {
+		eq: {default: "day"},
+		toggle(){
+			this.eq = (this.eq === "day" ? "night" : "day");
+		}
+	}
+});
+</script>
+```
+@codepen
+
+### Removing whitespace
+
+Stache renders whitespace. For example, the following will render the space between
+the `<h1>` tags and the `{{this.message}}` magic tag:
+
+```js
+import {stache} from "can";
+
+var view = stache(`<h1>
+	{{this.message}}
+</h1>`);
+
+var fragment = view({message: "Hi"});
+
+console.log( fragment.firstChild.innerHTML ) //-> "\n\tHi\n"
+```
+@codepen
+
+You can use [can-stache.tags.whitespace] to remove this whitespace like:
+
+
+```js
+import {stache} from "can";
+
+var view = stache(`<h1>
+	{{-this.message-}}
+</h1>`);
+
+var fragment = view({message: "Hi"});
+
+console.log( fragment.firstChild.innerHTML ) //-> "Hi"
+```
+@codepen
+
+## Understanding the stache language
 
 Stache has a variety of magic tags and expressions that control the behavior of
 the DOM it produces.  Furthermore, you are able to customize this behavior
 to a large extent.
 
-This page introduces all of [can-stache]'s major functionality, including:
+The following sections outline stache's formal syntax and grammar.  This knowledge
+can be useful when attempting to combine features into advanced functionality.
+
+
 
 - Magic tags - Magic tags like [can-stache.tags.escaped] and [can-stache.tags.unescaped]
   control control how stache operates on the DOM.
-- Expression types - This is the valid semantics (__TODO__) within a magic tag. For example, you
+- Expression types - This is the valid semantics within a magic tag. For example, you
   can call functions like `{{ this.callSomeMethod() }}`.
-- Pre
+- Scope and context - How variables and `this` get looked up.
 
+### Magic tags
 
+Rendering behavior is controlled with magic tags that look like `{{}}`.  There
+are several forms of magic tags:
 
+- Insertion tags
+  - [can-stache.tags.escaped] - Insert escaped content into the DOM.
+  - [can-stache.tags.unescaped] - Insert unescaped content into the DOM.
+  - [can-stache.tags.comment] - Make a comment.
+- Section tags - optional render a sub-section.
+  - [can-stache.tags.section]TRUTHY[can-stache.helpers.else]FALSY[can-stache.tags.close] - Optionally render the _TRUTHY_ or _FALSY_ section.
+  - [can-stache.tags.inverse]FALSY[can-stache.helpers.else]TRUTHY[can-stache.tags.close] - Optionally render the _TRUTHY_ or _FALSY_ section.
+- Special
+  - [can-stache.tags.named-partial {{<partialName}}]...[can-stache.tags.close {{/partialName}}] - Create
+    an inline partial.
+  - [can-stache.tags.whitespace] - Remove whitespace.
 
+Magic tags are valid in the following places in HTML:
 
+- Between a open and closed tag:
+  ```html
+  <div> {{magic}} </div>
+  <div> {{#magic}} {{/magic}} </div>
+  ```
+- Wrapping a series of opening and closing tags:
+  ```html
+  <div> {{#magic}} <label></label> {{/magic}} </div>
+  <div> {{#magic}} <label></label><span></span> {{/magic}} </div>
+  ```
+- Within an attribute:
+  ```html
+  <div class="selected {{magic}}"></div>
+  <div class="{{#magic}}selected{{/magic}}"></div>
+  ```
+- Within a tag:
+  ```html
+  <div {{magic}}></div>
+  ```
+- Within a tag, wrapping attributes:
+  ```html
+  <div {{#magic}}class="selected"{{/magic}}></div>
+  <input {{#magic}}checked{{/magic}}></div>
+  ```
 
+The following places are not supported:
 
+- Defining the tag name:
+  ```html
+  <{{tagName}}></{{tagName}}>
+  ```
+- Wrapping an opening or closing tag:
+  ```html
+  <div> {{#magic}} <label> {{/magic}} </label></div>
+  <div> <label> {{#magic}} </label><span></span> {{/magic}} </div>
+  ```
+- Intersecting part of an attribute:
+  ```html
+  <div {{attributeName}}="selected"></div>
+  <div {{#magic}}class="{{/magic}}selected"></div>
+  ```
 
-Learning stache is a bit like learning another language.  
+### Expression types
 
+Stache supports different expression types within most of the magic tags. The following
+uses most of the expressions available:
 
-
-Stache templates are a [mustache](https://mustache.github.io/mustache.5.html) and [handlebars](http://handlebarsjs.com/) compatible
-syntax.  
-
-The following
-creates a stache template, renders it with data, and inserts
-the result into the page:
-
-```js
-import stache from "can-stache";
-
-// renderer is a "renderer function"
-const renderer = stache( "<h1>Hello {{subject}}</h1>" );
-
-// "renderer functions" render a template and return a
-// document fragment.
-const fragment = renderer( { subject: "World" } );
-
-// A document fragment is a collection of elements that can be
-// used with jQuery or with normal DOM methods.
-fragment; //-> <h1>Hello World</h1>
-document.body.appendChild( fragment );
+```html
+<div> {{ this.method( 1, keyA=null keyB=true )[key]( "string", value ) }}
 ```
 
-Render a template with observable data like [can-define/map/map DefineMap]s or [can-define/list/list DefineList]s and the
-resulting HTML will update when the observable data changes.
+There are 6 expression types stache supports:
 
-```js
-import DefineMap from "can-define/map/map";
+- Literal expressions like `{{"string"}}`
+- KeyLookup expressions like `{{key}}`
+- Call expressions like `{{method(arg)}}`
+- Hash expressions like `{{prop=key}}`
+- Bracket expressions like `{{[key]}}`
+- Helper expressions like `{{helper arg}}` (deprecated, but will probably be supported forever)
 
+#### Literal expressions
 
-const renderer = stache( "<h1>Hello {{subject}}</h1>" );
-const map = new DefineMap( { subject: "World" } );
-const fragment = renderer( map );
-document.body.appendChild( fragment );
+A [can-stache/expressions/literal] specifies JS primitive values like:
 
-map.subject = "Earth";
+- Strings `"strings"`
+- Numbers `5`
+- Booleans `true` or `false`
+- And `null` or `undefined`
 
-document.body.innerHTML; //-> <h1>Hello Earth</h1>
+They are usually passed as arguments to Call expressions like:
+
+```html
+{{ task.filter( "completed", true ) }}
 ```
 
-There’s a whole lot of behavior that `stache` provides.  The following walks through
-the most important stuff:
+#### KeyLookup expressions
 
-- [can-stache.magicTagTypes] - The different tag types like `{{key}}` and `{{#key}}...{{/key}}`
-- [can-stache.scopeAndContext] - How key values are looked up.
-- [can-stache.expressions] - Supported expression types like `{{helper arg}}` and `{{method(arg)}}`
-- [can-stache.Acquisition] - How to load templates into your application.
-- [can-stache.Helpers] - The built in helpers and how to create your own.
-- [can-stache.Binding] - How live binding works.
+A [can-stache/expressions/key-lookup] specifies a value in the [can-view-scope scope]
+that will be looked up. KeyLookup expressions
+can be the entire stache expression like:
+
+```html
+{{ key }}
+```
+
+Or they can make up the method, arguments, bracket, and hash value parts of
+Call and Hash expressions:
+
+```html
+{{ method( arg1, arg2 ) }}      Call
+{{ method( prop=hashValue ) }}  Hash
+{{ [key] }}                     Bracket
+```
+
+The value returned up by a KeyLookup depends on what the [can-stache.key] looks like, and
+the scope.
+
+#### Call expressions
+
+A [can-stache/expressions/call] calls a function looked up in the [can-view-scope scope]. It looks like:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: 'my-demo',
+	view: `<h1>{{ this.pluralize(this.type, this.ages.length) }}</h1>`,
+	ViewModel: {
+		pluralize( type, count ) {
+			return type + ( count === 1 ? "" : "s" );
+		},
+		ages: {default: ()=> [ 22, 32, 42 ] },
+		type: {default: "age"}
+	}
+});
+</script>
+```
+@codepen
 
 
-## Syntax
+Call expression arguments are comma (,) separated.  If a Hash expression is an argument,
+an object with the hash properties and values will be passed. For example:
 
-### Magic Tags
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
 
-### Expressions
+Component.extend({
+	tag: 'my-demo',
+	view: `<h1>{{ this.pluralize(word=this.type count=this.ages.length) }}</h1>`,
+	ViewModel: {
+		pluralize( options ) {
+			return options.word + ( options.count === 1 ? "" : "s" );
+		},
+		ages: {default: ()=> [ 22, 32, 42 ] },
+		type: {default: "age"}
+	}
+});
+</script>
+```
+@codepen
 
-## Getting Syntax Highlighting
 
-Stache is very similar to handlebars and mustache.  Most editors have plugins for this
-format.
+#### Hash expressions
 
-## Spacing and formatting
+A [can-stache/expressions/hash] specifies a property value on a object
+argument. Notice how `method` is called below:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: 'my-demo',
+	view: `<h1>{{ this.method(a=this.aProp b=null, c=this.func() ) }}</h1>`,
+	ViewModel: {
+		method( arg1, arg2 ) {
+			console.log(arg1, arg2) //-> {aProp: "aValue", b: null},{c:"FUNC"}
+		},
+		aProp: {default: "aValue" },
+		func(){
+			return "FUNC";
+		}
+	}
+});
+</script>
+```
+@codepen
+
+#### Bracket expressions
+
+A [can-stache/expressions/bracket] can be used to look up a dynamic property in the [can-view-scope scope]. This is very useful when looping through properties to write out on many records:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: 'my-demo',
+	view: `
+		<table>
+			{{# for(record of records) }}
+				<tr>
+					{{# for(key of keys )}}
+						<td>{{ record[key] }}</td>
+					{{/ for}}
+				</tr>
+			{{/ for}}
+		</table>
+	`,
+	ViewModel: {
+		records: {
+			default: ()=> [
+				{first: "Justin", last: "Meyer", label: "Dad"},
+				{first: "Payal", last: "Meyer", label: "Mom"},
+				{first: "Ramiya", last: "Meyer", label: "Babu"},
+				{first: "Bohdi", last: "Meyer", label: "Baby"}
+			]
+		},
+		keys: {
+			default: ()=> [
+				"first","last","label"
+			]
+		}
+	}
+});
+</script>
+```
+@codepen
+
+
+This can be useful for looking up values using keys containing non-alphabetic characters:
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: 'my-demo',
+	view: `<h1>{{ this.data["special:prop"] }}</h1>`,
+	ViewModel: {
+		data: {
+			default(){
+				return {"special:prop": "SPECIAL VALUE"}
+			}
+		}
+	}
+});
+</script>
+```
+@codepen
+
+Bracket expressions can also be used to look up a value in the result of another expression:
+
+```html
+{{ this.getPerson()[key] }}
+```
+
+#### Helper expressions
+
+[can-stache/expressions/helper]s are supported but deprecated. It's unlikely they will
+be dropped for a long time.
+
+### Scope and context
+
+Stache maintains a [can-stache/keys/scope] similar to the one maintained in JavaScript. For example,
+the `inner` function is able to access the `message`, `last`, and `first` variables:
+
+```js
+const message = "Hello";
+function outer() {
+    const last = "Meyer";
+
+    function inner() {
+        const first = "Bohdi";
+        console.log( message + " " + first + " " + last );
+    }
+    inner();
+}
+outer();
+```
+
+Stache was originally built with a handlebars and mustache-type scope. This scope is still
+supported, but deprecated. If you are supporting templates in this style, please read [can-stache.scopeAndContext].
+
+The modern style of stache works much more like JavaScript. A view is rendered with
+a `context` accessible as `this`.  For example:
+
+```js
+import {stache} from "can";
+var view = stache(`<h1>Hello {{ this.subject }}</h1>`);
+
+var context = {
+	message: "World"
+};
+
+var fragment = view(context);
+
+console.log(fragment.firstChild.innerHTML)
+//-> Hello World
+```
+
+The [can-stache.helpers.for-of] helper creates variables local to the
+section. In the following example `todo` is only available between `{{# for(...)}}` and
+`{{/ for }}`.
+
+```html
+<my-demo></my-demo>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		<ul>
+			{{# for(todo of this.todos) }}
+				<li>{{ todo.name }}</li>
+			{{/ for }}
+		</ul>
+	`,
+	ViewModel: {
+		todos: {
+			default: () => [
+				{name: "Writing"},
+				{name: "Branching"},
+				{name: "Looping"}
+			]
+		}
+	}
+});
+</script>
+```
+@codepen
+
+When a variable like `todo` is looked up, it will look for variables in its
+scope and then walk to parent scopes until it finds a value.
+
 
 ## See also
 
@@ -889,3 +1348,5 @@ you to define custom attributes.
 component [can-component.prototype.ViewModel viewModels], or an element’s attributes.
 
 ## How it works
+
+Coming soon!

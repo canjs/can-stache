@@ -41,7 +41,6 @@ if(!viewCallbacks.tag("content")) {
 
 var isViewSymbol = canSymbol.for("can.isView");
 
-
 var wrappedAttrPattern = /[{(].*[)}]/;
 var colonWrappedAttrPattern = /^on:|(:to|:from|:bind)$|.*:to:on:.*/;
 var svgNamespace = "http://www.w3.org/2000/svg";

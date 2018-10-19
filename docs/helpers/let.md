@@ -1,5 +1,5 @@
 @function can-stache.helpers.let let
-@parent can-stache.htags 5
+@parent can-stache.htags
 
 
 @description Create a block-level variable.

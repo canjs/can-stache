@@ -1,5 +1,5 @@
-@function can-stache.helpers.domData {{domData(expression)}}
-@parent can-stache.htags 16
+@function can-stache.helpers.domData domData
+@parent can-stache.htags
 
 @signature `{{domData(key)}}`
 

@@ -5,6 +5,9 @@ var observationReader = require('can-stache-key');
 var canReflect = require('can-reflect');
 var KeyObservable = require("./key-observable");
 
+var canSymbol = require("can-symbol");
+var isViewSymbol = canSymbol.for("can.isView");
+
 // this creates a noop that marks that a renderer was called
 // this is for situations where a helper function calls a renderer
 // that was not provided such as
@@ -77,6 +80,16 @@ module.exports = {
 		};
 		return observeObservables ? convertedRenderer :
 			ObservationRecorder.ignore(convertedRenderer);
+	},
+	makeView: function(renderer){
+		var view = ObservationRecorder.ignore(function(scope, nodeList){
+			if(!(scope instanceof Scope)) {
+				scope = new Scope(scope);
+			}
+			return renderer(scope, nodeList);
+		});
+		view[isViewSymbol] = true;
+		return view;
 	},
 	// Calls the truthy subsection for each item in a list and returning them in a string.
 	getItemsStringContent: function(items, isObserveList, helperOptions){

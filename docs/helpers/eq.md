@@ -1,5 +1,5 @@
 @function can-stache.helpers.eq eq
-@parent can-stache.htags 12
+@parent can-stache.htags
 
 Render something if two values are equal.
 
