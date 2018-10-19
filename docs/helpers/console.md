@@ -1,5 +1,5 @@
-@function can-stache.helpers.console console methods
-@parent can-stache.htags 9
+@function can-stache.helpers.console console
+@parent can-stache.htags
 
 All `console` methods are available as stache helpers. A few of these are shown below, but any method available on [the global console](https://developer.mozilla.org/en-US/docs/Web/API/Console) can be called from stache.
 

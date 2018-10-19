@@ -2,11 +2,14 @@
 var Hashes = require('./hashes');
 var SetIdentifier = require("../src/set-identifier");
 var canSymbol = require("can-symbol");
-var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+
 var SetterObservable = require("can-simple-observable/setter/setter");
 var expressionHelpers = require("../src/expression-helpers");
 var canReflect = require("can-reflect");
 var assign = require('can-assign');
+
+var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
+var isViewSymbol = canSymbol.for("can.isView");
 
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
@@ -79,6 +82,9 @@ Call.prototype.value = function(scope, helperOptions){
 				if(helperOptions !== undefined) {
 					args.push(helperOptions);
 				}
+			}
+			if(func[isViewSymbol] === true) {
+				args.push(helperOptions.nodeList);
 			}
 			if(arguments.length) {
 				args.unshift(new SetIdentifier(newVal));

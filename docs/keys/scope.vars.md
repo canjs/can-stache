@@ -1,5 +1,5 @@
 @typedef {String} can-stache/keys/scope/scope.vars scope.vars
-@parent can-stache/keys/scope
+@parent can-stache/deprecated
 @description Used to reference variables specific to the template context
 
 @signature `scope.vars`

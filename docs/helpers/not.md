@@ -1,14 +1,14 @@
-@function can-stache.helpers.unless {{#unless(expression)}}
-@parent can-stache/deprecated
+@function can-stache.helpers.not not
+@parent can-stache.htags
 
-@signature `{{#unless(EXPRESSION)}}FN{{else}}INVERSE{{/unless}}`
+@signature `{{#not(EXPRESSION)}}FN{{else}}INVERSE{{/not}}`
 
 Renders `FN` if `EXPRESSION` is falsey or `INVERSE` if `EXPRESSION`
 is truthy. Both `FN` and `INVERSE` will be rendered with the
 current scope.
 
 ```html
-{{#unless(person.isAwake())}} Shhhhh! {{/unless}}
+{{#not(person.isAwake())}} Shhhhh! {{/not}}
 ```
 
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.
@@ -22,11 +22,11 @@ if `EXPRESSION` is truthy and [can-stache.helpers.else] is used.
 
 ## Use
 
-The `unless` helper evaluates the inverse of the value
+The `not` helper evaluates the inverse of the value
 of the key and renders the block between the helper and the slash.
 
 ```html
-{{#unless(expr)}}
-  // unless
-{{/unless}}
+{{#not(expr)}}
+  // not
+{{/not}}
 ```

@@ -1,5 +1,5 @@
 @function can-stache.helpers.each {{#each(expression)}}
-@parent can-stache.htags 5
+@parent can-stache/deprecated
 
 @signature `{{#each(EXPRESSION)}}FN{{else}}INVERSE{{/each}}`
 

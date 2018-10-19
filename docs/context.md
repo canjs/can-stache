@@ -1,5 +1,5 @@
-@page can-stache.scopeAndContext Scope and Context
-@parent can-stache.pages 1
+@page can-stache.scopeAndContext Legacy Scope Behavior
+@parent can-stache/deprecated
 
 @body
 

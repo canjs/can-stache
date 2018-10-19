@@ -12,6 +12,11 @@ module.exports = function(doc) {
 			var div = document.createElement("div");
 			div.appendChild( stache(template)(data, options) );
 			return this.cleanHTMLTextForIE( div.innerHTML );
+		},
+		innerHTML: function(node){
+			return "innerHTML" in node ?
+				node.innerHTML :
+				undefined;
 		}
 	};
 };

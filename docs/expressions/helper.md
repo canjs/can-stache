@@ -1,5 +1,5 @@
 @typedef {String} can-stache/expressions/helper Helper Expression
-@parent can-stache/expressions
+@parent can-stache/deprecated
 
 @signature `method [EXPRESSION...]`
 

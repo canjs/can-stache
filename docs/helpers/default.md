@@ -1,4 +1,4 @@
-@function can-stache.helpers.default {{#default()}}
+@function can-stache.helpers.default default
 @parent can-stache.htags 15
 
 @signature `{{#default()}}BLOCK{{/default}}`
