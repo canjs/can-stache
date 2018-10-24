@@ -348,7 +348,7 @@ test("call expressions called with different contexts (#616)", 1, function(){
 	var exprData = expression.parse("this.foo.doSomething()");
 	var doSomething = function(){
 		return this.value;
-	}
+	};
 	var context = new SimpleMap({
 		foo: {
 			doSomething: doSomething,
@@ -360,7 +360,7 @@ test("call expressions called with different contexts (#616)", 1, function(){
 
 
 	canReflect.onValue(res, function(value){
-		QUnit.equal(value, "B")
+		QUnit.equal(value, "B");
 	});
 
 	context.set("foo",{
