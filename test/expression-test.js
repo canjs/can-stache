@@ -344,6 +344,31 @@ test("call expressions called with different scopes give different results (#179
 	equal( res.get(), 12);
 });
 
+test("call expressions called with different contexts (#616)", 1, function(){
+	var exprData = expression.parse("this.foo.doSomething()");
+	var doSomething = function(){
+		return this.value;
+	}
+	var context = new SimpleMap({
+		foo: {
+			doSomething: doSomething,
+			value: "A"
+		}
+	});
+
+	var res = exprData.value( new Scope(context) );
+
+
+	canReflect.onValue(res, function(value){
+		QUnit.equal(value, "B")
+	});
+
+	context.set("foo",{
+		doSomething: doSomething,
+		value: "B"
+	});
+});
+
 test("convertKeyToLookup", function(){
 
 	equal( expression.convertKeyToLookup("../foo"), "../@foo" );
