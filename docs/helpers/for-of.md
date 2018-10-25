@@ -1,4 +1,4 @@
-@function can-stache.helpers.for-of {{#for(expression)}}
+@function can-stache.helpers.for-of for(of)
 @parent can-stache.htags 5
 @description Loop through a list of values.
 

@@ -344,6 +344,31 @@ test("call expressions called with different scopes give different results (#179
 	equal( res.get(), 12);
 });
 
+test("call expressions called with different contexts (#616)", 1, function(){
+	var exprData = expression.parse("this.foo.doSomething()");
+	var doSomething = function(){
+		return this.value;
+	};
+	var context = new SimpleMap({
+		foo: {
+			doSomething: doSomething,
+			value: "A"
+		}
+	});
+
+	var res = exprData.value( new Scope(context) );
+
+
+	canReflect.onValue(res, function(value){
+		QUnit.equal(value, "B");
+	});
+
+	context.set("foo",{
+		doSomething: doSomething,
+		value: "B"
+	});
+});
+
 test("convertKeyToLookup", function(){
 
 	equal( expression.convertKeyToLookup("../foo"), "../@foo" );
@@ -616,6 +641,18 @@ test("Bracket expression", function(){
 	);
 	equal(compute.get(), "name",'foo["bar.baz"]');
 
+	// foo["bar.baz.quz"]
+	expr = new expression.Bracket(
+		new expression.Literal("bar.baz.quz"),
+		new expression.Lookup("foo")
+	);
+	compute = expr.value(
+		new Scope(
+			new SimpleMap({foo: {"bar.baz.quz": "name"}})
+		)
+	);
+	equal(compute.get(), "name",'foo["bar.baz.quz"]');
+
 	// foo[bar]
 	expr = new expression.Bracket(
 		new expression.Lookup("bar"),
@@ -804,94 +841,6 @@ QUnit.test("registerConverter helpers are chainable", function () {
 	equal(twoWayCompute.get(), 'FF', 'Converter called');
 	twoWayCompute.set('7F');
 	equal(data.attr("observeVal"), 127, 'push converter called');
-});
-
-QUnit.test("addLiveConverter helpers push and pull correct values", function () {
-
-	helpers.addConverter('numberToHex', {
-		get: function(val) {
-			return canReflect.getValue(val).toString(16);
-		}, set: function(val, valCompute) {
-			return canReflect.setValue(valCompute, parseInt("0x" + val));
-		}
-	});
-
-	var data = new SimpleMap({
-		observeVal: 255
-	});
-	var scope = new Scope( data );
-	var parentExpression = expression.parse("numberToHex(observeVal)",{baseMethodType: "Call"});
-
-	var twoWayCompute = parentExpression.value(scope);
-	//twoWayCompute('34');
-
-	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
-
-
-	equal(twoWayCompute.get(), 'ff', 'Converter called');
-	twoWayCompute.set('7f');
-	equal(data.get("observeVal"), 127, 'push converter called');
-});
-
-QUnit.test("addConverter helpers push and pull multiple values", function () {
-
-	helpers.addConverter('isInList', {
-		get: function(valCompute, list) {
-			return !!~canReflect.getValue(list).indexOf(canReflect.getValue(valCompute));
-		}, set: function(newVal, valCompute, listObservable) {
-			var list = canReflect.getValue(listObservable);
-
-			if(!~list.indexOf(newVal)) {
-				list.push(newVal);
-			}
-		}
-	});
-
-	var data = new SimpleMap({
-		observeVal: 4,
-		list: new DefineList([1,2,3])
-	});
-	var scope = new Scope( data );
-	var parentExpression = expression.parse("isInList(observeVal, list)",{baseMethodType: "Call"});
-	var twoWayCompute = parentExpression.value(scope);
-	//twoWayCompute('34');
-
-	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
-
-
-	equal(twoWayCompute.get(), false, 'Converter called');
-	twoWayCompute.set(5);
-	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
-});
-
-QUnit.test("Can register multiple converters at once with addConverter", function(){
-	QUnit.expect(2);
-	var converters = {
-		"converter-one": {
-			get: function(){
-				QUnit.ok(true, "converter-one called");
-			},
-			set: function(){}
-		},
-		"converter-two": {
-			get: function(){
-				QUnit.ok(true, "converter-two called");
-			},
-			set: function(){}
-		}
-	};
-
-	helpers.addConverter(converters);
-
-	var data = new SimpleMap({
-		person: "Matthew"
-	});
-	var scope = new Scope(data);
-	var parentExpression = expression.parse("converter-one(person)",{baseMethodType: "Call"});
-	parentExpression.value(scope).get();
-
-	parentExpression = expression.parse("converter-two(person)",{baseMethodType: "Call"});
-	parentExpression.value(scope).get();
 });
 
 test('foo().bar', function() {

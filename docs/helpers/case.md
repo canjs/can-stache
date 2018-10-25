@@ -1,4 +1,4 @@
-@function can-stache.helpers.case {{#case(expression)}}
+@function can-stache.helpers.case case
 @parent can-stache.htags 14
 
 @signature `{{#case(EXPRESSION)}}BLOCK{{/case}}`

@@ -1,5 +1,5 @@
-@function can-stache.helpers.debugger {{debugger()}}
-@parent can-stache.htags 10
+@function can-stache.helpers.debugger debugger
+@parent can-stache.htags
 
 In development, breaks at the given point in the template to inspect the current scope in the console.
 

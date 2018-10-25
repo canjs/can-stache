@@ -1,12 +1,11 @@
 "use strict";
 var target = require('can-view-target');
-var Scope = require('can-view-scope');
-var ObservationRecorder = require('can-observation-recorder');
-
 var utils = require('./utils');
 var getDocument = require("can-globals/document/document");
 
 var assign = require('can-assign');
+
+
 var last = utils.last;
 
 var decodeHTML = typeof document !== "undefined" && (function(){
@@ -53,7 +52,7 @@ assign(HTMLSectionBuilder.prototype,{
 			return null;
 		} else {
 			var htmlSection = this.endSection();
-			return htmlSection.compiled.hydrate.bind(htmlSection.compiled);
+			return utils.makeView(htmlSection.compiled.hydrate.bind(htmlSection.compiled));
 		}
 	},
 	startSection: function( process ) {
@@ -74,13 +73,7 @@ assign(HTMLSectionBuilder.prototype,{
 		var compiled = this.stack.pop().compile();
 		// ignore observations here.  the render fn
 		//  itself doesn't need to be observable.
-		return ObservationRecorder.ignore(function(scope, nodeList){
-			if ( !(scope instanceof Scope) ) {
-				scope = new Scope(scope || {});
-			}
-
-			return compiled.hydrate(scope, nodeList);
-		});
+		return utils.makeView( compiled.hydrate.bind(compiled) );
 	},
 	push: function(chars){
 		this.last().push(chars);

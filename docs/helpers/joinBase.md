@@ -1,5 +1,5 @@
-@function can-stache.helpers.joinBase {{joinBase(expressions)}}
-@parent can-stache.htags 16
+@function can-stache.helpers.joinBase joinBase
+@parent can-stache.htags
 
 @signature `{{joinBase([EXPRESSION...])}}`
 

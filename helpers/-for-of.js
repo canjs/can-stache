@@ -4,6 +4,7 @@ var Observation = require("can-observation");
 var live = require('can-view-live');
 var nodeLists = require('can-view-nodelist');
 var expression = require("../src/expression");
+var KeyObservable = require("../src/key-observable");
 
 var bindAndRead = function (value) {
 	if ( value && canReflect.isValueLike(value) ) {
@@ -13,6 +14,24 @@ var bindAndRead = function (value) {
 		return value;
 	}
 };
+
+function forOfObject(object, variableName, options){
+	var result = [];
+	canReflect.each(object, function(val, key){
+		var value = new KeyObservable(object, key);
+		var variableScope = {};
+		if(variableName !== undefined){
+			variableScope[variableName] = value;
+		}
+		result.push(
+			options.fn( options.scope
+				.add({ key: key }, { special: true })
+				.addLetContext(variableScope) )
+		);
+	});
+
+	return options.stringOnly ? result.join('') : result;
+}
 
 // this is called with the ast ... we are going to use that to our advantage.
 var forHelper = function(helperOptions) {
@@ -49,6 +68,9 @@ var forHelper = function(helperOptions) {
 		options = args.pop(),
 		resolved = bindAndRead(items);
 
+	if(resolved && !canReflect.isListLike(resolved)) {
+		return forOfObject(resolved,variableName, helperOptions);
+	}
 	if(options.stringOnly) {
 		var parts = [];
 		canReflect.eachIndex(resolved, function(value, index){

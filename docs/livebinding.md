@@ -1,5 +1,6 @@
 @page can-stache.Binding Live Binding
 @parent can-stache.pages 5
+@hide
 
 Live binding refers to templates which update themselves when their state or data changes.
 [can-stache] templates are able to listen to observables

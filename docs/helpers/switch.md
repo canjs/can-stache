@@ -1,4 +1,4 @@
-@function can-stache.helpers.switch {{#switch(expression)}}
+@function can-stache.helpers.switch switch
 @parent can-stache.htags 13
 
 @signature `{{#switch(EXPRESSION)}}BLOCK{{/switch}}`

@@ -27,7 +27,7 @@ function computeHasDependencies(compute){
 function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptions, readOptions) {
 	// This needs to return something similar to a ScopeKeyData with intialValue and parentHasKey
 	var getKeys = function(){
-		return stacheKey.reads(("" + canReflect.getValue(key)).replace(".", "\\."));
+		return stacheKey.reads(("" + canReflect.getValue(key)).replace(/\./g, "\\."));
 	};
 	var parentHasKey;
 	var computeValue = new SetterObservable(function getDynamicKey() {

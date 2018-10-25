@@ -1,6 +1,6 @@
 {
   "name": "can-stache",
-  "version": "4.14.0",
+  "version": "4.15.1",
   "description": "Live binding handlebars templates",
   "homepage": "https://canjs.com/doc/can-stache.html",
   "repository": {
@@ -59,7 +59,7 @@
     "can-view-live": "^4.2.0",
     "can-view-nodelist": "^4.2.0",
     "can-view-parser": "^4.0.0",
-    "can-view-scope": "^4.9.0",
+    "can-view-scope": "^4.11.0",
     "can-view-target": "^4.0.0"
   },
   "devDependencies": {

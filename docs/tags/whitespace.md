@@ -1,5 +1,5 @@
-@page can-stache.Whitespace Whitespace Control
-@parent can-stache.pages 6
+@page can-stache.tags.whitespace {{-expression-}}
+@parent can-stache.tags 8
 
 @description Omit whitespace from around the output of the template.
 
