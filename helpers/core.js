@@ -76,10 +76,7 @@ var helpersCore = {
 		return function() {
 			var realArgs = [];
 			canReflect.eachIndex(arguments, function(val) {
-				while (val && val.isComputed) {
-					val = val();
-				}
-				realArgs.push(val);
+				realArgs.push(helpersCore.resolve(val));
 			});
 			return fn.apply(this, realArgs);
 		};
