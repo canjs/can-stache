@@ -1,8 +1,21 @@
 @function can-stache.tags.inverse {{^expression}}
-@parent can-stache.tags 5
+@parent can-stache/deprecated
 @description Like [can-stache.tags.section], but renders
 the opposite subsection depending on the type of expression
 or the expression’s return value.
+
+@deprecated {4.15.0} Instead of using `{{^}}`, use `{{#}}` and [can-stache.helpers.not]. For example,
+instead of:
+
+```html
+{{^ if(this.isOver18) }}
+```
+
+use:
+
+```html
+{{# not(this.isOver18) }}
+```
 
 @signature `{{^EXPRESSION}}FN{{else}}INVERSE{{/key}}`
 

@@ -1,14 +1,14 @@
 @function can-stache.helpers.not not
 @parent can-stache.htags
 
-@signature `{{#not(EXPRESSION)}}FN{{else}}INVERSE{{/not}}`
+@signature `{{# not(EXPRESSION) }} TRUTHY {{else}} FALSY {{/not}}`
 
-Renders `FN` if `EXPRESSION` is falsey or `INVERSE` if `EXPRESSION`
-is truthy. Both `FN` and `INVERSE` will be rendered with the
+Renders `TRUTHY` if `EXPRESSION` is falsy or `FALSY` if `EXPRESSION`
+is truthy. Both `TRUTHY` and `FALSY` will be rendered with the
 current scope.
 
 ```html
-{{#not(person.isAwake())}} Shhhhh! {{/not}}
+{{# not(person.isAwake()) }} Shhhhh! {{/ not }}
 ```
 
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION A lookup expression that will provide a truthy or falsey value.

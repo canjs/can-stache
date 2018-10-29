@@ -5,27 +5,11 @@ Create an inline named partial within the current template.
 
 @signature `{{<partialName}}BLOCK{{/partialName}}`
 
-Creates a reusable sub-template from `BLOCK` named `partialName` that can be rendered recursively or in the current scope using [can-stache.tags.partial {{>partialName}}].
+Creates a reusable sub-template from `BLOCK` named `partialName` that can be rendered with `{{ partialName() }}`.
 
-```handlebars
-{{<addressTemplate}}
-	<div>{{street}}, {{city}}</div>
-{{/addressTemplate}}
+For example, the following defines an `addressView` and uses it to render several addresses:
 
-<div>
-	{{#with(business.address)}}
-		{{>addressTemplate}}
-	{{/with}}
-</div>
-<ul>
-	{{#each(business.people)}}
-		<li>
-			{{fullName}}, {{birthday}}
-			{{>addressTemplate address}}
-		</li>
-	{{/each}}
-</ul>
-```
+- called with an object, set
 
 @param {String} partialName The name of the partial.   
 
@@ -37,74 +21,67 @@ Creates a reusable sub-template from `BLOCK` named `partialName` that can be ren
 
 ## Use
 
-Named partials are sub-templates in a larger template that aren’t rendered until referenced by the [can-stache.tags.partial partial tag]. They can be referenced any number of times with different contexts.
-
-Given this data:
-
-```js
-{
-	business: {
-		name: "Bitvoi",
-		address: { street: "Hello", city: "World" }
-	},
-	people: [
-		{
-			fullName: "James Atherton",
-			address: {
-				street: "123 45th Street",
-				city: "Moline"
-			}
-		},
-		{
-			fullName: "Someone Else",
-			address: {
-				street: "678 90th St",
-				city: "Chicago"
-			}
-		}
-	]
-}
-```
-
-This template:
-
-```handlebars
-{{<addressTemplate}}
-	<div>{{street}}, {{city}}</div>
-{{/addressTemplate}}
-
-<div>
-	{{#with(business.address)}}
-		{{>addressTemplate}}
-	{{/with}}
-</div>
-<ul>
-	{{#each(business.people)}}
-		<li>
-			{{fullName}}
-			{{>addressTemplate address}}
-		</li>
-	{{/each}}
-</ul>
-```
-
-Would result in:
+Named partials are sub-templates in a larger template that aren’t rendered until called. They can be called any number of times with different contexts.
 
 ```html
-<div>
-	<div>Hello, World</div>
-</div>
-<ul>
-		<li>
-			James Atherton
-			<div>123 45th Street, Moline</div>
-		</li>
-		<li>
-			Someone Else
-			<div>678 90th St, Chicago</div>
-		</li>
-</ul>
+<partial-demo></partial-demo>
+
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "partial-demo",
+	view: `
+		{{<addressView}}
+			<div>{{this.street}}, {{this.city}}</div>
+		{{/addressView}}
+
+		<div>
+			{{ addressView(this.business.address) }}
+		</div>
+		<ul>
+			{{# for(person of this.people) }}
+				<li>
+					{{ person.fullName }}, {{ person.birthday }}
+					{{ addressView(person.address) }}
+				</li>
+			{{/ for }}
+		</ul>
+	`,
+	ViewModel: {
+		business: {
+			default(){
+				return {
+					name: "Bitvoi",
+					address: { street: "Bitovi Way", city: "World" }
+				};
+			}
+		},
+		people: {
+			default(){
+				return [
+					{
+						fullName: "James Atherton",
+						address: {
+							street: "123 45th Street",
+							city: "Moline"
+						}
+					},
+					{
+						fullName: "Someone Else",
+						address: {
+							street: "678 90th St",
+							city: "Chicago"
+						}
+					}
+				];
+			}
+		}
+	}
+});
+</script>
 ```
+@codepen
 
 Named partials can also have a template block that references its own name in a [can-stache.tags.partial partial tag], which creates recursion. (So make sure you avoid infinite loops!)
 

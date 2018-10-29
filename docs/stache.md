@@ -882,6 +882,49 @@ Component.extend({
 ```
 @codepen
 
+### Animation
+
+Use [can-stache-bindings.event] to listen to an event and call an animation library.
+
+The following listens to when a todo's `complete` event is fired and calls `this.shake`.
+`this.shake` uses [anime](http://animejs.com/) to animate the `<div>`:
+
+```html
+<my-demo></my-demo>
+<script src="//cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-demo",
+	view: `
+		{{# for(todo of todos) }}
+			<div on:complete:by:todo="this.shake(scope.element)">
+				<input type="checkbox" checked:bind="todo.complete"/>
+				{{todo.name}}
+			</div>
+		{{/ for }}
+	`,
+	ViewModel: {
+		todos: {
+			default: ()=> [
+				{name: "animate", complete: false},
+				{name: "celebrate", complete: true}
+			]
+		},
+		shake(element){
+			anime({
+				targets: element,
+				translateX: [ 10,-10,0 ],
+				easing: 'linear'
+			});
+		}
+	}
+});
+</script>
+```
+@codepen
+
 ### Syntax Highlighting
 
 Stache is very similar to handlebars and mustache.  Most editors have plugins for one of these

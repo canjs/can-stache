@@ -7,18 +7,62 @@ output of the template.
 
 @signature `{{{EXPRESSION}}}`
 
-Behaves just like [can-stache.tags.escaped] but does not
-escape the result.
+  Behaves just like [can-stache.tags.escaped] but does not
+  escape the result. The following makes a markdown editor:
 
-```html
-<div> {{{ toMarkdown(content) }}} </div>
-```
+  ```html
+  <markdown-edit></markdown-edit>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/showdown/1.8.7/showdown.min.js"></script>
+  <script type="module">
+  import {Component} from "can";
 
-@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.
+  Component.extend({
+    tag: "markdown-edit",
+    view: `
+      <textarea on:input:value:bind="this.value"
+          rows="4" style="width: 90%"></textarea>
+      <div>{{{this.html}}}</div>
+    `,
+    ViewModel: {
+      value: {
+        default: "# Hello World\nHow are __you__?"
+      },
+      converter: {
+        Default: showdown.Converter
+      },
+      get html(){
+        return this.converter.makeHtml(this.value);
+      }
+    }
+  });
+  </script>
+  ```
+  @codepen
+
+  @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.
+
+  @return {Primitive|Node|Object|Function}
+
+  Depending on what the expression evaluates to, the following happens:
+
+  - `null`, `undefined` - inserts the empty string.
+  - `Number`, `Boolean` - inserts the string representation of the value.
+  - `String` - inserts the HTML of the string.
+  - `Function` - Calls the function back with a textNode placeholder element.
+  - `Node`, `Element` - Inserts the HTML into the page.
+  - An object with the `can.toDOM` symbol - Inserts the result of calling the `can.toDOM` symbol. This is how [can-stache.safeString]
+    works.
+  - An object with the `can.viewInsert` - Calls the `can.viewInsert` function with [can-view-callbacks.tagData]
+    and inserts the result.
+
+  Read [can-stache.tags.escaped]'s documentation to understand how these return types are handled.
 
 @body
 
-This can also be used to render [can-component] instances:
+
+## Render Component Instances
+
+`{{{expression}}}` can be used to render [can-component] instances:
 
 ```js
 import Component from "can-component";

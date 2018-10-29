@@ -1,14 +1,14 @@
 @function can-stache.helpers.else {{else}}
 @parent can-stache.tags 4
 
-@signature `{{#helper()}}BLOCK{{else}}INVERSE{{/helper}}`
+@signature `{{# helper() }} TRUTHY {{ else }} FALSY {{/ helper }}`
 
-Creates an `inverse` block for a [can-stache.helper helper function]’s
-[can-stache.helperOptions options argument]’s `inverse` property.
+  Creates an `FALSY` block for a [can-stache.helper helper function]’s
+  [can-stache.helperOptions options argument]’s `inverse` property.
 
-@param {can-stache.sectionRenderer} INVERSE A partial stache template
-converted into a function and set as the [can-stache.helper helper function]’s
-[can-stache.helperOptions options argument]’s `inverse` property.
+  @param {can-stache.sectionRenderer} FALSY A partial stache template
+  converted into a function and set as the [can-stache.helper helper function]’s
+  [can-stache.helperOptions options argument]’s `inverse` property.
 
 @body
 
@@ -16,5 +16,40 @@ converted into a function and set as the [can-stache.helper helper function]’s
 
 For more information on how `{{else}}` is used checkout:
 
- - [can-stache.helpers.if]
- - [can-stache.tags.section]
+- [can-stache.helpers.if] - renders the `FALSY` section if the expression evaluates to a falsy value.
+  ```js
+  import {stache} from "can";
+
+  const view = stache(`<div>
+    {{# if(this.value) }}
+      TRUTH
+    {{ else }}
+      FICTION
+    {{/ if }}
+	</div>
+    `);
+
+  var fragment = view({value: 0});
+  console.log(fragment.firstChild.innerHTML) //-> "FICTION"
+
+  document.body.appendChild(fragment);
+  ```
+  @codepen
+- [can-stache.helpers.for-of] - renders the `FALSY` if an empty list is provided.
+  ```js
+  import {stache} from "can";
+
+  const view = stache(`<ul>
+    {{# for(value of this.values) }}
+      <li>{{ value }}</li>
+    {{ else }}
+      <li>no values</li>
+    {{/ for }}
+    </ul>`);
+
+  var fragment = view({values: []});
+  console.log(fragment.firstChild.innerHTML) //-> "<li>no values</li>"
+
+  document.body.appendChild(fragment);
+  ```
+  @codepen

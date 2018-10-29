@@ -6,259 +6,136 @@ output of the template.
 
 @signature `{{EXPRESSION}}`
 
-Gets the value of `EXPRESSION` and inserts the result into the output of the
-template.
+  Gets the value of `EXPRESSION` and inserts the escaped result into the output of the
+  template.
 
-If the expression is clearly of a particular expression type like: `{{myHelper arg}}` or
-`{{myMethod(arg)}}`, that expression’s rules will be followed.
+  If the expression is clearly of a particular expression type like `{{ myMethod(arg) }}`,
+  that expression’s rules will be followed.
 
-An ambiguous expression type like `{{keyOrHelper}}` will first treat `keyOrHelper`
-as a [can-stache/expressions/key-lookup] and if there is no value in the scope of
-`keyOrHelper`, it will be treated as a [can-stache/expressions/helper].
+  ```js
+  import {stache} from "can";
 
+  var view = stache(`<div>{{ this.value }}</div>`);
+
+  var fragment = view({value: "<script src='evil.com'>"});
+
+  console.log(fragment.firstChild.innerHTML) //-> &lt;script src='evil.com'&gt;
+  document.body.append(fragment);
+  ```
+  @codepen
 
 
   @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} expression The `expression` can be:
 
-   - [can-stache/expressions/literal] - `{{5}}` - Inserts a string representation of the literal.
-   - [can-stache/expressions/key-lookup] - `{{key}}` - Looks up the value of `key` in the [can-view-scope].
-   - [can-stache/expressions/call] - `{{method()}}` - Calls `method` in the [can-view-scope].
-   - [can-stache/expressions/helper] - `{{helper arg}}` - Calls `helper` in the [can-view-scope.Options] and passes it a [can-stache.helperOptions].
+   - [can-stache/expressions/literal] - `{{ 5 }}` - Inserts a string representation of the literal.
+   - [can-stache/expressions/key-lookup] - `{{ key }}` - Looks up the value of `key` in the [can-view-scope].
+   - [can-stache/expressions/call] - `{{ method() }}` - Calls `method` in the [can-view-scope].
+   - [can-stache.view] - `{{ view(data) }}` - Calls a view renderer function with `data` and inserts the result.
 
+  @return {Primitive|Node|Object|Function}
 
+  Depending on what the expression evaluates to, the following happens:
+
+  - `null`, `undefined` - inserts the empty string.
+  - `String`, `Number`, `Boolean` - inserts the string representation of the value.
+  - `Function` - Calls the function back with a textNode placeholder element.
+  - `Node`, `Element` - Inserts the HTML into the page.
+  - An object with the `can.toDOM` symbol - Inserts the result of calling the `can.toDOM` symbol. This is how [can-stache.safeString]
+    works.
+  - An object with the `can.viewInsert` - Calls the `can.viewInsert` function with [can-view-callbacks.tagData]
+    and inserts the result.
 
 @body
 
 
 ## Use
 
-The following breaks down the behavior of `{{expression}}`.  It groups
-the behavior of [can-stache/expressions/key-lookup] and [can-stache/expressions/call]s
-because their behavior works the same way.  It then details how [can-stache/expressions/helper]s
-work.
+`{{expression}}` inserts the value returned by the `expression`. To understand how a particular expression works,
+please read that expression's documentation:
 
-### Key and Call Expressions
+- [can-stache/expressions/literal] - `{{ 5 }}`
+- [can-stache/expressions/key-lookup] - `{{ key }}`
+- [can-stache/expressions/call] - `{{ method() }}`
 
-`{{key}}` insert data into the template. It most commonly references
-values within the current context. For example:
+This documentation focuses on how `{{expression}}` handles the result of that expression.
 
-Rendering:
+## Inserting primitives
 
-```html
-<h1>{{name}}</h1>
-```
+## Inserting elements
 
-With:
+DOM elements and nodes returned will be inserted in the page.
 
 ```js
-{ name: "Austin" }
+import {stache, fragment} from "//unpkg.com/can@5/core.mjs";
+
+var view = stache(`<div>{{ this.h1("Hello World") }}</div>`);
+
+var frag = view({
+    h1(text) {
+        return fragment("<h1>"+text+"</h1>")
+    }
+});
+
+console.log(frag.firstChild.innerHTML) //-> <h1>Hello World</h1>
+document.body.append(frag);
 ```
+@codepen
 
-Results in:
+## Inserting functions
 
-```html
-<h1>Austin</h1>
-```
-
-If the key value is a String or Number, it is inserted into the template.
-If it is `null` or `undefined`, nothing is added to the template.
-
-
-### Nested Properties
-
-Stache supports nested paths, making it possible to
-look up properties nested deep inside the current context. For example:
-
-Rendering:
-
-```html
-<h1>{{book.author}}</h1>
-```
-
-With:
+If a function is returned, that function is called back with a placeholder text node:
 
 ```js
-{
-	book: {
-		author: "Ernest Hemingway"
+import {stache, domMutate} from "can";
+
+var view = stache(`<div>{{ this.blink("Hello There") }}</div>`);
+
+var fragment = view({
+	blink(text) {
+		return function(placeholderElement) {
+			var interval = setInterval(function(){
+				placeholderElement.nodeValue = placeholderElement.nodeValue === text ?
+					"" : text;
+			},500);
+			domMutate.onNodeRemoval(placeholderElement, function(){
+				console.log("element removed");
+				clearInterval(interval);
+			});
+
+		}
 	}
-}
+});
+
+document.body.append(fragment);
+
+setTimeout(function(){
+	document.body.innerHTML = "CLEARED";
+},2000);
 ```
+@codepen
 
-Results in:
 
-```html
-<h1>Ernest Hemingway</h1>
-```
 
-### Looking up values in parent contexts
 
-Sections and block helpers can create their own contexts. If a key’s value
-is not found in the current context, it will look up the key’s value
-in parent contexts. For example:
+## Inserting objects with `can.toDOM`
 
-Rendering:
-
-```html
-{{#chapters}}
-   <li>{{title}} - {{name}}</li>
-{{chapters}}
-```
-
-With:
+If an object has a `can.toDOM` symbol property, that property's value will be called, the result passed to [can-fragment],
+and the result of [can-fragment] will be inserted.
 
 ```js
-{
-	title: "The Book of Bitovi",
-	chapters: [ { name: "Breakdown" } ]
-}
-```
+import {stache} from "//unpkg.com/can@5/core.mjs";
 
-Results in:
+var view = stache(`<div>{{ helloWorld }}</div>`);
 
-```html
-<li>The Book of Bitovi - Breakdown</li>
-```
-
-## Helper expressions
-
-The `{{helper}}` syntax is used to call out to stache [can-stache.helper helper functions] functions
-that may contain more complex functionality. `helper` is a [can-stache.key key] that must match either:
-
- - a [can-stache.addLiveHelper helper function], or
- - a function in the current or parent [can-stache.scopeAndContext contexts]
-
-The following example shows both cases.
-
-The template:
-
-```html
-<p>{{greeting}} {{user}}</p>
-```
-
-Rendered with data:
-
-```js
-{
-	user: function() {
-		return "Justin";
+var fragment = view({
+    helloWorld: {
+		[Symbol.for("can.toDOM")]() {
+			return "<h1>Hello World</h1>";
+		}
 	}
-}
+});
+
+console.log(fragment.firstChild.innerHTML) //-> <h1>Hello World</h1>
+document.body.append(fragment);
 ```
-
-And with a registered helper like:
-
-```js
-stache.registerHelper( "greeting", function() {
-	return "Hello";
-} );
-```
-
-Results in:
-
-```html
-<p>Hello Justin</p>
-```
-
-### Arguments
-
-Arguments can be passed from the template to helper function by
-listing space separated strings, numbers or other [can-stache.key keys] after the
-`helper` name.  For example:
-
-The template:
-
-```html
-<p>{{madLib "Lebron James" verb 4}}</p>
-```
-
-Rendered with:
-
-```js
-{ verb: "swept" }
-```
-
-Will call a `madLib` helper with the following arguments:
-
-```js
-stache.registerHelper( "madLib",
-	function( subject, verb, number, options ) {
-
-		// subject -> "Lebron James"
-		// verb -> "swept"
-		// number -> 4
-	} );
-```
-
-If an argument `key` value is a [can-map] property, the Observe’s
-property is converted to a getter/setter [can-compute.computed]. For example:
-
-The template:
-
-```html
-<p>What! My name is: {{mr user.name}}</p>
-```
-
-Rendered with:
-
-```js
-{ user: new Map( { name: "Slim Shady" } ) }
-```
-
-Needs the helper to check if name is a function or not:
-
-```js
-stache.registerHelper( "mr", function( name ) {
-	return "Mr. " + ( typeof name === "function" ?
-		name() :
-		name );
-} );
-```
-
-This behavior enables two way binding helpers and is explained in more detail
-on the [can-stache.helper helper functions] docs.
-
-### Hash
-
-If enumerated arguments isn’t an appropriate way to configure the behavior
-of a helper, it’s possible to pass a hash of key-value pairs to the
-[can-stache.helperOptions helper option argument]’s
-hash object.  Properties and values are specified
-as `hashProperty=hashValue`.  For example:
-
-The template:
-
-```html
-<p>My {{excuse who=pet how="shredded"}}</p>
-```
-
-And the helper:
-
-```js
-stache.registerHelper( "excuse", function( options ) {
-	return [ "My",
-		options.hash.who || "dog".
-			options.hash.how || "ate",
-		"my",
-		options.hash.what || "homework" ].join( " " );
-} );
-```
-
-Rendered with:
-
-```js
-{ pet: "cat" }
-```
-
-Results in:
-
-```html
-<p>My cat shredded my homework</p>
-```
-
-### Returning an element callback function
-
-If a helper returns a function, that function is called back after
-the template has been rendered into DOM elements. This can
-be used to create stache tags that have rich behavior. Read about it
-on the [can-stache.helper helper function] page.
+@codepen
