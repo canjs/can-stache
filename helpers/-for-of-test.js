@@ -143,3 +143,12 @@ QUnit.test("for(value of object) works in a string", function(){
 
 	QUnit.equal( frag.firstChild.className, "[first-FIRST][second-SECOND]");
 });
+
+QUnit.test("else contains the correct this", function() {
+	var template = stache("{{#for(item of items)}}ITEM{{else}}{{this.message}}{{/for}}");
+	var frag = template({
+		items: [],
+		message: "empty"
+	});
+	QUnit.equal(frag.firstChild.nextSibling.nodeValue, "empty", "got the value from the VM");
+});
