@@ -1050,3 +1050,28 @@ test("let foo=bar,zed=ted", function(){
 		]
 	});
 });
+
+
+test("double [] in a function", function(){
+	var ast = expression.ast("log(thing['prop'][0])");
+
+	var logAst = {
+		type: "Call",
+		method: {type: "Lookup", key: "@log"},
+		children: [
+			{
+				"type":"Bracket",
+				"root": {
+					"type":"Bracket",
+					"root":{
+						"type":"Lookup",
+						"key":"thing"
+					},
+					"children":[{"type":"Literal","value":"prop"}]
+				},
+				"children":[{"type":"Literal","value":0}]
+			}
+		]
+	};
+	QUnit.deepEqual(ast, logAst);
+});

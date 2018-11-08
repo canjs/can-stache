@@ -355,7 +355,7 @@ var expression = {
 
 					}
 				}
-				
+
 				firstParent = stack.first(["Call","Helper","Hashes","Root"]);
 				// makes sure we are adding to Hashes if there already is one
 				// otherwise we create one.
@@ -467,8 +467,17 @@ var expression = {
 				top = stack.top();
 				lastToken = stack.topLastChild();
 
+				// foo()[bar] => top -> root, lastToken -> {t: call, m: "@foo"}
+				// foo()[bar()] => same as above last thing we see was a call expression "rotate"
+				// test['foo'][0] => lastToken => {root: test, t: Bracket, c: 'foo' }
+				// log(thing['prop'][0]) =>
+				//
+				//     top -> {Call, children|args: [Bracket(Lookup(thing), c: ['[prop]'])]}
+				//     last-> Bracket(Lookup(thing), c: ['[prop]'])
 				if (lastToken && (lastToken.type === "Call" || lastToken.type === "Bracket"  )  ) {
-					stack.replaceTopAndPush({type: "Bracket", root: lastToken});
+					// must be on top of the stack as it recieves new stuff ...
+					// however, what we really want is to
+					stack.replaceTopLastChildAndPush({type: "Bracket", root: lastToken});
 				} else if (top.type === "Lookup" || top.type === "Bracket") {
 					var bracket = {type: "Bracket", root: top};
 					//!steal-remove-start
