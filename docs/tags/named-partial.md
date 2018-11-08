@@ -5,15 +5,38 @@ Create an inline named partial within the current template.
 
 @signature `{{<partialName}}BLOCK{{/partialName}}`
 
-Creates a reusable sub-template from `BLOCK` named `partialName` that can be rendered with `{{ partialName() }}`.
+  Creates a reusable sub-template from `BLOCK` named `partialName` that can be rendered
+  with `{{ partialName() }}`. The following creates an `addressView` partial and
+  renders it with two addresses:
 
-For example, the following defines an `addressView` and uses it to render several addresses:
+  ```js
+  import {stache} from "can";
 
-- called with an object, set
+  const view = stache(`
+  	{{<addressView}}
+  		<address>{{this.street}}, {{this.city}}</address>
+  	{{/addressView}}
 
-@param {String} partialName The name of the partial.   
+  	<article>
+  		{{addressView(this.address1)}}
+  		{{addressView(this.address2)}}
+  	</article>
+  `)
 
-@param {can-stache.sectionRenderer} BLOCK a template to be captured and rendered later.
+  const fragment = view({
+  	address1: {street: "Bitovi Way", city: "World" },
+  	address2: {street: "Stave", city: "Chicago" }
+  });
+
+  console.log(fragment.firstChild.innerHTML)
+  //-> <address>...</address><address>...</address>
+  document.body.appendChild(fragment);
+  ```
+  @codepen
+
+  @param {String} partialName The name of the partial.   
+
+  @param {can-stache.sectionRenderer} BLOCK a template to be captured and rendered later.
 
 
 
@@ -83,49 +106,60 @@ Component.extend({
 ```
 @codepen
 
-Named partials can also have a template block that references its own name in a [can-stache.tags.partial partial tag], which creates recursion. (So make sure you avoid infinite loops!)
+Named partials can also references their own name in a [can-stache.tags.partial partial tag], which creates recursion.
 
-Given this data:
+```html
+<partial-demo></partial-demo>
 
-```js
-{
-	yayRecursion: {
-		name: "Root",
-		nodes: [
-			{
-				name: "Leaf #1 in Root",
-				nodes: []
-			},
-			{
-				name: "Branch under Root",
-				nodes: [
-					{
-						name: "Leaf in Branch",
-						nodes: []
-					}
-				]
-			},
-			{
-				name: "Leaf #2 in Root",
-				nodes: []
+<script type="module">
+import {Component} from "can";
+
+Component.extend({
+	tag: "partial-demo",
+	view: `
+		{{< recursiveView }}
+			<div>{{this.name}} <b>Type:</b> {{#if(this.nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
+			{{# for(node of this.nodes) }}
+				{{ recursiveView(node) }}
+			{{/ for }}
+		{{/ recursiveView }}
+
+		{{ recursiveView(this.yayRecursion) }}
+	`,
+	ViewModel: {
+		yayRecursion: {
+			default(){
+				return {
+					name: "Root",
+					nodes: [
+						{
+							name: "Leaf #1 in Root",
+							nodes: []
+						},
+						{
+							name: "Branch under Root",
+							nodes: [
+								{
+									name: "Leaf in Branch",
+									nodes: []
+								}
+							]
+						},
+						{
+							name: "Leaf #2 in Root",
+							nodes: []
+						}
+					]
+				}
 			}
-		]
+		}
 	}
-}
+});
+</script>
 ```
+@codepen
 
-This template:
 
-```handlebars
-{{<recursive}}
-	<div>{{./name}} <b>Type:</b> {{#if(./nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
-	{{#each(./nodes)}}
-		{{>recursive .}}
-	{{/each}}
-{{/recursive}}
-
-{{>recursive yayRecursion}}
-```
 
 Would result in:
 
