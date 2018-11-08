@@ -114,7 +114,7 @@ var forHelper = function(helperOptions) {
 			};
 
 			live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
-				return options.inverse(options.scope.add(list), options.options, parentNodeList);
+				return options.inverse(options.scope, options.options, parentNodeList);
 			});
 		};
 	}
