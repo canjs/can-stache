@@ -526,3 +526,31 @@ QUnit.test("inline partials are accessible from call expressions", 1, function()
 
 	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave");
 });
+
+QUnit.test("recursive inline partials are accessible from call expressions", 1, function(){
+
+	var view = stache(
+		"{{<folderPartial}}"+
+			"<span>{{this.name}}</span>"+
+			"{{#if(this.folder)}}<div>{{ folderPartial(this.folder) }}</div>{{/if}}"+
+		"{{/folderPartial}}"+
+		"<div>{{ folderPartial(this.folder) }}</div>"
+	);
+
+	var frag = view({
+		folder: {
+			name: "Parent",
+			folder: {
+				name: "Child",
+				folder:  null
+			}
+		}
+	});
+
+	var spans = frag.firstElementChild.getElementsByTagName("span");
+	var spanText = [].slice.call(spans,0).map(function(span){
+		return span.innerHTML;
+	});
+
+	QUnit.deepEqual(spanText, ["Parent", "Child"]);
+});

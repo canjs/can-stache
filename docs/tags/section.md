@@ -27,6 +27,7 @@ or the expression’s return value.
 
   document.body.appendChild(fragment);
   ```
+  @codepen
 
   Different helpers can render these sections multiple times. [can-stache.helpers.else]
   also defines a `FALSY` section that helpers can call. In the following, [can-stache.helpers.for-of]
@@ -48,6 +49,7 @@ or the expression’s return value.
 
   document.body.appendChild(fragment);
   ```
+  @codepen
 
   Helpers can control the variables and context accessible in the `TRUTHY`
   and `FALSY` section. Read [can-stache.addHelper] and

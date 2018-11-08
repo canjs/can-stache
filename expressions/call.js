@@ -10,6 +10,7 @@ var assign = require('can-assign');
 
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var isViewSymbol = canSymbol.for("can.isView");
+var Scope = require("can-view-scope");
 
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
@@ -83,7 +84,14 @@ Call.prototype.value = function(scope, helperOptions){
 					args.push(helperOptions);
 				}
 			}
+			// we are calling a view!
 			if(func[isViewSymbol] === true) {
+				// if not a scope, we should create a scope that
+				// includes the template scope
+				if(!(args[0] instanceof Scope)){
+					args[0] = scope.getTemplateContext().add(args[0]);
+				}
+				// and include nodeLists
 				args.push(helperOptions.nodeList);
 			}
 			if(arguments.length) {

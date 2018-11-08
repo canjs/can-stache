@@ -6,6 +6,29 @@
   Creates an `FALSY` block for a [can-stache.helper helper function]’s
   [can-stache.helperOptions options argument]’s `inverse` property.
 
+  The following creates a `isSquare` helper that renders the `FALSY` section
+  if the number is not a perfect square:
+
+  ```js
+  import {stache} from "can";
+
+  const view = stache(`<div>{{# isSquare(3) }}YES{{else}}NO{{/ isSquare}}</div>`);
+
+  stache.addHelper("isSquare", function(num, options){
+    if( Number.isInteger( Math.sqrt(num) ) ) {
+      return options.fn();
+    } else {
+      return options.inverse();
+    }
+  });
+
+  var fragment = view();
+
+  console.log(fragment.firstChild.innerHTML) //-> NO
+  document.body.appendChild(fragment);  
+  ```
+  @codepen
+
   @param {can-stache.sectionRenderer} FALSY A partial stache template
   converted into a function and set as the [can-stache.helper helper function]’s
   [can-stache.helperOptions options argument]’s `inverse` property.

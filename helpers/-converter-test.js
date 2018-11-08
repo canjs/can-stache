@@ -137,7 +137,7 @@ QUnit.test("not works also like if", function(){
 });
 
 QUnit.test("not works inside if", function(){
-	var view = stache("<div>{{#if( not(this.value) )  }}{{truthy(this)}}{{else}}FALSY{{/not}}</div>");
+	var view = stache("<div>{{#if( not(this.value) )  }}{{truthy(this)}}{{else}}FALSY{{/if}}</div>");
 
 	var data = new SimpleMap({
 		value: false
