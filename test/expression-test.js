@@ -523,7 +523,8 @@ test("expression.parse - [] operator", function(){
 	deepEqual(expression.parse("foo['bar']"),
 		new expression.Bracket(
 			new expression.Literal('bar'),
-			new expression.Lookup('foo')
+			new expression.Lookup('foo'),
+			'foo'
 		),
 		"foo['bar']"
 	);
@@ -531,7 +532,8 @@ test("expression.parse - [] operator", function(){
 	deepEqual(expression.parse("foo[bar]"),
 		new expression.Bracket(
 			new expression.Lookup('bar'),
-			new expression.Lookup('foo')
+			new expression.Lookup('foo'),
+			'foo'
 		),
 		"foo[bar]"
 	);
@@ -556,7 +558,8 @@ test("expression.parse - [] operator", function(){
 				[],
 				{}
 			),
-			new expression.Lookup('foo')
+			new expression.Lookup('foo'),
+			'foo'
 		)
 	);
 
