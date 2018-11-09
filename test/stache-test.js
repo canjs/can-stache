@@ -7105,20 +7105,24 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
 
 	});
-
+	
 	QUnit.test("SVGs are not rendered correctly", function() {
-		var svg = '<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">' +
-		'<path id="h-shape" d="M0 0h82.457v79.8h67.613V0H233v233h-82.93v-70.012H82.457V233H0z" />' +
-		'<circle r="25" cx="25" cy="25"></circle>' +
-		'<use xlink:href="#h-shape" />' +
-		'</svg>';
+		if(doc.createElementNS) {
+			var svg = '<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">' +
+			'<path id="h-shape" d="M0 0h82.457v79.8h67.613V0H233v233h-82.93v-70.012H82.457V233H0z" />' +
+			'<circle r="25" cx="25" cy="25"></circle>' +
+			'<use xlink:href="#h-shape" />' +
+			'</svg>';
 
-		var frag = stache(svg)({});
-		var svgTag = frag.firstChild;
-		var useTag = frag.firstChild.getElementsByTagName('use')[0];
+			var frag = stache(svg)({});
+			var svgTag = frag.firstChild;
+			var useTag = frag.firstChild.getElementsByTagName('use')[0];
 
-		QUnit.equal(svgTag.getAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns'), "http://www.w3.org/2000/svg", "xmlns attr");
-		QUnit.equal(useTag.getAttributeNS("http://www.w3.org/1999/xlink", 'href'), "#h-shape", "xlink:href attr");
+			QUnit.equal(svgTag.getAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns'), "http://www.w3.org/2000/svg", "xmlns attr");
+			QUnit.equal(useTag.getAttributeNS("http://www.w3.org/1999/xlink", 'href'), "#h-shape", "xlink:href attr");
+		} else {
+			expect(0);
+		}
 
 	});
 
