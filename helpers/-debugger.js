@@ -48,12 +48,13 @@ function debuggerHelper (left, right) {
 			return;
 		}
 
-		// jshint +W098
-		var options = arguments[arguments.length - 1];
+		var options = arguments[arguments.length - 1],
+			scope = options.scope;
 		var get = function (path) {
-			return options.scope.get(path);
+			return scope.get(path);
 		};
-		// jshint -W098
+		// This makes sure `get`, `options` and `scope` are available
+		debuggerHelper._lastGet = get;
 
 		canLog.log('Use `get(<path>)` to debug this template');
 

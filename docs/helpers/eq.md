@@ -3,33 +3,44 @@
 
 Render something if two values are equal.
 
-@signature `{{#eq([EXPRESSION...])}}FN{{else}}INVERSE{{/eq}}`
+@signature `{{#eq([EXPRESSION...])}}TRUTHY{{else}}FALSY{{/eq}}`
 
-Renders the `FN` if every `EXPRESSION` argument is equal (`===`).
+  Renders the `TRUTHY` section if every `EXPRESSION` argument is equal (`===`).
 
-```html
-{{#eq(user.type, "admin")}} <button/> {{else}} Login {{/eq}}
-{{#eq(task.ownerId, task.assignedId, user.id)}} Delegate! {{/eq}}
-```
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
 
-@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call} [EXPRESSION] Two or more expressions whose return values will be tested for equality.
+  Component.extend({
+  	tag: "my-demo",
+  	view: `
+  		{{# eq(this.state, 'loggedIn') }}
+  			<button on:click="this.state ='loggedOut'">Log Out</button>
+  		{{else}}
+  			<button on:click="this.state = 'loggedIn'">Log In</button>
+  		{{/ eq }}
+  	`,
+  	ViewModel: {
+  		state: {default: true}
+  	}
+  });
+  </script>
+  ```
+  @codepen
 
-@param {can-stache.sectionRenderer} FN A subsection that will be rendered if each
-`EXPRESSION` argument eq equal.
+  `eq` can compare more than two values:
 
-@param {can-stache.sectionRenderer} [INVERSE] An optional subsection that will be rendered
-if one of the `EXPRESSION` arguments is not equal to one of the others.
+  ```html
+  {{# eq(task.ownerId, task.assignedId, user.id) }} Delegate! {{/ eq }}
+  ```
+
+  @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call} [EXPRESSION] Two or more expressions whose return values will be tested for equality.
+
+  @param {can-stache.sectionRenderer} TRUTHY A subsection that will be rendered if each
+  `EXPRESSION` argument eq equal.
+
+  @param {can-stache.sectionRenderer} [FALSY] An optional subsection that will be rendered
+  if one of the `EXPRESSION` arguments is not equal to one of the others.
 
 @body
-
-## Use
-
-The `` helper compares expr1 and expr2 and renders the blocks accordingly.
-
-```html
-{{# eq(expr1, expr2) }}
-	// truthy
-{{ else }}
-	// falsey
-{{/ eq }}
-```

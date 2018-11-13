@@ -25,4 +25,4 @@ You can use `and` in a nested expression like:
 {{# if( and(this.x, this.y) ) }} YES {{else}} NO {{/ and }}
 ```
 
-It also takes multiple arguments.  `and( x, y, z )` works just like `x && y && z`.
+`and` also takes multiple arguments.  `and( x, y, z )` works just like `x && y && z`.

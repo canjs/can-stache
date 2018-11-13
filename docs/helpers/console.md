@@ -7,61 +7,69 @@ All `console` methods are available as stache helpers. A few of these are shown 
 
 Uses `console.log` to show the result of the provided expressions.
 
-```js
-const view = stache( "{{console.log(person.name, 'is', person.age, 'year(s) old')}}" );
+  ```js
+  import {stache} from "can";
 
-view( {
-	person: {
-		name: "Connor",
-		age: 1
-	}
-} );
-```
+  const view = stache(`{{ console.log(person.name, 'is', person.age, 'year(s) old') }}`);
 
-This will log to the console:
-```
-Connor is 1 year(s) old
-```
+  view( {
+  	person: {
+  		name: "Connor",
+  		age: 1
+  	}
+  } );
+  ```
+  @codepen
 
-You can also use `console.info`, `console.warn`, `console.error` in the same way.
+  This will log to the console:
+  ```
+  Connor is 1 year(s) old
+  ```
+
+  You can also use `console.info`, `console.warn`, `console.error` in the same way.
 
 
 @signature `console.time / console.timeEnd`
 
-[console.time()](https://developer.mozilla.org/en-US/docs/Web/API/Console/time) and [console.timeEnd()](https://developer.mozilla.org/en-US/docs/Web/API/Console/timeEnd) can be used to track how long an operation takes to run:
+  [console.time()](https://developer.mozilla.org/en-US/docs/Web/API/Console/time) and [console.timeEnd()](https://developer.mozilla.org/en-US/docs/Web/API/Console/timeEnd) can be used to track how long an operation takes to run:
 
-```js
-const view = stache( `
-    {{console.time("rendering list")}}
-    <ul>
-        {{#each(things)}}
-            <li>{{this}}</li>
-        {{/each}}
-    </ul>
-    {{console.timeEnd("rendering list")}}
-` );
+  ```js
+  import {stache} from "can";
+  const view = stache( `
+      {{console.time("rendering list")}}
+      <ul>
+          {{#for(thing of this.things)}}
+              <li>{{thing}}</li>
+          {{/for}}
+      </ul>
+      {{console.timeEnd("rendering list")}}
+  ` );
 
-view( {
-	things: [ "hammer", "apple", "dog" ]
-} );
-```
+  view( {
+  	things: [ "hammer", "apple", "dog" ]
+  } );
+  ```
+  @codepen
 
-This will log something like this to the console:
-```
-rendering list: 5.56298828125ms
-```
+  This will log something like this to the console:
+  ```
+  rendering list: 5.56298828125ms
+  ```
 
 @signature `console.table`
 
-```js
-const view = stache( "{{console.table(things)}}" );
+  ```js
+  import {stache} from "can";
 
-view( {
-	things: [ "hammer", "apple", "dog" ]
-} );
-```
+  const view = stache( "{{console.table(this.things)}}" );
 
-This will log something like this to the console:
+  view( {
+  	things: [ "hammer", "apple", "dog" ]
+  } );
+  ```
+  @codepen
+
+  This will log something like this to the console:
 
 <table style="width: 40%; border: 1px solid black;">
 	<thead style="background-color: #ddd;">

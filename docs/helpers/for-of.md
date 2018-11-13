@@ -28,22 +28,87 @@
   };
 
   var frag = view(data);
-  document.body.appendChild(frag);
+  console.log(frag.firstElementChild.innerHTML)
+  //-> <li>first</li><li>second</li>
 
-  document.body.innerHTML
-  //-> <ul><li>first</li><li>second</li></ul>
+  document.body.appendChild(frag);
   ```
   @codepen
 
-  @param {VariableExpression} VARIABLE_NAME A local variable
+  If an object of key-values are passed, the values of the object will be looped through.
+  You can access the key with `scope.key`:
+
+  ```js
+  import {stache} from "can";
+
+  var view = stache(`
+  	<ul>
+  		{{# for(name of this.values) }}
+  			<li>{{scope.key}}: {{ name }}</li>
+  		{{/ for }}
+  	</ul>
+  `);
+
+  var data = {
+  	values: {
+		first: "Hope",
+		middle: "van",
+		last: "Dyne"
+	}
+  };
+
+  var frag = view(data);
+  console.log(frag.firstElementChild.innerHTML)
+  //-> <li>first: Hope</li><li>middle: van</li><li>last: Dyne</li>
+
+  document.body.appendChild(frag);
+  ```
+  @codepen
+
+  If the `EXPRESSION` is falsy or an empty object or list, the `INVERSE` section will be rendered:
+
+  ```js
+  import {stache} from "can";
+
+  var view = stache(`
+  	<ul>
+  		{{# for(name of this.values) }}
+  			<li>{{ item.name }}</li>
+		{{ else }}
+			<li>No items</li>
+  		{{/ for }}
+  	</ul>
+  `);
+
+  var data = {
+  	values: []
+  };
+
+  var frag = view(data);
+  console.log(frag.firstElementChild.innerHTML)
+  //-> <li>No items</li>
+
+  document.body.appendChild(frag);
+  ```
+  @codepen
+
+  @param {VariableExpression} [VARIABLE_NAME] A local variable
   that will only be accessible to [can-stache/expressions/key-lookup KeyLookups] within the
-  block.  
+  block.  You can leave out the `VARIABLE_NAME` an `in` to loop through items in the object like:
+
+  ```html
+  {{# for( this.values ) }}
+	  <li>{{ scope.index }}</li>
+  {{/ for }}
+  ```
 
   @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
-  expression that typically returns a list like data structure.
-  If the value of the EXPRESSION is an observable list (for example: [can-define/list/list]), the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
+  expression that typically returns a [can-reflect.isListLike list like] data structure.
+  If the value of the `EXPRESSION` is an observable list (for example: [can-define/list/list]), the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
   element changes occur.  The list itself can also change, and a [can-diff/list/list difference]
   will be performed, which also will perform a minimal set of updates.
+
+
 
   @param {can-stache.sectionRenderer} FN A subsection that is
   rendered for each value in `EXPRESSION`. This subsection can

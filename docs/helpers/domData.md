@@ -1,19 +1,23 @@
 @function can-stache.helpers.domData domData
 @parent can-stache.htags
 
-@signature `{{domData(key)}}`
-
-Uses [can-dom-data] to associate an element with the current [can-stache.scopeAndContext context].
-
-@param {String} [key] The name of the data attribute to use for the context.
+@description Associate data with an HTML element. This is useful for integrating with
+other technologies.
 
 @signature `{{domData(key, value)}}`
 
 Uses [can-dom-data] to associate an element with a value.
 
-@param {String} [key] The name of the data attribute to use for the value.
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call} [value]
-The value to associate with the key.
+  @param {String} [key] The name of the data attribute to use for the value.
+  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} [value]
+  The value to associate with the key.
+
+@signature `{{domData(key)}}`
+
+  Uses [can-dom-data] to associate an element with the current [can-stache.scopeAndContext context].
+
+  @param {String} [key] The name of the data attribute to use for the context.
+
 
 @body
 

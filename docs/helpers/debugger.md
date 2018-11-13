@@ -1,37 +1,83 @@
 @function can-stache.helpers.debugger debugger
 @parent can-stache.htags
 
-In development, breaks at the given point in the template to inspect the current scope in the console.
+In development, breaks at the given point in the template to inspect the current scope in the
+console.  
 
-@signature `{{debugger()}}`
-The zero argument debugger breaks any time the helper evaluates.
+@signature `{{debugger}}`
 
-```html
-<!-- break each render -->
-{{debugger()}}
-```
+  Breaks any time that part of the page renders.
+
+  The following will hit the debugger
+  when you click the _Show_ button:
+
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
+
+  Component.extend({
+    tag: "my-demo",
+    view: `
+      {{ let value=false }}
+      {{# if(value) }}
+        {{ debugger }}
+      {{/ if }}
+      <button on:click="value = true">Show</button>
+    `
+  });
+  </script>
+  ```
+  @codepen
+
+  The [can-view-scope] can be used to look up values. `scope.log()` prints the scope.
+  `scope.get(key)` reads a key value.
 
 @signature `{{debugger(CONDITION)}}`
-The one argument debugger breaks any time the helper evaluates and the argument evaluates to a truthy value.
+  The one argument debugger breaks any time the helper evaluates and the argument evaluates to a truthy value.
 
-```html
-<!-- break each render when value is truthy -->
-{{debugger(value)}}
-```
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
 
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call} CONDITION an EXPRESSION that if evaluates to a truthy value triggers the debugger.
+  Component.extend({
+    tag: "my-demo",
+    view: `
+      {{ let value=false }}
+      {{ debugger(value) }}
+      <button on:click="value = true">Set to true</button>
+    `
+  });
+  </script>
+  ```
+  @codepen
+
+  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} CONDITION an EXPRESSION that if evaluates to a truthy value triggers the debugger.
 
 @signature `{{debugger(LEFT, RIGHT)}}`
-The two argument debugger breaks any time the helper evaluates and the two evaluated arguments are equal to each other.
+  The two argument debugger breaks any time the helper evaluates and the two evaluated arguments are equal to each other.
 
-```html
-<!-- break each render when leftValue === rightValue -->
-{{debugger(leftValue, rightValue)}}
-```
+  ```html
+  <my-demo></my-demo>
+  <script type="module">
+  import {Component} from "can";
 
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call} LEFT an EXPRESSION which compares with RIGHT which if equal triggers the debugger.
+  Component.extend({
+    tag: "my-demo",
+    view: `
+      {{ let value=false }}
+      {{ debugger(value, 2) }}
+      <button on:click="value = 2">Set to 2</button>
+    `
+  });
+  </script>
+  ```
+  @codepen
 
-@param {can-stache/expressions/key-lookup|can-stache/expressions/call} RIGHT an EXPRESSION which compares with LEFT which if equal triggers the debugger.
+  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} LEFT an EXPRESSION which compares with RIGHT which if equal triggers the debugger.
+
+  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} RIGHT an EXPRESSION which compares with LEFT which if equal triggers the debugger.
 
 @body
 
@@ -43,3 +89,8 @@ During a break, in the paused inspector there is a special `get(<path>)` functio
 
 Use the helper in development and debugging.
 In production, the `debugger` never breaks and instead prints a warning.
+
+## See also
+
+- [guides/debugging] Guide
+- [Debugging Tutorial](https://www.bitovi.com/blog/canjs-debugging-tutorial)

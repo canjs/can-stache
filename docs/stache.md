@@ -45,6 +45,7 @@
   import {Component} from "can";
 
   Component.extend({
+    tag: "my-demo",
     view: `<h1>Hello {{this.subject}}</h1>`,
     ViewModel: {
       subject: {default: "World"}
@@ -146,6 +147,7 @@ There are several ways to load a stache template:
   import {Component} from "can";
 
   Component.extend({
+    tag: "my-demo",
     view: `<h1>Hello {{ this.subject }}</h1>`,
     ViewModel: {
       subject: {default: "World"}
@@ -203,6 +205,7 @@ uses [can-stache.tags.escaped] to write out the `ViewModel`'s `subject`:
 import {Component} from "can";
 
 Component.extend({
+	tag: "my-demo",
 	view: `<h1>Hello {{ this.subject }}</h1>`,
 	ViewModel: {
 		subject: {default: "World"}
@@ -220,6 +223,7 @@ You can use [can-stache.tags.escaped] on any part of an HTML element except the 
 import {Component} from "can";
 
 Component.extend({
+	tag: "my-demo",
 	view: `
 		<h1 class='{{this.className}}' {{this.otherAttributes}}>
 			Hello {{ this.subject }}
@@ -242,6 +246,7 @@ You can call methods within [can-stache.tags.escaped] too:
 import {Component} from "can";
 
 Component.extend({
+	tag: "my-demo",
 	view: `<h1>Hello {{ this.caps( this.subject ) }}</h1>`,
 	ViewModel: {
 		subject: {default: "World"},

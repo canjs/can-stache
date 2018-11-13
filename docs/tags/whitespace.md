@@ -5,11 +5,39 @@
 
 @signature `{{-EXPRESSION-}}`
 
-Whitespace may be omitted from either or both ends of a magic tag by including a
-`-` character by the braces. When present, all whitespace on that side will be
-omitted up to the next tag, magic tag, or non-whitespace character. It also works with [can-stache.tags.unescaped].
+  Whitespace may be omitted from either or both ends of a magic tag by including a
+  `-` character by the braces. When present, all whitespace on that side will be
+  omitted up to the next tag, magic tag, or non-whitespace character. It also works with [can-stache.tags.unescaped].
 
-@param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.
+  The following ensures there is no extra between the second `<pre>`, the output of `{{-this.message-}}`,
+  and the `</pre>` closing tag:
+
+  ```html
+  <my-demo></my-demo>
+  <style>
+  pre {border: solid 1px;}
+  </style>
+  <script type="module">
+  import {Component} from "can";
+
+  Component.extend({
+    tag: "my-demo",
+    view: `
+      <pre>
+        {{this.message}}
+      </pre>
+      <pre>
+        {{- this.message -}}
+      </pre>`,
+    ViewModel: {
+      message: {default: "Hi There!"}
+    }
+  });
+  </script>
+  ```
+  @codepen
+
+  @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.
 
 @body
 
@@ -19,18 +47,18 @@ omitted up to the next tag, magic tag, or non-whitespace character. It also work
 
 ```html
 <div>
-	{{-#if(user.isMarried)-}}
+	{{-# if(user.isMarried) -}}
 		Mrs
-	{{-else-}}
+	{{- else -}}
 		Miss
-	{{-/if-}}
+	{{-/ if -}}
 </div>
 ```
 
 would render as:
 
 ```html
-<div>{{#if(user.isMarried)}}Mrs{{else}}Miss{{/if}}</div>
+<div>{{# if(user.isMarried) }}Mrs{{ else }}Miss{{/ if }}</div>
 ```
 
 and
@@ -54,11 +82,11 @@ One use case is to remove spaces around span elements.
 ```html
 <div>
 	<span>
-		{{-#if(user.isMarried)-}}
+		{{-# if(user.isMarried) -}}
 			Mrs.
-		{{-else-}}
+		{{- else -}}
 			Miss.
-		{{-/if-}}
+		{{-/ if -}}
 	</span>
 	{{- user.name }}
 </div>
@@ -81,16 +109,16 @@ while still being cleanly formatted for human consumption.
 ```html
 <div>
 	{{-! output the users name }}
-	{{-#if(user.name)}}
+	{{-# if(user.name) }}
 		{{ user.name }}
-	{{/if-}}
+	{{/ if -}}
 </div>
 ```
 
 would render as:
 
 ```html
-<div>{{-! output the users name }}{{-#if(user.name)}}
+<div>{{-! output the users name }}{{-# if(user.name) }}
 		{{ user.name }}
-	{{/if-}}</div>
+	{{/ if -}}</div>
 ```
