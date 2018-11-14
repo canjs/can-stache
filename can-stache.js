@@ -52,7 +52,7 @@ var namespaces = {
 	"g": svgNamespace,
 	"defs": svgNamespace,
 	"path": svgNamespace,
-	"filter": svgNamespace, 
+	"filter": svgNamespace,
 	"feMorphology": svgNamespace,
 	"feGaussianBlur": svgNamespace,
 	"feOffset": svgNamespace,
@@ -271,7 +271,7 @@ function stache (filename, template) {
 				if( isCustomTag ) {
 					section.startSubSection();
 				} else if(textContentOnlyTag[tagName]) {
-					state.textContentOnly = new TextSectionBuilder();
+					state.textContentOnly = new TextSectionBuilder(filename);
 				}
 			}
 
@@ -354,7 +354,7 @@ function stache (filename, template) {
 					state.node.attrs[state.attr.name] = state.attr.section.compile(copyState());
 				} else if (matchedAttrNamespacesURI) {
 					state.node.attrs[state.attr.name] = {
-						value: state.attr.value, 
+						value: state.attr.value,
 						namespaceURI: attrsNamespacesURI[attrName]
 					};
 				} else {
@@ -442,7 +442,7 @@ function stache (filename, template) {
 			else if(state.attr) {
 
 				if(!state.attr.section) {
-					state.attr.section = new TextSectionBuilder();
+					state.attr.section = new TextSectionBuilder(filename);
 					if(state.attr.value) {
 						state.attr.section.add(state.attr.value);
 					}
@@ -460,7 +460,7 @@ function stache (filename, template) {
 					state.node.attributes.push(mustacheCore.makeLiveBindingBranchRenderer(null, expression, copyState({ filename: section.filename, lineNo: lineNo })));
 				} else if( mode === "#" || mode === "^" ) {
 					if(!state.node.section) {
-						state.node.section = new TextSectionBuilder();
+						state.node.section = new TextSectionBuilder(filename);
 					}
 					makeRendererAndUpdateSection(state.node.section, mode, expression, lineNo);
 				} else {

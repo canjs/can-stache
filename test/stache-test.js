@@ -11,6 +11,7 @@ require('../helpers/-each-test');
 require('../helpers/-converter-test');
 require('./section-test');
 require("./partials-test");
+require("./filename-test");
 var stache = require('../can-stache');
 var core = require('../src/mustache_core');
 var clone = require('steal-clone');
@@ -5032,27 +5033,6 @@ function makeTest(name, doc, mutation) {
 		}
 	});
 
-	testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
-		var teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
-		stache("filename.stache", "{{#if someCondition}}\n...\n{{/foo}}");
-		QUnit.equal(teardown(), 1, "{{#if someCondition}}");
-
-		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
-		stache("filename.stache", "{{^if someCondition}}\n...\n{{/foo}}");
-		QUnit.equal(teardown(), 1, "{{^if someCondition}}");
-
-		teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/call}}");
-		stache("filename.stache", "{{#call()}}\n...\n{{/foo}}");
-		QUnit.equal(teardown(), 1, "{{#call()}}");
-
-		teardown = testHelpers.dev.willWarn(/filename.stache/);
-		stache("filename.stache", "{{#if}}...{{/}}");
-		stache("filename.stache", "{{#if someCondition}}...{{/if}}");
-		stache("filename.stache", "{{^if someCondition}}...{{/if}}");
-		stache("filename.stache", "{{#call()}}...{{/call}}");
-		QUnit.equal(teardown(), 0, "matching tags should not have warnings");
-	});
-
 	testHelpers.dev.devOnlyTest("warn on unknown attributes (canjs/can-stache#139)", function(assert) {
 		var done = assert.async();
 		var teardown = testHelpers.dev.willWarn(
@@ -5811,28 +5791,6 @@ function makeTest(name, doc, mutation) {
 
 		equal(frag.firstChild.firstChild.nodeValue, '1');
 		equal(frag.lastChild.firstChild.nodeValue, '2');
-	});
-
-	testHelpers.dev.devOnlyTest("scope has filename", function(){
-		var template = stache('some-file', '{{scope.filename}}');
-		var frag = template();
-
-		equal(frag.firstChild.nodeValue, 'some-file');
-	});
-
-	testHelpers.dev.devOnlyTest("scope has correct filename after calling a partial", function(){
-		var innerTemplate = stache('some-partial', '<span>{{scope.filename}}</span>');
-		var outerTemplate = stache('some-file', '{{#if foo}}{{scope.filename}}{{/if}}{{>somePartial}}');
-		var vm = new DefineMap()
-		var frag = outerTemplate(vm, {
-			partials: {
-				somePartial: innerTemplate
-			}
-		});
-		vm.set('foo', 'bar');
-
-		equal(frag.firstChild.nodeValue, 'some-file');
-		equal(frag.firstChild.nextSibling.firstChild.nodeValue, 'some-partial');
 	});
 
 	QUnit.test("using scope.index works when using #each with arrays", function() {
@@ -6646,7 +6604,7 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
 
 	});
-	
+
 	QUnit.test("SVGs are not rendered correctly", function() {
 		if(doc.createElementNS) {
 			var svg = '<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">' +

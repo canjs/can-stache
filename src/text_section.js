@@ -12,7 +12,10 @@ var Observation = require("can-observation");
 
 var noop = function(){};
 
-var TextSectionBuilder = function(){
+var TextSectionBuilder = function(filename){
+	if (filename) {
+		this.filename = filename;
+	}
 	this.stack = [new TextSection()];
 };
 

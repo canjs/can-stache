@@ -49,7 +49,7 @@ function debuggerHelper (left, right) {
 		}
 
 		var options = arguments[arguments.length - 1],
-			scope = options.scope;
+			scope = options && options.scope;
 		var get = function (path) {
 			return scope.get(path);
 		};
