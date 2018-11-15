@@ -103,6 +103,8 @@ The current line number that is being rendered (only available in dev mode).
 
 @signature `scope.root`
 
+`scope.root` is deprecated. Use either `scope.top` or `scope.vm` instead.
+
 The root scope. This can be used for reading data from the root when in another scope:
 
 ```js
