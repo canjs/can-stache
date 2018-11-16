@@ -335,9 +335,7 @@ var eachHelper = function(items) {
 			hashOptions[exprs.key] = key;
 		});
 	}
-
-
-
+	
 	if ((
 		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
 			( canReflect.isListLike(resolved) && canReflect.isValueLike(items) )

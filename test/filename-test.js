@@ -2,6 +2,8 @@ var testHelpers = require('can-test-helpers');
 var stache = require('../can-stache');
 var DefineMap = require("can-define/map/map");
 
+QUnit.module("can-stache: filename");
+
 testHelpers.dev.devOnlyTest("warn on missmatched tag (canjs/canjs#1476)", function() {
 	var teardown = testHelpers.dev.willWarn("filename.stache:3: unexpected closing tag {{/foo}} expected {{/if}}");
 	stache("filename.stache", "{{#if someCondition}}\n...\n{{/foo}}");

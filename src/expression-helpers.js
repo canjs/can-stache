@@ -14,7 +14,7 @@ var SetterObservable = require("can-simple-observable/setter/setter");
 function getObservableValue_fromKey(key, scope, readOptions) {
 	var data = scope.computeData(key, readOptions);
 
-	Observation.temporarilyBind(data);
+	// Observation.temporarilyBind(data);
 
 	return data;
 }
@@ -37,6 +37,7 @@ function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptio
 	}, function setDynamicKey(newVal){
 		stacheKey.write(canReflect.getValue(root), getKeys(), newVal);
 	});
+	// This prevents lazy evalutaion
 	Observation.temporarilyBind(computeValue);
 	computeValue.initialValue = canReflect.getValue(computeValue);
 	computeValue.parentHasKey = parentHasKey;
