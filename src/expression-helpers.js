@@ -11,18 +11,23 @@ var SetterObservable = require("can-simple-observable/setter/setter");
 
 // ## Helpers
 // Helper for getting a bound compute in the scope.
+
+/*
 function getObservableValue_fromKey(key, scope, readOptions) {
 	var data = scope.computeData(key, readOptions);
 
 	// Observation.temporarilyBind(data);
 
 	return data;
-}
+}*/
 
+// TODO: I think this can be removed
+/*
 function computeHasDependencies(compute){
 	return compute[canSymbol.for("can.valueHasDependencies")] ?
 		canReflect.valueHasDependencies(compute) : compute.computeInstance.hasDependencies;
 }
+*/
 
 function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptions, readOptions) {
 	// This needs to return something similar to a ScopeKeyData with intialValue and parentHasKey
@@ -88,8 +93,6 @@ function toCompute(value) {
 }
 
 module.exports = {
-	getObservableValue_fromKey: getObservableValue_fromKey,
-	computeHasDependencies: computeHasDependencies,
 	getObservableValue_fromDynamicKey_fromObservable: getObservableValue_fromDynamicKey_fromObservable,
 	convertToArgExpression: convertToArgExpression,
 	toComputeOrValue: toComputeOrValue,

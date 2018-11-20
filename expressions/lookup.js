@@ -14,21 +14,14 @@ var Lookup = function(key, root, sourceText) {
 	canReflect.setKeyValue(this, sourceTextSymbol, sourceText);
 };
 Lookup.prototype.value = function(scope, readOptions){
-	var value;
-
 	if (this.rootExpr) {
 		// TODO ... how to warn?
-		value = expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope), scope, {}, {});
+		return expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope), scope, {}, {});
 	} else {
-
-		value = expressionHelpers.getObservableValue_fromKey(this.key, scope, assign({
+		return scope.computeData(this.key, assign({
 			warnOnMissingKey: true
 		},readOptions));
 	}
-
-
-
-	return value;
 };
 //!steal-remove-start
 if (process.env.NODE_ENV !== 'production') {
