@@ -547,7 +547,7 @@ QUnit.test("recursive inline partials are accessible from call expressions", 1, 
 		}
 	});
 
-	var spans = frag.firstElementChild.getElementsByTagName("span");
+	var spans = frag.firstChild.getElementsByTagName("span");
 	var spanText = [].slice.call(spans,0).map(function(span){
 		return span.innerHTML;
 	});
