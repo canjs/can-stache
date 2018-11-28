@@ -2,7 +2,7 @@ var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var SimpleMap = require("can-simple-map");
 var canReflect = require("can-reflect");
-
+var Observation = require("can-observation");
 
 QUnit.module("can-stache and/or helper");
 
@@ -155,4 +155,28 @@ QUnit.test("or standalone", function(){
 	});
 	QUnit.equal( frag.firstChild.innerHTML, "falsey", "false,''" );
 	QUnit.deepEqual(renders,[]);
+});
+
+QUnit.test("and is lazy", function(){
+	var view = stache("<div>{{#and(this.isFalse, this.shouldNotBeRead)}}TRUE{{else}}FALSE{{/and}}</div>");
+
+	var fragment = view({
+		isFalse: false,
+		shouldNotBeRead: new Observation(function avoidReadingThis(){
+			QUnit.ok(false, "should not be read");
+		})
+	});
+
+	QUnit.equal(fragment.firstChild.innerHTML,"FALSE", "evaled to false");
+
+	view = stache("<div>{{#and(this.isFalse, this.functionCall() )}}TRUE{{else}}FALSE{{/and}}</div>");
+
+	fragment = view({
+		isFalse: false,
+		functionCall: function(){
+			QUnit.ok(false, "should not be read");
+		}
+	});
+
+	QUnit.equal(fragment.firstChild.innerHTML,"FALSE", "evaled to false");
 });

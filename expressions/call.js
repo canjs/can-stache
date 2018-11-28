@@ -11,6 +11,7 @@ var assign = require('can-assign');
 var sourceTextSymbol = canSymbol.for("can-stache.sourceText");
 var isViewSymbol = canSymbol.for("can.isView");
 var Scope = require("can-view-scope");
+var Observation = require("can-observation");
 
 // ### Call
 // `new Call( new Lookup("method"), [new ScopeExpr("name")], {})`
@@ -62,8 +63,9 @@ Call.prototype.value = function(scope, helperOptions){
 
 	// proxyMethods must be false so that the `requiresOptionsArgument` and any
 	// other flags stored on the function are preserved
-	var method = this.methodExpr.value(scope, { proxyMethods: false }),
-		func = canReflect.getValue( method );
+	var method = this.methodExpr.value(scope, { proxyMethods: false });
+	Observation.temporarilyBind(method);
+	var func = canReflect.getValue( method );
 
 	var getArgs = callExpression.args(scope , func && func.ignoreArgLookup);
 
