@@ -9,24 +9,6 @@ var makeComputeLike = require("can-view-scope/make-compute-like");
 var SetterObservable = require("can-simple-observable/setter/setter");
 
 // ## Helpers
-// Helper for getting a bound compute in the scope.
-
-/*
-function getObservableValue_fromKey(key, scope, readOptions) {
-	var data = scope.computeData(key, readOptions);
-
-	// Observation.temporarilyBind(data);
-
-	return data;
-}*/
-
-// TODO: I think this can be removed
-/*
-function computeHasDependencies(compute){
-	return compute[canSymbol.for("can.valueHasDependencies")] ?
-		canReflect.valueHasDependencies(compute) : compute.computeInstance.hasDependencies;
-}
-*/
 
 function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptions, readOptions) {
 	// This needs to return something similar to a ScopeKeyData with intialValue and parentHasKey
@@ -45,6 +27,11 @@ function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptio
 	Observation.temporarilyBind(computeValue);
 	computeValue.initialValue = canReflect.getValue(computeValue);
 	computeValue.parentHasKey = parentHasKey;
+	// Todo:
+	// 1. We should warn here if `initialValue` is undefined.  We can expose the warning function
+	//    in can-view-scope and call it here.
+	// 2. We should make this lazy if possible.  We can do that by making getter/setters for
+	//    initialValue and parentHasKey (and possibly @@can.valueHasDependencies)
 	return computeValue;
 }
 

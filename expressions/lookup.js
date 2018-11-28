@@ -15,7 +15,6 @@ var Lookup = function(key, root, sourceText) {
 };
 Lookup.prototype.value = function(scope, readOptions){
 	if (this.rootExpr) {
-		// TODO ... how to warn?
 		return expressionHelpers.getObservableValue_fromDynamicKey_fromObservable(this.key, this.rootExpr.value(scope), scope, {}, {});
 	} else {
 		return scope.computeData(this.key, assign({
