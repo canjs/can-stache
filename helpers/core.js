@@ -246,7 +246,7 @@ var switchHelper = function(expression, options){
 	var caseHelper = function(value, options) {
 		if(!found && helpersCore.resolve(expression) === helpersCore.resolve(value)) {
 			found = true;
-			return options.fn(options.scope.peek('this') || this);
+			return options.fn(options.scope);
 		}
 	};
 	caseHelper.requiresOptionsArgument = true;
