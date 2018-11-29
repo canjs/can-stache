@@ -554,3 +554,41 @@ QUnit.test("recursive inline partials are accessible from call expressions", 1, 
 
 	QUnit.deepEqual(spanText, ["Parent", "Child"]);
 });
+
+QUnit.test("Scope being overwritten in partials", function () {
+	var template;
+	var div = document.createElement('div');
+	var data = new SimpleMap({
+		people: new DefineList([{
+			name: 'matt'
+		}, {
+			name: 'justin'
+		}])
+	});
+
+	template = stache("{{#data}}{{>person people}}{{/data}}");
+
+	var dom = template({
+		data: data
+	},{
+		partials: {
+			person: stache("{{#each(this)}}<span>{{name}}</span>{{/each}}")
+		}
+	});
+	div.appendChild(dom);
+	var spans = div.getElementsByTagName('span');
+
+	equal(spans.length, 2, 'Got two people');
+	equal(stacheTestHelpers.innerHTML(spans[0]), 'matt', 'correct context');
+	equal(stacheTestHelpers.innerHTML(spans[1]), 'justin', 'correct context');
+
+	// Update the list of people
+	data.set('people', new DefineList([{
+		name: 'kevin'
+	}, {
+		name: 'austin'
+	}]));
+
+	equal(stacheTestHelpers.innerHTML(spans[0]), 'kevin', 'correct context');
+	equal(stacheTestHelpers.innerHTML(spans[1]), 'austin', 'correct context');
+});
