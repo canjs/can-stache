@@ -73,7 +73,7 @@
     "steal": "^1.0.5",
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^1.0.0",
-    "steal-tools": "^1.0.1",
+    "steal-tools": "^2.0.11",
     "testee": "^0.8.0"
   }
 }
