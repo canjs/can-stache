@@ -6422,14 +6422,12 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Handlebars helper: switch/case scope issue inside #each #509", function() {
-		var template = stache(`
-		{{#each(group, person=value)}}
-			{{#switch(person.gender)}}
-				{{#case "male"}}{{person.name}}{{/case}}
-				{{#default}}female{{/default}}
-			{{/switch}}
-		{{/each}}
-		`);
+		var template = stache("{{#each(group, person=value)}}"+
+			"{{#switch(person.gender)}}"+
+				"{{#case 'male'}}{{person.name}}{{/case}}"+
+				"{{#default}}female{{/default}}"+
+			"{{/switch}}"+
+		"{{/each}}");
 		var map = new DefineMap({
 			group: new DefineList([{
 				gender: 'male',
