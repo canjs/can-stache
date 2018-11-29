@@ -180,6 +180,7 @@ var core = {
 
 			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
+				var partialScope = scope;
 				// If the second parameter of a partial is a custom context
 				if(exprData && exprData.argExprs.length === 1) {
 					var newContext = canReflect.getValue( exprData.argExprs[0].value(scope) );
@@ -191,22 +192,22 @@ var core = {
 						}
 						//!steal-remove-end
 					}else{
-						scope = scope.add(newContext);
+						partialScope = scope.add(newContext);
 					}
 				}
 				// Look up partials in templateContext first
-				var partial = canReflect.getKeyValue(scope.templateContext.partials, localPartialName);
+				var partial = canReflect.getKeyValue(partialScope.templateContext.partials, localPartialName);
 				var renderer;
 
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(scope, nodeList)
-							: partial(scope);
+						return partial.render ? partial.render(partialScope, nodeList)
+							: partial(partialScope);
 					};
 				}
 				// Use can.view to get and render the partial.
 				else {
-					var scopePartialName = scope.read(localPartialName, {
+					var scopePartialName = partialScope.read(localPartialName, {
 						isArgument: true
 					}).value;
 
@@ -219,10 +220,10 @@ var core = {
 
 					renderer = function() {
 						if(typeof localPartialName === "function"){
-							return localPartialName(scope, {}, nodeList);
+							return localPartialName(partialScope, {}, nodeList);
 						} else {
 							var domRenderer = core.getTemplateById(localPartialName);
-							return domRenderer ? domRenderer(scope, {}, nodeList) : getDocument().createDocumentFragment();
+							return domRenderer ? domRenderer(partialScope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
 					};
 				}
