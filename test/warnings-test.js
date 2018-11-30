@@ -1,7 +1,6 @@
 var testHelpers = require('can-test-helpers');
 var stache = require('../can-stache');
 var DefineMap = require("can-define/map/map");
-var DefineList = require("can-define/list/list");
 var Scope = require("can-view-scope");
 
 QUnit.module("can-stache: warnings");
