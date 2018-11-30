@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "can-assign": "^1.1.1",
-    "can-attribute-encoder": "^1.0.0",
+    "can-attribute-encoder": "1.1.1",
     "can-child-nodes": "^1.0.0",
     "can-define-lazy-value": "^1.0.2",
     "can-dom-data": "^1.0.1",
