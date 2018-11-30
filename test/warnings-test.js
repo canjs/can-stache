@@ -1,6 +1,7 @@
 var testHelpers = require('can-test-helpers');
 var stache = require('../can-stache');
 var DefineMap = require("can-define/map/map");
+var DefineList = require("can-define/list/list");
 var Scope = require("can-view-scope");
 
 QUnit.module("can-stache: warnings");
@@ -218,4 +219,17 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 	});
 
 	QUnit.equal(warningTeardown(), 1, 'got expected warning');
+});
+
+testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #493", function () {
+	var template,
+		items = new DefineList(['one', 'two']),
+		teardown = testHelpers.dev.willWarn('Unable to find partial "itemRenderer"');
+
+	template = stache("{{#each(items)}} {{> itemRenderer}} {{/each}}");
+	template({
+		items: items,
+		itemRenderer: stache("{{this}}")
+	});
+	QUnit.equal(teardown(), 2, "got expected warning");
 });

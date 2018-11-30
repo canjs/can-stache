@@ -563,6 +563,12 @@ stache.from = mustacheCore.getTemplateById = function(id){
 		var el = DOCUMENT().getElementById(id);
 		if(el) {
 			templates[id] = stache("#" + id, el.innerHTML);
+		} else {
+			//!steal-remove-start
+			if (process.env.NODE_ENV !== 'production') {
+				dev.warn('Unable to find partial "' + id + '"');
+			}
+			//!steal-remove-end
 		}
 	}
 	return templates[id];
