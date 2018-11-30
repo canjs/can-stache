@@ -223,13 +223,8 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 
 testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #493", function () {
 	var template,
-		items = new DefineList(['one', 'two']),
-		teardown = testHelpers.dev.willWarn('Unable to find partial "itemRenderer"');
-
-	template = stache("{{#each(items)}} {{> itemRenderer}} {{/each}}");
-	template({
-		items: items,
-		itemRenderer: stache("{{this}}")
-	});
-	QUnit.equal(teardown(), 2, "got expected warning");
+		teardown = testHelpers.dev.willWarn('Unable to find partial "aPartial"');
+	template = stache("{{> aPartial}}");
+	template();
+	QUnit.equal(teardown(), 1, "got expected warning");
 });
