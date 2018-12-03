@@ -2,6 +2,8 @@ var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var DefineList = require("can-define/list/list");
 var canReflect = require("can-reflect");
+var helpersCore = require('./core');
+
 require("./-for-of");
 
 
@@ -151,4 +153,22 @@ QUnit.test("else contains the correct this", function() {
 		message: "empty"
 	});
 	QUnit.equal(frag.firstChild.nextSibling.nodeValue, "empty", "got the value from the VM");
+});
+
+QUnit.test("forOf works after calling helpersCore.__resetHelpers", function() {
+	helpersCore.__resetHelpers();
+
+	var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
+	var list = new DefineList([34234,2,1,3]);
+	var frag = template({
+		list: list,
+		vmProp: "1"
+	});
+	list.sort();
+
+	var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
+			return +p.innerHTML;
+	});
+
+	deepEqual(order, [11,12,13,134234]);
 });

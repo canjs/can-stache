@@ -1,7 +1,7 @@
 var expression = require('../src/expression');
 var QUnit = require('steal-qunit');
 var Scope = require('can-view-scope');
-var helpers = require('../helpers/converter');
+var helpers = require('./core');
 var canReflect = require("can-reflect");
 
 var SimpleMap = require('can-simple-map');
