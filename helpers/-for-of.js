@@ -1,4 +1,3 @@
-var helpers = require("can-stache-helpers");
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");
 var live = require('can-view-live');
@@ -125,5 +124,4 @@ forHelper.ignoreArgLookup = function ignoreArgLookup(index) {
 	return index === 0;
 };
 
-
-helpers.for = forHelper;
+module.exports = forHelper;

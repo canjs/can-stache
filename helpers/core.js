@@ -12,15 +12,17 @@ var KeyObservable = require("../src/key-observable");
 var Observation = require("can-observation");
 var TruthyObservable = require("../src/truthy-observable");
 var helpers = require("can-stache-helpers");
+var makeConverter = require('./converter');
 
 var domData = require('can-dom-data');
 var domDataState = require('can-dom-data-state');
 
-require("./-for-of");
-require("./-let");
-
+var forHelper = require("./-for-of");
+var letHelper = require("./-let");
 
 var builtInHelpers = {};
+var builtInConverters = {};
+var converterPackages = new WeakMap();
 
 // ## Helpers
 var helpersCore = {
@@ -72,6 +74,9 @@ var helpersCore = {
 			helpersCore.registerHelper(name, helpersCore.makeSimpleHelper(callback));
 		}
 	},
+	registerConverter: function(name, getterSetter) {
+		helpersCore.registerHelper(name, makeConverter(getterSetter));
+	},
 	makeSimpleHelper: function(fn) {
 		return function() {
 			var realArgs = [];
@@ -86,6 +91,21 @@ var helpersCore = {
 			return helpersCore.registerHelpers(name);
 		}
 		return helpersCore.registerHelper(name, helpersCore.makeSimpleHelper(callback));
+	},
+	addConverter: function(name, getterSetter) {
+		if(typeof name === "object") {
+			if(!converterPackages.has(name)) {
+				converterPackages.set(name, true);
+				canReflect.eachKey(name, function(getterSetter, name) {
+					helpersCore.addConverter(name, getterSetter);
+				});
+			}
+			return;
+		}
+	
+		var helper = makeConverter(getterSetter);
+		helper.isLiveBound = true;
+		helpersCore.registerHelper(name, helper);
 	},
 
 	// add helpers that set up their own internal live-binding
@@ -110,13 +130,19 @@ var helpersCore = {
 		for (var helper in helpers) {
 			delete helpers[helper];
 		}
-
+		// Clear converterPackages map before re-adding converters
+		converterPackages.delete(builtInConverters);
+		
 		helpersCore.addBuiltInHelpers();
+		helpersCore.addBuiltInConverters();
 	},
 	addBuiltInHelpers: function() {
 		canReflect.each(builtInHelpers, function(helper, helperName) {
 			helpers[helperName] = helper;
 		});
+	},
+	addBuiltInConverters: function () {
+		helpersCore.addConverter(builtInConverters);
 	},
 	_makeLogicHelper: function(name, logic){
 		var logicHelper =  assign(function() {
@@ -472,9 +498,24 @@ unlessHelper.requiresOptionsArgument = true;
 unlessHelper.isLiveBound = true;
 
 
+// ## Converters
+// ## NOT converter
+var notConverter = {
+	get: function(obs, options){
+		if(helpersCore.looksLikeOptions(options)) {
+			return canReflect.getValue(obs) ? options.inverse() : options.fn();
+		} else {
+			return !canReflect.getValue(obs);
+		}
+	},
+	set: function(newVal, obs){
+		canReflect.setValue(obs, !newVal);
+	}
+};
+
 // ## Register as defaults
 
-var builtInHelpers = {
+assign(builtInHelpers, {
 	'debugger': debuggerHelper,
 	each: eachHelper,
 	eachOf: eachHelper,
@@ -490,11 +531,17 @@ var builtInHelpers = {
 	'switch': switchHelper,
 	joinBase: joinBaseHelper,
 	and: andHelper,
-	or: orHelper
-};
+	or: orHelper,
+	'let': letHelper,
+	'for': forHelper
+});
 
+assign(builtInConverters, {
+	'not': notConverter
+});
 
 // add all the built-in helpers when stache is loaded
 helpersCore.addBuiltInHelpers();
+helpersCore.addBuiltInConverters();
 
 module.exports = helpersCore;

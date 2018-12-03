@@ -1,9 +1,10 @@
 var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var DefineMap = require("can-define/map/map");
-require("./-let");
 var Scope = require("can-view-scope");
+var helpersCore = require('can-stache/helpers/core');
 
+require("./-let");
 
 QUnit.module("can-stache let helper");
 
@@ -64,4 +65,22 @@ QUnit.test("custom scopes still get a let context", function(){
 	var template = stache("{{let foo='bar'}}");
 	template(new Scope({}));
 	QUnit.ok(true, "passes");
+});
+
+QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
+	helpersCore.__resetHelpers();
+
+	var template = stache(
+		"{{let userName=this.name constTwo=2}}"+
+		"<div>{{userName}}</div>"
+	);
+	var vm = new DefineMap({name: "Justin"});
+
+	var frag = template(vm);
+
+	QUnit.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+
+	vm.name = "Ramiya";
+
+	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
 });

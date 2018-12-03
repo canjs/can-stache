@@ -8,7 +8,6 @@ var HTMLSectionBuilder = require('./src/html_section');
 var TextSectionBuilder = require('./src/text_section');
 var mustacheCore = require('./src/mustache_core');
 var mustacheHelpers = require('./helpers/core');
-require('./helpers/converter');
 var getIntermediateAndImports = require('can-stache-ast').parse;
 var utils = require('./src/utils');
 var makeRendererConvertScopes = utils.makeRendererConvertScopes;
