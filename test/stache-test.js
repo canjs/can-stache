@@ -1452,7 +1452,7 @@ function makeTest(name, doc, mutation) {
 			"if": "{{#if test}}if{{else}}else{{/if}}",
 			"not_if": "not_{{^if test}}not{{/if}}if",
 			"each": "{{#each test}}{{.}}{{/each}}",
-			"with": "wit{{#with test}}<span>{{3}}</span>{{/with}}"
+			"with": "wit{{#with test}}<span>{{[3]}}</span>{{/with}}"
 		};
 
 		var template = stache("There are {{ length }} todos");
@@ -6439,6 +6439,23 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(frag);
 		QUnit.equal(innerHTML(div).trim(), 'matt');
+	});
+
+	QUnit.test("Literals in magic tags #615", function() {
+		var template = stache("<div data-value=\"{{1}}\">{{0}} - {{1}}</div>");
+		var map = new DefineMap({
+			"0": "Hello",
+			"1": "World"
+		});
+
+		var section = doc.createElement("section");
+		var frag = template(map);
+
+		section.appendChild(frag);
+
+		var div = section.firstChild;
+		QUnit.equal(div.getAttribute('data-value'), 1, "has the literal value");
+		QUnit.equal(innerHTML(div).trim(), '0 - 1');
 	});
 
 	// PUT NEW TESTS RIGHT BEFORE THIS!

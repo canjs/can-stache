@@ -94,6 +94,8 @@ var core = {
 			value = exprData.value(scope);
 		} else if (exprData instanceof expression.Lookup) {
 			value = exprData.value(scope);
+		} else if (exprData instanceof expression.Literal) {
+			value = exprData.value.bind(exprData);
 		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
 			// Brackets get wrapped in Helpers when used in attributes
 			// like `<p class="{{ foo[bar] }}" />`
@@ -303,9 +305,7 @@ var core = {
 	makeLiveBindingBranchRenderer: function(mode, expressionString, state){
 		// Pre-process the expression.
 		var exprData = core.expression.parse(expressionString);
-		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
-			exprData = new expression.Helper(exprData,[],{});
-		}
+
 		// A branching renderer takes truthy and falsey renderer.
 		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
 			// If this is within a tag, make sure we only get string values.
