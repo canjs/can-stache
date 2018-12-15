@@ -5,6 +5,7 @@ var Literal = require("../expressions/literal");
 var canReflect = require("can-reflect");
 var stacheKey = require("can-stache-key");
 var Observation = require("can-observation");
+var ObservationRecorder = require("can-observation-recorder");
 var makeComputeLike = require("can-view-scope/make-compute-like");
 var SetterObservable = require("can-simple-observable/setter/setter");
 
@@ -25,7 +26,9 @@ function getObservableValue_fromDynamicKey_fromObservable(key, root, helperOptio
 	});
 	// This prevents lazy evalutaion
 	Observation.temporarilyBind(computeValue);
-	computeValue.initialValue = canReflect.getValue(computeValue);
+
+	// peek so no observable that might call getObservableValue_fromDynamicKey_fromObservable will re-evaluate if computeValue changes.
+	computeValue.initialValue = ObservationRecorder.peekValue(computeValue);
 	computeValue.parentHasKey = parentHasKey;
 	// Todo:
 	// 1. We should warn here if `initialValue` is undefined.  We can expose the warning function

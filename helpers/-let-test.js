@@ -1,8 +1,10 @@
 var QUnit = require("steal-qunit");
 var stache = require("can-stache");
 var DefineMap = require("can-define/map/map");
+var SimpleMap = require("can-simple-map");
 var Scope = require("can-view-scope");
 var helpersCore = require('can-stache/helpers/core');
+window.queues = require("can-queues");
 
 require("./-let");
 
@@ -83,4 +85,29 @@ QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
 	vm.name = "Ramiya";
 
 	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+});
+
+QUnit.test("let multiple updates (#650)", function(){
+
+	// This is actually testing that creating the prop[ref] observable will not leak an observation record.
+	var template = stache(
+		"{{let a = prop[ref]}}"+
+		"{{a}}"
+	);
+
+	var data = new SimpleMap({
+		ref: 0,
+		prop: new SimpleMap({
+			0: 1,
+			1: 2,
+			2: 3,
+			4: 4
+		})
+	});
+
+	template(data);
+
+	data.set("ref", data.get("ref")+1 );
+	data.set("ref", data.get("ref")+1 );
+	QUnit.ok(true, "got here");
 });
