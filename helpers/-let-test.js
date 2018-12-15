@@ -4,7 +4,6 @@ var DefineMap = require("can-define/map/map");
 var SimpleMap = require("can-simple-map");
 var Scope = require("can-view-scope");
 var helpersCore = require('can-stache/helpers/core');
-window.queues = require("can-queues");
 
 require("./-let");
 
