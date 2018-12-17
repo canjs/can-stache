@@ -75,11 +75,14 @@ QUnit.test("let blocks allow reassigning variables #645", function(){
 		"{{/let}}" + 
 		"{{#let foo='baz'}}" + 
 		"<p>{{foo}}</p>" + 
-		"{{/let}}"
+		"{{/let}}" + 
+		"<p>foo-{{foo}}</p>"
 	);
 	var frag = template(new Scope({}));
-	QUnit.equal( frag.firstChild.innerHTML, "bar", "first value still works");
-	QUnit.equal( frag.lastChild.innerHTML, "baz", "reassigning foo works");
+	var paragraphs = frag.querySelectorAll('p');
+	QUnit.equal( paragraphs[0].innerHTML, "bar", "first value still works");
+	QUnit.equal( paragraphs[1].innerHTML, "baz", "reassigning foo works");
+	QUnit.equal( paragraphs[2].innerHTML, "foo-", "foo is not available outside of let block");
 });
 
 QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
