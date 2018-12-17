@@ -54,8 +54,9 @@ function portalHelper(elementObservable, options){
 	getElementAndRender();
 
 	return function(el) {
-		var comment = getDocument().createComment("portal(" + canReflect.getName(elementObservable) + ")");
-		var frag = getDocument().createDocumentFragment();
+		var doc = getDocument();
+		var comment = doc.createComment("portal(" + canReflect.getName(elementObservable) + ")");
+		var frag = doc.createDocumentFragment();
 		domMutateNode.appendChild.call(frag, comment);
 		nodeLists.replace([el], frag);
 

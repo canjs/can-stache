@@ -25,7 +25,7 @@ console.log(document.head.innerHTML)
 ```
 
 @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
-expression that returns an *element*. If the value of the `EXPRESSION` is observable, the resulting HTML will be reattached to which underlying element it points to.
+expression that returns an *element*. If the value of the `EXPRESSION` is observable, the resulting HTML will be *moved* when the value of the observable changes to a different element.
 
 @param {can-stache.sectionRenderer} FN A subsection that is
 rendered to the value in `EXPRESSION`.
@@ -34,7 +34,7 @@ rendered to the value in `EXPRESSION`.
 
 ## Use
 
-`portal` is used to render HTML some place other than the template from which the helper is used.
+`portal` is used to render HTML some place other than the template in which the helper is used.
 
 A common use case for `portal` is to render content with the document's [head](https://developer.mozilla.org/en-US/docs/Web/API/Document/head) element.
 
