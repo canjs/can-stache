@@ -68,6 +68,20 @@ QUnit.test("custom scopes still get a let context", function(){
 	QUnit.ok(true, "passes");
 });
 
+QUnit.test("let blocks allow reassigning variables #645", function(){
+	var template = stache(
+		"{{#let foo='bar'}}" + 
+		"<p>{{foo}}</p>" + 
+		"{{/let}}" + 
+		"{{#let foo='baz'}}" + 
+		"<p>{{foo}}</p>" + 
+		"{{/let}}"
+	);
+	var frag = template(new Scope({}));
+	QUnit.equal( frag.firstChild.innerHTML, "bar", "first value still works");
+	QUnit.equal( frag.lastChild.innerHTML, "baz", "reassigning foo works");
+});
+
 QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
 	helpersCore.__resetHelpers();
 
