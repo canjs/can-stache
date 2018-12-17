@@ -6,7 +6,7 @@ function isVariable(scope) {
 
 var letHelper = function(options){
 	if(options.isSection){
-		return options.fn( options.scope.addLetContext( options.hash ) )
+		return options.fn( options.scope.addLetContext( options.hash ) );
 	}
 	var variableScope = options.scope.getScope(isVariable);
 	if(!variableScope) {
