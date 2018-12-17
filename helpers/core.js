@@ -19,6 +19,7 @@ var domDataState = require('can-dom-data-state');
 
 var forHelper = require("./-for-of");
 var letHelper = require("./-let");
+var portalHelper = require("./-portal");
 
 var builtInHelpers = {};
 var builtInConverters = {};
@@ -102,7 +103,7 @@ var helpersCore = {
 			}
 			return;
 		}
-	
+
 		var helper = makeConverter(getterSetter);
 		helper.isLiveBound = true;
 		helpersCore.registerHelper(name, helper);
@@ -132,7 +133,7 @@ var helpersCore = {
 		}
 		// Clear converterPackages map before re-adding converters
 		converterPackages.delete(builtInConverters);
-		
+
 		helpersCore.addBuiltInHelpers();
 		helpersCore.addBuiltInConverters();
 	},
@@ -361,7 +362,7 @@ var eachHelper = function(items) {
 			hashOptions[exprs.key] = key;
 		});
 	}
-	
+
 	if ((
 		canReflect.isObservableLike(resolved) && canReflect.isListLike(resolved) ||
 			( canReflect.isListLike(resolved) && canReflect.isValueLike(items) )
@@ -533,7 +534,8 @@ assign(builtInHelpers, {
 	and: andHelper,
 	or: orHelper,
 	'let': letHelper,
-	'for': forHelper
+	'for': forHelper,
+	portal: portalHelper
 });
 
 assign(builtInConverters, {

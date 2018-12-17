@@ -9,6 +9,7 @@ require('../helpers/-for-of-test');
 require('../helpers/-let-test');
 require('../helpers/-each-test');
 require('../helpers/-converter-test');
+require('../helpers/-portal-test');
 require('./section-test');
 require("./partials-test");
 require("./filename-test");
