@@ -592,3 +592,11 @@ QUnit.test("Scope being overwritten in partials", function () {
 	equal(stacheTestHelpers.innerHTML(spans[0]), 'kevin', 'correct context');
 	equal(stacheTestHelpers.innerHTML(spans[1]), 'austin', 'correct context');
 });
+
+
+QUnit.test(" call partials stored in LetContext as Call Expressions #649", function () {
+	var renderer = stache( "{{<foo}}bar{{/foo}} {{ let bar = scope.templateContext.partials.foo }}  <p>{{ bar() }}</p>" );
+	var frag = renderer();
+
+	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+});
