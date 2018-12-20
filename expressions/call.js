@@ -71,8 +71,10 @@ Call.prototype.value = function(scope, helperOptions){
 
 	var computeFn = function(newVal){
 		var func = canReflect.getValue( method );
-
 		if(typeof func === "function") {
+			if (canReflect.isObservableLike(func)) {
+				func = canReflect.getValue(func);
+			}
 			var args = getArgs(
 				func.isLiveBound
 			);
