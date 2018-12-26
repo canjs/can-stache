@@ -177,7 +177,7 @@ function stache (filename, template) {
 						//!steal-remove-start
 						if (process.env.NODE_ENV !== 'production') {
 							var tag = typeof renderer.exprData.closingTag === 'function' ?
-								renderer.exprData.closingTag() : '';
+								renderer.exprData.closingTag() : stache;
 							sectionItem.tag = tag;
 						}
 						//!steal-remove-end
