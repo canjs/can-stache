@@ -206,3 +206,16 @@ testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct k
 	Scope.prototype.getPathsForKey = origGetPaths;
 
 });
+
+testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does not match the opener", function () {
+	stache.registerPartial('partial', "<div></div>");
+
+	var warningTeardown = testHelpers.dev.willWarn(/bar.stache:1: unexpected closing tag {{\/partiall}} expected {{\/partial}}/);
+
+	stache('bar.stache', '<div>{{<partial}}{{/partiall}}</div>')({
+		name: 'app',
+		user: {}
+	});
+
+	QUnit.equal(warningTeardown(), 1, 'got expected warning');
+});
