@@ -219,25 +219,3 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 
 	QUnit.equal(warningTeardown(), 1, 'got expected warning');
 });
-
-testHelpers.dev.devOnlyTest("Should warn when the closing tag of a helper does not match the opener", function () {
-	var warningTeardown = testHelpers.dev.willWarn(/bar.stache:1: unexpected closing tag {{\/ify}} expected {{\/if}}/);
-
-	stache('bar.stache', '<div>{{#if}}{{/ify}}</div>')({
-		name: 'app',
-		user: {}
-	});
-
-	QUnit.equal(warningTeardown(), 1, 'got expected warning');
-});
-
-testHelpers.dev.devOnlyTest("Should warn when the closing tag of an inverse  does not match the opener", function () {
-	var warningTeardown = testHelpers.dev.willWarn(/bar.stache:1: unexpected closing tag {{\/Inversey}} expected {{\/Inverse}}/);
-
-	stache('bar.stache', '<div>{{^ Inverse(something)}}{{/Inversey}}</div>')({
-		name: 'app',
-		user: {}
-	});
-
-	QUnit.equal(warningTeardown(), 1, 'got expected warning');
-});
