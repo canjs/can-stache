@@ -1100,6 +1100,12 @@ The following places are not supported:
   <div {{attributeName}}="selected"></div>
   <div {{#magic}}class="{{/magic}}selected"></div>
   ```
+- Attribute values without quotes:
+  ```html
+  <div attribute={{#magic}}"foo"{{/magic}}></div>
+  <div key:raw={{#magic}}"foo"{{/magic}}></div>
+  <div key:from={{#magic}}{{foo}}{{/magic}}></div>
+  ```
 
 ### Expression types
 
