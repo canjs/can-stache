@@ -4,6 +4,7 @@ var DefineMap = require("can-define/map/map");
 var globals = require("can-globals");
 var domMutate = require("can-dom-mutate");
 var domMutateNode = require("can-dom-mutate/node");
+var canSymbol = require("can-symbol");
 
 require("./-portal");
 
@@ -95,4 +96,17 @@ test("Doesn't mess with existing DOM", function() {
 	template(vm);
 	equal(el.firstChild.nodeValue, "Hello", "existing content left alone");
 	equal(el.firstChild.nextSibling.nodeValue, "Matthew");
+});
+
+test("Adds the done.keepNode symbol to nodes", function() {
+	var el = document.createElement("div");
+	var template = stache("{{#portal(root)}}<span>one</span><div>two</div>{{/portal}}");
+	var vm = new DefineMap({ root: el });
+	template(vm);
+
+	var child = el.firstChild;
+	do {
+		ok(child[canSymbol.for("done.keepNode")], "symbol added to this node");
+		child = child.nextSibling;
+	} while(child);
 });
