@@ -44,7 +44,7 @@
   ```
   @codepen
 
-  @param {String} converterName The name of the converter helper.
+  @param {String|Object} converterName The name of the converter helper.	An object to register multiple converters at once.
   @param {can-stache.getterSetter} getterSetter An object containing get() and set() functions.
 
 @body
@@ -87,6 +87,47 @@ var data = new DefineMap({hours: 3, minutes: 17});
 var frag = stache(`
 	<input value:bind="hoursAndMinutes(hours, minutes)"/>
 	Hours: {{hours}}, Minutes: {{minutes}}`
+)(data);
+
+document.body.append(frag);
+```
+@codepen
+
+It is possible to add multiple converters at once by passing an object instead of a string to the `name` argument:
+
+```js
+import {stache, DefineMap, queues, Reflect as canReflect} from "can";
+
+stache.addConverter({
+	"numberToHex": {
+		get: function(val) {
+				return canReflect.getValue(val).toString(16);
+		},
+		set: function(val, valCompute) {
+			return canReflect.setValue(valCompute, parseInt("0x" + val));
+		}
+	},
+	"capitalize": {
+		get: function(val){
+			return canReflect.getValue(val).toString().toUpperCase();
+		},
+		set: function(val, valCompute) {
+			return canReflect.setValue(valCompute, val.toLowerCase());
+		}
+	}
+});
+
+var data = new DefineMap({fname: "Cherif", age: 36});
+var frag = stache(`
+	<div>
+		<input value:bind="capitalize(fname)"/>
+		Firstname: {{fname}}
+	</div>
+	<div>
+		<input value:bind="numberToHex(age)"/>
+		Age: {{age}}
+  </div>
+ `
 )(data);
 
 document.body.append(frag);
