@@ -5,14 +5,25 @@ var Observation = require("can-observation");
 var getDocument = require("can-globals/document/document");
 var domMutate = require("can-dom-mutate");
 var domMutateNode = require("can-dom-mutate/node");
+var canSymbol = require("can-symbol");
+
+var keepNodeSymbol = canSymbol.for("done.keepNode");
 
 function portalHelper(elementObservable, options){
 	function evaluator() {
-		return options.fn(
+		var frag = options.fn(
 			options.scope
 			.addLetContext({}),
 			options.options
 		);
+
+		var child = frag.firstChild;
+		while(child) {
+			child[keepNodeSymbol] = true;
+			child = child.nextSibling;
+		}
+
+		return frag;
 	}
 
 	var el, nodeList;
