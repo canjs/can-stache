@@ -56,10 +56,11 @@ function portalHelper(elementObservable, options){
 			var observable = new Observation(evaluator, null, {isObservable: false});
 
 			live.html(node, observable, el, nodeList);
-
-			canReflect.onValue(elementObservable, getElementAndRender);
 			domMutate.onNodeRemoval(el, teardown);
+		} else {
+			options.metadata.rendered = true;
 		}
+		canReflect.onValue(elementObservable, getElementAndRender);
 	}
 
 	getElementAndRender();
