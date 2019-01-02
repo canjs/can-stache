@@ -56,6 +56,33 @@ If you want to create two undefined variables, you must (currently) do so like:
 {{ let varA=undefined, varB=undefined }}
 ```
 
+@signature `{{# let VARIABLE_NAME=VALUE [,HASHES] }}FN{{/ let}}`
+
+Allows to create a variable local to the template multiple times.
+
+The following creates `name` helper two times, a different value is referenced each time.
+
+```html
+<script type="module">
+
+import {Component} from "can";
+
+Component.extend({
+	tag: "my-app",
+	view: `
+		{{# let name="Cherif" }}
+			<div> Customer: {{name}} </div>
+		{{/ let }}
+
+		{{# let name="XBox" }}
+			<div> Product: {{name}} </div>
+		{{/ let }}
+	`,
+	ViewModel: {}
+});
+</script>
+```
+
 @body
 
 
