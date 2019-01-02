@@ -110,3 +110,32 @@ test("Adds the done.keepNode symbol to nodes", function() {
 		child = child.nextSibling;
 	} while(child);
 });
+
+test("Doesn't do anything if there isn't a place to put the content", function() {
+	var el = document.createElement("div");
+	var view = stache("{{#portal(root)}}<span>two</span>{{/portal}}");
+	var vm = new DefineMap({ root: null });
+	var frag = view(vm);
+
+	console.log(frag.firstChild, el.firstChild);
+
+	QUnit.equal(frag.firstChild.nodeType, 8, "Only rendered the comment node");
+});
+
+test("Dynamic content outside portal", function() {
+	var view = stache("{{#portal(root)}}<span>two</span>{{/portal}}<div>{{#if(showThing)}}<span>one</span>{{/if}}</div>");
+	var vm = new DefineMap({ showThing: false, root: null });
+	var frag = view(vm);
+
+	var div = frag.firstChild.nextSibling;
+
+	QUnit.equal(div.firstChild.firstChild, null, "nothing rendered in the div yet");
+
+	// Flip the conditional
+	vm.showThing = true;
+	QUnit.equal(div.firstChild.firstChild.nodeValue, "one", "shows the template content");
+
+	// Set the element
+	vm.root = div;
+	QUnit.equal(div.firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
+});
