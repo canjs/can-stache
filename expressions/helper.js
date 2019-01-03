@@ -97,9 +97,7 @@ if (process.env.NODE_ENV !== 'production') {
 		}
 		return text.join(" ");
 	};
-}
-//!steal-remove-end
-if (process.env.NODE_ENV !== 'production') {
+
 	canReflect.assignSymbols(Helper.prototype,{
 		"can.getName": function() {
 			return canReflect.getName(this.constructor) + "{{" + (this.sourceText()) + "}}";
