@@ -60,7 +60,7 @@ If you want to create two undefined variables, you must (currently) do so like:
 
 Allows to create a variable local to the template multiple times.
 
-The following creates `name` helper two times, a different value is referenced each time.
+The following creates `name` variable two times, a different value is referenced each time.
 
 ```html
 <script type="module">
