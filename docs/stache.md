@@ -89,7 +89,7 @@ Stache is designed to be:
      </li>
   {{/ }}
   ```
-- Limited - Complex logic should be done in the `ViewModel` were it is more easily
+- Limited - Complex logic should be done in the `ViewModel` where it is more easily
   tested. Stache only supports a subset of JavaScript expressions.
 - Powerful (where you want it) - Stache adds a few things JavaScript doesn't support
   but are very useful for views:
