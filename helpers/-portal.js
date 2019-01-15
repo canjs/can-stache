@@ -28,13 +28,18 @@ function portalHelper(elementObservable, options){
 
 	var el, nodeList;
 	function teardown() {
+		var root = el;
 		if(el) {
 			canReflect.offValue(elementObservable, getElementAndRender);
 			el = null;
 		}
 
 		if(nodeList) {
-			nodeLists.remove(nodeList);
+			canReflect.eachListLike(nodeList, function(node) {
+				if(root === node.parentNode) {
+					domMutateNode.removeChild.call(root, node);
+				}
+			});
 			nodeList = null;
 		}
 	}

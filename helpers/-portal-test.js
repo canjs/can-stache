@@ -112,12 +112,9 @@ test("Adds the done.keepNode symbol to nodes", function() {
 });
 
 test("Doesn't do anything if there isn't a place to put the content", function() {
-	var el = document.createElement("div");
 	var view = stache("{{#portal(root)}}<span>two</span>{{/portal}}");
 	var vm = new DefineMap({ root: null });
 	var frag = view(vm);
-
-	console.log(frag.firstChild, el.firstChild);
 
 	QUnit.equal(frag.firstChild.nodeType, 8, "Only rendered the comment node");
 });
@@ -138,4 +135,25 @@ test("Dynamic content outside portal", function() {
 	// Set the element
 	vm.root = div;
 	QUnit.equal(div.firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
+});
+
+test("Works when DOM nodes are removed outside of stache", function() {
+	var view = stache("{{#if(show)}}{{#portal(root)}} <span>tests</span> {{/portal}}{{/if}}");
+	var root = document.createElement("div");
+	var vm = new DefineMap({ root: root, show: true });
+	view(vm);
+
+	var badScript = function() {
+		domMutateNode.removeChild.call(root, root.firstChild);
+	};
+
+	badScript();
+
+	try {
+		vm.show = false;
+		QUnit.ok(true, "Did not throw");
+	} catch(e) {
+		QUnit.ok(false, e);
+	}
+
 });
