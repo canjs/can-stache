@@ -44,7 +44,7 @@
   ```
   @codepen
 
-  @param {String|Object} converterName The name of the converter helper.	An object to register multiple converters at once.
+  @param {String|Object} converterName The name of the converter helper or an object to register multiple converters at once.
   @param {can-stache.getterSetter} getterSetter An object containing get() and set() functions.
 
 @body
