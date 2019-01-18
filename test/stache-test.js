@@ -6373,10 +6373,10 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	testHelpers.dev.devOnlyTest("Arrays warn about escaping (#600)", 3, function () {
+	testHelpers.dev.devOnlyTest(" (#600)", 3, function () {
 
 		var map = new SimpleMap({
-			foo: ["<p></p>"]
+			foo: new DefineList(["<p></p>"])
 		});
 
 		var teardown = testHelpers.dev.willWarn(/stache.safeString/, function(message, matched) {

@@ -219,3 +219,17 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 
 	QUnit.equal(warningTeardown(), 1, 'got expected warning');
 });
+
+testHelpers.dev.devOnlyTest("builtIn types should not warn #613", function () {
+	var VM = DefineMap.extend({
+		date: "any"
+	});
+
+	var vm = new VM({
+		date: new Date()
+	});
+
+	var teardown = testHelpers.dev.willWarn(/Previously, the result of/);
+	stache('<div>{{date}}</div>')(vm);
+	QUnit.equal(teardown(), 0, 'did not get warning');
+});
