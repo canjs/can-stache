@@ -381,7 +381,7 @@ var core = {
 				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
 					//!steal-remove-start
 					if (process.env.NODE_ENV !== 'production') {
-						if(value !== null && typeof value === "object" && canReflect.isBuiltIn(value) === false) {
+						if(value !== null && typeof value === "object" && !canReflect.isBuiltIn(value)) {
 							dev.warn("Previously, the result of "+
 								expressionString+" in "+state.filename+":"+state.lineNo+
 								", was being inserted as HTML instead of TEXT. Please use stache.safeString(obj) "+
