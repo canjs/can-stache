@@ -5518,8 +5518,6 @@ function makeTest(name, doc, mutation) {
 		renderer({ foo: stache("baz") });
 	});
 
-
-
 	test("#unless works with call expressions", function(){
 		var template = stache("{{#unless(foo)}}foo{{else}}bar{{/unless}}");
 		var map = new DefineMap({
@@ -6459,6 +6457,133 @@ function makeTest(name, doc, mutation) {
 		QUnit.equal(innerHTML(div).trim(), '0 - 1');
 	});
 
+	test("#if works with call expressions", function(){
+		var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#if works with nested call expressions", function(){
+
+		var template = stache("{{#and({if(foo)}, if(bar))}}and{{else}}!and{{/and}} {{#or(if(foo), if(bar))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
+	});
+
+	test("#unless works with nested call expressions", function(){
+		var template = stache("{{#and(unless(foo), unless(bar))}}and{{else}}!and{{/and}} {{#or(unless(foo), unless(bar))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "!and !or");
+	});
+
+	test("#eq works with call expressions", function(){
+		var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#eq works with nested call expressions", function(){
+
+		var template = stache("{{#and(eq(foo, true), eq(bar, true))}}and{{else}}!and{{/and}} {{#or(eq(foo, true), eq(bar, true))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
+	});
+
+	test("#is works with call expressions", function(){
+		var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
+		var map = new DefineMap({
+			foo: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "foo");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "bar");
+	});
+
+	test("#is works with nested call expressions", function(){
+		var template = stache("{{#and(is(foo, true), is(bar, true))}}and{{else}}!and{{/and}} {{#or(is(foo, true), is(bar, true))}}or{{else}}!or{{/or}}");
+		var map = new DefineMap({
+			foo: true,
+			bar: true
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		QUnit.equal(innerHTML(div), "and or");
+		map.foo = false;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = false;
+		QUnit.equal(innerHTML(div), "!and !or");
+		map.foo = true;
+		QUnit.equal(innerHTML(div), "!and or");
+		map.bar = true;
+		QUnit.equal(innerHTML(div), "and or");
+	});
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }

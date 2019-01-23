@@ -210,11 +210,11 @@ var ifHelper = assign(function ifHelper(expr, options) {
 		value = !! helpersCore.resolve(expr);
 	}
 
-	if (value) {
-		return options.fn(options.scope || this);
-	} else {
-		return options.inverse(options.scope || this);
+	if (options) {
+		return value ? options.fn(options.scope || this) : options.inverse(options.scope || this);
 	}
+
+	return !!value;
 }, {requiresOptionsArgument: true, isLiveBound: true});
 
 
@@ -490,6 +490,9 @@ var dataHelper = function(attr, value) {
 
 // ## UNLESS HELPER
 var unlessHelper = function (expr, options) {
+	if(!options) {	
+		return !ifHelper.apply(this, [expr]);	
+	}
 	return ifHelper.apply(this, [expr, assign(assign({}, options), {
 		fn: options.inverse,
 		inverse: options.fn
