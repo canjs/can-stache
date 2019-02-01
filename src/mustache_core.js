@@ -225,15 +225,14 @@ var core = {
 							return localPartialName(partialScope, {}, nodeList);
 						} else {
 							var domRenderer = core.getTemplateById(localPartialName);
-							if (domRenderer) {
-								return domRenderer(partialScope, {}, nodeList);
-							}
-
 							//!steal-remove-start
 							if (process.env.NODE_ENV !== 'production') {
-								dev.warn('Unable to find the partial "' + localPartialName + '" in ' + state.filename + ':' + state.lineNo);
+								if (!domRenderer) {
+									dev.warn('Unable to find the partial "' + localPartialName + '" in ' + state.filename + ':' + state.lineNo);
+								}
 							}
-							return getDocument().createDocumentFragment();
+							//!steal-remove-end
+							return domRenderer ? domRenderer(partialScope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
 					};
 				}
