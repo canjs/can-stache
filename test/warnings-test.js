@@ -219,3 +219,11 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 
 	QUnit.equal(warningTeardown(), 1, 'got expected warning');
 });
+
+testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #493", function () {
+	var template,
+		teardown = testHelpers.dev.willWarn(/Unable to find partial/);
+	template = stache('missing.stache', "{{> aPartial}}");
+	template();
+	QUnit.equal(teardown(), 1, "got expected warning");
+});

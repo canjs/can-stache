@@ -225,6 +225,16 @@ var core = {
 							return localPartialName(partialScope, {}, nodeList);
 						} else {
 							var domRenderer = core.getTemplateById(localPartialName);
+							//!steal-remove-start
+							if (process.env.NODE_ENV !== 'production') {
+								if (!domRenderer) {
+									dev.warn(
+										(state.filename ? state.filename + ':' : '') +
+										(state.lineNo ? state.lineNo + ': ' : '') +
+										'Unable to find partial "' + localPartialName + '".');
+								}
+							}
+							//!steal-remove-end
 							return domRenderer ? domRenderer(partialScope, {}, nodeList) : getDocument().createDocumentFragment();
 						}
 					};
