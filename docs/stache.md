@@ -581,10 +581,10 @@ Component.extend({
 			<div>
 				<p>
 					Locked:
-					<input type='checkbox' checked:from="locked"/>
+					<input type='checkbox' checked:bind="locked"/>
 				</p>
 				<p>
-					<input type='value' value:bind="todo.name" disabled:from="locked"/>
+					<input type='value' value:bind="todo.name" disabled:bind="locked"/>
 				</p>
 			</div>
 		{{/ for }}
