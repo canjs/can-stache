@@ -1,6 +1,8 @@
 @page can-stache.scopeAndContext Legacy Scope Behavior
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.helpers.let] and [can-stache.helpers.for-of] instead to refer to things up in the scope.
+
 @body
 
 Every part of a stache template is rendered with a

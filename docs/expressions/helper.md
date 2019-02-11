@@ -1,6 +1,8 @@
 @typedef {String} can-stache/expressions/helper Helper Expression
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.expression.call] instead.
+
 @signature `method [EXPRESSION...]`
 
 Calls `method` with zero or many arguments where each argument

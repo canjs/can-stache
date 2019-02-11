@@ -1,6 +1,8 @@
 @function can-stache.tags.partial {{>key}}
 @parent can-stache/deprecated
 
+@deprecated {4.15} Use passing renderer functions through the ViewModel instead.
+
 Render another template within the current template.
 
 @signature `{{>key [EXPRESSION]}}`

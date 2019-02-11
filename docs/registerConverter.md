@@ -2,7 +2,7 @@
 @description Register a helper for bidirectional value conversion.
 @parent can-stache/deprecated
 
-@deprecated {4.0} Use [can-stache.addConverter] instead. It will always be passed
+@deprecated {4.15.0} Use [can-stache.addConverter] instead. It will always be passed
 observables, removing the need for the user to pass values with `~`.
 
 @signature `stache.registerConverter(converterName, getterSetter)`

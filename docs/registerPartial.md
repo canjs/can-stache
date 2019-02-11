@@ -2,6 +2,8 @@
 @description Register a partial template that can be rendered with [can-stache.tags.partial].
 @parent can-stache/deprecated
 
+@deprecated {4.0} Use ViewModel functions instead.
+
 @signature `stache.registerPartial(name, template)`
 
 Registers a template so it can be rendered with `{{>name}}`.

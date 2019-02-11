@@ -1,6 +1,8 @@
 @function can-stache.helpers.is {{#is(expressions)}}
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.helpers.if] instead.
+
 @signature `{{#is([EXPRESSION...])}}FN{{else}}INVERSE{{/is}}`
 
 Render FN if two values are equal, otherwise render INVERSE.

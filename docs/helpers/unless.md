@@ -1,6 +1,8 @@
 @function can-stache.helpers.unless {{#unless(expression)}}
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.helpers.if] instead.
+
 @signature `{{#unless(EXPRESSION)}}FN{{else}}INVERSE{{/unless}}`
 
 Renders `FN` if `EXPRESSION` is falsey or `INVERSE` if `EXPRESSION`
