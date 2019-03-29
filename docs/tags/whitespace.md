@@ -9,7 +9,7 @@
   `-` character by the braces. When present, all whitespace on that side will be
   omitted up to the next tag, magic tag, or non-whitespace character. It also works with [can-stache.tags.unescaped].
 
-  The following ensures there is no extra between the second `<pre>`, the output of `{{-this.message-}}`,
+  The following ensures there is no extra whitespace between the second `<pre>`, the output of `{{-this.message-}}`,
   and the `</pre>` closing tag:
 
   ```html
@@ -38,6 +38,52 @@
   @codepen
 
   @param {can-stache/expressions/literal|can-stache/expressions/key-lookup|can-stache/expressions/call|can-stache/expressions/helper} EXPRESSION An expression whose unescaped result is inserted into the page.
+
+@signature `{{--}}`
+
+  Whitespace may be omitted without an expression. This is useful between html tags, for example, where it may cause issues in the display of static inline elements.
+
+  The following ensures there is no extra whitespace between the inline items:
+
+  ```html
+  <my-demo></my-demo>
+  <style>
+  .slantycolors {
+    display: inline-block;
+    transform: skewX(15deg);
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+    background: linear-gradient(to top, orange, black, blue);
+  }
+  </style>
+  <script type="module">
+  import {Component} from "can";
+
+  Component.extend({
+    tag: "my-demo",
+    view: `
+      <span class="slantycolors">
+        orange
+      </span>
+      {{--}}
+      <span class="slantycolors">
+        black
+      </span>
+      {{--}}
+      <span class="slantycolors">
+        blue
+      </span>
+      <span class="slantycolors">
+        {{message}}
+      </span>`,
+    ViewModel: {
+      message: {default: "There's no {{--}} before me."}
+    }
+  });
+  </script>
+  ```
+  @codepen
 
 @body
 
@@ -121,4 +167,24 @@ would render as:
 <div>{{-! output the users name }}{{-# if(user.name) }}
 		{{ user.name }}
 	{{/ if -}}</div>
+```
+
+### Special Case
+
+ You may want to remove all whitespace between elements without output or comment.
+
+ ```html
+<ul>
+  {{--}}
+  <li>Inline Nav Item 1</li>
+  {{--}}
+  <li>Inline Nav Item 2</li>
+  {{--}}
+</ul>
+```
+
+ would render as:
+
+ ```html
+<ul><li>Inline Nav Item 1</li><li>Inline Nav Item 2</li></ul>
 ```
