@@ -70,12 +70,12 @@ QUnit.test("custom scopes still get a let context", function(){
 
 QUnit.test("let blocks allow reassigning variables #645", function(){
 	var template = stache(
-		"{{#let foo='bar'}}" + 
-		"<p>{{foo}}</p>" + 
-		"{{/let}}" + 
-		"{{#let foo='baz'}}" + 
-		"<p>{{foo}}</p>" + 
-		"{{/let}}" + 
+		"{{#let foo='bar'}}" +
+		"<p>{{foo}}</p>" +
+		"{{/let}}" +
+		"{{#let foo='baz'}}" +
+		"<p>{{foo}}</p>" +
+		"{{/let}}" +
 		"<p>foo-{{foo}}</p>"
 	);
 	var frag = template(new Scope({}));
@@ -126,4 +126,49 @@ QUnit.test("let multiple updates (#650)", function(){
 	data.set("ref", data.get("ref")+1 );
 	data.set("ref", data.get("ref")+1 );
 	QUnit.ok(true, "got here");
+});
+
+
+QUnit.test("let does not observe itself", function(){
+	//queues.stopAfterTaskCount(200);
+	//queues.log("flush");
+	//queues.breakOnTaskName("Observation<ScopeKeyData{{state}}.read>.onDependencyChange")
+
+	var view = stache("<div>"+
+		"{{# or(edit,delete) }}"+
+
+			"{{# if(edit)}}"+
+				"{{ let state = editing}}"+
+			"{{else}}"+
+				"{{ let state = deleting}}"+
+			"{{/ if}}"+
+
+			"<p>You are {{state}}</p>"+
+
+		"{{else}}"+
+
+			"<p>Not editing or deleting</p>"+
+
+		"{{/ or}}"+
+		"</div>"
+	);
+
+
+	var vm = new SimpleMap({
+		edit: false,
+		"delete": false,
+		editing: "editing",
+		deleting: "deleting",
+	});
+
+	var frag = view(vm);
+
+	vm.set("edit", true);
+
+	vm.set("edit", false);
+
+	vm.set("delete", true);
+
+	QUnit.ok(true, "got here without breaking");
+	QUnit.equal( frag.firstChild.querySelector("p").innerHTML, "You are deleting");
 });
