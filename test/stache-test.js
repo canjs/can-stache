@@ -5025,6 +5025,18 @@ function makeTest(name, doc, mutation) {
 		equal(core.cleanWhitespaceControl(
 			"<foo>\n\t{{-! comment -}}\n</foo>"),
 			"<foo>{{! comment }}</foo>");
+		// right only
+		equal(core.cleanWhitespaceControl(
+			"<foo>\n\t{{! comment -}}\n</foo>"),
+			"<foo>\n\t{{! comment }}</foo>");
+		// left only
+		equal(core.cleanWhitespaceControl(
+			"<foo>\n\t{{-! comment }}\n</foo>"),
+			"<foo>{{! comment }}\n</foo>");
+		// both without output
+		equal(core.cleanWhitespaceControl(
+			"<foo>\n\t{{--}}\n</foo>"),
+			"<foo></foo>");
 
 		var div = doc.createElement('div');
 		div.appendChild(stache("<foo>\n\t{{-! comment -}}\n</foo>")());
