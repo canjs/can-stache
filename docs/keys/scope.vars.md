@@ -2,6 +2,8 @@
 @parent can-stache/deprecated
 @description Used to reference variables specific to the template context
 
+@deprecated {4.15.0} Use `{{ let }}` [can-stache.helpers.let] instead.
+
 @signature `scope.vars`
 
 A placeholder for a value that is local to the template.

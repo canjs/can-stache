@@ -1,6 +1,8 @@
 @function can-stache.helpers.each {{#each(expression)}}
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.helpers.for-of] instead.
+
 @signature `{{#each(EXPRESSION)}}FN{{else}}INVERSE{{/each}}`
 
 Render `FN` for each item in `EXPRESSION`’s return value.  If `EXPRESSION`

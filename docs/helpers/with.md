@@ -1,6 +1,8 @@
 @function can-stache.helpers.with {{#with(expression)}}
 @parent can-stache/deprecated
 
+@deprecated {4.15.0} Use [can-stache.helpers.let] instead.
+
 Changes the context within a block.
 
 @signature `{{#with(EXPRESSION)}}BLOCK{{/with}}`

@@ -2,7 +2,7 @@
 @description Register a helper.
 @parent can-stache/deprecated
 
-@deprecated {4.0} Use [can-stache.addLiveHelper] instead.
+@deprecated {4.15.0} Use [can-stache.addLiveHelper] instead.
 
 @signature `stache.registerHelper(name, helper)`
 
