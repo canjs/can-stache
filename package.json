@@ -63,7 +63,7 @@
     "can-view-target": "^4.0.0"
   },
   "devDependencies": {
-    "can-define": "^2.0.4",
+    "can-define": "^2.7.12",
     "can-queues": "^1.0.0",
     "can-simple-map": "^4.0.0",
     "can-test-helpers": "^1.1.0",
