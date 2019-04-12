@@ -125,13 +125,15 @@ function stache (filename, template) {
 				// to avoid "Blocks are nested too deeply" when linting
 				//!steal-remove-start
 				if (process.env.NODE_ENV !== 'production') {
-					var last = state.sectionElementStack[state.sectionElementStack.length - 1];
-					if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
-						if (filename) {
-							dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
-						}
-						else {
-							dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+					if(section instanceof HTMLSectionBuilder) {
+						var last = state.sectionElementStack[state.sectionElementStack.length - 1];
+						if (last.tag && last.type === "section" && stache !== "" && stache !== last.tag) {
+							if (filename) {
+								dev.warn(filename + ":" + lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
+							else {
+								dev.warn(lineNo + ": unexpected closing tag {{/" + stache + "}} expected {{/" + last.tag + "}}");
+							}
 						}
 					}
 				}
@@ -479,14 +481,12 @@ function stache (filename, template) {
 			// warn if closing magic tag is missed #675
 			var last = state.sectionElementStack[state.sectionElementStack.length - 1];
 			if (process.env.NODE_ENV !== 'production') {
-				if(section instanceof HTMLSectionBuilder) {
-					if (last && last.tag && last.type === "section") {
-						if (filename) {
-							dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
-						}
-						else {
-							dev.warn(lineNo + ": closing tag {{/" + last.tag + "}} was expected");
-						}
+				if (last && last.tag && last.type === "section") {
+					if (filename) {
+						dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+					}
+					else {
+						dev.warn(lineNo + ": closing tag {{/" + last.tag + "}} was expected");
 					}
 				}
 			}
