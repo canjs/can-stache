@@ -481,12 +481,14 @@ function stache (filename, template) {
 			// warn if closing magic tag is missed #675
 			var last = state.sectionElementStack[state.sectionElementStack.length - 1];
 			if (process.env.NODE_ENV !== 'production') {
-				if (last && last.tag && last.type === "section") {
-					if (filename) {
-						dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
-					}
-					else {
-						dev.warn(lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+				if(section instanceof HTMLSectionBuilder) {
+					if (last && last.tag && last.type === "section") {
+						if (filename) {
+							dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+						}
+						else {
+							dev.warn(lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+						}
 					}
 				}
 			}
