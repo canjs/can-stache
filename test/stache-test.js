@@ -6596,6 +6596,28 @@ function makeTest(name, doc, mutation) {
 		map.bar = true;
 		QUnit.equal(innerHTML(div), "and or");
 	});
+
+	QUnit.test("{{foo()()}} nested call expressions", function(){
+		QUnit.expect(3);
+
+		var div = doc.createElement('div');
+		var data = {
+			foo: function(outter) {
+				QUnit.equal(outter, 1, 'foo should be called with 1');
+				return function (inner) {
+					QUnit.equal(inner, 2, 'inner should be called with 2');
+					return inner;
+				};
+			}
+		};
+		var template = stache("{{foo(1)(2)}}");
+		var frag = template(data);
+
+		div.appendChild(frag);
+
+		QUnit.equal(innerHTML(div), 2, 'should return inner value');
+	});
+
 	// PUT NEW TESTS RIGHT BEFORE THIS!
 
 }
