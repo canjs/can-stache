@@ -76,7 +76,18 @@ test("expression.ast - root hash expressions work", function(){
 
 });
 
+test("expression.ast - nested call expressions", function(){
+	var ast = expression.ast("foo()()");
 
+	deepEqual(ast, {
+		type: "Call",
+		method: {
+			type: "Call",
+			method: {type: "Lookup", key: "@foo"},
+		}
+	});
+
+});
 
 test("expression.ast - everything", function(){
 	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
@@ -221,6 +232,77 @@ test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
 
 	equal(exprData.argExprs.length, 1, "there is one arg");
 	deepEqual(exprData.argExprs[0], hashArg, "correct hashes");
+});
+
+test("expression.parse nested Call expressions", function(){
+	QUnit.expect(7);
+
+	deepEqual(expression.parse("foo()()"),
+		new expression.Call(
+			new expression.Call(
+				new expression.Lookup('@foo'),
+				[],
+				{}
+			),
+			[],
+			{}
+		),
+		"Returned the correct expression"
+	);
+	
+	var expr = new expression.Call(
+		new expression.Call(
+			new expression.Lookup('@bar'),
+			[ new expression.Literal(1) ],
+			{}
+		),
+		[ new expression.Literal(2) ],
+		{}
+	);
+	var compute = expr.value(
+		new Scope(
+			new SimpleMap({
+				bar: function(outter) {
+					equal(outter, 1, "Outter called with correct value");
+
+					return function (inner) {
+						equal(inner, 2, "Inner called with correct value");
+
+						return 'Inner!';
+					};
+				}
+			})
+		)
+	);
+	equal(compute.get(), "Inner!", "Got the inner value");
+
+	expr = new expression.Call(
+		new expression.Call(
+			new expression.Lookup('@foobar'),
+			[ new expression.Lookup('fname') ],
+			{}
+		),
+		[ new expression.Lookup('lname') ],
+		{}
+	);
+	compute = expr.value(
+		new Scope(
+			new SimpleMap({
+				foobar: function(outter) {
+					equal(outter, 'Matt', "Outter called with correct value");
+
+					return function (inner) {
+						equal(inner, 'Chaffe', "Inner called with correct value");
+
+						return 'Inner!';
+					};
+				},
+				fname: 'Matt',
+				lname: 'Chaffe'
+			})
+		)
+	);
+	equal(compute.get(), "Inner!", "Got the inner value");
 });
 
 test("numeric expression.Literal", function(){
