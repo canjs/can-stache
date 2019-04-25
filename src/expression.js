@@ -437,10 +437,19 @@ var expression = {
 			// foo[bar()]
 			else if(token === "(") {
 				top = stack.top();
+				lastToken = stack.topLastChild();
 				if(top.type === "Lookup") {
 					stack.replaceTopAndPush({
 						type: "Call",
 						method: convertToAtLookup(top)
+					});
+
+				// Nested Call
+				// foo()()
+				} else if (lastToken && lastToken.type === "Call") {
+					stack.replaceTopAndPush({
+						type: "Call",
+						method: lastToken
 					});
 				} else {
 					throw new Error("Unable to understand expression "+tokens.join(''));
