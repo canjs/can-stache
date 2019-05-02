@@ -26,9 +26,15 @@ function portalHelper(elementObservable, options){
 		return frag;
 	}
 
-	var el, nodeList;
+	var el, nodeList, removeNodeRemovalListener;
 	function teardown() {
 		var root = el;
+
+		if(removeNodeRemovalListener) {
+			removeNodeRemovalListener();
+			removeNodeRemovalListener = null;
+		}
+
 		if(el) {
 			canReflect.offValue(elementObservable, getElementAndRender);
 			el = null;
@@ -61,7 +67,7 @@ function portalHelper(elementObservable, options){
 			var observable = new Observation(evaluator, null, {isObservable: false});
 
 			live.html(node, observable, el, nodeList);
-			domMutate.onNodeRemoval(el, teardown);
+			removeNodeRemovalListener = domMutate.onNodeRemoval(el, teardown);
 		} else {
 			options.metadata.rendered = true;
 		}
