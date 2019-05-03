@@ -15,7 +15,6 @@ var helpers = require("can-stache-helpers");
 var makeConverter = require('./converter');
 
 var domData = require('can-dom-data');
-var domDataState = require('can-dom-data-state');
 
 var forHelper = require("./-for-of");
 var letHelper = require("./-let");
@@ -484,7 +483,7 @@ var dataHelper = function(attr, value) {
 			dev.warn('The {{data}} helper has been deprecated; use {{domData}} instead: https://canjs.com/doc/can-stache.helpers.domData.html');
 		}
 		//!steal-remove-end
-		domDataState.set.call( el, attr, data );
+		domData.set( el, attr, data );
 	};
 };
 

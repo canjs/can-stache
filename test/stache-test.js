@@ -39,7 +39,6 @@ var globals = require('can-globals');
 
 var getChildNodes = require('can-child-nodes');
 var domData = require('can-dom-data');
-var domDataState = require('can-dom-data-state');
 var domMutateNode = require('can-dom-mutate/node');
 var DOCUMENT = require('can-globals/document/document');
 
@@ -1960,17 +1959,17 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(renderer(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 1 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer2(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 2 should have correct data');
 
 		div = doc.createElement('div');
 		div.appendChild(renderer3(data,{partials: partials}));
 		span = div.getElementsByTagName('span')[0];
-		strictEqual(domDataState.get.call(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
+		strictEqual(domData.get(span, 'attr'), data.get('bar'), 'Nested data 3 should have correct data');
 	});
 
 	test("domData helper should set proper data instead of a context stack", function () {
@@ -2021,7 +2020,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement('div');
 		div.appendChild(rendered);
 		var span = div.getElementsByTagName('span')[0];
-		strictEqual(domDataState.get.call(span, 'todo'), vm.todos[0], 'can-dom-data-state should have the correct value');
+		strictEqual(domData.get(span, 'todo'), vm.todos[0], 'can-dom-data-state should have the correct value');
 	});
 
 	test("domData helper should store passed values", function () {
