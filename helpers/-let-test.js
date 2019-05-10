@@ -9,7 +9,7 @@ require("./-let");
 
 QUnit.module("can-stache let helper");
 
-QUnit.test("basics without commas", function(){
+QUnit.test("basics without commas", function(assert) {
 
 	var template = stache(
 		"{{let userName=this.name constTwo=2}}"+
@@ -19,14 +19,14 @@ QUnit.test("basics without commas", function(){
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	assert.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	assert.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
 });
 
-QUnit.test("basics with commas", function(){
+QUnit.test("basics with commas", function(assert) {
 
 	var template = stache(
 		"{{let userName=this.name, constTwo=2}}"+
@@ -36,14 +36,14 @@ QUnit.test("basics with commas", function(){
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin-2", "got initial value");
+	assert.equal( frag.lastChild.innerHTML, "Justin-2", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya-2", "value updated");
+	assert.equal( frag.lastChild.innerHTML, "Ramiya-2", "value updated");
 });
 
-QUnit.test("make undefined variables settable", function(){
+QUnit.test("make undefined variables settable", function(assert) {
 	var template = stache(
 		"{{ let userName=undefined }}"+
 		"<div>{{userName}} {{changeUserName(scope)}}</div>"
@@ -58,17 +58,17 @@ QUnit.test("make undefined variables settable", function(){
 
 
 	scope.set("userName","Justin");
-	QUnit.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
+	assert.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
 
 });
 
-QUnit.test("custom scopes still get a let context", function(){
+QUnit.test("custom scopes still get a let context", function(assert) {
 	var template = stache("{{let foo='bar'}}");
 	template(new Scope({}));
-	QUnit.ok(true, "passes");
+	assert.ok(true, "passes");
 });
 
-QUnit.test("let blocks allow reassigning variables #645", function(){
+QUnit.test("let blocks allow reassigning variables #645", function(assert) {
 	var template = stache(
 		"{{#let foo='bar'}}" +
 		"<p>{{foo}}</p>" +
@@ -80,12 +80,12 @@ QUnit.test("let blocks allow reassigning variables #645", function(){
 	);
 	var frag = template(new Scope({}));
 	var paragraphs = frag.querySelectorAll('p');
-	QUnit.equal( paragraphs[0].innerHTML, "bar", "first value still works");
-	QUnit.equal( paragraphs[1].innerHTML, "baz", "reassigning foo works");
-	QUnit.equal( paragraphs[2].innerHTML, "foo-", "foo is not available outside of let block");
+	assert.equal( paragraphs[0].innerHTML, "bar", "first value still works");
+	assert.equal( paragraphs[1].innerHTML, "baz", "reassigning foo works");
+	assert.equal( paragraphs[2].innerHTML, "foo-", "foo is not available outside of let block");
 });
 
-QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
+QUnit.test("let works after calling helpersCore.__resetHelpers", function(assert) {
 	helpersCore.__resetHelpers();
 
 	var template = stache(
@@ -96,14 +96,14 @@ QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	assert.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	assert.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
 });
 
-QUnit.test("let multiple updates (#650)", function(){
+QUnit.test("let multiple updates (#650)", function(assert) {
 
 	// This is actually testing that creating the prop[ref] observable will not leak an observation record.
 	var template = stache(
@@ -125,11 +125,11 @@ QUnit.test("let multiple updates (#650)", function(){
 
 	data.set("ref", data.get("ref")+1 );
 	data.set("ref", data.get("ref")+1 );
-	QUnit.ok(true, "got here");
+	assert.ok(true, "got here");
 });
 
 
-QUnit.test("let does not observe itself", function(){
+QUnit.test("let does not observe itself", function(assert) {
 	//queues.stopAfterTaskCount(200);
 	//queues.log("flush");
 	//queues.breakOnTaskName("Observation<ScopeKeyData{{state}}.read>.onDependencyChange")
@@ -169,6 +169,6 @@ QUnit.test("let does not observe itself", function(){
 
 	vm.set("delete", true);
 
-	QUnit.ok(true, "got here without breaking");
-	QUnit.equal( frag.firstChild.querySelector("p").innerHTML, "You are deleting");
+	assert.ok(true, "got here without breaking");
+	assert.equal( frag.firstChild.querySelector("p").innerHTML, "You are deleting");
 });
