@@ -3,7 +3,7 @@ var SimpleMap = require('can-simple-map');
 var stache = require('can-stache');
 QUnit.module("can-stache nodeList");
 
-QUnit.test("nodeList not cleaned (#486)", function(){
+QUnit.test("nodeList not cleaned (#486)", function(assert) {
     var template = stache("<div>"+
 	  "{{#showHome}}"+
 		  "<h1> home </h1>"+
@@ -24,5 +24,5 @@ QUnit.test("nodeList not cleaned (#486)", function(){
     state.set("showHome", true);
     state.set("startsFalse", true);
 
-    QUnit.ok(true,"no errors at this point");
+    assert.ok(true,"no errors at this point");
 });
