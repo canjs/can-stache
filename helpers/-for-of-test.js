@@ -9,7 +9,7 @@ require("./-for-of");
 
 QUnit.module("can-stache #for(of) helper");
 
-test("basics", function(){
+QUnit.test("basics", function(assert) {
 
     var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
     var list = new DefineList([34234,2,1,3]);
@@ -24,7 +24,7 @@ test("basics", function(){
         return +p.innerHTML;
     });
 
-    deepEqual(order, [11,12,13,134234]);
+    assert.deepEqual(order, [11,12,13,134234]);
 
 
 
@@ -57,10 +57,10 @@ test("basics", function(){
 	};
 
 	var result = template(vm).firstChild.innerHTML.replace(/\s+/g," ");
-	QUnit.equal(result, "Hello, you have 1. <div> Justin <ul> <li>for-in yes</li> </ul> </div>");
+	assert.equal(result, "Hello, you have 1. <div> Justin <ul> <li>for-in yes</li> </ul> </div>");
 });
 
-QUnit.test("create an observable let scope (#593)", function(){
+QUnit.test("create an observable let scope (#593)", function(assert) {
 	var template = stache("<div>{{# for(thing of this.stuff)}}"+
 		"{{let theValue=null}}"+
 		"{{write theValue}}"+
@@ -80,13 +80,13 @@ QUnit.test("create an observable let scope (#593)", function(){
 
 	var labels = frag.firstChild.getElementsByTagName("label");
 
-	QUnit.equal(labels[0].innerHTML,"1", "first element");
-	QUnit.equal(labels[1].innerHTML,"2", "first element");
+	assert.equal(labels[0].innerHTML,"1", "first element");
+	assert.equal(labels[1].innerHTML,"2", "first element");
 
 
 });
 
-QUnit.test("works with non observables", function(){
+QUnit.test("works with non observables", function(assert) {
 	var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
     var list = [34234,2,1,3];
     var frag = template({
@@ -98,42 +98,42 @@ QUnit.test("works with non observables", function(){
         return +p.innerHTML;
     });
 
-    deepEqual(order, [134234,12,11,13]);
+    assert.deepEqual(order, [134234,12,11,13]);
 });
 
 
-QUnit.test("works as string only", function(){
+QUnit.test("works as string only", function(assert) {
 	var template = stache("<div class='{{#for(value of list)}}[{{this.vmProp}}-{{value}}]{{/for}}'></div>");
     var list = [1,2,3];
     var frag = template({
 		list: list,
 		vmProp: "a"
 	});
-	QUnit.equal( frag.firstChild.className, "[a-1][a-2][a-3]");
+	assert.equal( frag.firstChild.className, "[a-1][a-2][a-3]");
 });
 
-QUnit.test("scope.index works", function(){
+QUnit.test("scope.index works", function(assert) {
 	var template = stache("<div>{{#for(value of list)}}[{{scope.index}}]{{/for}}</div>");
     var list = ["a","b","c"];
     var frag = template({
 		list: list,
 		vmProp: "a"
 	});
-	QUnit.equal( frag.firstChild.innerHTML, "[0][1][2]");
+	assert.equal( frag.firstChild.innerHTML, "[0][1][2]");
 });
 
-QUnit.test("for(list) works", function(){
+QUnit.test("for(list) works", function(assert) {
 	var template = stache("<div>{{#for(list)}}[{{scope.index}}]{{/for}}</div>");
 	var list = ["a","b","c"];
 	var frag = template({
 		list: list,
 		vmProp: "a"
 	});
-	QUnit.equal( frag.firstChild.innerHTML, "[0][1][2]");
+	assert.equal( frag.firstChild.innerHTML, "[0][1][2]");
 });
 
 
-QUnit.test("for(value of object) works in a string", function(){
+QUnit.test("for(value of object) works in a string", function(assert) {
 	var template = stache("<div class='{{#for(value of object)}}[{{scope.key}}-{{value}}]{{/for}}'></div>");
 	var object = {
 		first: "FIRST",
@@ -143,19 +143,19 @@ QUnit.test("for(value of object) works in a string", function(){
 		object: object
 	});
 
-	QUnit.equal( frag.firstChild.className, "[first-FIRST][second-SECOND]");
+	assert.equal( frag.firstChild.className, "[first-FIRST][second-SECOND]");
 });
 
-QUnit.test("else contains the correct this", function() {
+QUnit.test("else contains the correct this", function(assert) {
 	var template = stache("{{#for(item of items)}}ITEM{{else}}{{this.message}}{{/for}}");
 	var frag = template({
 		items: [],
 		message: "empty"
 	});
-	QUnit.equal(frag.firstChild.nextSibling.nodeValue, "empty", "got the value from the VM");
+	assert.equal(frag.firstChild.nextSibling.nodeValue, "empty", "got the value from the VM");
 });
 
-QUnit.test("forOf works after calling helpersCore.__resetHelpers", function() {
+QUnit.test("forOf works after calling helpersCore.__resetHelpers", function(assert) {
 	helpersCore.__resetHelpers();
 
 	var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
@@ -170,5 +170,5 @@ QUnit.test("forOf works after calling helpersCore.__resetHelpers", function() {
 			return +p.innerHTML;
 	});
 
-	deepEqual(order, [11,12,13,134234]);
+	assert.deepEqual(order, [11,12,13,134234]);
 });
