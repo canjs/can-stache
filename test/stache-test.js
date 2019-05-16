@@ -510,7 +510,8 @@ function makeTest(name, doc, mutation) {
 		assert.deepEqual(innerHTML(div2), "foo");
 	});
 
-	QUnit.test("String literals passed to helper should work (#1143)", 1, function(assert) {
+	QUnit.test("String literals passed to helper should work (#1143)", function(assert) {
+		assert.expect(1);
 		stache.registerHelper("concatStrings", function(arg1, arg2) {
 			return arg1 + arg2;
 		});
@@ -2470,7 +2471,8 @@ function makeTest(name, doc, mutation) {
 		assert.equal(img.getAttribute("src"), url, "images src is correct");
 	});
 
-	QUnit.test("empty lists update", 2, function(assert) {
+	QUnit.test("empty lists update", function(assert) {
+		assert.expect(2);
 		var template = stache('<p>{{#list}}{{.}}{{/list}}</p>');
 		var map = new SimpleMap({
 			list: ['something']
@@ -3550,7 +3552,8 @@ function makeTest(name, doc, mutation) {
 		assert.equal(frag.firstChild.className, 'red', 'else branch');
 	});
 
-	QUnit.test("returns correct value for DOM attributes (#1065)", 3, function(assert) {
+	QUnit.test("returns correct value for DOM attributes (#1065)", function(assert) {
+		assert.expect(3);
 		var template = '<h2 class="{{#if shown}}foo{{/if}} test1 {{#shown}}muh{{/shown}}"></h2>' +
 			'<h3 class="{{#if shown}}bar{{/if}} test2 {{#shown}}kuh{{/shown}}"></h3>' +
 			'<h4 class="{{#if shown}}baz{{/if}} test3 {{#shown}}boom{{/shown}}"></h4>';
@@ -3623,7 +3626,8 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	QUnit.test("<col> inside <table> renders correctly (#1013)", 1, function(assert) {
+	QUnit.test("<col> inside <table> renders correctly (#1013)", function(assert) {
+		assert.expect(1);
 		var template = '<table><colgroup>{{#columns}}<col class="{{class}}" />{{/columns}}</colgroup><tbody></tbody></table>';
 		var frag = stache(template)({
 			columns: new DefineList([
@@ -3934,7 +3938,8 @@ function makeTest(name, doc, mutation) {
 		assert.equal(innerHTML(frag.firstChild), 'My Meals', 'shows if case');
 	});
 
-	QUnit.test('addHelper', 3, function(assert) {
+	QUnit.test('addHelper', function(assert) {
+		assert.expect(3);
 		var template = stache('<div>Result: {{simple first second}}</div>');
 		stache.addHelper('simple', function (first, second) {
 			assert.equal(first, 2);
@@ -3948,7 +3953,8 @@ function makeTest(name, doc, mutation) {
 		assert.equal(innerHTML(frag.firstChild), 'Result: 6');
 	});
 
-	QUnit.test('Helper handles list replacement (#1652)', 3, function(assert) {
+	QUnit.test('Helper handles list replacement (#1652)', function(assert) {
+		assert.expect(3);
 		var state = new SimpleMap({
 			list: new DefineList([])
 		});
@@ -4077,7 +4083,8 @@ function makeTest(name, doc, mutation) {
 		assert.equal(frag.firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
 	});
 
-	QUnit.test('Custom attribute callbacks are called when in a conditional within a live section', 6, function(assert) {
+	QUnit.test('Custom attribute callbacks are called when in a conditional within a live section', function(assert) {
+		assert.expect(6);
 		viewCallbacks.attr('test-attr', function(el, attrData) {
 			assert.ok(true, "test-attr called");
 			assert.equal(attrData.attributeName, 'test-attr', "attributeName set correctly");
@@ -5547,7 +5554,6 @@ function makeTest(name, doc, mutation) {
 		var map = new DefineMap({
 			foo: "bar"
 		});
-		var log = console.log;
 
 		var done = assert.async();
 		console.log = function(value){
@@ -5565,7 +5571,6 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("debugger works with call expressions", function(assert) {
 		debug.__testing.allowDebugger = false;
-		var log = canLog.log;
 		var warn = canLog.warn;
 
 		var logs = [
@@ -5589,7 +5594,6 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("debugger Lookup Expression calls debugger helper (#469)", function(assert) {
 		debug.__testing.allowDebugger = false;
-		var log = canLog.log;
 		var warn = canLog.warn;
 
 		var logs = [
@@ -6382,7 +6386,8 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	testHelpers.dev.devOnlyTest("Arrays warn about escaping (#600)", 3, function (assert) {
+	testHelpers.dev.devOnlyTest("Arrays warn about escaping (#600)", function (assert) {
+		assert.expect(3);
 
 		var map = new SimpleMap({
 			foo: ["<p></p>"]
@@ -6597,7 +6602,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	QUnit.test("{{foo()()}} nested call expressions", function(assert) {
-		QUnit.expect(3);
+		assert.expect(3);
 
 		var div = doc.createElement('div');
 		var data = {

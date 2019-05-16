@@ -235,7 +235,7 @@ QUnit.test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
 });
 
 QUnit.test("expression.parse nested Call expressions", function(assert) {
-	QUnit.expect(7);
+	assert.expect(7);
 
 	assert.deepEqual(expression.parse("foo()()"),
 		new expression.Call(
@@ -249,7 +249,7 @@ QUnit.test("expression.parse nested Call expressions", function(assert) {
 		),
 		"Returned the correct expression"
 	);
-	
+
 	var expr = new expression.Call(
 		new expression.Call(
 			new expression.Lookup('@bar'),
@@ -426,7 +426,8 @@ QUnit.test("call expressions called with different scopes give different results
 	assert.equal( res.get(), 12);
 });
 
-QUnit.test("call expressions called with different contexts (#616)", 1, function(assert) {
+QUnit.test("call expressions called with different contexts (#616)", function(assert) {
+	assert.expect(1);
 	var exprData = expression.parse("this.foo.doSomething()");
 	var doSomething = function(){
 		return this.value;

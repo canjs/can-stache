@@ -491,7 +491,8 @@ QUnit.test("can pass values to partials as let scope", function(){
 });*/
 
 
-QUnit.test("Using call expressions works and passes the nodeList", 2, function(assert) {
+QUnit.test("Using call expressions works and passes the nodeList", function(assert) {
+	assert.expect(2);
 	var addressView = stache("<address>{{this.street}}</address>");
 
 	var addressPartial = function(data, nodeList){
@@ -511,7 +512,8 @@ QUnit.test("Using call expressions works and passes the nodeList", 2, function(a
 	assert.equal(frag.firstChild.firstChild.innerHTML, "Stave");
 });
 
-QUnit.test("inline partials are accessible from call expressions", 1, function(assert) {
+QUnit.test("inline partials are accessible from call expressions", function(assert) {
+	assert.expect(1);
 
 	var view = stache(
 		"{{<addressPartial}}<address>{{this.street}}</address>{{/addressPartial}}"+
@@ -527,7 +529,8 @@ QUnit.test("inline partials are accessible from call expressions", 1, function(a
 	assert.equal(frag.firstChild.firstChild.innerHTML, "Stave");
 });
 
-QUnit.test("recursive inline partials are accessible from call expressions", 1, function(assert) {
+QUnit.test("recursive inline partials are accessible from call expressions", function(assert) {
+	assert.expect(1);
 
 	var view = stache(
 		"{{<folderPartial}}"+

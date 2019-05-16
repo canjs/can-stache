@@ -69,7 +69,7 @@ QUnit.test("addConverter helpers push and pull multiple values", function(assert
 });
 
 QUnit.test("Can register multiple converters at once with addConverter", function(assert) {
-	QUnit.expect(2);
+	assert.expect(2);
 	var converters = {
 		"converter-one": {
 			get: function(){
