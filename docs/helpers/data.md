@@ -7,5 +7,3 @@
 
 Adds the current [can.stache.context context] to the
 element's [can.data].
-
-@param {String} [key] An optional key used to specify what data should be stored in [can-dom-data].  It defaults to the context (`this`) if no key is specified.
