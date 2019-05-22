@@ -20,11 +20,10 @@ var defineLazyValue = require("can-define-lazy-value");
 var toDOMSymbol = canSymbol.for("can.toDOM");
 
 // Lazily lookup the context only if it's needed.
-function HelperOptions(scope, nodeList, exprData, stringOnly) {
+function HelperOptions(scope /*TODO: , nodeList*/, exprData, stringOnly) {
 	this.metadata = { rendered: false };
 	this.stringOnly = stringOnly;
 	this.scope = scope;
-	this.nodeList = nodeList;
 	this.exprData = exprData;
 }
 defineLazyValue(HelperOptions.prototype,"context", function(){
@@ -74,7 +73,7 @@ var core = {
 	 * @param {String} [stringOnly] A flag to indicate that only strings will be returned by subsections.
 	 * @return {Function} An 'evaluator' function that evaluates the expression.
 	 */
-	makeEvaluator: function (scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+	makeEvaluator: function (scope, /*TODO: nodeList,*/ mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
 
 		if(mode === "^") {
 			var temp = truthyRenderer;
@@ -83,9 +82,9 @@ var core = {
 		}
 
 		var value,
-			helperOptions = new HelperOptions(scope, nodeList, exprData, stringOnly);
+			helperOptions = new HelperOptions(scope , /*TODO: nodeList,*/ exprData, stringOnly);
 			// set up renderers
-			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.createRenderers(helperOptions, scope ,/*TODO: nodeList,*/ truthyRenderer, falseyRenderer, stringOnly);
 
 		if(exprData instanceof expression.Call) {
 			value = exprData.value(scope, helperOptions);
@@ -274,7 +273,7 @@ var core = {
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
-				evaluator = makeEvaluator( scope, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+				evaluator = makeEvaluator( scope, /*TODO: null,*/ mode, exprData, truthyRenderer, falseyRenderer, true);
 				if(!mode) {
 					scope.__cache[fullExpression] = evaluator;
 				}

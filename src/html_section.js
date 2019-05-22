@@ -92,10 +92,9 @@ var HTMLSection = function(process){
 	// A record of what targetData element we are within.
 	this.targetStack = [];
 	var self = this;
-	this.targetCallback = function(scope, sectionNode){
+	this.targetCallback = function(scope){
 		process.call(this,
 			scope,
-			sectionNode,
 			self.compiled.hydrate.bind(self.compiled),
 			self.inverseCompiled && self.inverseCompiled.hydrate.bind(self.inverseCompiled)  ) ;
 	};

@@ -52,15 +52,15 @@ module.exports = {
 	},
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
-	createRenderers: function(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, isStringOnly){
-		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
-		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, nodeList, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
+	createRenderers: function(helperOptions, scope /*TODO: , nodeList*/, truthyRenderer, falseyRenderer, isStringOnly){
+		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
+		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
 		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
 	},
 	// Returns a new renderer function that makes sure any data or helpers passed
 	// to it are converted to a can.view.Scope and a can.view.Options.
-	makeRendererConvertScopes: function (renderer, parentScope, nodeList, observeObservables, metadata) {
-		var convertedRenderer = function (newScope, newOptions, parentNodeList) {
+	makeRendererConvertScopes: function (renderer, parentScope, observeObservables, metadata) {
+		var convertedRenderer = function (newScope, newOptions) {
 			// prevent binding on fn.
 			// If a non-scope value is passed, add that to the parent scope.
 			if (newScope !== undefined && !(newScope instanceof Scope)) {
@@ -75,7 +75,7 @@ module.exports = {
 				metadata.rendered = true;
 			}
 
-			var result = renderer(newScope || parentScope, parentNodeList || nodeList );
+			var result = renderer(newScope || parentScope );
 			return result;
 		};
 		return observeObservables ? convertedRenderer :

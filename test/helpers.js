@@ -1,6 +1,18 @@
 var stache = require("can-stache");
 
-module.exports = function(doc) {
+var removePlaceholderNodes = function(node){
+	var children = Array.from(node.childNodes);
+	for(var i = 0; i < children.length; i++) {
+		if(children[i].nodeType === Node.COMMENT_NODE) {
+			node.removeChild(children[i])
+		} else if(children[i].nodeType === Node.ELEMENT_NODE) {
+			createHelpers.removePlaceholderNodes(children[i]);
+		}
+	}
+	return node;
+};
+
+var createHelpers = function(doc) {
 	doc = doc || document;
 	return {
 		cleanHTMLTextForIE: function(html){  // jshint ignore:line
@@ -17,6 +29,11 @@ module.exports = function(doc) {
 			return "innerHTML" in node ?
 				node.innerHTML :
 				undefined;
-		}
+		},
+		removePlaceholderNodes: removePlaceholderNodes
 	};
 };
+
+createHelpers.removePlaceholderNodes = removePlaceholderNodes;
+
+module.exports = createHelpers;

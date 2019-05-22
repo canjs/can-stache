@@ -47,7 +47,8 @@ QUnit.test("Stache with boolean property with {{#if}}", function() {
 
 	var nested = new NestedMap();
 	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
-	var frag = template(nested);
+	var frag = stacheTestHelpers.removePlaceholderNodes( template(nested) );
+
 	equal(frag.firstChild.nodeValue, 'Enabled');
 });
 
