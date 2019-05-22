@@ -475,7 +475,22 @@ function stache (filename, template) {
 				comment: text
 			});
 		},
-		done: function(lineNo){}
+		done: function(lineNo){
+			//!steal-remove-start
+			// warn if closing magic tag is missed #675
+			if (process.env.NODE_ENV !== 'production') {
+				var last = state.sectionElementStack[state.sectionElementStack.length - 1];
+				if (last && last.tag && last.type === "section") {
+					if (filename) {
+						dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+					}
+					else {
+						dev.warn(lineNo + ": closing tag {{/" + last.tag + "}} was expected");
+					}
+				}
+			}
+			//!steal-remove-end
+		}
 	});
 
 	var renderer = section.compile();
