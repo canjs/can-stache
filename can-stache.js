@@ -478,9 +478,9 @@ function stache (filename, template) {
 		},
 		done: function(lineNo){
 			//!steal-remove-start
-			// warn if closing magic tag is missed #675
-			var last = state.sectionElementStack[state.sectionElementStack.length - 1];
 			if (process.env.NODE_ENV !== 'production') {
+				// warn if closing magic tag is missed #675
+				var last = state.sectionElementStack[state.sectionElementStack.length - 1];
 				if (last && last.tag && last.type === "section") {
 					if (filename) {
 						dev.warn(filename + ":" + lineNo + ": closing tag {{/" + last.tag + "}} was expected");
