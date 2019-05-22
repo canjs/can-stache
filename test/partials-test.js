@@ -4,7 +4,6 @@ var QUnit = require('steal-qunit');
 var SimpleMap = require('can-simple-map');
 var DefineList = require('can-define/list/list');
 var DefineMap = require('can-define/map/map');
-var nodeLists = require('can-view-nodelist');
 var parser = require('can-view-parser');
 var string = require('can-string');
 var canSymbol = require("can-symbol");
@@ -88,7 +87,7 @@ test("partials are not working within an {{#each}} (#2174)", function() {
 	equal( frag.firstChild.innerHTML, "HELLOWORLD");
 });
 
-test("partials don't leak (#2174)", function() {
+QUnit.skip("partials don't leak (#2174)", function() {
 
 	stache.registerHelper("somethingCrazy", function(name, options){
 		return function(el){

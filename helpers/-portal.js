@@ -1,6 +1,5 @@
 var canReflect = require("can-reflect");
 var live = require("can-view-live");
-var nodeLists = require("can-view-nodelist");
 var Observation = require("can-observation");
 var getDocument = require("can-globals/document/document");
 var domMutate = require("can-dom-mutate");
@@ -60,13 +59,10 @@ function portalHelper(elementObservable, options){
 
 			// make a child nodeList inside the can.view.live.html nodeList
 			// so that if the html is re
-			nodeList = [node];
-			nodeList.expression = "live.html";
-			nodeLists.register(nodeList, null, null, true);
 
 			var observable = new Observation(evaluator, null, {isObservable: false});
 
-			live.html(node, observable, el, nodeList);
+			live.html(node, observable);
 			removeNodeRemovalListener = domMutate.onNodeRemoval(el, teardown);
 		} else {
 			options.metadata.rendered = true;
@@ -81,12 +77,12 @@ function portalHelper(elementObservable, options){
 		var comment = doc.createComment("portal(" + canReflect.getName(elementObservable) + ")");
 		var frag = doc.createDocumentFragment();
 		domMutateNode.appendChild.call(frag, comment);
-		nodeLists.replace([el], frag);
+		/*nodeLists.replace([el], frag);
 
 		var nodeList = [comment];
 		nodeList.expression = "portal";
 		nodeLists.register(nodeList, teardown, options.nodeList, true);
-		nodeLists.update(options.nodeList, [comment]);
+		nodeLists.update(options.nodeList, [comment]);*/
 	};
 }
 

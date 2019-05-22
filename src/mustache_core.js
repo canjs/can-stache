@@ -4,7 +4,6 @@
 // only stache uses these helpers.  Ideally, these utilities could be used
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
-var nodeLists = require('can-view-nodelist');
 
 var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
@@ -169,16 +168,17 @@ var core = {
 			exprData = core.expression.parse(expressionString);
 		}
 
-		return function(scope, parentSectionNodeList){
+		return function(scope /*TODO: , parentSectionNodeList */){
 			//!steal-remove-start
 			if (process.env.NODE_ENV !== 'production') {
 				scope.set('scope.filename', state.filename);
 				scope.set('scope.lineNumber', state.lineNo);
 			}
 			//!steal-remove-end
-			var nodeList = [this];
+			/*TODO: var nodeList = [this];
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
+			*/
 
 			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
@@ -203,7 +203,7 @@ var core = {
 
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(partialScope, nodeList)
+						return partial.render ? partial.render(partialScope /*TODO:, nodeList*/)
 							: partial(partialScope);
 					};
 				}
@@ -222,7 +222,7 @@ var core = {
 
 					renderer = function() {
 						if(typeof localPartialName === "function"){
-							return localPartialName(partialScope, {}, nodeList);
+							return localPartialName(partialScope, {} /*TODO:, nodeList*/);
 						} else {
 							var domRenderer = core.getTemplateById(localPartialName);
 							//!steal-remove-start
@@ -235,16 +235,16 @@ var core = {
 								}
 							}
 							//!steal-remove-end
-							return domRenderer ? domRenderer(partialScope, {}, nodeList) : getDocument().createDocumentFragment();
+							return domRenderer ? domRenderer(partialScope, {} /*TODO: , nodeList*/) : getDocument().createDocumentFragment();
 						}
 					};
 				}
 				var res = ObservationRecorder.ignore(renderer)();
 				return frag(res);
 			});
-			canReflect.setPriority(partialFrag,nodeList.nesting );
+			// TODO: canReflect.setPriority(partialFrag,nodeList.nesting );
 
-			live.html(this, partialFrag, this.parentNode, nodeList);
+			live.html(this, partialFrag /*, this.parentNode, nodeList*/);
 		};
 	},
 	// ## mustacheCore.makeStringBranchRenderer
@@ -317,7 +317,7 @@ var core = {
 		var exprData = core.expression.parse(expressionString);
 
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope /*TODO:, parentSectionNodeList*/, truthyRenderer, falseyRenderer){
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
@@ -326,15 +326,15 @@ var core = {
 				scope.set('scope.lineNumber', state.lineNo);
 			}
 			//!steal-remove-end
-			var nodeList = [this];
+			/*TODO: var nodeList = [this];
 			nodeList.expression = expressionString;
 			// register this nodeList.
 			// Register it with its parent ONLY if this is directly nested.  Otherwise, it's unnecessary.
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
-
+			*/
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
+			var evaluator = makeEvaluator( scope, /*TODO: nodeList,*/ mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
 
 			// Create a compute that can not be observed by other
 			// computes. This is important because this renderer is likely called by
@@ -356,10 +356,11 @@ var core = {
 				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
 			}
-
+			/*TODO: Remove
 			if(canReflect.setPriority(observable, nodeList.nesting) === false) {
 				throw new Error("can-stache unable to set priority on observable");
 			}
+			*/
 
 			// Bind on the computeValue to set the cached value. This helps performance
 			// so live binding can read a cached value instead of re-calculating.
@@ -399,11 +400,11 @@ var core = {
 						}
 					}
 					//!steal-remove-end
-					live.text(this, observable, this.parentNode, nodeList);
+					live.text(this, observable/*TODO , this.parentNode, nodeList*/);
 				} else {
-					live.html(this, observable, this.parentNode, {
+					live.html(this, observable/* TODO: , this.parentNode, {
 						nodeList: nodeList
-					});
+					}*/);
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
@@ -420,13 +421,17 @@ var core = {
 				}
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
-						var insert = value[viewInsertSymbol]({
+						// TODO:
+						throw new Error("FIGURE THIS OUT");
+						/*var insert = value[viewInsertSymbol]({
 							nodeList: nodeList
 						});
 						var oldNodes = nodeLists.update(nodeList, [insert]);
-						nodeLists.replace(oldNodes, insert);
+						nodeLists.replace(oldNodes, insert);*/
 					} else {
-						nodeLists.replace([this], frag(value, this.ownerDocument));
+						// TODO:
+						throw new Error("FIGURE THIS OUT");
+						//nodeLists.replace([this], frag(value, this.ownerDocument));
 					}
 				}
 			}

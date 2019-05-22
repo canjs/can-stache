@@ -1,7 +1,7 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
 require('./expression-test');
 require('../helpers/-debugger-test');
-require('./nodelist-test');
+//require('./nodelist-test');
 require('../helpers/-if-test');
 require('../helpers/-and-or-test');
 require('../helpers/-is-test');
@@ -32,7 +32,6 @@ var encoder = require('can-attribute-encoder');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
-var nodeLists = require('can-view-nodelist');
 
 var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
@@ -3823,7 +3822,7 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	test("possible to teardown immediate nodeList (#1593)", function(){
+	QUnit.skip("possible to teardown immediate nodeList (#1593)", function(){
 		expect(3);
 		var map = new SimpleMap({show: true});
 

@@ -27,7 +27,6 @@ var canSymbol = require("can-symbol");
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
-require('can-view-nodelist');
 
 
 if(!viewCallbacks.tag("content")) {
