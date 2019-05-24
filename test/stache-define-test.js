@@ -15,7 +15,7 @@ test("basic replacement and updating", function(){
 
 	var frag = stashed(map);
 
-	equal( frag.firstChild.firstChild.nodeValue, "World","got back the right text");
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "World","got back the right text");
 });
 
 
@@ -26,12 +26,12 @@ test('Helper each inside a text section (attribute) (#8)', function(assert){
 		list: new DefineList(['one','two'])
 	});
 	var frag = template(vm);
-	var className = frag.firstChild.className;
+	var className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 	assert.equal( className, 'one two ' );
 
 	vm.list.push('three');
-	className = frag.firstChild.className;
+	className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 	assert.equal( className, 'one two three ' );
 });
@@ -55,7 +55,7 @@ test("Using #each on a DefineMap", function(assert){
 
 	var frag = template({ obj: vm });
 
-	var first = frag.firstChild,
+	var first = stacheTestHelpers.cloneAndClean(frag).firstChild,
 		second = first.nextSibling.nextSibling,
 		third = second.nextSibling.nextSibling;
 
@@ -156,9 +156,9 @@ QUnit.test("Stache with single property", function() {
 		foo: 'bar'
 	});
 	var frag = template(t);
-	equal(frag.firstChild.nodeValue, 'bar');
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'bar');
 	t.foo = "baz";
-	equal(frag.firstChild.nodeValue, 'baz');
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'baz');
 });
 
 QUnit.test("stache with double property", function() {
@@ -197,7 +197,7 @@ QUnit.test("stache with double property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{test.name}}');
 	var frag = template(nested);
-	equal(frag.firstChild.nodeValue, nailedIt);
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
 QUnit.test("Stache with one nested property", function() {
@@ -236,7 +236,7 @@ QUnit.test("Stache with one nested property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{examples.one.name}}');
 	var frag = template(nested);
-	equal(frag.firstChild.nodeValue, nailedIt);
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
 QUnit.test("Stache with two nested property", function() {
@@ -275,7 +275,7 @@ QUnit.test("Stache with two nested property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{examples.two.deep.name}}');
 	var frag = template(nested);
-	equal(frag.firstChild.nodeValue, nailedIt);
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
 test('list.sort a list of DefineMaps', function(){

@@ -42,9 +42,9 @@ QUnit.test("#eq works with call expressions", function(){
 	var frag = template(map);
 
 	div.appendChild(frag);
-	QUnit.equal(div.innerHTML, "foo");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal(div.innerHTML, "bar");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
 QUnit.test("#is works with call expressions", function(){
@@ -56,9 +56,9 @@ QUnit.test("#is works with call expressions", function(){
 	var frag = template(map);
 
 	div.appendChild(frag);
-	QUnit.equal(div.innerHTML, "foo");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal(div.innerHTML, "bar");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
 QUnit.test("Handlebars helper: is/else (with 'eq' alias)", function() {

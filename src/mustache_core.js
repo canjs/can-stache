@@ -11,6 +11,7 @@ var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-fragment");
 var domMutate = require("can-dom-mutate");
+var domMutateNode = require("can-dom-mutate/node/node");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");
@@ -428,9 +429,8 @@ var core = {
 						var oldNodes = nodeLists.update(nodeList, [insert]);
 						nodeLists.replace(oldNodes, insert);*/
 					} else {
-						// TODO:
-						throw new Error("FIGURE THIS OUT");
-						//nodeLists.replace([this], frag(value, this.ownerDocument));
+						this.parentNode.replaceChild(frag(value, this.ownerDocument), this);
+						//domMutateNode.replaceChild.call(this.parentNode, frag(value, this.ownerDocument), this);
 					}
 				}
 			}

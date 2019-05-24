@@ -6,6 +6,8 @@ var domMutate = require("can-dom-mutate");
 var domMutateNode = require("can-dom-mutate/node");
 var canSymbol = require("can-symbol");
 
+var stacheTestHelpers = require("../test/helpers")(document);
+
 require("./-portal");
 
 QUnit.module("can-stache #portal helper");
@@ -16,10 +18,13 @@ test("basics", function(){
 	var vm = new DefineMap({name: "Matthew", root: el});
 
 	template(vm);
-	equal(el.firstChild.nextSibling.nodeValue, "Matthew");
+
+	var cleaned = stacheTestHelpers.cloneAndClean(el);
+
+	equal(cleaned.firstChild.nextSibling.nodeValue, "Matthew");
 
 	vm.name ="Wilbur";
-	equal(el.firstChild.nextSibling.nodeValue, "Wilbur");
+	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Wilbur");
 });
 
 test("element is observable", function(){
@@ -30,7 +35,7 @@ test("element is observable", function(){
 	template(vm);
 
 	vm.root = el;
-	equal(el.firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
 });
 
 test("element changes", function() {
@@ -41,10 +46,10 @@ test("element changes", function() {
 	var vm = new DefineMap({name: "Matthew", root: one});
 
 	template(vm);
-	equal(one.firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
 
 	vm.root = two;
-	equal(two.firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
 	equal(one.firstChild, null, "One had its children removed");
 });
 
@@ -59,11 +64,15 @@ test("tears down when the element is removed", function() {
 	var vm = new DefineMap({name: "Matthew", root: el});
 
 	template(vm);
-	equal(el.firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
 
-	domMutate.onNodeRemoval(el, function() {
-		equal(el.firstChild, null, "removed when parent removed");
-		start();
+	domMutate.onNodeRemoved(el, function() {
+		// parent nodes removed is always called first ... this fixes it
+		setTimeout(function(){
+			QUnit.equal( vm[canSymbol.for("can.meta")].handlers.get(["name"]).length, 0, "no handlers");
+			start();
+		},1)
+
 	});
 
 	stop();
@@ -76,15 +85,16 @@ test("conditionally rendering a portal", function() {
 
 	var template = stache("{{#eq(page, 'one')}}{{#portal(this.one)}}{{name}}{{/portal}}{{/eq}}" +
 		"{{#eq(page, 'two')}}{{#portal(this.two)}}{{name}}{{/portal}}{{/eq}}");
+
 	var vm = new DefineMap({page: "one", name: "Matthew", one: one, two: two});
 
 	template(vm);
-	equal(one.firstChild.nodeValue, "Matthew");
-	equal(two.firstChild, null, "nothing rendered to two");
+	equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(two).firstChild, null, "nothing rendered to two");
 
 	vm.page = "two";
-	equal(one.firstChild, null, "nothing rendered to one");
-	equal(two.firstChild.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(one).firstChild, null, "nothing rendered to one");
+	equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
 });
 
 test("Doesn't mess with existing DOM", function() {
@@ -94,8 +104,8 @@ test("Doesn't mess with existing DOM", function() {
 	var vm = new DefineMap({name: "Matthew", root: el});
 
 	template(vm);
-	equal(el.firstChild.nodeValue, "Hello", "existing content left alone");
-	equal(el.firstChild.nextSibling.nodeValue, "Matthew");
+	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Hello", "existing content left alone");
+	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Matthew");
 });
 
 test("Adds the done.keepNode symbol to nodes", function() {
@@ -124,17 +134,18 @@ test("Dynamic content outside portal", function() {
 	var vm = new DefineMap({ showThing: false, root: null });
 	var frag = view(vm);
 
-	var div = frag.firstChild.nextSibling;
+	var div = frag.querySelector("div");
 
 	QUnit.equal(div.firstChild.firstChild, null, "nothing rendered in the div yet");
 
 	// Flip the conditional
 	vm.showThing = true;
-	QUnit.equal(div.firstChild.firstChild.nodeValue, "one", "shows the template content");
+
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).firstChild.firstChild.nodeValue, "one", "shows the template content");
 
 	// Set the element
 	vm.root = div;
-	QUnit.equal(div.firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(div).firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
 });
 
 test("Works when DOM nodes are removed outside of stache", function() {

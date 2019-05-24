@@ -49,7 +49,7 @@ QUnit.test("Stache with boolean property with {{#if}}", function() {
 	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
 	var frag = stacheTestHelpers.removePlaceholderNodes( template(nested) );
 
-	equal(frag.firstChild.nodeValue, 'Enabled');
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'Enabled');
 });
 
 QUnit.test("#each with #if directly nested (#750)", function(){
@@ -76,7 +76,7 @@ QUnit.test("#each with #if directly nested (#750)", function(){
 
 	data.get('list').pop();
 
-	equal(frag.firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
 
 });
 
@@ -86,11 +86,11 @@ QUnit.test("call expression with #if", function(){
 	var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
 	var frag = template({truthy: truthy});
 
-	equal( frag.firstChild.nodeValue, "true", "set to true");
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "true", "set to true");
 
 	truthy.set(false);
 
-	equal( frag.firstChild.nodeValue, "false", "set to false");
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "false", "set to false");
 });
 
 test("#if works with call expressions", function(){
@@ -101,10 +101,10 @@ test("#if works with call expressions", function(){
 	var div = document.createElement("div");
 	var frag = template(map);
 
-	div.appendChild(frag);
-	QUnit.equal(div.innerHTML, "foo");
+	div.appendChild( frag);
+	QUnit.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal(div.innerHTML, "bar");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
 
@@ -115,7 +115,7 @@ QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", 
 		isTrue: function() { return true; }
 	});
 	div.appendChild(frag);
-	equal(div.innerHTML, "", "No textnode rendered");
+	equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "", "No textnode rendered");
 });
 
 QUnit.test("#if should not re-render children", function(){

@@ -7,6 +7,8 @@ var SimpleObservable = require("can-simple-observable");
 var Observation = require("can-observation");
 var SimpleMap = require("can-simple-map");
 
+var stacheTestHelpers = require("../test/helpers")(document);
+
 QUnit.module("can-stache #each helper");
 
 test("each with sort (#498)", function(){
@@ -18,7 +20,7 @@ test("each with sort (#498)", function(){
     list.sort();
     // list.splice(0,4,1,2,3,34234);
 
-    var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
+    var order = [].map.call( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p"), function(p){
         return +p.firstChild.nodeValue;
     });
 

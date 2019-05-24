@@ -7,6 +7,7 @@ var DefineMap = require('can-define/map/map');
 var parser = require('can-view-parser');
 var string = require('can-string');
 var canSymbol = require("can-symbol");
+var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache partials");
 
@@ -56,11 +57,11 @@ test("Using a renderer function as a partial", function(){
 
 	var frag = template(map);
 
-	equal(frag.firstChild.nodeValue, "", "Initially it is a blank textnode");
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "", "Initially it is a blank textnode");
 
 	map.set("other", partial);
 
-	equal(frag.firstChild.nodeValue, "hello there", "partial rendered");
+	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "hello there", "partial rendered");
 });
 
 test("partials are not working within an {{#each}} (#2174)", function() {
@@ -78,13 +79,13 @@ test("partials are not working within an {{#each}} (#2174)", function() {
 
 	data.get('items').get(0).set('name', 'WORLD');
 
-	equal( frag.firstChild.innerHTML, "WORLD", "updated to world");
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "WORLD", "updated to world");
 
 
 	data.get('items').splice(0, 0, {
 		name : 'HELLO'
 	});
-	equal( frag.firstChild.innerHTML, "HELLOWORLD");
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "HELLOWORLD");
 });
 
 QUnit.skip("partials don't leak (#2174)", function() {
@@ -122,11 +123,11 @@ test("partials should leave binding to helpers and properties (#2174)", function
 	data.get('items').splice(0, 0, {name: 'bob'});
 
 	// simulate the user entering text
-	frag.firstChild.nextSibling.setAttribute('value', 'user text');
+	frag.querySelector("input").setAttribute('value', 'user text');
 	// re-render the partial for the 0th element
 	data.set('items.0.name', 'dave');
 
-	equal(frag.firstChild.nextSibling.getAttribute('value'), 'user text');
+	equal(frag.querySelector("input").getAttribute('value'), 'user text');
 });
 
 test("content within {{#if}} inside partial surrounded by {{#if}} should not display outside partial (#2186)", function() {
@@ -140,7 +141,7 @@ test("content within {{#if}} inside partial surrounded by {{#if}} should not dis
 	data.set('showHiddenSection', true);
 	data.set('showPartial', false);
 
-	equal( frag.firstChild.innerHTML, '');
+	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, '');
 });
 
 
@@ -149,7 +150,7 @@ test( "named partials don't render (canjs/can-stache/issues/3)", function () {
 	var data = new SimpleMap( {} );
 	var frag = renderer( data );
 
-	equal( stacheTestHelpers.innerHTML( frag.firstChild ), "" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).firstChild ), "" );
 });
 
 test( "named partials can be inserted (canjs/can-stache/issues/3)", function () {
@@ -157,7 +158,7 @@ test( "named partials can be inserted (canjs/can-stache/issues/3)", function () 
 	var data = new SimpleMap( {} );
 	var frag = renderer( data );
 
-	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild ), "bar" );
 });
 
 test( "named partials can be inserted with an initial scope (canjs/can-stache/issues/3)", function () {
@@ -170,7 +171,7 @@ test( "named partials can be inserted with an initial scope (canjs/can-stache/is
 	});
 	var frag = renderer( data );
 
-	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "Anka, Darryl" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild ), "Anka, Darryl" );
 });
 
 test( "named partials work with live binding (canjs/can-stache/issues/3)", function () {
@@ -198,7 +199,12 @@ test( "named partials work with live binding (canjs/can-stache/issues/3)", funct
 	equal( stacheTestHelpers.innerHTML( div.getElementsByTagName( "span" )[ 0 ] ), "Test: works!", "Named partial updates when attr is updated" );
 
 	data.get( "greatJoy").set(0, "quite happy" );
-	equal( stacheTestHelpers.innerHTML( div.getElementsByTagName( "div" )[ 0 ] ), "quite happy", "Named partial list updates when list item attr is updated" );
+
+	equal(
+		stacheTestHelpers.innerHTML(
+			stacheTestHelpers.cloneAndClean( div.getElementsByTagName( "div" )[ 0 ] ) ),
+		"quite happy",
+		"Named partial list updates when list item attr is updated" );
 
 	data.get( "greatJoy" ).push( "Nintendo Sixty-FOOOOOOOOOOUR" );
 	equal( div.getElementsByTagName( "div" ).length, 4, "Named partial list updates with new item" );
@@ -212,7 +218,7 @@ test('stache can accept an intermediate with a named partial (canjs/can-stache/i
 	var data = new SimpleMap( {} );
 	var frag = renderer( data );
 
-	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild ), "bar" );
 });
 
 test('named partials can reference each other (canjs/can-stache/issues/3)', function(){
@@ -223,7 +229,7 @@ test('named partials can reference each other (canjs/can-stache/issues/3)', func
 	var data = new SimpleMap( {} );
 	var frag = renderer( data );
 
-	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "hello world" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild ), "hello world" );
 });
 
 test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
@@ -262,7 +268,7 @@ test( "recursive named partials work (canjs/can-stache/issues/3)", function () {
 		}
 	});
 	var frag = renderer( data );
-	var fraghtml = stacheTestHelpers.innerHTML( frag.lastChild );
+	var fraghtml = stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild );
 
 	equal( (fraghtml.match(/<li>/g) || []).length, 7 );
 	ok( fraghtml.indexOf( "<li>goku<ul><li>gohan<ul><\/ul><\/li><\/ul><\/li>" ) !== -1 );
@@ -291,7 +297,7 @@ test("Templates can refer to themselves with {{>scope.view .}} (#159)", function
 		"{{/child}}"
 	);
 
-	var view = renderer(thing);
+	var view = stacheTestHelpers.cloneAndClean( renderer(thing) );
 
 	equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
 	equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
@@ -320,7 +326,7 @@ test("Self-referential templates assume 'this'", function() {
 		"{{/child}}"
 	);
 
-	var view = renderer(thing);
+	var view = stacheTestHelpers.cloneAndClean( renderer(thing) );
 
 	equal(view.firstChild.firstChild.innerHTML, "", "Got the second span");
 	equal(view.firstChild.firstChild.firstChild.firstChild, undefined, "It stopped there");
@@ -353,7 +359,7 @@ test("Self-referential templates work with partial templates", function() {
 		"{{/child}}"
 	);
 
-	var view = renderer(thing);
+	var view = stacheTestHelpers.cloneAndClean( renderer(thing) );
 
 	equal(view.firstChild.firstChild.nodeValue, "foo", "Got the second span");
 });
@@ -383,7 +389,7 @@ test("Self-referential templates can be given scope", function() {
 		"{{/child}}"
 	);
 
-	var view = renderer(thing);
+	var view = stacheTestHelpers.cloneAndClean( renderer(thing) );
 
 	equal(view.firstChild.firstChild.nodeValue, "1", "It got the passed scope");
 });
@@ -486,29 +492,9 @@ QUnit.test("can pass values to partials as let scope", function(){
 		address: address
 	});
 
-	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave, Chicago");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.innerHTML, "Stave, Chicago");
 });*/
 
-
-QUnit.test("Using call expressions works and passes the nodeList", 2, function(){
-	var addressView = stache("<address>{{this.street}}</address>");
-
-	var addressPartial = function(data, nodeList){
-		QUnit.ok(nodeList, true, "has a nodelist");
-		return addressView.apply(this, arguments);
-	};
-	addressPartial[canSymbol.for("can.isView")] = true;
-	var view = stache("<div>{{ addressPartial(street=user.street) }}</div>");
-
-	var frag = view({
-		addressPartial: addressPartial,
-		user: {
-			street: "Stave"
-		}
-	});
-
-	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave");
-});
 
 QUnit.test("inline partials are accessible from call expressions", 1, function(){
 
@@ -523,7 +509,7 @@ QUnit.test("inline partials are accessible from call expressions", 1, function()
 		}
 	});
 
-	QUnit.equal(frag.firstChild.firstChild.innerHTML, "Stave");
+	QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.innerHTML, "Stave");
 });
 
 QUnit.test("recursive inline partials are accessible from call expressions", 1, function(){
@@ -546,7 +532,7 @@ QUnit.test("recursive inline partials are accessible from call expressions", 1, 
 		}
 	});
 
-	var spans = frag.firstChild.getElementsByTagName("span");
+	var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
 	var spanText = [].slice.call(spans,0).map(function(span){
 		return span.innerHTML;
 	});
@@ -597,5 +583,5 @@ QUnit.test(" call partials stored in LetContext as Call Expressions #649", funct
 	var renderer = stache( "{{<foo}}bar{{/foo}} {{ let bar = scope.templateContext.partials.foo }}  <p>{{ bar() }}</p>" );
 	var frag = renderer();
 
-	equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
+	equal( stacheTestHelpers.innerHTML( stacheTestHelpers.cloneAndClean(frag).lastChild ), "bar" );
 });

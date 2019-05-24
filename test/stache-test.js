@@ -1,19 +1,5 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
-require('./expression-test');
-require('../helpers/-debugger-test');
-//require('./nodelist-test');
-require('../helpers/-if-test');
-require('../helpers/-and-or-test');
-require('../helpers/-is-test');
-require('../helpers/-for-of-test');
-require('../helpers/-let-test');
-require('../helpers/-each-test');
-require('../helpers/-converter-test');
-require('../helpers/-portal-test');
-require('./section-test');
-require("./partials-test");
-require("./filename-test");
-require("./warnings-test");
+
 var stache = require('../can-stache');
 var core = require('../src/mustache_core');
 var clone = require('steal-clone');
@@ -49,7 +35,7 @@ var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
-
+var makeStacheTestHelpers = require("../test/helpers");
 var browserDoc = DOCUMENT();
 
 
@@ -71,11 +57,13 @@ function overwriteGlobalHelper(name, fn, method) {
 }
 
 function makeTest(name, doc, mutation) {
+	var stacheTestHelpers = makeStacheTestHelpers(doc);
+
 	var isNormalDOM = doc === window.document;
 
 	var innerHTML = function(node){
 		return "innerHTML" in node ?
-			node.innerHTML :
+			stacheTestHelpers.cloneAndClean(node).innerHTML :
 			undefined;
 	};
 	var getValue = function(node){
@@ -98,7 +86,7 @@ function makeTest(name, doc, mutation) {
 	var getText = function(template, data, options){
 			var div = doc.createElement("div");
 			div.appendChild( stache(template)(data, options) );
-			return cleanHTMLTextForIE( innerHTML(div) );
+			return cleanHTMLTextForIE( innerHTML(stacheTestHelpers.cloneAndClean(div)) );
 		},
 		getAttr = function (el, attrName) {
 			return attrName === "class" ?
@@ -177,7 +165,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stashed({
 			message: "World"
 		});
-		equal( innerHTML(frag.firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
+		equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
 
 	QUnit.test("a section helper", function(){
@@ -193,9 +181,9 @@ function makeTest(name, doc, mutation) {
 
 
 		var frag = stashed({});
-		equal(frag.firstChild.firstChild.nodeName.toLowerCase(), "span", "got a span");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeName.toLowerCase(), "span", "got a span");
 
-		equal(innerHTML(frag.firstChild.firstChild), "Hello World!","got back the right text");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild), "Hello World!","got back the right text");
 
 	});
 
@@ -250,7 +238,7 @@ function makeTest(name, doc, mutation) {
 			attributes: "foo='bar'"
 		});
 
-		equal(frag.firstChild.getAttribute('foo'), "bar", "{{attributes}} set");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), "bar", "{{attributes}} set");
 
 		template = stache("<div {{#if truthy}}foo='{{baz}}'{{/if}}/>");
 
@@ -259,14 +247,14 @@ function makeTest(name, doc, mutation) {
 			baz: "bar"
 		});
 
-		equal(frag.firstChild.getAttribute('foo'), "bar", "foo='{{baz}}' set");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), "bar", "foo='{{baz}}' set");
 
 		frag = template({
 			truthy: false,
 			baz: "bar"
 		});
 
-		equal(frag.firstChild.getAttribute('foo'), null, "attribute not set if not truthy");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), null, "attribute not set if not truthy");
 
 
 	});
@@ -306,11 +294,11 @@ function makeTest(name, doc, mutation) {
 
 		//equal(frag.children.length, 2, "there are 2 childNodes");
 
-		ok(/top: 0px/.test(   frag.firstChild.firstChild.getAttribute("style") ), "0px");
+		ok(/top: 0px/.test(   stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("style") ), "0px");
 
 		boxes[0].tick();
 
-		ok(! /top: 0px/.test( frag.firstChild.firstChild.getAttribute("style")) , "!0px");
+		ok(! /top: 0px/.test( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("style")) , "!0px");
 
 	});
 
@@ -320,7 +308,7 @@ function makeTest(name, doc, mutation) {
 			completed: 0
 		});
 
-		equal( frag.firstChild.firstChild.nodeValue, "0", 'zero shown' );
+		equal( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "0", 'zero shown' );
 	});
 
 	test('Inverted section function returning numbers', function () {
@@ -340,12 +328,12 @@ function makeTest(name, doc, mutation) {
 			todos: todos
 		});
 
-		deepEqual(frag.firstChild.firstChild.nodeValue, "hidden", 'hidden shown');
+		deepEqual(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "hidden", 'hidden shown');
 
 		// now update the named attribute
 		obsvr.set('named', true);
 
-		deepEqual(frag.firstChild.firstChild.nodeValue, "", 'hidden gone');
+		deepEqual(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "", 'hidden gone');
 
 	});
 
@@ -360,14 +348,14 @@ function makeTest(name, doc, mutation) {
 
 		var frag = tpl(teacher);
 
-		deepEqual(innerHTML(frag.firstChild), "&lt;strong&gt;Mrs Peters&lt;/strong&gt;");
-		deepEqual(innerHTML(frag.lastChild.firstChild), "Mrs Peters");
+		deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "&lt;strong&gt;Mrs Peters&lt;/strong&gt;");
+		deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild), "Mrs Peters");
 
 		teacher.set('name', '<i>Mr Scott</i>');
 
-		deepEqual(innerHTML(frag.firstChild), "&lt;i&gt;Mr Scott&lt;/i&gt;");
+		deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "&lt;i&gt;Mr Scott&lt;/i&gt;");
 
-		deepEqual(innerHTML(frag.lastChild.firstChild), "Mr Scott");
+		deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild), "Mr Scott");
 
 	});
 
@@ -469,7 +457,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement("div");
 		div.appendChild(frag);
 
-		equal(innerHTML( div ), t.expected);
+		equal(innerHTML( stacheTestHelpers.cloneAndClean(div) ), t.expected);
 
 		equal(getText(t.template, {}), t.expected2);
 	});
@@ -537,7 +525,7 @@ function makeTest(name, doc, mutation) {
 			}
 		}));
 
-		deepEqual(innerHTML(div), "foo");
+		deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(div)), "foo");
 	});
 
 	if(isNormalDOM) {
@@ -640,7 +628,7 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(stache(t.template)(t.data2));
 
-		deepEqual( innerHTML(div), expected, 'Using Observe.List');
+		deepEqual( innerHTML(stacheTestHelpers.cloneAndClean(div)), expected, 'Using Observe.List');
 		t.data2.names.push('What');
 	});
 
@@ -1474,7 +1462,7 @@ function makeTest(name, doc, mutation) {
 				div.insertBefore(span.firstChild, span);
 				div.removeChild(span);
 			}
-			actual = innerHTML(div);
+			actual = innerHTML(stacheTestHelpers.cloneAndClean(div));
 
 			equal(actual, result, "canCompute resolved for helper " + result);
 		}
@@ -2375,7 +2363,7 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		var divs = getChildNodes(frag);
+		var divs = getChildNodes(stacheTestHelpers.cloneAndClean(frag));
 		equal(divs.length, 4, "there are 4 divs");
 
 		var vals = canReflect.toArray(divs).map(function (div) {
@@ -2675,9 +2663,9 @@ function makeTest(name, doc, mutation) {
 		var lis = tpl.getElementsByTagName('li');
 		equal(lis.length, 3, "three lis");
 
-		equal(innerHTML(lis[0]), '0 a', "first index and value are correct");
-		equal(innerHTML(lis[1]), '1 b', "second index and value are correct");
-		equal(innerHTML(lis[2]), '2 c', "third index and value are correct");
+		equal(innerHTML(lis[0]), '0 a', "A: first index and value are correct");
+		equal(innerHTML(lis[1]), '1 b', "A: second index and value are correct");
+		equal(innerHTML(lis[2]), '2 c', "A: third index and value are correct");
 
 		// add a few more items
 		list.push('d', 'e');
@@ -2685,28 +2673,28 @@ function makeTest(name, doc, mutation) {
 		lis = tpl.getElementsByTagName('li');
 		equal(lis.length, 5, "five lis");
 
-		equal(innerHTML(lis[3]), '3 d', "fourth index and value are correct");
-		equal(innerHTML(lis[4]), '4 e', "fifth index and value are correct");
+		equal(innerHTML(lis[3]), '3 d', "B: fourth index and value are correct");
+		equal(innerHTML(lis[4]), '4 e', "B: fifth index and value are correct");
 
 		// splice off a few items and add some more
 		list.splice(0, 2, 'z', 'y');
 
 		lis = tpl.getElementsByTagName('li');
 		equal(lis.length, 5, "five lis");
-		equal(innerHTML(lis[0]), '0 z', "first item updated");
-		equal(innerHTML(lis[1]), '1 y', "second item updated");
-		equal(innerHTML(lis[2]), '2 c', "third item the same");
-		equal(innerHTML(lis[3]), '3 d', "fourth item the same");
-		equal(innerHTML(lis[4]), '4 e', "fifth item the same");
+		equal(innerHTML(lis[0]), '0 z', "C: first item updated");
+		equal(innerHTML(lis[1]), '1 y', "C: second item updated");
+		equal(innerHTML(lis[2]), '2 c', "C: third item the same");
+		equal(innerHTML(lis[3]), '3 d', "C: fourth item the same");
+		equal(innerHTML(lis[4]), '4 e', "C: fifth item the same");
 
 		// splice off from the middle
 		list.splice(2, 2);
 
 		lis = tpl.getElementsByTagName('li');
 		equal(lis.length, 3, "three lis");
-		equal(innerHTML(lis[0]), '0 z', "first item the same");
-		equal(innerHTML(lis[1]), '1 y', "second item the same");
-		equal(innerHTML(lis[2]), '2 e', "fifth item now the 3rd item");
+		equal(innerHTML(lis[0]), '0 z', "D: first item the same");
+		equal(innerHTML(lis[1]), '1 y', "D: second item the same");
+		equal(innerHTML(lis[2]), '2 e', "D: fifth item now the 3rd item");
 	});
 
 	test('Rendering keys of an object with #each and scope.key', function () {
@@ -2836,8 +2824,8 @@ function makeTest(name, doc, mutation) {
 
 		items.push("a");
 
-		equal(frag.firstChild.getElementsByTagName("li")
-			.length, 3, "there are 3 elements - "+frag.firstChild.innerHTML);
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")
+			.length, 3, "there are 3 elements - "+stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML);
 
 	});
 
@@ -2851,8 +2839,8 @@ function makeTest(name, doc, mutation) {
 
 		var frag = tmp(data);
 
-		equal(innerHTML(frag.firstChild.getElementsByTagName("li")[0]), "0");
-		equal(innerHTML(frag.firstChild.getElementsByTagName("li")[1]), "");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")[0]), "0");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")[1]), "");
 
 	});
 
@@ -2877,7 +2865,7 @@ function makeTest(name, doc, mutation) {
 		});
 		var frag = tmp(data);
 
-		equal(frag.firstChild.className, "fails animate-ready");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "fails animate-ready");
 
 		tmp = stache('<div class="fails {{#if state}}animate-{{state}}{{/if}}"></div>');
 		data = new SimpleMap({
@@ -2885,7 +2873,7 @@ function makeTest(name, doc, mutation) {
 		});
 		tmp(data);
 
-		equal(frag.firstChild.className, "fails animate-ready")
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "fails animate-ready")
 	});
 
 	test('html comments must not break mustache scanner', function () {
@@ -2933,7 +2921,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{safeHelper()}}</div>")
 
 		var frag = template();
-		equal(frag.firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
 
 	});
 
@@ -2956,7 +2944,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var frag = template(data),
-			div = frag.firstChild,
+			div = stacheTestHelpers.cloneAndClean(frag).firstChild,
 			labels = div.getElementsByTagName("label");
 
 		equal(labels.length, 1, "initially one label");
@@ -3049,7 +3037,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map);
 
-		var lis = frag.firstChild.getElementsByTagName("li");
+		var lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 		equal(lis.length, 3, "there are 3 properties of map's data property");
 
 		equal(innerHTML(lis[0]), "some : test");
@@ -3291,7 +3279,7 @@ function makeTest(name, doc, mutation) {
 			var frag = itemsTemplate({
 					items: items
 				}),
-				div = frag.firstChild,
+				div = stacheTestHelpers.cloneAndClean(frag).firstChild,
 				labels = div.getElementsByTagName("label");
 
 			equal(labels.length, 2, "two labels");
@@ -3315,7 +3303,7 @@ function makeTest(name, doc, mutation) {
 			equal(typeof tagData.subtemplate, "function", "got subtemplate");
 			var frag = tagData.subtemplate(tagData.scope.add({last: "Meyer"}));
 
-			equal( innerHTML(frag.firstChild), "Justin Meyer", "rendered right");
+			equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "Justin Meyer", "rendered right");
 		});
 
 		var template = stache("<stache-tag><span>{{../first}} {{last}}</span></stache-tag>")
@@ -3467,7 +3455,7 @@ function makeTest(name, doc, mutation) {
 				return opts.fn();
 			}
 		});
-		var node = frag.firstChild;
+		var node = stacheTestHelpers.cloneAndClean(frag).firstChild;
 
 		equal(innerHTML(node), 'baz', 'Context is forwarded correctly');
 	});
@@ -3490,7 +3478,7 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		equal(innerHTML(frag.firstChild), '0', 'Context is set correctly for falsey values');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), '0', 'Context is set correctly for falsey values');
 		equal(innerHTML(frag.childNodes.item(1)), '', 'Context is set correctly for falsey values');
 		equal(innerHTML(frag.childNodes.item(2)), '', 'Context is set correctly for falsey values');
 	});
@@ -3527,14 +3515,14 @@ function makeTest(name, doc, mutation) {
 		}
 
 		frag = stache(t.template)({}, t.helpers);
-		equal(frag.firstChild.nodeValue, t.expected);
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, t.expected);
 	});
 
 	test("{{else}} with {{#unless}} (#988)", function(){
 		var tmpl = "<div>{{#unless noData}}data{{else}}no data{{/unless}}</div>";
 
 		var frag = stache(tmpl)({ noData: true });
-		equal(innerHTML(frag.firstChild), 'no data', 'else with unless worked');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'no data', 'else with unless worked');
 	});
 
 	test("{{else}} within an attribute (#974)", function(){
@@ -3544,9 +3532,9 @@ function makeTest(name, doc, mutation) {
 			}),
 			frag = stache(tmpl)(data);
 
-		equal(frag.firstChild.className, 'orange', 'if branch');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'orange', 'if branch');
 		data.set('color', false);
-		equal(frag.firstChild.className, 'red', 'else branch');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'red', 'else branch');
 	});
 
 	test("returns correct value for DOM attributes (#1065)", 3, function() {
@@ -3556,7 +3544,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = stache(template)({ shown: true });
 
-		equal(frag.firstChild.className, 'foo test1 muh');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'foo test1 muh');
 		equal(frag.childNodes.item(1).className, 'bar test2 kuh');
 		equal(frag.childNodes.item(2).className, 'baz test3 boom');
 	});
@@ -3567,7 +3555,7 @@ function makeTest(name, doc, mutation) {
 				'<circle r="25" cx="25" cy="25"></circle>' +
 				'</svg>';
 			var frag = stache(template)({});
-			equal(frag.firstChild.firstChild.getAttribute("r"), "25");
+			equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("r"), "25");
 		} else {
 			expect(0);
 		}
@@ -3618,7 +3606,7 @@ function makeTest(name, doc, mutation) {
 			team : team
 		});
 
-		equal(innerHTML(frag.firstChild), "ARS", "got value");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "ARS", "got value");
 
 	});
 
@@ -3656,8 +3644,8 @@ function makeTest(name, doc, mutation) {
 
 		var renderer = stache(intermediate);
 		var frag = renderer({className: "foo", message: "bar"});
-		equal(frag.firstChild.className, "foo", "correct class name");
-		equal(innerHTML(frag.firstChild), "bar", "correct innerHTMl");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "foo", "correct class name");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "bar", "correct innerHTMl");
 	});
 
 	test("Passing Partial set in options (#1388 and #1389). Support live binding of partial", function () {
@@ -3768,7 +3756,7 @@ function makeTest(name, doc, mutation) {
 
 		data.get("items").push("foo");
 
-		var spans = frag.firstChild.getElementsByTagName("span");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
 
 		equal(spans.length,1, "one span");
 
@@ -3788,7 +3776,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template({
 			promise: compute
 		});
-		var div = frag.firstChild,
+		var div = stacheTestHelpers.cloneAndClean(frag).firstChild,
 			spans = div.getElementsByTagName("span");
 
 		var d2 = {};
@@ -3818,7 +3806,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template({d: promise});
 
-		equal(innerHTML(frag.firstChild), "AltValue", "read value");
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "AltValue", "read value");
 
 	});
 
@@ -3874,7 +3862,7 @@ function makeTest(name, doc, mutation) {
 		product.set(1);
 		queues.batch.stop();
 
-		equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
 	});
 
@@ -3888,7 +3876,7 @@ function makeTest(name, doc, mutation) {
 				radius: 6
 			});
 
-			equal(frag.firstChild.namespaceURI, "http://www.w3.org/2000/svg", "svg namespace");
+			equal(stacheTestHelpers.cloneAndClean(frag).firstChild.namespaceURI, "http://www.w3.org/2000/svg", "svg namespace");
 
 		});
 	}
@@ -3916,7 +3904,7 @@ function makeTest(name, doc, mutation) {
 		// 2. Set that key to a canCompute
 		myMap.set('test', new Observation(function() { return "def"; }));
 
-		equal(frag.firstChild.firstChild.nodeValue, "def", "correct value");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "def", "correct value");
 	});
 
 	test('template with a block section and nested if doesnt render correctly', function() {
@@ -3928,9 +3916,9 @@ function makeTest(name, doc, mutation) {
 			"{{#bar}}<div>{{#if ../foo}}My Meals{{else}}My Order{{/if}}</div>{{/bar}}"
 		)(myMap);
 
-		equal(innerHTML(frag.firstChild), 'My Order', 'shows else case');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'My Order', 'shows else case');
 		myMap.set('foo', true);
-		equal(innerHTML(frag.firstChild), 'My Meals', 'shows if case');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'My Meals', 'shows if case');
 	});
 
 	test('addHelper', 3, function() {
@@ -3944,7 +3932,7 @@ function makeTest(name, doc, mutation) {
 			first: 2,
 			second: 4
 		}));
-		equal(innerHTML(frag.firstChild), 'Result: 6');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'Result: 6');
 	});
 
 	test('Helper handles list replacement (#1652)', 3, function () {
@@ -4061,7 +4049,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map);
 
-		equal(frag.firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
 
 	});
 
@@ -4073,7 +4061,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map, { module: { uri: baseUrl } });
 
-		equal(frag.firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
 	});
 
 	test('Custom attribute callbacks are called when in a conditional within a live section', 6, function () {
@@ -4122,7 +4110,7 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		equal(frag.firstChild.nodeValue, "helperA value");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperA value");
 	});
 
 	test("inner expressions with computes", function(){
@@ -4173,14 +4161,14 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		equal(frag.firstChild.nodeValue, "helperB=B-helperC=B");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperB=B-helperC=B");
 
 		changes++;
 		queues.batch.start();
 		valueB.set("X");
 		queues.batch.stop();
 
-		equal(frag.firstChild.nodeValue, "helperB=X-helperC=X");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperB=X-helperC=X");
 	});
 
 	test("parent scope functions not called with arguments (#1833)", function(){
@@ -4206,7 +4194,7 @@ function makeTest(name, doc, mutation) {
 			arg: age
 		});
 
-		equal( frag.firstChild.nodeValue, "64", "method call works");
+		equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "64", "method call works");
 
 	});
 
@@ -4276,13 +4264,13 @@ function makeTest(name, doc, mutation) {
 			'<span class="num1">{{num1}}</span>' +
 			'<span class="num2">{{num2()}}</span>')(map);
 
-		equal(frag.firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
-		equal(frag.lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
+		equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
 
 		map.set('num1', map.get('num1') * 2);
 
-		equal(frag.firstChild.firstChild.nodeValue, '2', 'Rendered correct value');
-		equal(frag.lastChild.firstChild.nodeValue, '4', 'Rendered correct value');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '2', 'Rendered correct value');
+		equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '4', 'Rendered correct value');
 	});
 
 	test('eq called twice (#1931)', function() {
@@ -4310,8 +4298,8 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
 		list.replace([]);
-		var spans = frag.firstChild.getElementsByTagName("span");
-		var labels = frag.firstChild.getElementsByTagName("label");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
+		var labels = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("label");
 		equal(spans.length, 0, "truthy case doesn't render");
 		equal(labels.length, 1, "empty case");
 	});
@@ -4342,22 +4330,22 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map);
 
-		equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "home", "'home' is the first item shown");
 
 		map.set("page", "users");
-		equal(frag.firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
 
 		map.set("slug", "Matthew");
-		equal(frag.firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
 
 		queues.batch.start();
 		map.set("page", "home");
 		map.set("slug", undefined);
 		queues.batch.stop();
 
-		equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
-		equal(frag.firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
-		equal(frag.firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
 	});
 
 	test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function () {
@@ -4382,18 +4370,18 @@ function makeTest(name, doc, mutation) {
 		var list = new DefineList(["a","b"]);
 		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
 		var frag = tmpl({items: list});
-		equal(frag.lastChild.firstChild.nodeValue, "1", "read indexOf");
+		equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, "1", "read indexOf");
 	});
 
 	test("rendering style tag (#2035)",function(){
 		var map = new SimpleMap({color: 'green'});
 		var frag = stache('<style>body {color: {{color}} }</style>')(map);
-		var content = frag.firstChild.firstChild.nodeValue;
+		var content = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue;
 		equal(content,"body {color: green }","got the right style text");
 
 		map = new SimpleMap({showGreen: true});
 		frag = stache('<style>body {color: {{#showGreen}}green{{/showGreen}} }</style>')(map);
-		content = frag.firstChild.firstChild.nodeValue;
+		content = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue;
 		equal(content,"body {color: green }","sub expressions work");
 
 	});
@@ -4403,13 +4391,13 @@ function makeTest(name, doc, mutation) {
 			preview: true
 		});
 		var frag = stache("<div {{#if preview}}checked{{/if}}></div>")(map);
-		equal(frag.firstChild.getAttribute("checked"), "", "got attribute");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("checked"), "", "got attribute");
 	});
 
 	test("sections with attribute spacing (#2097)", function(){
 		var template = stache('<div {{#foo}} disabled {{/foo}}>');
 		var frag = template({foo: true});
-		equal(frag.firstChild.getAttribute("disabled"),"","disabled set");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("disabled"),"","disabled set");
 	});
 
 	test("readonly as a custom attribute", function() {
@@ -4417,7 +4405,7 @@ function makeTest(name, doc, mutation) {
 			conditions: false
 		});
 		var frag = stache('<input {{^conditions}}readonly{{/conditions}} name="password" type="password" />')(map);
-		equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("readonly"),"","readonly set");
 	});
 
 	test("keep scope.index working with multi-dimensional arrays (#2127)", function() {
@@ -4429,7 +4417,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(data);
 
-		var spans = frag.firstChild.getElementsByTagName("span");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
 		equal( spans[0].firstChild.nodeValue, "0");
 	});
 
@@ -4462,8 +4450,8 @@ function makeTest(name, doc, mutation) {
 		queues.batch.stop();
 
 
-	    ok( innerHTML(frag.firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
-	    ok( innerHTML(frag.firstChild).indexOf("INNER1") === -1, "does not have INNER1");
+	    ok( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
+	    ok( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).indexOf("INNER1") === -1, "does not have INNER1");
 
 
 	});
@@ -4559,7 +4547,7 @@ function makeTest(name, doc, mutation) {
 			  c: true
           }));
 
-          equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
+          equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("f"),"f", "able to set f");
 	});
 
 	test("Bracket expression", function () {
@@ -4669,15 +4657,15 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
 		var items = new DefineList(["one","two"]);
 		var frag = template(items);
-		var lis = frag.firstChild.getElementsByTagName("li");
+		var lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 
 		items.set(1,"TWO");
-		lis = frag.firstChild.getElementsByTagName("li");
+		lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 		//QUnit.equal(computes[1](), "TWO", "compute value is right");
 		QUnit.equal( lis[1].innerHTML, "TWO", "is TWO");
 
 		computes[1]("2");
-		lis = frag.firstChild.getElementsByTagName("li");
+		lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 		QUnit.equal( lis[1].innerHTML, "2", "is 2");
 	});
 
@@ -4708,12 +4696,12 @@ function makeTest(name, doc, mutation) {
 			ascending: false
 		});
 		var frag = template(vm);
-		var className = frag.firstChild.className;
+		var className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 		assert.equal( className, 'sort');
 
 		vm.set('ascending', true);
-		className = frag.firstChild.className;
+		className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 		assert.equal( className, 'sort-ascend');
 	});
@@ -4725,12 +4713,12 @@ function makeTest(name, doc, mutation) {
 			list: new DefineList(['one','two'])
 		});
 		var frag = template(vm);
-		var className = frag.firstChild.className;
+		var className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 		assert.equal( className, 'one two ' );
 
 		vm.get('list').push('three');
-		className = frag.firstChild.className;
+		className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
 
 		assert.equal( className, 'one two three ' );
 	});
@@ -4745,7 +4733,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache.from("some-template");
 		var frag = template({message: "Hello"});
 
-		assert.equal(frag.firstChild.nodeValue, "Hello");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "Hello");
 	});
 
 	test("foo().bar", function () {
@@ -5103,8 +5091,8 @@ function makeTest(name, doc, mutation) {
 		viewCallbacks.tag("my-email", function(el, tagData){
 			ok(tagData.templates, "has templates");
 			frag = tagData.templates.subject({subject: "Hello"})
-			QUnit.equal(frag.firstChild.nodeName, 'H2');
-			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+			QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeName, 'H2');
+			QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "Hello");
 		});
 
 		frag = template({});
@@ -5129,8 +5117,8 @@ function makeTest(name, doc, mutation) {
 		viewCallbacks.tag("my-email", function(el, tagData){
 			ok(tagData.templates, "has templates");
 			frag = tagData.templates.subject({subject: "Hello"})
-			QUnit.equal(frag.firstChild.nodeName, 'H' + count++);
-			QUnit.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+			QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeName, 'H' + count++);
+			QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "Hello");
 		});
 
 		frag = template({});
@@ -5164,7 +5152,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<ul>{{#each list}}<li/>{{/each}}</ul>");
 		var frag = template({list: list});
 
-		var ul = frag.firstChild;
+		var ul = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var lis = ul.getElementsByTagName("li");
 		var aLI = lis[0],
 			cLI = lis[1];
@@ -5188,7 +5176,7 @@ function makeTest(name, doc, mutation) {
 			equal(typeof tagData.subtemplate, "function", "got subtemplate");
 			var frag = tagData.subtemplate({last: "Meyer"});
 
-			equal( innerHTML(frag.firstChild), "Meyer", "rendered right");
+			equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "Meyer", "rendered right");
 		});
 
 		var template = stache("<stache-tag><span>{{last}}</span></stache-tag>")
@@ -5398,7 +5386,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache("<p>{{globalValue 'value' 0='indexed'}}</p>");
 		var frag = renderer({});
 
-		var fraghtml = innerHTML(frag.lastChild);
+		var fraghtml = innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild);
 
 		equal(fraghtml, "value:indexed");
 
@@ -5406,7 +5394,7 @@ function makeTest(name, doc, mutation) {
 		renderer = stache("<p>{{globalValue 'value' zero='strung'}}</p>");
 		frag = renderer({});
 
-		fraghtml = innerHTML(frag.lastChild);
+		fraghtml = innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild);
 
 		equal(fraghtml, "value:strung");
 	});
@@ -5799,8 +5787,8 @@ function makeTest(name, doc, mutation) {
 		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
 		var frag = template();
 
-		equal(frag.firstChild.firstChild.nodeValue, '1');
-		equal(frag.lastChild.firstChild.nodeValue, '2');
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '1');
+		equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '2');
 	});
 
 	QUnit.test("using scope.index works when using #each with arrays", function() {
@@ -6146,7 +6134,7 @@ function makeTest(name, doc, mutation) {
 			name: function(first) { return first; }
 		};
 		var frag = stache("<div id='{{name \"matthew\"}}'></div>")(vm);
-		QUnit.equal(frag.firstChild.getAttribute("id"), "matthew", "able to set the attribute");
+		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "matthew", "able to set the attribute");
 	});
 
 	test("#case and #default should not change context (#475)", function(){
@@ -6184,16 +6172,16 @@ function makeTest(name, doc, mutation) {
 			name: ""
 		});
 		var frag = stache("<input value='{{name}}'>")(vm);
-		QUnit.equal(frag.firstChild.value, "", "initially empty");
+		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "", "initially empty");
 
 		vm.name = "matthew";
-		QUnit.equal(frag.firstChild.value, "matthew", "set to matthew");
+		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "matthew", "set to matthew");
 
-		frag.firstChild.value = "mark"
-		QUnit.equal(frag.firstChild.value, "mark", "set to mark");
+		stacheTestHelpers.cloneAndClean(frag).firstChild.value = "mark"
+		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "mark", "set to mark");
 
 		vm.name = "paul";
-		QUnit.equal(frag.firstChild.value, "paul", "set to paul");
+		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "paul", "set to paul");
 	});
 
 	testHelpers.dev.devOnlyTest("Can use magic tags within attributes without warnings (#477)", function(){
@@ -6226,12 +6214,12 @@ function makeTest(name, doc, mutation) {
 		var frag = renderer(map);
 
 		QUnit.ok(true, "no error");
-		QUnit.equal( innerHTML(frag.firstChild), "", "no content");
+		QUnit.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "", "no content");
 
 		map.set("foo", function(){
 			return "bar";
 		});
-		QUnit.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
+		QUnit.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "bar", "updated to bar");
 	});
 
 	test("each should premptively bind values", function(){
@@ -6269,7 +6257,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		// Basics look correct
-		assert.equal(innerHTML(fragment.firstChild), "Hello world", "fragment has correct text content");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(fragment).firstChild), "Hello world", "fragment has correct text content");
 	});
 
 	test("addHelper can take an object of helpers", function(){
@@ -6286,7 +6274,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span>{{helperOne()}}</span><span>{{helperTwo()}}</span>");
 		var frag = template();
 
-		var spanOne = frag.firstChild;
+		var spanOne = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var spanTwo = spanOne.nextSibling;
 
 		QUnit.equal(spanOne.firstChild.nodeValue, "one");
@@ -6306,7 +6294,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span foo></span><span bar></span>");
 		var frag = template();
 
-		var firstSpan = frag.firstChild;
+		var firstSpan = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var secondSpan = firstSpan.nextSibling;
 
 		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
@@ -6331,7 +6319,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span foo2></span><span bar2></span>");
 		var frag = template();
 
-		var firstSpan = frag.firstChild;
+		var firstSpan = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var secondSpan = firstSpan.nextSibling;
 
 		QUnit.equal(firstSpan.firstChild.nodeValue, "foo");
@@ -6377,7 +6365,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stache("<div>{{foo}}</div>")(map);
 		map.set("foo", "<p></p>");
 
-		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+		QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
 
 	});
 
@@ -6397,7 +6385,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stache("<div>{{foo}}</div>")(map);
 		teardown();
 
-		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+		QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
 
 
 		map = new SimpleMap({
@@ -6406,7 +6394,7 @@ function makeTest(name, doc, mutation) {
 
 		frag = stache("<div>{{foo}}</div>")(map);
 
-		QUnit.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
+		QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 1, "paragraphs");
 
 	});
 
@@ -6419,8 +6407,8 @@ function makeTest(name, doc, mutation) {
 			'</svg>';
 
 			var frag = stache(svg)({});
-			var svgTag = frag.firstChild;
-			var useTag = frag.firstChild.getElementsByTagName('use')[0];
+			var svgTag = stacheTestHelpers.cloneAndClean(frag).firstChild;
+			var useTag = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('use')[0];
 
 			QUnit.equal(svgTag.getAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns'), "http://www.w3.org/2000/svg", "xmlns attr");
 			QUnit.equal(useTag.getAttributeNS("http://www.w3.org/1999/xlink", 'href'), "#h-shape", "xlink:href attr");

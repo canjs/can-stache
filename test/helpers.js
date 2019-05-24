@@ -12,6 +12,10 @@ var removePlaceholderNodes = function(node){
 	return node;
 };
 
+function cloneAndClean(node) {
+	return removePlaceholderNodes( node.cloneNode(true) );
+}
+
 var createHelpers = function(doc) {
 	doc = doc || document;
 	return {
@@ -23,14 +27,15 @@ var createHelpers = function(doc) {
 		getText: function(template, data, options){
 			var div = document.createElement("div");
 			div.appendChild( stache(template)(data, options) );
-			return this.cleanHTMLTextForIE( div.innerHTML );
+			return this.cleanHTMLTextForIE( cloneAndClean(div).innerHTML );
 		},
 		innerHTML: function(node){
 			return "innerHTML" in node ?
 				node.innerHTML :
 				undefined;
 		},
-		removePlaceholderNodes: removePlaceholderNodes
+		removePlaceholderNodes: removePlaceholderNodes,
+		cloneAndClean: cloneAndClean
 	};
 };
 

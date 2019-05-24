@@ -5,6 +5,8 @@ var SimpleMap = require("can-simple-map");
 var Scope = require("can-view-scope");
 var helpersCore = require('can-stache/helpers/core');
 
+var stacheTestHelpers = require("../test/helpers")(document);
+
 require("./-let");
 
 QUnit.module("can-stache let helper");
@@ -19,11 +21,11 @@ QUnit.test("basics without commas", function(){
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya", "value updated");
 });
 
 QUnit.test("basics with commas", function(){
@@ -36,11 +38,11 @@ QUnit.test("basics with commas", function(){
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin-2", "got initial value");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin-2", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya-2", "value updated");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya-2", "value updated");
 });
 
 QUnit.test("make undefined variables settable", function(){
@@ -58,7 +60,7 @@ QUnit.test("make undefined variables settable", function(){
 
 
 	scope.set("userName","Justin");
-	QUnit.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
+	QUnit.deepEqual( stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, "Justin");
 
 });
 
@@ -96,11 +98,11 @@ QUnit.test("let works after calling helpersCore.__resetHelpers", function() {
 
 	var frag = template(vm);
 
-	QUnit.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	QUnit.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya", "value updated");
 });
 
 QUnit.test("let multiple updates (#650)", function(){
@@ -170,5 +172,5 @@ QUnit.test("let does not observe itself", function(){
 	vm.set("delete", true);
 
 	QUnit.ok(true, "got here without breaking");
-	QUnit.equal( frag.firstChild.querySelector("p").innerHTML, "You are deleting");
+	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.querySelector("p").innerHTML, "You are deleting");
 });
