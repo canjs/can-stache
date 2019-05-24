@@ -228,8 +228,8 @@ testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #
 	assert.equal(teardown(), 1, "got expected warning");
 });
 
-testHelpers.dev.devOnlyTest("Warn on missmatch closing tag ", function () {
+testHelpers.dev.devOnlyTest("Warn on missmatch closing tag ", function (assert) {
 	var warningTeardown = testHelpers.dev.willWarn("missmatch.stache:1: closing tag {{/let}} was expected");
 	stache('missmatch.stache', "{{#let foo='bar'}} {{foo}}")();
-	QUnit.equal(warningTeardown(), 1, "got expected warning");
+	assert.equal(warningTeardown(), 1, "got expected warning");
 });
