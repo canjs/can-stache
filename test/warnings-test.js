@@ -6,15 +6,15 @@ var Scope = require("can-view-scope");
 QUnit.module("can-stache: warnings");
 
 
-testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function() {
+testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function (assert) {
 	var scope = new Scope({ foo: "classVal" });
 	var template = stache("<div class='{{foo}}'>Hello</div>");
 	template(scope);
 
-	QUnit.equal(scope.get("scope.lineNumber"), 1);
+	assert.equal(scope.get("scope.lineNumber"), 1);
 });
 
-testHelpers.dev.devOnlyTest("should not warn for keys that exist but are `undefined` (#427)", function () {
+testHelpers.dev.devOnlyTest("should not warn for keys that exist but are `undefined` (#427)", function (assert) {
 	var VM = DefineMap.extend({
 		propWithoutValue: 'string'
 	});
@@ -23,10 +23,10 @@ testHelpers.dev.devOnlyTest("should not warn for keys that exist but are `undefi
 
 	stache('<li>{{propWithoutValue}}</li>')(vm);
 
-	QUnit.equal(teardown(), 0, 'did not get warning');
+	assert.equal(teardown(), 0, 'did not get warning');
 });
 
-testHelpers.dev.devOnlyTest("should not warn for dotted keys that exist", function () {
+testHelpers.dev.devOnlyTest("should not warn for dotted keys that exist", function (assert) {
 	var ENV = DefineMap.extend({
 		NODE_ENV: "any"
 	});
@@ -40,24 +40,24 @@ testHelpers.dev.devOnlyTest("should not warn for dotted keys that exist", functi
 	var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 	stache('{{env.NODE_ENV}}')(vm);
 
-	QUnit.equal(teardown(), 0, "did not warn");
+	assert.equal(teardown(), 0, "did not warn");
 
 	// Then with an env but no prop
 	vm = new VM({env: new DefineMap()});
 	teardown = testHelpers.dev.willWarn(/Unable to find key/);
 	stache('{{env.NODE_ENV}}')(vm);
 
-	QUnit.equal(teardown(), 1, "did warn");
+	assert.equal(teardown(), 1, "did warn");
 
 	// Then with everything
 	vm = new VM({env: new ENV()});
 	teardown = testHelpers.dev.willWarn(/Unable to find key/);
 	stache('{{env.NODE_ENV}}')(vm);
 
-	QUnit.equal(teardown(), 0, "did not warn");
+	assert.equal(teardown(), 0, "did not warn");
 });
 
-testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", function () {
+testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", function (assert) {
 	var VM = DefineMap.extend({
 		name: "string",
 		list: {
@@ -72,10 +72,10 @@ testHelpers.dev.devOnlyTest("should not warn for scope.<key> keys that exist", f
 	var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 	stache('{{#each list}}{{scope.vm.name}}{{/each}}')(scope);
 
-	QUnit.equal(teardown(), 0, "did not warn");
+	assert.equal(teardown(), 0, "did not warn");
 });
 
-testHelpers.dev.devOnlyTest("should not warn for ../<key> keys that exist (#519)", function () {
+testHelpers.dev.devOnlyTest("should not warn for ../<key> keys that exist (#519)", function (assert) {
 	var VM = DefineMap.extend({
 		name: "string",
 		list: {
@@ -90,10 +90,10 @@ testHelpers.dev.devOnlyTest("should not warn for ../<key> keys that exist (#519)
 	var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 	stache('{{#each list}}{{../name}}{{/each}}')(scope);
 
-	QUnit.equal(teardown(), 0, "did not warn");
+	assert.equal(teardown(), 0, "did not warn");
 });
 
-testHelpers.dev.devOnlyTest("Warnings for nested properties should not suggest using the same key (#536)", function () {
+testHelpers.dev.devOnlyTest("Warnings for nested properties should not suggest using the same key (#536)", function (assert) {
 	var Abc = DefineMap.extend({});
 	var VM = DefineMap.extend({
 		abc: {
@@ -107,11 +107,11 @@ testHelpers.dev.devOnlyTest("Warnings for nested properties should not suggest u
 	var suggestionTeardown = testHelpers.dev.willWarn(/will read from/);
 	stache('{{abc.def}}')(scope);
 
-	QUnit.equal(warningTeardown(), 1, "gave warning");
-	QUnit.equal(suggestionTeardown(), 0, "did not give suggestions");
+	assert.equal(warningTeardown(), 1, "gave warning");
+	assert.equal(suggestionTeardown(), 0, "did not give suggestions");
 });
 
-testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function () {
+testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys", function (assert) {
 	var origGetPaths = Scope.prototype.getPathsForKey;
 	Scope.prototype.getPathsForKey = function(key) {
 		var paths = {};
@@ -129,9 +129,9 @@ testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct k
 		user: {}
 	});
 
-	QUnit.equal(considerTeardown(), 1, 'got expected warning');
-	QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
-	QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+	assert.equal(considerTeardown(), 1, 'got expected warning');
+	assert.equal(fooOptionTeardown(), 1, 'got foo/name option');
+	assert.equal(barOptionTeardown(), 1, 'got ../bar/name option');
 
 	Scope.prototype.getPathsForKey = function(key) {
 		var paths = {};
@@ -147,13 +147,13 @@ testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct k
 		user: {}
 	});
 
-	QUnit.equal(considerTeardown(), 1, 'got expected warning');
-	QUnit.equal(bazOptionTeardown(), 1, 'got baz/name option');
+	assert.equal(considerTeardown(), 1, 'got expected warning');
+	assert.equal(bazOptionTeardown(), 1, 'got baz/name option');
 
 	Scope.prototype.getPathsForKey = origGetPaths;
 });
 
-testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for nested properties (#519)", function () {
+testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for nested properties (#519)", function (assert) {
 	var origGetPaths = Scope.prototype.getPathsForKey;
 	Scope.prototype.getPathsForKey = function(key) {
 		var paths = {};
@@ -171,15 +171,15 @@ testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct k
 		user: {}
 	});
 
-	QUnit.equal(considerTeardown(), 1, 'got expected warning');
-	QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
-	QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+	assert.equal(considerTeardown(), 1, 'got expected warning');
+	assert.equal(fooOptionTeardown(), 1, 'got foo/name option');
+	assert.equal(barOptionTeardown(), 1, 'got ../bar/name option');
 
 	Scope.prototype.getPathsForKey = origGetPaths;
 
 });
 
-testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for functions (#529)", function () {
+testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct keys for functions (#529)", function (assert) {
 	var origGetPaths = Scope.prototype.getPathsForKey;
 	Scope.prototype.getPathsForKey = function(key) {
 		var paths = {};
@@ -199,15 +199,15 @@ testHelpers.dev.devOnlyTest("Variable not found warning should suggest correct k
 		user: {}
 	});
 
-	QUnit.equal(considerTeardown(), 1, 'got expected warning');
-	QUnit.equal(fooOptionTeardown(), 1, 'got foo/name option');
-	QUnit.equal(barOptionTeardown(), 1, 'got ../bar/name option');
+	assert.equal(considerTeardown(), 1, 'got expected warning');
+	assert.equal(fooOptionTeardown(), 1, 'got foo/name option');
+	assert.equal(barOptionTeardown(), 1, 'got ../bar/name option');
 
 	Scope.prototype.getPathsForKey = origGetPaths;
 
 });
 
-testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does not match the opener", function () {
+testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does not match the opener", function (assert) {
 	stache.registerPartial('partial', "<div></div>");
 
 	var warningTeardown = testHelpers.dev.willWarn(/bar.stache:1: unexpected closing tag {{\/partiall}} expected {{\/partial}}/);
@@ -217,15 +217,15 @@ testHelpers.dev.devOnlyTest("Should warn when the closing tag of a partial does 
 		user: {}
 	});
 
-	QUnit.equal(warningTeardown(), 1, 'got expected warning');
+	assert.equal(warningTeardown(), 1, 'got expected warning');
 });
 
-testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #493", function () {
+testHelpers.dev.devOnlyTest("Should give a warning when a partial is not found #493", function (assert) {
 	var template,
 		teardown = testHelpers.dev.willWarn(/Unable to find partial/);
 	template = stache('missing.stache', "{{> aPartial}}");
 	template();
-	QUnit.equal(teardown(), 1, "got expected warning");
+	assert.equal(teardown(), 1, "got expected warning");
 });
 
 testHelpers.dev.devOnlyTest("Warn on missmatch closing tag ", function () {

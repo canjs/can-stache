@@ -10,7 +10,7 @@ var stache = require("can-stache");
 
 QUnit.module("can-stache converters");
 
-QUnit.test("addLiveConverter helpers push and pull correct values", function () {
+QUnit.test("addLiveConverter helpers push and pull correct values", function(assert) {
 
 	helpers.addConverter('numberToHex', {
 		get: function(val) {
@@ -32,12 +32,12 @@ QUnit.test("addLiveConverter helpers push and pull correct values", function () 
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute.get(), 'ff', 'Converter called');
+	assert.equal(twoWayCompute.get(), 'ff', 'Converter called');
 	twoWayCompute.set('7f');
-	equal(data.get("observeVal"), 127, 'push converter called');
+	assert.equal(data.get("observeVal"), 127, 'push converter called');
 });
 
-QUnit.test("addConverter helpers push and pull multiple values", function () {
+QUnit.test("addConverter helpers push and pull multiple values", function(assert) {
 
 	helpers.addConverter('isInList', {
 		get: function(valCompute, list) {
@@ -63,23 +63,23 @@ QUnit.test("addConverter helpers push and pull multiple values", function () {
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute.get(), false, 'Converter called');
+	assert.equal(twoWayCompute.get(), false, 'Converter called');
 	twoWayCompute.set(5);
-	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
+	assert.deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
 
-QUnit.test("Can register multiple converters at once with addConverter", function(){
-	QUnit.expect(2);
+QUnit.test("Can register multiple converters at once with addConverter", function(assert) {
+	assert.expect(2);
 	var converters = {
 		"converter-one": {
 			get: function(){
-				QUnit.ok(true, "converter-one called");
+				assert.ok(true, "converter-one called");
 			},
 			set: function(){}
 		},
 		"converter-two": {
 			get: function(){
-				QUnit.ok(true, "converter-two called");
+				assert.ok(true, "converter-two called");
 			},
 			set: function(){}
 		}
@@ -100,7 +100,7 @@ QUnit.test("Can register multiple converters at once with addConverter", functio
 
 QUnit.module("can-stache converters - not");
 
-QUnit.test("saves the inverse of the selected value without ~ (#68)", function(){
+QUnit.test("saves the inverse of the selected value without ~ (#68)", function(assert) {
 	var data = new SimpleMap({
 		val: true
 	});
@@ -110,13 +110,13 @@ QUnit.test("saves the inverse of the selected value without ~ (#68)", function()
 
 	var value = expr.value(scope);
 
-	QUnit.equal( value.get(), false , "read the value");
+	assert.equal( value.get(), false , "read the value");
 	value.set(true);
 
-	QUnit.equal( data.get("val"), false ,"able to change the value" );
+	assert.equal( data.get("val"), false ,"able to change the value" );
 });
 
-QUnit.test("not works also like if", function(){
+QUnit.test("not works also like if", function(assert) {
 	var view = stache("<div>{{# not(this.value) }}{{truthy(this)}}{{else}}FALSY{{/not}}</div>");
 
 	var data = new SimpleMap({
@@ -125,18 +125,18 @@ QUnit.test("not works also like if", function(){
 
 	var frag = view(data,{
 		truthy: function(that){
-			QUnit.equal(that, data, "has the right scope");
+			assert.equal(that, data, "has the right scope");
 			return "TRUTHY";
 		}
 	});
 
-	QUnit.equal(frag.firstChild.innerHTML, "TRUTHY");
+	assert.equal(frag.firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	QUnit.equal(frag.firstChild.innerHTML, "FALSY");
+	assert.equal(frag.firstChild.innerHTML, "FALSY");
 });
 
-QUnit.test("not works inside if", function(){
+QUnit.test("not works inside if", function(assert) {
 	var view = stache("<div>{{#if( not(this.value) )  }}{{truthy(this)}}{{else}}FALSY{{/if}}</div>");
 
 	var data = new SimpleMap({
@@ -145,13 +145,13 @@ QUnit.test("not works inside if", function(){
 
 	var frag = view(data,{
 		truthy: function(that){
-			QUnit.equal(that, data, "has the right scope");
+			assert.equal(that, data, "has the right scope");
 			return "TRUTHY";
 		}
 	});
 
-	QUnit.equal(frag.firstChild.innerHTML, "TRUTHY");
+	assert.equal(frag.firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	QUnit.equal(frag.firstChild.innerHTML, "FALSY");
+	assert.equal(frag.firstChild.innerHTML, "FALSY");
 });
