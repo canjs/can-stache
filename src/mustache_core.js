@@ -422,12 +422,9 @@ var core = {
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
 						// TODO:
-						throw new Error("FIGURE THIS OUT");
-						/*var insert = value[viewInsertSymbol]({
-							nodeList: nodeList
-						});
-						var oldNodes = nodeLists.update(nodeList, [insert]);
-						nodeLists.replace(oldNodes, insert);*/
+
+						var insert = value[viewInsertSymbol]({});
+						this.parentNode.replaceChild( insert, this );
 					} else {
 						this.parentNode.replaceChild(frag(value, this.ownerDocument), this);
 						//domMutateNode.replaceChild.call(this.parentNode, frag(value, this.ownerDocument), this);

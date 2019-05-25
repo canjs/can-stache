@@ -37,10 +37,15 @@ var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
 var makeStacheTestHelpers = require("../test/helpers");
 var browserDoc = DOCUMENT();
-
+var compareDocumentPositionPolyfill = require("./compare-document-position");
 
 makeTest('can/view/stache dom', browserDoc);
-makeTest('can/view/stache vdom', makeDocument());
+(function(){
+	var vDocument = makeDocument();
+	vDocument.nodeConstructor.prototype.compareDocumentPosition = compareDocumentPositionPolyfill;
+	makeTest('can/view/stache vdom', vDocument);
+})();
+
 
 // HELPERS
 function overwriteGlobalHelper(name, fn, method) {
@@ -2865,7 +2870,7 @@ function makeTest(name, doc, mutation) {
 		});
 		var frag = tmp(data);
 
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "fails animate-ready");
+		equal(frag.firstChild.className, "fails animate-ready");
 
 		tmp = stache('<div class="fails {{#if state}}animate-{{state}}{{/if}}"></div>');
 		data = new SimpleMap({
@@ -2873,7 +2878,7 @@ function makeTest(name, doc, mutation) {
 		});
 		tmp(data);
 
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "fails animate-ready")
+		equal(frag.firstChild.className, "fails animate-ready")
 	});
 
 	test('html comments must not break mustache scanner', function () {
@@ -2885,7 +2890,7 @@ function makeTest(name, doc, mutation) {
 		], function (content) {
 			var div = doc.createElement('div');
 			div.appendChild(stache(content)());
-			equal(innerHTML(div), content, 'Content did not change: "' + content + '"');
+			equal(div.innerHTML, content, 'Content did not change: "' + content + '"');
 		});
 	});
 
@@ -2921,9 +2926,27 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{safeHelper()}}</div>")
 
 		var frag = template();
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
+		var cleaned= stacheTestHelpers.cloneAndClean(frag);
+
+		equal(cleaned.firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
 
 	});
+	window.getChildNodes = getChildNodes;
+	window.print = function(node){
+		var text = "";
+		if(node.nodeType === 1 || node.nodeType === 11) {
+			text += "<"+node.nodeName+">";
+			for(let child of Array.from( getChildNodes(node) ) ) {
+				text += print(child);
+			}
+			text += "</"+node.nodeName+">";
+		} else if(node.nodeType === 3){
+			text += node.nodeValue;
+		} else if(node.nodeType) {
+			text += "<! "+node.nodeValue +" ->";
+		}
+		return text;
+	}
 
 	test("directly nested subitems and each (#605)", function () {
 
@@ -2944,10 +2967,11 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var frag = template(data),
-			div = stacheTestHelpers.cloneAndClean(frag).firstChild,
+			div = frag.firstChild,
 			labels = div.getElementsByTagName("label");
 
 		equal(labels.length, 1, "initially one label");
+
 		data.get('item').get('subitems')
 			.push('second');
 
@@ -3279,7 +3303,7 @@ function makeTest(name, doc, mutation) {
 			var frag = itemsTemplate({
 					items: items
 				}),
-				div = stacheTestHelpers.cloneAndClean(frag).firstChild,
+				div = frag.firstChild,
 				labels = div.getElementsByTagName("label");
 
 			equal(labels.length, 2, "two labels");
@@ -3479,8 +3503,8 @@ function makeTest(name, doc, mutation) {
 		});
 
 		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), '0', 'Context is set correctly for falsey values');
-		equal(innerHTML(frag.childNodes.item(1)), '', 'Context is set correctly for falsey values');
-		equal(innerHTML(frag.childNodes.item(2)), '', 'Context is set correctly for falsey values');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).childNodes.item(1)), '', 'Context is set correctly for falsey values');
+		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).childNodes.item(2)), '', 'Context is set correctly for falsey values');
 	});
 
 	test("Custom elements created with default namespace in IE8", function(){
@@ -3532,9 +3556,9 @@ function makeTest(name, doc, mutation) {
 			}),
 			frag = stache(tmpl)(data);
 
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'orange', 'if branch');
+		equal(frag.firstChild.className, 'orange', 'if branch');
 		data.set('color', false);
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'red', 'else branch');
+		equal(frag.firstChild.className, 'red', 'else branch');
 	});
 
 	test("returns correct value for DOM attributes (#1065)", 3, function() {
@@ -3544,7 +3568,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = stache(template)({ shown: true });
 
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, 'foo test1 muh');
+		equal(frag.firstChild.className, 'foo test1 muh');
 		equal(frag.childNodes.item(1).className, 'bar test2 kuh');
 		equal(frag.childNodes.item(2).className, 'baz test3 boom');
 	});
@@ -3620,22 +3644,23 @@ function makeTest(name, doc, mutation) {
 
 		// Only node in IE is <table>, text in other browsers
 		var index = getChildNodes(frag).length === 2 ? 1 : 0;
-		var tagName = frag.childNodes.item(index).firstChild.firstChild.tagName.toLowerCase();
+		var tagName = stacheTestHelpers.cloneAndClean(frag).childNodes.item(index).firstChild.firstChild.tagName.toLowerCase();
 
 		equal(tagName, 'col', '<col> nodes added in proper position');
 	});
 
 	test('splicing negative indices works (#1038)', function() {
 		// http://jsfiddle.net/ZrWVQ/2/
-		var template = '{{#each list}}<p>{{.}}</p>{{/each}}';
+		var template = '<div>{{#each list}}<p>{{.}}</p>{{/each}}</div>';
 		var list = new DefineList(['a', 'b', 'c', 'd']);
 		var frag = stache(template)({
 			list: list
 		});
-		var children = getChildNodes(frag).length;
+		var children = frag.firstChild.getElementsByTagName("p").length;
 
 		list.splice(-1);
-		equal(getChildNodes(frag).length, children - 1, 'Child node removed');
+
+		equal(frag.firstChild.getElementsByTagName("p").length, children - 1, 'Child node removed');
 	});
 
 	test('stache can accept an intermediate (#1387)', function(){
@@ -3644,8 +3669,8 @@ function makeTest(name, doc, mutation) {
 
 		var renderer = stache(intermediate);
 		var frag = renderer({className: "foo", message: "bar"});
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.className, "foo", "correct class name");
-		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "bar", "correct innerHTMl");
+		equal(frag.firstChild.className, "foo", "correct class name");
+		equal(innerHTML(frag.firstChild), "bar", "correct innerHTMl");
 	});
 
 	test("Passing Partial set in options (#1388 and #1389). Support live binding of partial", function () {
@@ -3776,7 +3801,7 @@ function makeTest(name, doc, mutation) {
 		var frag = template({
 			promise: compute
 		});
-		var div = stacheTestHelpers.cloneAndClean(frag).firstChild,
+		var div = frag.firstChild,
 			spans = div.getElementsByTagName("span");
 
 		var d2 = {};
@@ -3807,37 +3832,6 @@ function makeTest(name, doc, mutation) {
 		var frag = template({d: promise});
 
 		equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "AltValue", "read value");
-
-	});
-
-	QUnit.skip("possible to teardown immediate nodeList (#1593)", function(){
-		expect(3);
-		var map = new SimpleMap({show: true});
-
-
-
-		var template = stache("{{#if show}}<span/>TEXT{{/if}}");
-		var nodeList = nodeLists.register([], undefined, true);
-		var frag = template(map,{},nodeList);
-		nodeLists.update(nodeList, getChildNodes(frag));
-
-		equal(nodeList.length, 1, "our nodeList has the nodeList of #if show");
-		var meta = map[canSymbol.for("can.meta")];
-		QUnit.ok(meta.handlers.get([]).length, "there is one handler");
-
-		nodeLists.unregister(nodeList);
-
-		// has to be async b/c of the temporary bind for performance
-		QUnit.stop();
-		var check = function(){
-			if(!meta.handlers.get([]).length) {
-				QUnit.ok(true, "there is no handler");
-				QUnit.start();
-			} else {
-				setTimeout(check,20);
-			}
-		};
-		check();
 
 	});
 
@@ -4305,6 +4299,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test("Re-evaluating a case in a switch (#1988)", function(){
+		//debugger;
 		var template = stache(
 			"{{#switch page}}" +
 				"{{#case 'home'}}" +
@@ -4368,9 +4363,10 @@ function makeTest(name, doc, mutation) {
 
 	test("scope.index content should be skipped by ../ (#1554)", function(){
 		var list = new DefineList(["a","b"]);
-		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
+		var tmpl = stache('<div>{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}</div>');
 		var frag = tmpl({items: list});
-		equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, "1", "read indexOf");
+
+		equal(frag.firstChild.getElementsByTagName("li")[1].innerHTML, "1", "read indexOf");
 	});
 
 	test("rendering style tag (#2035)",function(){
@@ -4457,6 +4453,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Child bindings are called before the parent', function() {
+		
 		var template = "{{#eq page 'todos'}}" +
 				"{{#eq action   'view'}} {{trace 'view todos'}} {{/eq}}" +
 				"{{#eq action   'edit'}} {{trace 'edit todos'}} {{/eq}}" +
@@ -4476,15 +4473,16 @@ function makeTest(name, doc, mutation) {
 			trace: function(value, options) {
 
 				if(counter === 0) {
-					equal(value, 'view todos');
+					equal(value, 'view todos', "first we should see view-todos");
 				} else if(counter === 1) {
-					equal(value, 'edit recipes')
+					equal(value, 'edit recipes', "next we should see edit-recipes")
 				} else {
 					ok(false, 'Traced an unexpected template call: '+value);
 				}
 				counter++;
 			}
 		});
+		console.log("\nUPDATING\n");
 		queues.batch.start();
 		state.set({
 			action: 'edit',
@@ -4696,12 +4694,12 @@ function makeTest(name, doc, mutation) {
 			ascending: false
 		});
 		var frag = template(vm);
-		var className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
+		var className = frag.firstChild.className;
 
 		assert.equal( className, 'sort');
 
 		vm.set('ascending', true);
-		className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
+		className = frag.firstChild.className;
 
 		assert.equal( className, 'sort-ascend');
 	});
@@ -4713,12 +4711,12 @@ function makeTest(name, doc, mutation) {
 			list: new DefineList(['one','two'])
 		});
 		var frag = template(vm);
-		var className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
+		var className = frag.firstChild.className;
 
 		assert.equal( className, 'one two ' );
 
 		vm.get('list').push('three');
-		className = stacheTestHelpers.cloneAndClean(frag).firstChild.className;
+		className = frag.firstChild.className;
 
 		assert.equal( className, 'one two three ' );
 	});
@@ -5152,7 +5150,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<ul>{{#each list}}<li/>{{/each}}</ul>");
 		var frag = template({list: list});
 
-		var ul = stacheTestHelpers.cloneAndClean(frag).firstChild;
+		var ul = frag.firstChild;
 		var lis = ul.getElementsByTagName("li");
 		var aLI = lis[0],
 			cLI = lis[1];
@@ -5430,8 +5428,8 @@ function makeTest(name, doc, mutation) {
 
 		view = renderer(viewModel);
 
-		equal(view.firstChild.firstChild.nodeValue, "John", "Object AND hash values - Got the first name");
-		equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Object AND hash values - Got the last name");
+		equal(stacheTestHelpers.cloneAndClean(view).firstChild.firstChild.nodeValue, "John", "Object AND hash values - Got the first name");
+		equal(stacheTestHelpers.cloneAndClean(view).firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Object AND hash values - Got the last name");
 
 
 	});
@@ -5451,16 +5449,18 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache(
-			"{{#each people person=value num=index}}" +
+			"<div>{{#each people person=value num=index}}" +
 				"<div class=\"person\" data-index=\"{{num}}\"><span>{{person.first}}</span>" +
 				"<span>{{person.last}}</span></div>" +
-			"{{/each}}"
+			"{{/each}}</div>"
 		);
 
 		var view = renderer(viewModel);
+		var divs = view.firstChild.getElementsByTagName("div");
+		var spans = view.firstChild.getElementsByTagName("span");
 
-		equal(view.lastChild.getAttribute('data-index'), "2", "Got the index");
-		equal(view.firstChild.nextSibling.firstChild.firstChild.nodeValue, "John", "Got aliased value");
+		equal(divs[divs.length - 1].getAttribute('data-index'), "2", "Got the index");
+		equal(spans[0].firstChild.nodeValue, "John", "Got aliased value");
 	});
 
 	test("can assign hash using each on an iterable map #300", function () {
@@ -5472,15 +5472,16 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache(
-			"{{#each flags flagValue=value flagKey=key}}" +
+			"<div>{{#each flags flagValue=value flagKey=key}}" +
 				"<span>{{flagKey}}: {{flagValue}}</span>" +
-			"{{/each}}"
+			"{{/each}}</div>"
 		);
 
-		var view = renderer(viewModel);
+		var view = renderer(viewModel),
+			spans = view.firstChild.getElementsByTagName("span");
 
-		equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
-		equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
+		equal(spans[0].firstChild.nodeValue, "isJSCool", "Got the key");
+		equal(spans[0].lastChild.nodeValue, "yep", "Got aliased value");
 	});
 
 	test('check if <content> is already registred #165', function () {
@@ -6177,8 +6178,8 @@ function makeTest(name, doc, mutation) {
 		vm.name = "matthew";
 		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "matthew", "set to matthew");
 
-		stacheTestHelpers.cloneAndClean(frag).firstChild.value = "mark"
-		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "mark", "set to mark");
+		frag.firstChild.value = "mark"
+		QUnit.equal(frag.firstChild.value, "mark", "set to mark");
 
 		vm.name = "paul";
 		QUnit.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "paul", "set to paul");

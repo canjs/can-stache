@@ -1,7 +1,8 @@
 var stache = require("can-stache");
+var childNodes = require("can-child-nodes");
 
 var removePlaceholderNodes = function(node){
-	var children = Array.from(node.childNodes);
+	var children = Array.from(childNodes(node));
 	for(var i = 0; i < children.length; i++) {
 		if(children[i].nodeType === Node.COMMENT_NODE) {
 			node.removeChild(children[i])
