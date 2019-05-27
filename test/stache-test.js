@@ -37,14 +37,9 @@ var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
 var makeStacheTestHelpers = require("../test/helpers");
 var browserDoc = DOCUMENT();
-var compareDocumentPositionPolyfill = require("./compare-document-position");
 
 makeTest('can/view/stache dom', browserDoc);
-(function(){
-	var vDocument = makeDocument();
-	vDocument.nodeConstructor.prototype.compareDocumentPosition = compareDocumentPositionPolyfill;
-	makeTest('can/view/stache vdom', vDocument);
-})();
+makeTest('can/view/stache vdom', makeDocument());
 
 
 // HELPERS
@@ -4453,7 +4448,7 @@ function makeTest(name, doc, mutation) {
 	});
 
 	test('Child bindings are called before the parent', function() {
-		
+
 		var template = "{{#eq page 'todos'}}" +
 				"{{#eq action   'view'}} {{trace 'view todos'}} {{/eq}}" +
 				"{{#eq action   'edit'}} {{trace 'edit todos'}} {{/eq}}" +
