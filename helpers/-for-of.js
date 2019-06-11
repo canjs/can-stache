@@ -17,7 +17,8 @@ var bindAndRead = function (value) {
 function forOfObject(object, variableName, options){
 	var result = [];
 	canReflect.each(object, function(val, key){
-		var value = new KeyObservable(object, key);
+		// Allow key to contain a dot, for example: "My.key.has.dot"
+		var value = new KeyObservable(object, key.replace(/\./g, "\\."));
 		var variableScope = {};
 		if(variableName !== undefined){
 			variableScope[variableName] = value;

@@ -172,3 +172,16 @@ QUnit.test("forOf works after calling helpersCore.__resetHelpers", function(asse
 
 	assert.deepEqual(order, [11,12,13,134234]);
 });
+
+QUnit.test("for(value of object) works if value is keyed with a dot (issue#698)", function(assert){
+	var template = stache("<div class='{{#for(value of object)}}[{{scope.key}}-{{value}}]{{/for}}'></div>");
+	var object = {
+		first: "FIRST",
+		"second.key.has.dot": "SECOND"
+	};
+	var frag = template({
+		object: object
+	});
+
+	assert.equal( frag.firstChild.className, "[first-FIRST][second.key.has.dot-SECOND]");
+});
