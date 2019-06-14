@@ -3,6 +3,10 @@ var stache = require("can-stache");
 var DefineMap = require("can-define/map/map");
 var DefineList = require("can-define/list/list");
 var define = require("can-define");
+var makeStacheTestHelpers = require("./helpers");
+var DOCUMENT = require("can-globals/document/document");
+
+var stacheTestHelpers = makeStacheTestHelpers(DOCUMENT());
 
 QUnit.module("can-stache with can-define");
 

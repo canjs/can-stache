@@ -501,7 +501,7 @@ unlessHelper.isLiveBound = true;
 
 
 // ## Converters
-// ## NOT converter
+// ## NOT converter
 var notConverter = {
 	get: function(obs, options){
 		if(helpersCore.looksLikeOptions(options)) {

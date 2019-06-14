@@ -7,7 +7,7 @@ var Scope = require("can-view-scope");
 
 QUnit.module("can-stache: warnings");
 
-var stacheTestHelpers = require("../test/helpers")(document);
+//var stacheTestHelpers = require("../test/helpers")(document);
 
 testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function() {
 	var scope = new Scope({ foo: "classVal" });

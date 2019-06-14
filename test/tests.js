@@ -12,5 +12,5 @@
 //require('./section-test');
 //require("./partials-test");
 //require("./filename-test");
-//require("./warnings-test");
+require("./warnings-test");
 require("./stache-test");

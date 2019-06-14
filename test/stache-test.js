@@ -2931,9 +2931,9 @@ function makeTest(name, doc, mutation) {
 		var text = "";
 		if(node.nodeType === 1 || node.nodeType === 11) {
 			text += "<"+node.nodeName+">";
-			for(let child of Array.from( getChildNodes(node) ) ) {
+			Array.from( getChildNodes(node) ).forEach(function(child) {
 				text += print(child);
-			}
+			});
 			text += "</"+node.nodeName+">";
 		} else if(node.nodeType === 3){
 			text += node.nodeValue;

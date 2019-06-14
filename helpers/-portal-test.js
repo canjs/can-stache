@@ -71,7 +71,7 @@ test("tears down when the element is removed", function() {
 		setTimeout(function(){
 			QUnit.equal( vm[canSymbol.for("can.meta")].handlers.get(["name"]).length, 0, "no handlers");
 			start();
-		},1)
+		},1);
 
 	});
 

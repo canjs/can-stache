@@ -6,7 +6,6 @@ var DefineList = require('can-define/list/list');
 var DefineMap = require('can-define/map/map');
 var parser = require('can-view-parser');
 var string = require('can-string');
-var canSymbol = require("can-symbol");
 var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache partials");
@@ -89,29 +88,29 @@ test("partials are not working within an {{#each}} (#2174)", function() {
 });
 
 QUnit.skip("partials don't leak (#2174)", function() {
+	// commenting test out to pass linter (nodeLists is not defined)
+	// stache.registerHelper("somethingCrazy", function(name, options){
+	// 	return function(el){
+	// 		var nodeList = [el];
+	// 		nodeList.expression = "something crazy";
+	// 		nodeLists.register(nodeList, function(){
+	// 			ok(true, "nodeList torn down");
+	// 		}, options.nodeList, true);
+	// 		nodeLists.update(options.nodeList, [el]);
+	// 	};
+	// });
+	// var data = new SimpleMap({
+	// 	items : new DefineList([{
+	// 		name : 'foo'
+	// 	}]),
+	// 	itemRender: stache('{{somethingCrazy name}}')
+	// });
 
-	stache.registerHelper("somethingCrazy", function(name, options){
-		return function(el){
-			var nodeList = [el];
-			nodeList.expression = "something crazy";
-			nodeLists.register(nodeList, function(){
-				ok(true, "nodeList torn down");
-			}, options.nodeList, true);
-			nodeLists.update(options.nodeList, [el]);
-		};
-	});
-	var data = new SimpleMap({
-		items : new DefineList([{
-			name : 'foo'
-		}]),
-		itemRender: stache('{{somethingCrazy name}}')
-	});
+	// var renderer = stache('<div>{{#each items}}{{>../itemRender}}{{/each}}</div>');
 
-	var renderer = stache('<div>{{#each items}}{{>../itemRender}}{{/each}}</div>');
+	// renderer(data);
 
-	renderer(data);
-
-	data.get('items').pop();
+	// data.get('items').pop();
 });
 
 test("partials should leave binding to helpers and properties (#2174)", function() {

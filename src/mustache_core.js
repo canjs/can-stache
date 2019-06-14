@@ -11,7 +11,6 @@ var utils = require('./utils');
 var expression = require('./expression');
 var frag = require("can-fragment");
 var domMutate = require("can-dom-mutate");
-var domMutateNode = require("can-dom-mutate/node/node");
 var canSymbol = require("can-symbol");
 var canReflect = require("can-reflect");
 var dev = require("can-log/dev/dev");

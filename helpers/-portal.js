@@ -1,7 +1,6 @@
 var canReflect = require("can-reflect");
 var live = require("can-view-live");
 var Observation = require("can-observation");
-var getDocument = require("can-globals/document/document");
 var domMutate = require("can-dom-mutate");
 var domMutateNode = require("can-dom-mutate/node");
 var canSymbol = require("can-symbol");
