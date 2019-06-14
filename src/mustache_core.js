@@ -4,6 +4,7 @@
 // only stache uses these helpers.  Ideally, these utilities could be used
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
+var liveHelpers = require("can-view-live/lib/helpers");
 
 var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
@@ -416,7 +417,7 @@ var core = {
 					live.attrs(this, value);
 				}
 				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
-					this.nodeValue = live.makeString(value);
+					this.nodeValue = liveHelpers.makeString(value);
 				}
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
