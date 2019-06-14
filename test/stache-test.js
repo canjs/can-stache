@@ -4334,8 +4334,8 @@ function makeTest(name, doc, mutation) {
 		queues.batch.stop();
 
 		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "home", "'home' is the first item shown");
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
-		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
+		//equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
+		equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling, undefined, "there are no more nodes");
 	});
 
 	test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function () {

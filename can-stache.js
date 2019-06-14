@@ -116,6 +116,8 @@ function stache (filename, template) {
 				var createdSection = section.last();
 				if ( createdSection.startedWith === "<" ) {
 					inlinePartials[ stache ] = section.endSubSectionAndReturnRenderer();
+					// Remove *TWO* nodes because we now have a start and an end comment for the section....
+					section.removeCurrentNode();
 					section.removeCurrentNode();
 				} else {
 					section.endSection();
@@ -168,7 +170,7 @@ function stache (filename, template) {
 					var sectionItem = {
 						type: "section"
 					};
-					section.startSection(renderer);
+					section.startSection(renderer, stache);
 					section.last().startedWith = mode;
 
 					// If we are a directly nested section, count how many we are within

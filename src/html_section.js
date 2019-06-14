@@ -55,9 +55,15 @@ assign(HTMLSectionBuilder.prototype,{
 			return utils.makeView(htmlSection.compiled.hydrate.bind(htmlSection.compiled));
 		}
 	},
-	startSection: function( process ) {
+	startSection: function( process, commentName ) {
 		var newSection = new HTMLSection(process);
-		this.last().add(newSection.targetCallback);
+		this.last().add({
+			comment: commentName || "#section",
+			callbacks: [newSection.targetCallback]
+		});
+		this.last().add({
+			comment: "can-end-placeholder"
+		});
 		// adding a section within a section ...
 		// the stack has section ...
 		this.stack.push(newSection);
