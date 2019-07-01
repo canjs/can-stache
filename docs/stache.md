@@ -314,7 +314,7 @@ The following helpers are used to render conditionally:
 - [can-stache.helpers.and] - Renders the  _TRUTHY_ section if all values are truthy.
 - [can-stache.helpers.or] - Renders the  _TRUTHY_ section if any value is truthy.
 - [can-stache.helpers.switch] with [can-stache.helpers.case] - Renders the case section that matches the value.
-
+- [can-stache.helpers.else] - Renders the  _FALSY_ section if the value is falsy.
 
 These helpers (except for [can-stache.helpers.switch]) can be combined. For example,
 we can show the sun if `this.time` equals `"day"` or `"afternoon"` as follows:
