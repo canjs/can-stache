@@ -219,6 +219,27 @@ var ifHelper = assign(function ifHelper(expr, options) {
 
 
 
+// ## IF ELSE HELPER
+var ifElseHelper = assign(function ifHelper(expr, options) {
+	var value;
+	// if it's a function, wrap its value in a compute
+	// that will only change values from true to false
+	if (expr && canReflect.isValueLike(expr)) {
+		value = canReflect.getValue(new TruthyObservable(expr));
+	} else {
+		value = !! helpersCore.resolve(expr);
+	}
+
+	if (options) {
+		return value ? options.fn(options.scope || this) : options.inverse(options.scope || this);
+	}
+
+	return !!value;
+}, {requiresOptionsArgument: true, isLiveBound: true});
+
+
+
+
 //## EQ/IS HELPER
 var isHelper = helpersCore._makeLogicHelper("eq", function eqHelper(args){
 	var curValue, lastValue;
@@ -524,6 +545,7 @@ assign(builtInHelpers, {
 	eachOf: eachHelper,
 	index: indexHelper,
 	'if': ifHelper,
+	'ifElse': ifElseHelper,
 	is: isHelper,
 	eq: isHelper,
 	unless: unlessHelper,
