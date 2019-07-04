@@ -543,7 +543,12 @@ function stache (filename, template) {
 			scope._parent = templateContextScope;
 		}
 
-		return renderer(scope.addLetContext(), nodeList);
+		// add let context if passed scope doesn't already have one
+		if (!scope.getScope(function(s) {return s._meta.variable === true;})) {
+			scope = scope.addLetContext();
+		}
+
+		return renderer(scope, nodeList);
 	});
 
 	// Identify is a view type
