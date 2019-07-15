@@ -54,11 +54,11 @@
     "can-stache-key": "^1.3.1",
     "can-string": "<2.0.0",
     "can-symbol": "^1.6.4",
-    "can-view-callbacks": "^4.2.0",
+    "can-view-callbacks": "canjs/can-view-callbacks#major",
     "can-view-live": "canjs/can-view-live.git#major",
     "can-view-parser": "^4.0.0",
     "can-view-scope": "^4.12.0",
-    "can-view-target": "^4.1.6"
+    "can-view-target": "canjs/can-view-target#major"
   },
   "devDependencies": {
     "can-define": "^2.0.4",
