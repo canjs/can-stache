@@ -20,7 +20,7 @@
    - a `set` method that updates one or multiple of the `right` arguments
      computes given a new `left` value.
 
-  `stringToNumber` might converts a number (`age`)
+  `stringToNumber` might convert a number (`age`)
   to a string (`value`), and the string (`value`) to a number (`age`)
   as follows:
 

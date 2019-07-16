@@ -10,7 +10,7 @@ var stacheTestHelpers = makeStacheTestHelpers(DOCUMENT());
 
 QUnit.module("can-stache with can-define");
 
-test("basic replacement and updating", function(){
+QUnit.test("basic replacement and updating", function(assert) {
 
 	var map = new DefineMap({
 		message: "World"
@@ -19,11 +19,11 @@ test("basic replacement and updating", function(){
 
 	var frag = stashed(map);
 
-	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "World","got back the right text");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "World","got back the right text");
 });
 
 
-test('Helper each inside a text section (attribute) (#8)', function(assert){
+QUnit.test('Helper each inside a text section (attribute) (#8)', function(assert){
 	var template = stache('<div class="{{#each list}}{{.}} {{/}}"></div>');
 
 	var vm = new DefineMap({
@@ -40,7 +40,7 @@ test('Helper each inside a text section (attribute) (#8)', function(assert){
 	assert.equal( className, 'one two three ' );
 });
 
-test("Using #each on a DefineMap", function(assert){
+QUnit.test("Using #each on a DefineMap", function(assert){
 	var template = stache("{{#each obj}}{{%key}}{{.}}{{/each}}");
 
 	var VM = DefineMap.extend({
@@ -71,19 +71,19 @@ test("Using #each on a DefineMap", function(assert){
 	assert.equal(third.nextSibling.nodeValue, "qux");
 });
 
-QUnit.test("{{%index}} work with {{#key}} iteration", function () {
+QUnit.test("{{%index}} work with {{#key}} iteration", function(assert) {
 	var template = stache('<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
 	var div = document.createElement('div');
 	var dom = template({iter: new DefineList(['hey', 'there'])});
 	div.appendChild(dom);
 
 	var span = div.getElementsByTagName('span');
-	equal((span[0].innerHTML), '0', 'iteration for %index');
-	equal((span[1].innerHTML), '1', 'iteration for %index');
+	assert.equal((span[0].innerHTML), '0', 'iteration for %index');
+	assert.equal((span[1].innerHTML), '1', 'iteration for %index');
 });
 
 // cf. https://github.com/canjs/can-stache/issues/180
-QUnit.test("Renders live bound `{{defineList[0]}}` and `{{defineList.0}}` data (#180)", function() {
+QUnit.test("Renders live bound `{{defineList[0]}}` and `{{defineList.0}}` data (#180)", function(assert) {
 	var list = new DefineList([ 'zero' ]);
 	var renderer = stache('<div><span class="brackets">{{list[0]}}</span><span class="dot">{{list.0}}</span>');
 	//var html = renderer({ list: list });
@@ -95,15 +95,15 @@ QUnit.test("Renders live bound `{{defineList[0]}}` and `{{defineList.0}}` data (
 	//   <span class="brackets">zero</span>
 	//   <span class="dot">zero</span>
 	// </div>
-	equal(html.querySelector('.brackets').textContent, 'zero', '{{list[0]}}');
-	equal(html.querySelector('.dot').textContent, 'zero', '{{list.0}}');
+	assert.equal(html.querySelector('.brackets').textContent, 'zero', '{{list[0]}}');
+	assert.equal(html.querySelector('.dot').textContent, 'zero', '{{list.0}}');
 
 	list.set(0, 'even');
-	equal(html.querySelector('.brackets').textContent, 'even', '{{list[0]}} set as list.set(0, even)');
-	equal(html.querySelector('.dot').textContent, 'even', '{{list.0}} set as list.set(0, even)');
+	assert.equal(html.querySelector('.brackets').textContent, 'even', '{{list[0]}} set as list.set(0, even)');
+	assert.equal(html.querySelector('.dot').textContent, 'even', '{{list.0}} set as list.set(0, even)');
 });
 
-QUnit.test("Renders #each live bound `defineList[%index]` data (#180)", function() {
+QUnit.test("Renders #each live bound `defineList[%index]` data (#180)", function(assert) {
 	var list = new DefineList([true, false, true]);
 	var renderer = stache('<form>{{#each list}}<input type="checkbox" value="{{%index}}" class="{{#if list[%index]}}selected{{/if}}" />{{/each}}</form>');
 	var html = renderer({ list: list });
@@ -114,29 +114,29 @@ QUnit.test("Renders #each live bound `defineList[%index]` data (#180)", function
 	//	 <input type="checkbox" value="1" class />
 	//	 <input type="checkbox" value="2" class="selected" />
 	// </form>
-	equal(html.querySelectorAll('input').length, 3, 'three checkboxes');
-	equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
-	equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
-	equal(html.querySelector('[value="2"]').className, 'selected', 'third IS selected');
+	assert.equal(html.querySelectorAll('input').length, 3, 'three checkboxes');
+	assert.equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
+	assert.equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
+	assert.equal(html.querySelector('[value="2"]').className, 'selected', 'third IS selected');
 
 	list.set(0, false);
 	list[1] = true;
 	list[2] = false;
 	list.push(true);
-	equal(html.querySelectorAll('input').length, 4, 'AFTER DATA CHANGES: four checkboxes');
-	equal(html.querySelector('[value="0"]').className, '', 'first NOT selected');
-	equal(html.querySelector('[value="1"]').className, 'selected', 'second IS selected');
-	equal(html.querySelector('[value="2"]').className, '', 'third NOT selected');
-	equal(html.querySelector('[value="3"]').className, 'selected', 'fourth IS selected');
+	assert.equal(html.querySelectorAll('input').length, 4, 'AFTER DATA CHANGES: four checkboxes');
+	assert.equal(html.querySelector('[value="0"]').className, '', 'first NOT selected');
+	assert.equal(html.querySelector('[value="1"]').className, 'selected', 'second IS selected');
+	assert.equal(html.querySelector('[value="2"]').className, '', 'third NOT selected');
+	assert.equal(html.querySelector('[value="3"]').className, 'selected', 'fourth IS selected');
 
 	list.shift();
 	list.pop();
-	equal(html.querySelectorAll('input').length, 2, 'AFTER DATA CHANGES: two checkboxes');
-	equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
-	equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
+	assert.equal(html.querySelectorAll('input').length, 2, 'AFTER DATA CHANGES: two checkboxes');
+	assert.equal(html.querySelector('[value="0"]').className, 'selected', 'first IS selected');
+	assert.equal(html.querySelector('[value="1"]').className, '', 'second NOT selected');
 });
 
-QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
+QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(assert) {
 	var template = stache('<p>{{#each iter}}<span>{{%key}} {{.}}</span>{{/each}}</p>');
 	var div = document.createElement('div');
 
@@ -144,11 +144,11 @@ QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
 	div.appendChild(dom);
 
 	var span = div.getElementsByTagName('span');
-	equal((span[0].innerHTML), 'first justin', 'first');
-	equal((span[1].innerHTML), 'last meyer', 'last');
+	assert.equal((span[0].innerHTML), 'first justin', 'first');
+	assert.equal((span[1].innerHTML), 'last meyer', 'last');
 });
 
-QUnit.test("Stache with single property", function() {
+QUnit.test("Stache with single property", function(assert) {
 	var Typer = define.Constructor({
 		foo: {
 			type: 'string'
@@ -160,12 +160,12 @@ QUnit.test("Stache with single property", function() {
 		foo: 'bar'
 	});
 	var frag = template(t);
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'bar');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'bar');
 	t.foo = "baz";
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'baz');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'baz');
 });
 
-QUnit.test("stache with double property", function() {
+QUnit.test("stache with double property", function(assert) {
 	var nailedIt = 'Nailed it';
 	var Example = define.Constructor({
 		name: {
@@ -201,10 +201,10 @@ QUnit.test("stache with double property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{test.name}}');
 	var frag = template(nested);
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
-QUnit.test("Stache with one nested property", function() {
+QUnit.test("Stache with one nested property", function(assert) {
 	var nailedIt = 'Nailed it';
 	var Example = define.Constructor({
 		name: {
@@ -240,10 +240,10 @@ QUnit.test("Stache with one nested property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{examples.one.name}}');
 	var frag = template(nested);
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
-QUnit.test("Stache with two nested property", function() {
+QUnit.test("Stache with two nested property", function(assert) {
 	var nailedIt = 'Nailed it';
 	var Example = define.Constructor({
 		name: {
@@ -279,10 +279,10 @@ QUnit.test("Stache with two nested property", function() {
 	var nested = new NestedMap();
 	var template = stache('{{examples.two.deep.name}}');
 	var frag = template(nested);
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, nailedIt);
 });
 
-test('list.sort a list of DefineMaps', function(){
+QUnit.test('list.sort a list of DefineMaps', function(assert) {
 
 	var Account = DefineMap.extend({
 		name: "string",
@@ -318,7 +318,7 @@ test('list.sort a list of DefineMaps', function(){
 	accounts.limit = 3;
 
 	var template = stache('{{#each accounts}}{{name}},{{/each}}')({accounts: accounts});
-	equal(template.textContent, "Savings,Checking,Kids Savings,", "template rendered properly.");
+	assert.equal(template.textContent, "Savings,Checking,Kids Savings,", "template rendered properly.");
 
 	accounts.sort(function(a, b){
 		if (a.name < b.name) {
@@ -329,8 +329,8 @@ test('list.sort a list of DefineMaps', function(){
 			return 0;
 		}
 	});
-	equal(accounts.length, 3);
-	equal(template.textContent, "Checking,Kids Savings,Savings,", "template updated properly.");
+	assert.equal(accounts.length, 3);
+	assert.equal(template.textContent, "Checking,Kids Savings,Savings,", "template updated properly.");
 
 	// Try sorting in reverse on the dynamic `slug` property
 	accounts.sort(function(a, b){
@@ -343,7 +343,7 @@ test('list.sort a list of DefineMaps', function(){
 		}
 	});
 
-	equal(accounts.length, 3);
-	equal(accounts.limit, 3, "expandos still present after sorting/replacing.");
-	equal(template.textContent, "Savings,Kids Savings,Checking,", "template updated properly.");
+	assert.equal(accounts.length, 3);
+	assert.equal(accounts.limit, 3, "expandos still present after sorting/replacing.");
+	assert.equal(template.textContent, "Savings,Kids Savings,Checking,", "template updated properly.");
 });

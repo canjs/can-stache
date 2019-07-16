@@ -11,7 +11,7 @@ var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache #each helper");
 
-test("each with sort (#498)", function(){
+QUnit.test("each with sort (#498)", function(assert) {
     var template = stache("<div>{{#each(list)}}<p>{{.}}</p>{{/each}}</div>");
     var list = new DefineList([34234,2,1,3]);
 
@@ -24,11 +24,11 @@ test("each with sort (#498)", function(){
         return +p.firstChild.nodeValue;
     });
 
-    deepEqual(order, [1,2,3,34234]);
+    assert.deepEqual(order, [1,2,3,34234]);
 });
 
 
-QUnit.test("#each throws error (can-stache-bindings#444)", function(){
+QUnit.test("#each throws error (can-stache-bindings#444)", function(assert) {
     var list = new DefineList([
         {name: 'A'},
         {name: 'B'},
@@ -61,10 +61,11 @@ QUnit.test("#each throws error (can-stache-bindings#444)", function(){
     }, data, []);
     queues.batch.stop();
 
-    QUnit.ok(true, "no errors");
+    assert.ok(true, "no errors");
 });
 
-QUnit.asyncTest("if within an each", function(){
+QUnit.test("if within an each", function(assert) {
+    var ready = assert.async();
     var template = stache("<div>{{# each(sortedMonthlyOSProjects ) }}{{# if(val) }}<span>Hi</span>{{/ if }}{{/ each }}</div>");
 
     var osProject1 = {
@@ -92,16 +93,15 @@ QUnit.asyncTest("if within an each", function(){
     setTimeout(function(){
 
         osProject1.val.set(true);
-        QUnit.ok(true,"no errors");
-        QUnit.start();
+        assert.ok(true,"no errors");
+        ready();
     },20);
 
 
     //osProject2.val.set(false);
-
 });
 
-test("changing the list works with each", function () {
+QUnit.test("changing the list works with each", function(assert) {
 
     var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
 
@@ -110,18 +110,18 @@ test("changing the list works with each", function () {
     });
 
     var tpl = template(map).firstChild;
-    equal(tpl.getElementsByTagName('li').length, 1, "one li");
+    assert.equal(tpl.getElementsByTagName('li').length, 1, "one li");
     var fooLi = tpl.getElementsByTagName('li')[0];
 
     map.set("list", new DefineList(["foo", "car"]));
 
-    QUnit.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
-    QUnit.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
+    assert.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
+    assert.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
 
 });
 
 
-test("changing the list from undefined to defined", function () {
+QUnit.test("changing the list from undefined to defined", function(assert) {
 
     var template = stache("<ul>{{#each list}}<li>.</li>{{/each}}</ul>");
 
@@ -130,17 +130,17 @@ test("changing the list from undefined to defined", function () {
     });
 
     var tpl = template(map).firstChild;
-    equal(tpl.getElementsByTagName('li').length, 0, "no li");
+    assert.equal(tpl.getElementsByTagName('li').length, 0, "no li");
 
     var list = new DefineList(["foo", "car"]);
     map.set("list", list);
 
-    QUnit.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
+    assert.equal(tpl.getElementsByTagName('li').length, 2, "two lis");
 
     var fooLi = tpl.getElementsByTagName('li')[1];
 
     list.shift();
-    QUnit.equal(tpl.getElementsByTagName('li').length, 1, "one lis");
-    QUnit.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
+    assert.equal(tpl.getElementsByTagName('li').length, 1, "one lis");
+    assert.equal(fooLi, tpl.getElementsByTagName('li')[0], "retains the same li");
 
 });

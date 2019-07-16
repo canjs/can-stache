@@ -11,34 +11,34 @@ var testHelpers = require('can-test-helpers');
 
 QUnit.module("can-stache/src/expression");
 
-QUnit.test("expression.tokenize", function(){
+QUnit.test("expression.tokenize", function(assert) {
 	var literals = "'quote' \"QUOTE\" 1 undefined null true false 0.1";
 	var res = expression.tokenize(literals);
 
-	deepEqual(res, literals.split(" "));
+	assert.deepEqual(res, literals.split(" "));
 
 	var keys = "key foo.bar foo@bar %foo *foo foo/bar";
 	res = expression.tokenize(keys);
-	deepEqual(res, keys.split(" "));
+	assert.deepEqual(res, keys.split(" "));
 
 	var syntax = "( ) , ~ =";
 	res = expression.tokenize(syntax);
-	deepEqual(res, syntax.split(" "));
+	assert.deepEqual(res, syntax.split(" "));
 
 	var curly = "{{ }}";
 	res = expression.tokenize(curly);
-	deepEqual(res, []);
+	assert.deepEqual(res, []);
 
 	var bracket = "[foo] bar [baz]";
 	res = expression.tokenize(bracket);
-	deepEqual(res, ["[", "foo", "]", " ", "bar", " ", "[", "baz", "]", " "]);
+	assert.deepEqual(res, ["[", "foo", "]", " ", "bar", " ", "[", "baz", "]", " "]);
 
 });
 
-test("expression.ast - helper followed by hash", function(){
+QUnit.test("expression.ast - helper followed by hash", function(assert) {
 	var ast = expression.ast("print_hash prop=own_prop");
 
-	deepEqual(ast, {
+	assert.deepEqual(ast, {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -60,10 +60,10 @@ test("expression.ast - helper followed by hash", function(){
 
 });
 
-test("expression.ast - root hash expressions work", function(){
+QUnit.test("expression.ast - root hash expressions work", function(assert) {
 	var ast = expression.ast("prop=own_prop");
 
-	deepEqual(ast, {
+	assert.deepEqual(ast, {
 		type: "Hashes",
 		children: [
 			{
@@ -76,10 +76,10 @@ test("expression.ast - root hash expressions work", function(){
 
 });
 
-test("expression.ast - nested call expressions", function(){
+QUnit.test("expression.ast - nested call expressions", function(assert) {
 	var ast = expression.ast("foo()()");
 
-	deepEqual(ast, {
+	assert.deepEqual(ast, {
 		type: "Call",
 		method: {
 			type: "Call",
@@ -89,7 +89,7 @@ test("expression.ast - nested call expressions", function(){
 
 });
 
-test("expression.ast - everything", function(){
+QUnit.test("expression.ast - everything", function(assert) {
 	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var helperBCall = {
@@ -125,7 +125,7 @@ test("expression.ast - everything", function(){
 		]
 	};
 
-	deepEqual(ast, {
+	assert.deepEqual(ast, {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -156,7 +156,7 @@ test("expression.ast - everything", function(){
 	});
 });
 
-test("expression.parse - everything", function(){
+QUnit.test("expression.parse - everything", function(assert) {
 
 	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested.prop() outerPropA=helperC(2,valueB)");
 
@@ -203,22 +203,22 @@ test("expression.parse - everything", function(){
 		}
 	);
 
-	deepEqual(callHelperB, exprData.argExprs[0].rootExpr, "call helper b");
+	assert.deepEqual(callHelperB, exprData.argExprs[0].rootExpr, "call helper b");
 
-	deepEqual(callHelperC, exprData.hashExprs.outerPropA, "helperC call");
+	assert.deepEqual(callHelperC, exprData.hashExprs.outerPropA, "helperC call");
 
-	deepEqual(callHelperBdotZed, exprData.argExprs[0], "call helper b.zed");
+	assert.deepEqual(callHelperBdotZed, exprData.argExprs[0], "call helper b.zed");
 
 	var expectedArgs = [callHelperBdotZed, def, callNestedProp];
 	canReflect.each(exprData.argExprs, function(arg, i){
-		deepEqual(arg, expectedArgs[i], "helperA arg["+i+"]");
+		assert.deepEqual(arg, expectedArgs[i], "helperA arg["+i+"]");
 	});
 
-	deepEqual(exprData, callHelperA, "full thing");
+	assert.deepEqual(exprData, callHelperA, "full thing");
 });
 
-test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
-		 function(){
+QUnit.test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
+		 function(assert) {
 
 	var exprData = expression.parse("withArgs content=content", {
 		lookupRule: "method",
@@ -230,14 +230,14 @@ test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
 		content: valueContent
 	}));
 
-	equal(exprData.argExprs.length, 1, "there is one arg");
-	deepEqual(exprData.argExprs[0], hashArg, "correct hashes");
+	assert.equal(exprData.argExprs.length, 1, "there is one arg");
+	assert.deepEqual(exprData.argExprs[0], hashArg, "correct hashes");
 });
 
-test("expression.parse nested Call expressions", function(){
-	QUnit.expect(7);
+QUnit.test("expression.parse nested Call expressions", function(assert) {
+	assert.expect(7);
 
-	deepEqual(expression.parse("foo()()"),
+	assert.deepEqual(expression.parse("foo()()"),
 		new expression.Call(
 			new expression.Call(
 				new expression.Lookup('@foo'),
@@ -249,7 +249,7 @@ test("expression.parse nested Call expressions", function(){
 		),
 		"Returned the correct expression"
 	);
-	
+
 	var expr = new expression.Call(
 		new expression.Call(
 			new expression.Lookup('@bar'),
@@ -263,10 +263,10 @@ test("expression.parse nested Call expressions", function(){
 		new Scope(
 			new SimpleMap({
 				bar: function(outter) {
-					equal(outter, 1, "Outter called with correct value");
+					assert.equal(outter, 1, "Outter called with correct value");
 
 					return function (inner) {
-						equal(inner, 2, "Inner called with correct value");
+						assert.equal(inner, 2, "Inner called with correct value");
 
 						return 'Inner!';
 					};
@@ -274,7 +274,7 @@ test("expression.parse nested Call expressions", function(){
 			})
 		)
 	);
-	equal(compute.get(), "Inner!", "Got the inner value");
+	assert.equal(compute.get(), "Inner!", "Got the inner value");
 
 	expr = new expression.Call(
 		new expression.Call(
@@ -289,10 +289,10 @@ test("expression.parse nested Call expressions", function(){
 		new Scope(
 			new SimpleMap({
 				foobar: function(outter) {
-					equal(outter, 'Matt', "Outter called with correct value");
+					assert.equal(outter, 'Matt', "Outter called with correct value");
 
 					return function (inner) {
-						equal(inner, 'Chaffe', "Inner called with correct value");
+						assert.equal(inner, 'Chaffe', "Inner called with correct value");
 
 						return 'Inner!';
 					};
@@ -302,18 +302,18 @@ test("expression.parse nested Call expressions", function(){
 			})
 		)
 	);
-	equal(compute.get(), "Inner!", "Got the inner value");
+	assert.equal(compute.get(), "Inner!", "Got the inner value");
 });
 
-test("numeric expression.Literal", function(){
+QUnit.test("numeric expression.Literal", function(assert) {
 	var exprData = expression.parse("3");
 
 	var result = new expression.Literal(3);
-	deepEqual( exprData, result);
+	assert.deepEqual( exprData, result);
 
 });
 
-test("expression.Helper:value non-observable values", function(){
+QUnit.test("expression.Helper:value non-observable values", function(assert) {
 	// {{fullName 'marshall' 'thompson'}}
 
 	var scope = new Scope({
@@ -330,14 +330,14 @@ test("expression.Helper:value non-observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}),  {});
 
-	equal(expression.toComputeOrValue(result)(), "marshall thompson");
+	assert.equal(expression.toComputeOrValue(result)(), "marshall thompson");
 });
 
-test("expression.Helper:value observable values", function(){
+QUnit.test("expression.Helper:value observable values", function(assert) {
 	// {{fullName first 'thompson'}}
 	var obj = {
 		fullName: function(first, last){
-			QUnit.equal(this, obj, "this is right");
+			assert.equal(this, obj, "this is right");
 			return first()+" "+last;
 		},
 		first: new SimpleObservable("marshall")
@@ -352,10 +352,10 @@ test("expression.Helper:value observable values", function(){
 
 	var result = callFullName.value(scope, new Scope({}) );
 
-	equal(result(), "marshall thompson");
+	assert.equal(result(), "marshall thompson");
 });
 
-test("methods can return values (#1887)", function(){
+QUnit.test("methods can return values (#1887)", function(assert) {
 	var MyMap = SimpleMap.extend({
 		getSomething: function(arg){
 			return this.attr("foo") + arg();
@@ -373,10 +373,10 @@ test("methods can return values (#1887)", function(){
 
 	var result = callGetSomething.value(scope, new Scope({}), {asCompute: true});
 
-	equal(result(), 5);
+	assert.equal(result(), 5);
 });
 
-test("methods don't update correctly (#1891)", function(){
+QUnit.test("methods don't update correctly (#1891)", function(assert) {
 	var map = new SimpleMap({
 	  num: 1
 	});
@@ -400,11 +400,11 @@ test("methods don't update correctly (#1891)", function(){
 	map.runTest();
 
 	var func = canReflect.getValue( num2 );
-	equal( func() , 4, "num2 updated correctly");
+	assert.equal( func() , 4, "num2 updated correctly");
 
 });
 
-test("call expressions called with different scopes give different results (#1791)", function(){
+QUnit.test("call expressions called with different scopes give different results (#1791)", function(assert) {
 	var exprData = expression.parse("doSomething(number)");
 
 	var res = exprData.value(new Scope({
@@ -414,7 +414,7 @@ test("call expressions called with different scopes give different results (#179
 		number: new SimpleObservable(2)
 	}));
 
-	equal( res.get(), 4);
+	assert.equal( res.get(), 4);
 
 	res = exprData.value(new Scope({
 		doSomething: function(num){
@@ -423,10 +423,11 @@ test("call expressions called with different scopes give different results (#179
 		number: new SimpleObservable(4)
 	}));
 
-	equal( res.get(), 12);
+	assert.equal( res.get(), 12);
 });
 
-test("call expressions called with different contexts (#616)", 1, function(){
+QUnit.test("call expressions called with different contexts (#616)", function(assert) {
+	assert.expect(1);
 	var exprData = expression.parse("this.foo.doSomething()");
 	var doSomething = function(){
 		return this.value;
@@ -442,7 +443,7 @@ test("call expressions called with different contexts (#616)", 1, function(){
 
 
 	canReflect.onValue(res, function(value){
-		QUnit.equal(value, "B");
+		assert.equal(value, "B");
 	});
 
 	context.set("foo",{
@@ -451,53 +452,53 @@ test("call expressions called with different contexts (#616)", 1, function(){
 	});
 });
 
-test("convertKeyToLookup", function(){
+QUnit.test("convertKeyToLookup", function(assert) {
 
-	equal( expression.convertKeyToLookup("../foo"), "../@foo" );
-	equal( expression.convertKeyToLookup("foo"), "@foo" );
-	equal( expression.convertKeyToLookup(".foo"), "@foo" );
-	equal( expression.convertKeyToLookup("./foo"), "./@foo" );
-	equal( expression.convertKeyToLookup("foo.bar"), "foo@bar" );
+	assert.equal( expression.convertKeyToLookup("../foo"), "../@foo" );
+	assert.equal( expression.convertKeyToLookup("foo"), "@foo" );
+	assert.equal( expression.convertKeyToLookup(".foo"), "@foo" );
+	assert.equal( expression.convertKeyToLookup("./foo"), "./@foo" );
+	assert.equal( expression.convertKeyToLookup("foo.bar"), "foo@bar" );
 
 });
 
 
-test("expression.ast - [] operator", function(){
-	deepEqual(expression.ast("['propName']"), {
+QUnit.test("expression.ast - [] operator", function(assert) {
+	assert.deepEqual(expression.ast("['propName']"), {
 		type: "Bracket",
 		children: [{type: "Literal", value: "propName"}]
 	}, "['propName'] valid");
 
-	deepEqual(expression.ast("[propName]"), {
+	assert.deepEqual(expression.ast("[propName]"), {
     	type: "Bracket",
     	children: [{type: "Lookup", key: "propName"}]
 	}, "[propName] valid");
 
-	deepEqual(expression.ast("foo['bar']"), {
+	assert.deepEqual(expression.ast("foo['bar']"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Literal", value: "bar"}]
 	}, "foo['bar'] valid");
 
-	deepEqual(expression.ast("foo[bar]"), {
+	assert.deepEqual(expression.ast("foo[bar]"), {
 	    type: "Bracket",
 			root: {type: "Lookup", key: "foo"},
 	    children: [{type: "Lookup", key: "bar"}]
 	}, "foo[bar] valid");
 
-	deepEqual(expression.ast("foo[bar()]"), {
+	assert.deepEqual(expression.ast("foo[bar()]"), {
     type: "Bracket",
 		root: {type: "Lookup", key: "foo"},
     children: [{type: "Call", method: {key: "@bar", type: "Lookup" }}]
 	}, "foo[bar()] valid");
 
-	deepEqual(expression.ast("foo()[bar]"), {
+	assert.deepEqual(expression.ast("foo()[bar]"), {
 		type: "Bracket",
 		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
 		children: [{type: "Lookup", key: "bar"}]
 	}, "foo()[bar] valid");
 
-	deepEqual(expression.ast("foo [bar]"), {
+	assert.deepEqual(expression.ast("foo [bar]"), {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -509,7 +510,7 @@ test("expression.ast - [] operator", function(){
 		}]
 	}, "foo [bar] valid");
 
-	deepEqual(expression.ast("eq foo['bar'] 'foo'"), {
+	assert.deepEqual(expression.ast("eq foo['bar'] 'foo'"), {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -528,7 +529,7 @@ test("expression.ast - [] operator", function(){
 	"eq foo['bar'] 'foo' valid"
 	);
 
-	deepEqual(expression.ast("eq foo[bar] foo"), {
+	assert.deepEqual(expression.ast("eq foo[bar] foo"), {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -545,7 +546,7 @@ test("expression.ast - [] operator", function(){
 		}]
 	}, "eq foo[bar] foo valid");
 
-	deepEqual(expression.ast("foo[bar][baz]"), {
+	assert.deepEqual(expression.ast("foo[bar][baz]"), {
 		type: "Bracket",
 		root: {
 				type: "Bracket",
@@ -555,7 +556,7 @@ test("expression.ast - [] operator", function(){
 		children: [{type: "Lookup", key: "baz"}]
 	}, "foo[bar][baz] valid");
 
-	deepEqual(expression.ast("foo[bar].baz"), {
+	assert.deepEqual(expression.ast("foo[bar].baz"), {
 		type: "Lookup",
 		key: "baz",
 		root: {
@@ -565,7 +566,7 @@ test("expression.ast - [] operator", function(){
 		}
 	}, "foo[bar].baz");
 
-	deepEqual(expression.ast("eq foo[bar].baz xyz"), {
+	assert.deepEqual(expression.ast("eq foo[bar].baz xyz"), {
 		type: "Helper",
 		method: {
 			type: "Lookup",
@@ -587,22 +588,22 @@ test("expression.ast - [] operator", function(){
 	}, "eq foo[bar].baz xyz");
 });
 
-test("expression.parse - [] operator", function(){
-	deepEqual(expression.parse("['propName']"),
+QUnit.test("expression.parse - [] operator", function(assert) {
+	assert.deepEqual(expression.parse("['propName']"),
 		new expression.Bracket(
 			new expression.Literal('propName')
 		),
 		"['propName']"
 	);
 
-	deepEqual(expression.parse("[propName]"),
+	assert.deepEqual(expression.parse("[propName]"),
 		new expression.Bracket(
 			new expression.Lookup('propName')
 		),
 		"[propName]"
 	);
 
-	deepEqual(expression.parse("foo['bar']"),
+	assert.deepEqual(expression.parse("foo['bar']"),
 		new expression.Bracket(
 			new expression.Literal('bar'),
 			new expression.Lookup('foo'),
@@ -611,7 +612,7 @@ test("expression.parse - [] operator", function(){
 		"foo['bar']"
 	);
 
-	deepEqual(expression.parse("foo[bar]"),
+	assert.deepEqual(expression.parse("foo[bar]"),
 		new expression.Bracket(
 			new expression.Lookup('bar'),
 			new expression.Lookup('foo'),
@@ -620,7 +621,7 @@ test("expression.parse - [] operator", function(){
 		"foo[bar]"
 	);
 
-	deepEqual(expression.parse("foo()[bar]"),
+	assert.deepEqual(expression.parse("foo()[bar]"),
 		new expression.Bracket(
 			new expression.Lookup('bar'),
 			new expression.Call(
@@ -633,7 +634,7 @@ test("expression.parse - [] operator", function(){
 	);
 
 	var exprData = expression.parse("foo[bar()]");
-	deepEqual(exprData,
+	assert.deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(
 				new expression.Lookup('@bar'),
@@ -646,7 +647,7 @@ test("expression.parse - [] operator", function(){
 	);
 
 	exprData = expression.parse("foo()[bar()]");
-	deepEqual(exprData,
+	assert.deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(
 				new expression.Lookup("@bar"),
@@ -662,8 +663,8 @@ test("expression.parse - [] operator", function(){
 	);
 
 	exprData = expression.parse("equal(foo(), [bar])");
-	equal(exprData.argExprs.length, 2, "there are two arguments");
-	deepEqual(exprData,
+	assert.equal(exprData.argExprs.length, 2, "there are two arguments");
+	assert.deepEqual(exprData,
 		new expression.Call(
 			new expression.Lookup("@equal"),
 			[
@@ -679,7 +680,7 @@ test("expression.parse - [] operator", function(){
 	);
 });
 
-test("Bracket expression", function(){
+QUnit.test("Bracket expression", function(assert) {
 	// ["bar"]
 	var expr = new expression.Bracket(
 		new expression.Literal("bar")
@@ -689,7 +690,7 @@ test("Bracket expression", function(){
 			new SimpleMap({bar: "name"})
 		)
 	);
-	equal(compute.get(), "name");
+	assert.equal(compute.get(), "name");
 
 	// [bar]
 	expr = new expression.Bracket(
@@ -700,7 +701,7 @@ test("Bracket expression", function(){
 			new SimpleMap({bar: "name", name: "Kevin"})
 		)
 	);
-	equal(compute.get(), "Kevin");
+	assert.equal(compute.get(), "Kevin");
 
 	// foo["bar"]
 	expr = new expression.Bracket(
@@ -712,7 +713,7 @@ test("Bracket expression", function(){
 			new SimpleMap({foo: {bar: "name"}})
 		)
 	);
-	equal(compute.get(), "name");
+	assert.equal(compute.get(), "name");
 
 	// foo["bar.baz"]
 	expr = new expression.Bracket(
@@ -724,7 +725,7 @@ test("Bracket expression", function(){
 			new SimpleMap({foo: {"bar.baz": "name"}})
 		)
 	);
-	equal(compute.get(), "name",'foo["bar.baz"]');
+	assert.equal(compute.get(), "name",'foo["bar.baz"]');
 
 	// foo["bar.baz.quz"]
 	expr = new expression.Bracket(
@@ -736,7 +737,7 @@ test("Bracket expression", function(){
 			new SimpleMap({foo: {"bar.baz.quz": "name"}})
 		)
 	);
-	equal(compute.get(), "name",'foo["bar.baz.quz"]');
+	assert.equal(compute.get(), "name",'foo["bar.baz.quz"]');
 
 	// foo[bar]
 	expr = new expression.Bracket(
@@ -749,10 +750,10 @@ test("Bracket expression", function(){
 			state
 		)
 	);
-	equal(compute.get(), "Kevin", "foo[bar] get");
+	assert.equal(compute.get(), "Kevin", "foo[bar] get");
 
 	compute.set("Curtis");
-	equal(state.get("foo").get("name"), "Curtis");
+	assert.equal(state.get("foo").get("name"), "Curtis");
 
 	// foo()[bar]
 	expr = new expression.Bracket(
@@ -768,7 +769,7 @@ test("Bracket expression", function(){
 			new SimpleMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
 		)
 	);
-	equal(compute.get(), "Kevin");
+	assert.equal(compute.get(), "Kevin");
 
 	// foo[bar()]
 	expr = new expression.Bracket(
@@ -787,7 +788,7 @@ test("Bracket expression", function(){
 			})
 		)
 	);
-	equal(compute.get(), "Kevin");
+	assert.equal(compute.get(), "Kevin");
 
 	// foo()[bar()]
 	expr = new expression.Bracket(
@@ -810,7 +811,7 @@ test("Bracket expression", function(){
 			})
 		)
 	);
-	equal(compute.get(), "Kevin");
+	assert.equal(compute.get(), "Kevin");
 
 	// foo([bar])
 	expr = new expression.Call(
@@ -831,10 +832,10 @@ test("Bracket expression", function(){
 			})
 		)
 	);
-	equal(compute.get(), "Kevin!");
+	assert.equal(compute.get(), "Kevin!");
 });
 
-QUnit.test("registerConverter helpers push and pull correct values", function () {
+QUnit.test("registerConverter helpers push and pull correct values", function(assert) {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -856,14 +857,14 @@ QUnit.test("registerConverter helpers push and pull correct values", function ()
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute.get(), 'ff', 'Converter called');
+	assert.equal(twoWayCompute.get(), 'ff', 'Converter called');
 	twoWayCompute.set('7f');
-	equal(data.get("observeVal"), 127, 'push converter called');
+	assert.equal(data.get("observeVal"), 127, 'push converter called');
 });
 
 
 
-QUnit.test("registerConverter helpers push and pull multiple values", function () {
+QUnit.test("registerConverter helpers push and pull multiple values", function(assert) {
 
 	helpers.registerConverter('isInList', {
 		get: function(valCompute, list) {
@@ -887,12 +888,12 @@ QUnit.test("registerConverter helpers push and pull multiple values", function (
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute.get(), false, 'Converter called');
+	assert.equal(twoWayCompute.get(), false, 'Converter called');
 	twoWayCompute.set(5);
-	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
+	assert.deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
 });
 
-QUnit.test("registerConverter helpers are chainable", function () {
+QUnit.test("registerConverter helpers are chainable", function(assert) {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -923,16 +924,16 @@ QUnit.test("registerConverter helpers are chainable", function () {
 	//var renderer = stache('<input type="text" bound-attr="numberToHex(~observeVal)" />');
 
 
-	equal(twoWayCompute.get(), 'FF', 'Converter called');
+	assert.equal(twoWayCompute.get(), 'FF', 'Converter called');
 	twoWayCompute.set('7F');
-	equal(data.attr("observeVal"), 127, 'push converter called');
+	assert.equal(data.attr("observeVal"), 127, 'push converter called');
 });
 
-test('foo().bar', function() {
+QUnit.test('foo().bar', function(assert) {
 	// expression.ast
 	var ast4 = expression.ast("foo().bar");
 
-	deepEqual(ast4, {
+	assert.deepEqual(ast4, {
 		type: "Lookup",
 		key: "bar",
 		root: {type: "Call", method: {key: "@foo", type: "Lookup" } }
@@ -940,7 +941,7 @@ test('foo().bar', function() {
 
 	// expression.parse
 	var exprData = expression.parse("foo().bar");
-	deepEqual(exprData,
+	assert.deepEqual(exprData,
 		new expression.Lookup(
 			"bar",
 			new expression.Call( new expression.Lookup("@foo"), [], {} )
@@ -957,10 +958,10 @@ test('foo().bar', function() {
 			new SimpleMap({foo: function() { return {bar: "Kevin"}; }})
 		)
 	);
-	equal(compute.get(), "Kevin");
+	assert.equal(compute.get(), "Kevin");
 });
 
-test("Helper with a ~ key operator (#112)", function() {
+QUnit.test("Helper with a ~ key operator (#112)", function(assert) {
 	var ast = expression.ast('each ~foo');
 
 	var expected = {
@@ -969,11 +970,11 @@ test("Helper with a ~ key operator (#112)", function() {
 		children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "foo"} ]}]
 	};
 
-	QUnit.deepEqual(ast, expected);
+	assert.deepEqual(ast, expected);
 
 });
 
-test("ast with [double][brackets] or [bracket].prop (#207)", function(){
+QUnit.test("ast with [double][brackets] or [bracket].prop (#207)", function(assert) {
 
 	var ast = expression.ast("test['foo'][0]");
 
@@ -987,7 +988,7 @@ test("ast with [double][brackets] or [bracket].prop (#207)", function(){
 		}
 	};
 
-	QUnit.deepEqual(ast, expected);
+	assert.deepEqual(ast, expected);
 
 	ast = expression.ast("test['foo'].zed");
 
@@ -1002,7 +1003,7 @@ test("ast with [double][brackets] or [bracket].prop (#207)", function(){
 	};
 
 
-	QUnit.deepEqual(ast, expected);
+	assert.deepEqual(ast, expected);
 
 	ast = expression.ast("test['foo'].zed['bar']");
 
@@ -1021,25 +1022,25 @@ test("ast with [double][brackets] or [bracket].prop (#207)", function(){
 	};
 
 
-	QUnit.deepEqual(ast, expected);
+	assert.deepEqual(ast, expected);
 
 
 });
 
-testHelpers.dev.devOnlyTest("All expression types have sourceText on prototype", function(){
+testHelpers.dev.devOnlyTest("All expression types have sourceText on prototype", function (assert){
 	["Arg", "Bracket", "Call",  "Hashes", "Helper", "Literal"].forEach(function(name){
-		QUnit.ok(typeof expression[name].prototype.sourceText === "function", name);
+		assert.ok(typeof expression[name].prototype.sourceText === "function", name);
 	});
 });
 
 
-testHelpers.dev.devOnlyTest("expression.sourceText - everything", function(){
+testHelpers.dev.devOnlyTest("expression.sourceText - everything", function (assert){
 	var source = "helperA helperB(1,valueA,propA=~valueB propC=2,1).zed \"def\" nested.prop() outerPropA=helperC(2,valueB)";
 	var exprData = expression.parse(source);
-	QUnit.equal(exprData.sourceText(),source);
+	assert.equal(exprData.sourceText(),source);
 });
 
-test('Call Expressions can return functions instead of Observations', function() {
+QUnit.test('Call Expressions can return functions instead of Observations', function(assert) {
 	var data = new SimpleMap({
 		name: "kevin",
 		foo: function() {
@@ -1053,11 +1054,11 @@ test('Call Expressions can return functions instead of Observations', function()
 		expr.value( new Scope( data ) )
 	);
 
-	equal(canReflect.getValue(val.value), "kevin", "got correct initial value");
+	assert.equal(canReflect.getValue(val.value), "kevin", "got correct initial value");
 
-	ok(canReflect.isObservableLike(val.value), "value is observable by default");
+	assert.ok(canReflect.isObservableLike(val.value), "value is observable by default");
 	canReflect.onValue(val.value, function(newVal) {
-		equal(newVal, "mark", "got correct changed value");
+		assert.equal(newVal, "mark", "got correct changed value");
 	});
 
 	data.set("name", "mark");
@@ -1068,8 +1069,8 @@ test('Call Expressions can return functions instead of Observations', function()
 		})
 	);
 
-	equal(canReflect.getValue(nonBindingVal.value), "mark", "got correct initial value");
-	ok(!canReflect.isObservableLike(nonBindingVal.value), "value is not observable when doNotWrapInObservation is true");
+	assert.equal(canReflect.getValue(nonBindingVal.value), "mark", "got correct initial value");
+	assert.ok(!canReflect.isObservableLike(nonBindingVal.value), "value is not observable when doNotWrapInObservation is true");
 });
 
 QUnit.test("negative literals ast", function(assert) {
@@ -1086,7 +1087,7 @@ QUnit.test("negative literals ast", function(assert) {
 
 
 
-testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads", function () {
+testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads", function (assert) {
 	var teardown = testHelpers.dev.willWarn(/Unable to find key/);
 
 	var exprData = expression.parse("method().toFixed(1)",{baseMethodType: "Call"});
@@ -1098,19 +1099,19 @@ testHelpers.dev.devOnlyTest("don't warn on perfectly fine function result reads"
 	});
 
 	var result = exprData.value(scope);
-	QUnit.equal( result.get(), "1.1" , "got value");
+	assert.equal( result.get(), "1.1" , "got value");
 
 
-	QUnit.equal(teardown(), 0, 'got expected warning');
+	assert.equal(teardown(), 0, 'got expected warning');
 });
 
-test("let foo=bar,zed=ted", function(){
+QUnit.test("let foo=bar,zed=ted", function(assert) {
 	//var helperAst = expression.ast("let foo=bar zed=ted");
 	var commaHelperAst = expression.ast("let foo=bar,zed=ted");
 
-	//QUnit.deepEqual( commaHelperAst, helperAst, "commas work in helpers");
+	//assert.deepEqual( commaHelperAst, helperAst, "commas work in helpers");
 
-	QUnit.deepEqual(commaHelperAst, {
+	assert.deepEqual(commaHelperAst, {
 		"type": "Helper",
 		"method": { "type": "Lookup", "key": "let" },
 		"children": [
@@ -1134,7 +1135,7 @@ test("let foo=bar,zed=ted", function(){
 });
 
 
-test("double [] in a function", function(){
+QUnit.test("double [] in a function", function(assert) {
 	var ast = expression.ast("log(thing['prop'][0])");
 
 	var logAst = {
@@ -1155,5 +1156,5 @@ test("double [] in a function", function(){
 			}
 		]
 	};
-	QUnit.deepEqual(ast, logAst);
+	assert.deepEqual(ast, logAst);
 });

@@ -12,7 +12,7 @@ require("./-portal");
 
 QUnit.module("can-stache #portal helper");
 
-test("basics", function(){
+QUnit.test("basics", function(assert) {
 	var el = document.createElement("div");
 	var template = stache("{{#portal(root)}}hello {{name}}{{/portal}}");
 	var vm = new DefineMap({name: "Matthew", root: el});
@@ -21,13 +21,13 @@ test("basics", function(){
 
 	var cleaned = stacheTestHelpers.cloneAndClean(el);
 
-	equal(cleaned.firstChild.nextSibling.nodeValue, "Matthew");
+	assert.equal(cleaned.firstChild.nextSibling.nodeValue, "Matthew");
 
 	vm.name ="Wilbur";
-	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Wilbur");
+	assert.equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Wilbur");
 });
 
-test("element is observable", function(){
+QUnit.test("element is observable", function(assert) {
 	var el = document.createElement("div");
 	var template = stache("{{#portal(root)}}{{name}}{{/}}");
 	var vm = new DefineMap({name: "Matthew", root: null});
@@ -35,10 +35,10 @@ test("element is observable", function(){
 	template(vm);
 
 	vm.root = el;
-	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
+	assert.equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
 });
 
-test("element changes", function() {
+QUnit.test("element changes", function(assert) {
 	var one = document.createElement("div");
 	var two = document.createElement("div");
 
@@ -46,14 +46,14 @@ test("element changes", function() {
 	var vm = new DefineMap({name: "Matthew", root: one});
 
 	template(vm);
-	equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
+	assert.equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
 
 	vm.root = two;
-	equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
-	equal(one.firstChild, null, "One had its children removed");
+	assert.equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
+	assert.equal(one.firstChild, null, "One had its children removed");
 });
 
-test("tears down when the element is removed", function() {
+QUnit.test("tears down when the element is removed", function(assert) {
 	var doc = document.implementation.createHTMLDocument("test");
 	globals.setKeyValue("document", doc);
 
@@ -64,22 +64,22 @@ test("tears down when the element is removed", function() {
 	var vm = new DefineMap({name: "Matthew", root: el});
 
 	template(vm);
-	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
-
+	assert.equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Matthew");
+	var done = assert.async();
 	domMutate.onNodeRemoved(el, function() {
 		// parent nodes removed is always called first ... this fixes it
 		setTimeout(function(){
-			QUnit.equal( vm[canSymbol.for("can.meta")].handlers.get(["name"]).length, 0, "no handlers");
-			start();
+			assert.equal( vm[canSymbol.for("can.meta")].handlers.get(["name"]).length, 0, "no handlers");
+			done();
 		},1);
 
 	});
 
-	stop();
+
 	domMutateNode.removeChild.call(doc.body, el);
 });
 
-test("conditionally rendering a portal", function() {
+QUnit.test("conditionally rendering a portal", function(assert) {
 	var one = document.createElement("div");
 	var two = document.createElement("span");
 
@@ -89,26 +89,26 @@ test("conditionally rendering a portal", function() {
 	var vm = new DefineMap({page: "one", name: "Matthew", one: one, two: two});
 
 	template(vm);
-	equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
-	equal(stacheTestHelpers.cloneAndClean(two).firstChild, null, "nothing rendered to two");
+	assert.equal(stacheTestHelpers.cloneAndClean(one).firstChild.nodeValue, "Matthew");
+	assert.equal(stacheTestHelpers.cloneAndClean(two).firstChild, null, "nothing rendered to two");
 
 	vm.page = "two";
-	equal(stacheTestHelpers.cloneAndClean(one).firstChild, null, "nothing rendered to one");
-	equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
+	assert.equal(stacheTestHelpers.cloneAndClean(one).firstChild, null, "nothing rendered to one");
+	assert.equal(stacheTestHelpers.cloneAndClean(two).firstChild.nodeValue, "Matthew");
 });
 
-test("Doesn't mess with existing DOM", function() {
+QUnit.test("Doesn't mess with existing DOM", function(assert) {
 	var el = document.createElement("div");
 	el.appendChild(document.createTextNode("Hello"));
 	var template = stache("{{#portal(root)}}{{name}}{{/portal}}");
 	var vm = new DefineMap({name: "Matthew", root: el});
 
 	template(vm);
-	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Hello", "existing content left alone");
-	equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Matthew");
+	assert.equal(stacheTestHelpers.cloneAndClean(el).firstChild.nodeValue, "Hello", "existing content left alone");
+	assert.equal(stacheTestHelpers.cloneAndClean(el).firstChild.nextSibling.nodeValue, "Matthew");
 });
 
-test("Adds the done.keepNode symbol to nodes", function() {
+QUnit.test("Adds the done.keepNode symbol to nodes", function(assert) {
 	var el = document.createElement("div");
 	var template = stache("{{#portal(root)}}<span>one</span><div>two</div>{{/portal}}");
 	var vm = new DefineMap({ root: el });
@@ -116,39 +116,39 @@ test("Adds the done.keepNode symbol to nodes", function() {
 
 	var child = el.firstChild;
 	do {
-		ok(child[canSymbol.for("done.keepNode")], "symbol added to this node");
+		assert.ok(child[canSymbol.for("done.keepNode")], "symbol added to this node");
 		child = child.nextSibling;
 	} while(child);
 });
 
-test("Doesn't do anything if there isn't a place to put the content", function() {
+QUnit.test("Doesn't do anything if there isn't a place to put the content", function(assert) {
 	var view = stache("{{#portal(root)}}<span>two</span>{{/portal}}");
 	var vm = new DefineMap({ root: null });
 	var frag = view(vm);
 
-	QUnit.equal(frag.firstChild.nodeType, 8, "Only rendered the comment node");
+	assert.equal(frag.firstChild.nodeType, 8, "Only rendered the comment node");
 });
 
-test("Dynamic content outside portal", function() {
+QUnit.test("Dynamic content outside portal", function(assert) {
 	var view = stache("{{#portal(root)}}<span>two</span>{{/portal}}<div>{{#if(showThing)}}<span>one</span>{{/if}}</div>");
 	var vm = new DefineMap({ showThing: false, root: null });
 	var frag = view(vm);
 
 	var div = frag.querySelector("div");
 
-	QUnit.equal(div.firstChild.firstChild, null, "nothing rendered in the div yet");
+	assert.equal(div.firstChild.firstChild, null, "nothing rendered in the div yet");
 
 	// Flip the conditional
 	vm.showThing = true;
 
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).firstChild.firstChild.nodeValue, "one", "shows the template content");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).firstChild.firstChild.nodeValue, "one", "shows the template content");
 
 	// Set the element
 	vm.root = div;
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).firstChild.nextSibling.firstChild.nodeValue, "two", "shows the portaled content");
 });
 
-test("Works when DOM nodes are removed outside of stache", function() {
+QUnit.test("Works when DOM nodes are removed outside of stache", function(assert) {
 	var view = stache("{{#if(show)}}{{#portal(root)}} <span>tests</span> {{/portal}}{{/if}}");
 	var root = document.createElement("div");
 	var vm = new DefineMap({ root: root, show: true });
@@ -162,9 +162,9 @@ test("Works when DOM nodes are removed outside of stache", function() {
 
 	try {
 		vm.show = false;
-		QUnit.ok(true, "Did not throw");
+		assert.ok(true, "Did not throw");
 	} catch(e) {
-		QUnit.ok(false, e);
+		assert.ok(false, e);
 	}
 
 });

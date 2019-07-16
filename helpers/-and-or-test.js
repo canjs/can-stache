@@ -8,9 +8,7 @@ var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache and/or helper");
 
-
-
-QUnit.test("and standalone", function(){
+QUnit.test("and standalone", function(assert) {
 
 	var renders = [];
 	var view = stache("<div>{{#and(a,b)}}{{truthy(this)}}{{else}}{{falsey(this)}}{{/and}}</div>");
@@ -21,25 +19,25 @@ QUnit.test("and standalone", function(){
 	});
 
 	map.set("truthy", function(that){
-		QUnit.equal(that, map, "truthy this is right");
+		assert.equal(that, map, "truthy this is right");
 		renders.push("truthy");
 		return "truthy";
 	});
 	map.set("falsey", function(that){
-		QUnit.equal(that, map, "falsey this is right");
+		assert.equal(that, map, "falsey this is right");
 		renders.push("falsey");
 		return "falsey";
 	});
 	var frag = view(map);
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "1,1" );
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "1,1" );
 
 	// 2,2 ... stays truthy
 	canReflect.assign(map, {
 		a: 2,
 		b: 2
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "2,2" );
-	QUnit.deepEqual(renders,["truthy"], "2,2 render");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "2,2" );
+	assert.deepEqual(renders,["truthy"], "2,2 render");
 	renders = [];
 
 	// 0,2
@@ -47,8 +45,8 @@ QUnit.test("and standalone", function(){
 		a: 0,
 		b: 2
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "0,2" );
-	QUnit.deepEqual(renders,["falsey"], "0,2 render");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "0,2" );
+	assert.deepEqual(renders,["falsey"], "0,2 render");
 	renders = [];
 
 	// false, ""
@@ -56,11 +54,11 @@ QUnit.test("and standalone", function(){
 		a: false,
 		b: ""
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "false,''" );
-	QUnit.deepEqual(renders,[]);
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "false,''" );
+	assert.deepEqual(renders,[]);
 });
 
-QUnit.test("and as call expression", function(){
+QUnit.test("and as call expression", function(assert) {
 
 	var renders = [];
 	var view = stache("<div>{{#eq( and(a,b), c) }}{{truthy(this)}}{{else}}{{falsey(this)}}{{/eq}}</div>");
@@ -72,24 +70,24 @@ QUnit.test("and as call expression", function(){
 	});
 
 	map.set("truthy", function(that){
-		QUnit.equal(that, map, "truthy this is right");
+		assert.equal(that, map, "truthy this is right");
 		renders.push("truthy");
 		return "truthy";
 	});
 	map.set("falsey", function(that){
-		QUnit.equal(that, map, "falsey this is right");
+		assert.equal(that, map, "falsey this is right");
 		renders.push("falsey");
 		return "falsey";
 	});
 	var frag = view(map);
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "(1 && 1 ) === 1" );
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "(1 && 1 ) === 1" );
 
 	// 2,2 ... stays truthy
 	canReflect.assign(map, {
 		a: 2,
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "(2 && 1 ) === 1" );
-	QUnit.deepEqual(renders,["truthy"]);
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "(2 && 1 ) === 1" );
+	assert.deepEqual(renders,["truthy"]);
 	renders = [];
 
 	// 2,0
@@ -97,8 +95,8 @@ QUnit.test("and as call expression", function(){
 		a: 2,
 		b: 0
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "(2 && 0 ) === 1" );
-	QUnit.deepEqual(renders,["falsey"]);
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "(2 && 0 ) === 1" );
+	assert.deepEqual(renders,["falsey"]);
 	renders = [];
 
 	// false, ""
@@ -106,12 +104,12 @@ QUnit.test("and as call expression", function(){
 		a: false,
 		b: ""
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "(false && '' ) === 1" );
-	QUnit.deepEqual(renders,[]);
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "(false && '' ) === 1" );
+	assert.deepEqual(renders,[]);
 });
 
 
-QUnit.test("or standalone", function(){
+QUnit.test("or standalone", function(assert) {
 
 	var renders = [];
 	var view = stache("<div>{{#or(a,b)}}{{truthy(this)}}{{else}}{{falsey(this)}}{{/or}}</div>");
@@ -122,25 +120,25 @@ QUnit.test("or standalone", function(){
 	});
 
 	map.set("truthy", function(that){
-		QUnit.equal(that, map, "truthy this is right");
+		assert.equal(that, map, "truthy this is right");
 		renders.push("truthy");
 		return "truthy";
 	});
 	map.set("falsey", function(that){
-		QUnit.equal(that, map, "falsey this is right");
+		assert.equal(that, map, "falsey this is right");
 		renders.push("falsey");
 		return "falsey";
 	});
 	var frag = view(map);
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "1,1" );
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "1,1" );
 
 	// 2,2 ... stays truthy
 	canReflect.assign(map, {
 		a: 0,
 		b: 2
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "0,2" );
-	QUnit.deepEqual(renders,["truthy"], "0,2 render");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "truthy", "0,2" );
+	assert.deepEqual(renders,["truthy"], "0,2 render");
 	renders = [];
 
 	// 0,2
@@ -148,8 +146,8 @@ QUnit.test("or standalone", function(){
 		a: 0,
 		b: 0
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "0,0" );
-	QUnit.deepEqual(renders,["falsey"], "0,0 render");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "0,0" );
+	assert.deepEqual(renders,["falsey"], "0,0 render");
 	renders = [];
 
 	// false, ""
@@ -157,30 +155,30 @@ QUnit.test("or standalone", function(){
 		a: false,
 		b: ""
 	});
-	QUnit.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "false,''" );
-	QUnit.deepEqual(renders,[]);
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "falsey", "false,''" );
+	assert.deepEqual(renders,[]);
 });
 
-QUnit.test("and is lazy", function(){
+QUnit.test("and is lazy", function(assert) {
 	var view = stache("<div>{{#and(this.isFalse, this.shouldNotBeRead)}}TRUE{{else}}FALSE{{/and}}</div>");
 
 	var fragment = view({
 		isFalse: false,
 		shouldNotBeRead: new Observation(function avoidReadingThis(){
-			QUnit.ok(false, "should not be read");
+			assert.ok(false, "should not be read");
 		})
 	});
 
-	QUnit.equal(stacheTestHelpers.cloneAndClean(fragment).firstChild.innerHTML,"FALSE", "evaled to false");
+	assert.equal(stacheTestHelpers.cloneAndClean(fragment).firstChild.innerHTML,"FALSE", "evaled to false");
 
 	view = stache("<div>{{#and(this.isFalse, this.functionCall() )}}TRUE{{else}}FALSE{{/and}}</div>");
 
 	fragment = view({
 		isFalse: false,
 		functionCall: function(){
-			QUnit.ok(false, "should not be read");
+			assert.ok(false, "should not be read");
 		}
 	});
 
-	QUnit.equal(stacheTestHelpers.cloneAndClean(fragment).firstChild.innerHTML,"FALSE", "evaled to false");
+	assert.equal(stacheTestHelpers.cloneAndClean(fragment).firstChild.innerHTML,"FALSE", "evaled to false");
 });

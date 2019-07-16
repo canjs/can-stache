@@ -12,7 +12,7 @@ QUnit.module("can-stache if helper");
 
 
 
-QUnit.test("Stache with boolean property with {{#if}}", function() {
+QUnit.test("Stache with boolean property with {{#if}}", function(assert) {
 	var nailedIt = 'Nailed it';
 	var Example = define.Constructor({
 		name: {
@@ -49,10 +49,10 @@ QUnit.test("Stache with boolean property with {{#if}}", function() {
 	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
 	var frag = stacheTestHelpers.removePlaceholderNodes( template(nested) );
 
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'Enabled');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'Enabled');
 });
 
-QUnit.test("#each with #if directly nested (#750)", function(){
+QUnit.test("#each with #if directly nested (#750)", function(assert) {
 	var template = stache("<ul>{{#each list}} {{#if visible}}<li>{{name}}</li>{{/if}} {{/each}}</ul>");
 	var data = new SimpleMap(
 		{
@@ -76,24 +76,24 @@ QUnit.test("#each with #if directly nested (#750)", function(){
 
 	data.get('list').pop();
 
-	equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
 
 });
 
-QUnit.test("call expression with #if", function(){
+QUnit.test("call expression with #if", function(assert) {
 
 	var truthy = new SimpleObservable(true);
 	var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
 	var frag = template({truthy: truthy});
 
-	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "true", "set to true");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "true", "set to true");
 
 	truthy.set(false);
 
-	equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "false", "set to false");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "false", "set to false");
 });
 
-test("#if works with call expressions", function(){
+QUnit.test("#if works with call expressions", function(assert) {
 	var template = stache("{{#if(foo)}}foo{{else}}bar{{/if}}");
 	var map = new DefineMap({
 		foo: true
@@ -102,23 +102,23 @@ test("#if works with call expressions", function(){
 	var frag = template(map);
 
 	div.appendChild( frag);
-	QUnit.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
+	assert.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
+	assert.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
 
-QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(){
+QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", function(assert) {
 	var div = document.createElement("div");
 	var view = stache("{{^if(isTrue())}}did not work{{/if}}");
 	var frag = view({
 		isTrue: function() { return true; }
 	});
 	div.appendChild(frag);
-	equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "", "No textnode rendered");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "", "No textnode rendered");
 });
 
-QUnit.test("#if should not re-render children", function(){
+QUnit.test("#if should not re-render children", function(assert) {
 	var count = 0;
 	var view = stache("{{#if(person.name)}} {{increment()}} {{/if}}");
 	var map = new DefineMap({
@@ -132,10 +132,10 @@ QUnit.test("#if should not re-render children", function(){
 	map.person.name = "Kevin";
 	map.person.name = "Justin";
 
-	QUnit.equal(count, 1, "count should be called only once");
+	assert.equal(count, 1, "count should be called only once");
 });
 
-test("Handlebars helper: if/else", function () {
+QUnit.test("Handlebars helper: if/else", function(assert) {
 	var expected;
 	var t = {
 		template: "{{#if name}}{{name}}{{/if}}{{#if missing}} is missing!{{/if}}",
@@ -148,10 +148,10 @@ test("Handlebars helper: if/else", function () {
 
 	expected = t.expected.replace(/&quot;/g, '&#34;')
 		.replace(/\r\n/g, '\n');
-	deepEqual(stacheTestHelpers.getText(t.template,t.data), expected);
+	assert.deepEqual(stacheTestHelpers.getText(t.template,t.data), expected);
 
 	t.data.missing = null;
 	expected = t.expected.replace(/&quot;/g, '&#34;')
 		.replace(/\r\n/g, '\n');
-	deepEqual(stacheTestHelpers.getText(t.template,t.data), expected);
+	assert.deepEqual(stacheTestHelpers.getText(t.template,t.data), expected);
 });

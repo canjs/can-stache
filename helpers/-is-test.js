@@ -7,7 +7,7 @@ var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache is/eq helper");
 
-QUnit.test("#if should not re-render children", function(){
+QUnit.test("#if should not re-render children", function(assert) {
 	var count = 0;
 	var view = stache("{{#eq(a,b)}} {{increment()}} {{/eq}}");
 	var map = new DefineMap({
@@ -29,11 +29,11 @@ QUnit.test("#if should not re-render children", function(){
 		b: 3
 	});
 
-	QUnit.equal(count, 1, "count should be called only once");
+	assert.equal(count, 1, "count should be called only once");
 });
 
 
-QUnit.test("#eq works with call expressions", function(){
+QUnit.test("#eq works with call expressions", function(assert) {
 	var template = stache("{{#eq(foo, true)}}foo{{else}}bar{{/eq}}");
 	var map = new DefineMap({
 		foo: true
@@ -42,12 +42,12 @@ QUnit.test("#eq works with call expressions", function(){
 	var frag = template(map);
 
 	div.appendChild(frag);
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
-QUnit.test("#is works with call expressions", function(){
+QUnit.test("#is works with call expressions", function(assert) {
 	var template = stache("{{#is(foo, true)}}foo{{else}}bar{{/eq}}");
 	var map = new DefineMap({
 		foo: true
@@ -56,12 +56,12 @@ QUnit.test("#is works with call expressions", function(){
 	var frag = template(map);
 
 	div.appendChild(frag);
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	QUnit.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
-QUnit.test("Handlebars helper: is/else (with 'eq' alias)", function() {
+QUnit.test("Handlebars helper: is/else (with 'eq' alias)", function(assert) {
 	var expected;
 	var t = {
 		template: '{{#eq ducks tenDucks "10"}}10 ducks{{else}}Not 10 ducks{{/eq}}',
@@ -81,12 +81,12 @@ QUnit.test("Handlebars helper: is/else (with 'eq' alias)", function() {
 	};
 
 	expected = t.expected.replace(/&quot;/g, '&#34;').replace(/\r\n/g, '\n');
-	deepEqual(stacheTestHelpers.getText(t.template, t.data), expected);
+	assert.deepEqual(stacheTestHelpers.getText(t.template, t.data), expected);
 
-	deepEqual(stacheTestHelpers.getText(t.template, t.liveData), expected);
+	assert.deepEqual(stacheTestHelpers.getText(t.template, t.liveData), expected);
 
 	t.data.ducks = 5;
 
-	deepEqual(stacheTestHelpers.getText(t.template, t.data), 'Not 10 ducks');
+	assert.deepEqual(stacheTestHelpers.getText(t.template, t.data), 'Not 10 ducks');
 
 });
