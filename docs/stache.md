@@ -679,17 +679,15 @@ Component.extend({
 
 
 <details>
-<summary>Importing Functions (older method)</summary>
+<summary>Importing Functions</summary>
 
-If you are using a module loader to import stache files, [can-view-import]
-can be used to import a function to a [can-stache/keys/scope/scope.vars] variable:
+If you are using a module loader to import stache files, [can-view-import] can
+be used to import a function to a [can-stache.helpers.let let variable]:
 
 ```html
-<can-import from="app/helpers/upperCase"  module.default:to="scope.vars.myModule"/>
+<can-import from="app/helpers/upperCase"  module.default:to="upperCase"/>
+{{upperCase(name)}}
 ```
-
-A replacement for this technique is being [designed here](https://github.com/canjs/can-stache/issues/610).
-
 </details>
 
 
