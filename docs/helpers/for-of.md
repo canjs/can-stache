@@ -42,19 +42,19 @@
   import {stache} from "can";
 
   var view = stache(`
-    <ul>
-      {{# for(name of this.values) }}
-        <li>{{scope.key}}: {{ name }}</li>
-      {{/ for }}
-    </ul>
+  	<ul>
+  		{{# for(name of this.values) }}
+  			<li>{{scope.key}}: {{ name }}</li>
+  		{{/ for }}
+  	</ul>
   `);
 
   var data = {
-    values: {
-    first: "Hope",
-    middle: "van",
-    last: "Dyne"
-  }
+  	values: {
+		first: "Hope",
+		middle: "van",
+		last: "Dyne"
+	}
   };
 
   var frag = view(data);
