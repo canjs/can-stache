@@ -185,3 +185,31 @@ QUnit.test("for(value of object) works if value is keyed with a dot (issue#698)"
 
 	assert.equal( frag.firstChild.className, "[first-FIRST][second.key.has.dot-SECOND]");
 });
+
+QUnit.test("for(integerValue) works", function (assert) {
+	var template = stache("<div>{{#for(integerValue)}}[{{scope.index}}]{{/for}}</div>");
+	var frag = template({
+		integerValue: 3
+	});
+	assert.equal( frag.firstChild.innerHTML, "[0][1][2]" );
+});
+
+QUnit.test("for(ittr of intVal) works", function (assert) {
+	var template = stache("<div class='{{#for(ittr of object.intVal)}}[{{scope.index}}-{{ittr}}]{{/for}}'></div>");
+	var object = {
+		intVal: 6
+	};
+	var frag = template({
+		object: object
+	});
+
+	assert.equal( frag.firstChild.className, "[0-0][1-1][2-2][3-3][4-4][5-5]" );
+});
+
+QUnit.test("for(integerValue) uses else block for negatives", function (assert) {
+	var template = stache("<div>{{#for(integerValue)}}[{{scope.index}}]{{else}}val is negative{{/for}}</div>");
+	var frag = template({
+		integerValue: -3
+	});
+	assert.equal( frag.firstChild.innerHTML, "val is negative" );
+});

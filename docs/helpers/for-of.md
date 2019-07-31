@@ -42,24 +42,50 @@
   import {stache} from "can";
 
   var view = stache(`
-  	<ul>
-  		{{# for(name of this.values) }}
-  			<li>{{scope.key}}: {{ name }}</li>
-  		{{/ for }}
-  	</ul>
+    <ul>
+      {{# for(name of this.values) }}
+        <li>{{scope.key}}: {{ name }}</li>
+      {{/ for }}
+    </ul>
   `);
 
   var data = {
-  	values: {
-		first: "Hope",
-		middle: "van",
-		last: "Dyne"
-	}
+    values: {
+    first: "Hope",
+    middle: "van",
+    last: "Dyne"
+  }
   };
 
   var frag = view(data);
   console.log(frag.firstElementChild.innerHTML)
   //-> <li>first: Hope</li><li>middle: van</li><li>last: Dyne</li>
+
+  document.body.appendChild(frag);
+  ```
+  @codepen
+
+  If a positive integer value is passed, it will loop that number of times.
+  You can access the current index with `scope.index`:
+
+  ```js
+  import {stache} from "can";
+
+  var view = stache(`
+    <ul>
+      {{# for(ittr of this.integerValue) }}
+        <li>{{scope.index}}: {{ ittr }}</li>
+      {{/ for }}
+    </ul>
+  `);
+
+  var data = {
+    integerValue: 3
+  };
+
+  var frag = view(data);
+  console.log(frag.firstElementChild.innerHTML)
+  //-> <li>0: 0</li><li>1: 1</li><li>2: 2</li>
 
   document.body.appendChild(frag);
   ```
