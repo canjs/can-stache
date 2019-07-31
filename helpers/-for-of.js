@@ -16,7 +16,7 @@ var bindAndRead = function (value) {
 
 function forOfInteger(integer, variableName, options) {
 	var result = [];
-  for (var i = 0; i < integer; i++) {
+	for (var i = 0; i < integer; i++) {
 		var variableScope = {};
 		if(variableName !== undefined){
 			variableScope[variableName] = i;
@@ -26,7 +26,7 @@ function forOfInteger(integer, variableName, options) {
 				.add({ index: i }, { special: true })
 				.addLetContext(variableScope) )
 		);
-  }
+	}
 
 	return options.stringOnly ? result.join('') : result;
 }

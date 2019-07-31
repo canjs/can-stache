@@ -73,8 +73,8 @@
 
   var view = stache(`
     <ul>
-      {{# for(ittr of this.integerValue) }}
-        <li>{{scope.index}}: {{ ittr }}</li>
+      {{# for(this.integerValue) }}
+        <li>{{scope.index}}</li>
       {{/ for }}
     </ul>
   `);
@@ -85,7 +85,7 @@
 
   var frag = view(data);
   console.log(frag.firstElementChild.innerHTML)
-  //-> <li>0: 0</li><li>1: 1</li><li>2: 2</li>
+  //-> <li>0</li><li>1</li><li>2</li>
 
   document.body.appendChild(frag);
   ```
@@ -128,12 +128,15 @@
   {{/ for }}
   ```
 
-  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An
-  expression that typically returns a [can-reflect.isListLike list like] data structure.
-  If the value of the `EXPRESSION` is an observable list (for example: [can-define/list/list]), the resulting HTML is updated when the list changes. When a change in the list happens, only the minimum amount of DOM
-  element changes occur.  The list itself can also change, and a [can-diff/list/list difference]
-  will be performed, which also will perform a minimal set of updates.
+  @param {can-stache/expressions/key-lookup|can-stache/expressions/call} EXPRESSION An expression that returns
 
+
+  - A [can-reflect.isListLike list like] data structure.
+  - An object-like (key-value) data structure.
+  - A positive integer Number
+
+
+  If the value of the `EXPRESSION` is an observable list ([can-define/list/list]) or map ([can-define/map/map]) and an item within it changes, only the minimum amount of DOM elements in the resulting HTML will change. If the list/map/or number value itself changes, a [can-diff/list/list difference] will be performed, resulting again in a minimal set of updates.
 
 
   @param {can-stache.sectionRenderer} FN A subsection that is
