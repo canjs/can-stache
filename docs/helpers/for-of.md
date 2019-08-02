@@ -94,7 +94,7 @@
 
   @param {VariableExpression} [VARIABLE_NAME] A local variable
   that will only be accessible to [can-stache/expressions/key-lookup KeyLookups] within the
-  block.  You can leave out the `VARIABLE_NAME` an `in` to loop through items in the object like:
+  block.  You can leave out the `VARIABLE_NAME` and `of` to loop through items in the object like:
 
   ```html
   {{# for( this.values ) }}
