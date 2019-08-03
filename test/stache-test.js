@@ -4044,6 +4044,36 @@ function makeTest(name, doc, mutation) {
 		assert.deepEqual(getText(t.template, t.data), 'Not 10 ducks');
 	});
 
+	QUnit.test("Handlebars helper: if-else/case", function(assert) {
+		var expected;
+		var t = {
+			template: '{{#if ducks}}{{#else-if "10"}}10 ducks{{/else-if}}' +
+			'{{#else}}Not 10 ducks{{/else}}{{/else}}',
+			expected: "10 ducks",
+			data: {
+				ducks: '10',
+				tenDucks: function() {
+					return '10'
+				}
+			},
+			liveData: new SimpleMap({
+				ducks: '10',
+				tenDucks: function() {
+					return '10'
+				}
+			})
+		};
+
+		expected = t.expected.replace(/&quot;/g, '&#34;').replace(/\r\n/g, '\n');
+		assert.deepEqual(getText(t.template, t.data), expected);
+
+		assert.deepEqual(getText(t.template, t.liveData), expected);
+
+		t.data.ducks = 5;
+
+		assert.deepEqual(getText(t.template, t.data), 'Not 10 ducks');
+	});
+
 	QUnit.test("Handlebars helper: switch - changing to default (#1857)", function(assert) {
 		var template = stache('{{#switch ducks}}{{#case "10"}}10 ducks{{/case}}' +
 		'{{#default}}Not 10 ducks{{/default}}{{/switch}}');
@@ -4059,6 +4089,23 @@ function makeTest(name, doc, mutation) {
 
 		assert.deepEqual(getTextFromFrag(frag), "Not 10 ducks");
 	});
+
+	QUnit.test("Handlebars helper: else if - changing to default ", function(assert) {
+		var template = stache('{{#if ducks}}{{#else-if "10"}}10 ducks{{/else-if}}' +
+		'{{#else}}Not 10 ducks{{/else}}{{/if}}');
+		var map = new SimpleMap({
+			ducks: "10"
+		});
+
+		var frag = template(map);
+
+		assert.deepEqual(getTextFromFrag(frag), "10 ducks");
+
+		map.set("ducks", "12");
+
+		assert.deepEqual(getTextFromFrag(frag), "Not 10 ducks");
+	});
+
 
 	QUnit.test("joinBase helper joins to the baseURL", function(assert) {
 
@@ -4368,6 +4415,50 @@ function makeTest(name, doc, mutation) {
 		assert.equal(frag.firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
 	});
 
+	QUnit.test("Re-evaluating a else-if in a else-if statement", function(assert) {
+		var template = stache(
+			"{{#if page}}" +
+				"{{#else-if 'home'}}" +
+					"<h1 id='home'>Home</h1>" +
+				"{{/else-if}}" +
+				"{{#else-if 'users'}}" +
+					"{{#if slug}}" +
+						"<h1 id='user'>User - {{slug}}</h1>" +
+					"{{else}}" +
+						"<h1 id='users'>Users</h1>" +
+						"<ul>" +
+							"<li>User 1</li>" +
+							"<li>User 2</li>" +
+						"</ul>" +
+					"{{/if}}" +
+				"{{/else-if}}" +
+			"{{/if}}"
+		);
+
+		var map = new SimpleMap({
+			page: "home"
+		});
+
+		var frag = template(map);
+
+		assert.equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+
+		map.set("page", "users");
+		assert.equal(frag.firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
+
+		map.set("slug", "Matthew");
+		assert.equal(frag.firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
+
+		queues.batch.start();
+		map.set("page", "home");
+		map.set("slug", undefined);
+		queues.batch.stop();
+
+		assert.equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+		assert.equal(frag.firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
+		assert.equal(frag.firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
+	});
+
 	QUnit.test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function(assert) {
 		var list = new DefineList([{value:'a'}, {value:'b'}, {value: 'c'}]);
 		var template = stache("<ul>{{#each list}}<li>{{scope.index}} {{value}}</li>{{/each}}</ul>");
@@ -4455,6 +4546,41 @@ function makeTest(name, doc, mutation) {
 				"OUTER2"+
 			"{{/case}}"+
 	    "{{/switch}}</div>");
+
+
+		var vm = new SimpleMap({
+			outer : "outerValue1",
+			inner : "innerValue1"
+		});
+
+		var frag = template(vm);
+
+		queues.batch.start();
+		vm.set("inner",undefined);
+		vm.set("outer", "outerValue2");
+		queues.batch.stop();
+
+
+	    assert.ok( innerHTML(frag.firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
+	    assert.ok( innerHTML(frag.firstChild).indexOf("INNER1") === -1, "does not have INNER1");
+
+
+	});
+
+	QUnit.test("nested else-if statement fail", function(assert) {
+
+		var template  = stache("<div>{{#if outer}}"+
+			'{{#else-if "outerValue1"}}'+
+				"{{#if inner}}"+
+					"{{#else-if 'innerValue1'}}"+
+						"INNER1"+
+					"{{/else-if}}"+
+				"{{/if}}"+
+			"{{/else-if}}"+
+			'{{#else-if "outerValue2"}}'+
+				"OUTER2"+
+			"{{/else-if}}"+
+	    "{{/else-if}}</div>");
 
 
 		var vm = new SimpleMap({
@@ -5629,6 +5755,20 @@ function makeTest(name, doc, mutation) {
 		assert.equal(innerHTML(div), "peasant");
 	});
 
+	QUnit.test("#if, #else-if, and #delse work with call expressions", function(assert) {
+		var template = stache("{{#if(type)}}{{#else-if('admin')}}admin{{/else-if}}{{#else-if()}}peasant{{/else-if}}{{/if}}");
+		var map = new DefineMap({
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		assert.equal(innerHTML(div), "admin");
+		map.type = "peasant";
+		assert.equal(innerHTML(div), "peasant");
+	});
+
 	QUnit.test("joinbase works with call expressions", function(assert) {
 		var baseUrl = System.baseURL || getBaseURL();
 		var template = stache("{{joinBase('hello/', name, '.png')}}");
@@ -6169,6 +6309,21 @@ function makeTest(name, doc, mutation) {
 		assert.equal(innerHTML(div), "peasant: Johnny", "{{#default()}}");
 	});
 
+	QUnit.test("#if and #default should not change context (#475)", function(assert) {
+		var template = stache("{{#if(type)}}{{#else-if('admin')}}admin: {{name}}{{/else-if}}{{#else()}}peasant: {{name}}{{/else}}{{/if}}");
+		var map = new DefineMap({
+			name: "Johnny",
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		assert.equal(innerHTML(div), "admin: Johnny", "{{#case('Johnny')}}");
+		map.type = "peasant";
+		assert.equal(innerHTML(div), "peasant: Johnny", "{{#default()}}");
+	});
+
 	QUnit.test("#case and #default with Helper Expressions should not change context (#475)", function(assert) {
 		var template = stache("{{#switch type}}{{#case 'admin'}}admin: {{name}}{{/case}}{{#default}}peasant: {{name}}{{/default}}{{/switch}}");
 		var map = new DefineMap({
@@ -6182,6 +6337,21 @@ function makeTest(name, doc, mutation) {
 		assert.equal(innerHTML(div), "admin: Johnny", "{{#case 'Johnny'}}");
 		map.type = "peasant";
 		assert.equal(innerHTML(div), "peasant: Johnny", "{{#default}}");
+	});
+
+	QUnit.test("#if and #default with Helper Expressions should not change context (#475)", function(assert) {
+		var template = stache("{{#if type}}{{#else-if 'admin'}}admin: {{name}}{{/else-if}}{{#else}}peasant: {{name}}{{/else}}{{/if}}");
+		var map = new DefineMap({
+			name: "Johnny",
+			type: "admin"
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		assert.equal(innerHTML(div), "admin: Johnny", "{{#else-if 'Johnny'}}");
+		map.type = "peasant";
+		assert.equal(innerHTML(div), "peasant: Johnny", "{{#else}}");
 	});
 
 	QUnit.test("Can use magic tags within attributes (#470)", function(assert) {
@@ -6442,6 +6612,26 @@ function makeTest(name, doc, mutation) {
 				"{{#case 'male'}}{{person.name}}{{/case}}"+
 				"{{#default}}female{{/default}}"+
 			"{{/switch}}"+
+		"{{/each}}");
+		var map = new DefineMap({
+			group: new DefineList([{
+				gender: 'male',
+				name: 'matt'
+			}])
+		});
+		var div = doc.createElement("div");
+		var frag = template(map);
+
+		div.appendChild(frag);
+		assert.equal(innerHTML(div).trim(), 'matt');
+	});
+
+	QUnit.test("Handlebars helper: if/else-if scope issue inside #each", function(assert) {
+		var template = stache("{{#each(group, person=value)}}"+
+			"{{#if(person.gender)}}"+
+				"{{#else-if 'male'}}{{person.name}}{{/else-if}}"+
+				"{{#else}}female{{/else}}"+
+			"{{/else}}"+
 		"{{/each}}");
 		var map = new DefineMap({
 			group: new DefineList([{
