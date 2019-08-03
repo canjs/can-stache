@@ -220,24 +220,43 @@ var ifHelper = assign(function ifHelper(expr, options) {
 
 
 // ## IF ELSE HELPER
-var ifElseHelper = assign(function ifHelper(expr, options) {
-	var value;
-	// if it's a function, wrap its value in a compute
-	// that will only change values from true to false
-	if (expr && canReflect.isValueLike(expr)) {
-		value = canReflect.getValue(new TruthyObservable(expr));
-	} else {
-		value = !! helpersCore.resolve(expr);
-	}
+var ifElseHelper = function(expression, options){
+	helpersCore.resolve(expression);
+	var found = false;
 
-	if (options) {
-		return value ? options.fn(options.scope || this) : options.inverse(options.scope || this);
-	}
+	var caseHelper = function(value, options) {
+		if(!found && helpersCore.resolve(expression) === helpersCore.resolve(value)) {
+			found = true;
+			return options.fn(options.scope);
+		}
+	};
+	caseHelper.requiresOptionsArgument = true;
 
-	return !!value;
-}, {requiresOptionsArgument: true, isLiveBound: true});
+	// create default helper as a value-like function
+	// so that either {{#default}} or {{#default()}} will work
+	var defaultHelper = function(options) {
+		if (!found) {
+			return options ? options.scope.peek('this') : true;
+		}
+	};
+	defaultHelper.requiresOptionsArgument = true;
+	canReflect.assignSymbols(defaultHelper, {
+		"can.isValueLike": true,
+		"can.isFunctionLike": false,
+		"can.getValue": function() {
+			// pass the helperOptions passed to {{#switch}}
+			return this(options);
+		}
+	});
 
+	var newScope = options.scope.add({
+		case: caseHelper,
+		default: defaultHelper
+	}, { notContext: true });
 
+	return options.fn(newScope, options);
+};
+ifElseHelper.requiresOptionsArgument = true;
 
 
 //## EQ/IS HELPER
