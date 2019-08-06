@@ -2933,7 +2933,7 @@ function makeTest(name, doc, mutation) {
 		var text = "";
 		if(node.nodeType === 1 || node.nodeType === 11) {
 			text += "<"+node.nodeName+">";
-			Array.from( getChildNodes(node) ).forEach(function(child) {
+			stacheTestHelpers.ArrayFrom( getChildNodes(node) ).forEach(function(child) {
 				text += print(child);
 			});
 			text += "</"+node.nodeName+">";
