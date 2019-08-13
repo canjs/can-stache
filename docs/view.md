@@ -4,7 +4,7 @@
 @description A function returned by [can-stache] that renders a
 template into an html documentFragment.
 
-@signature `view(data, [helpers], [nodeList])`
+@signature `view(data, [helpers])`
 
   A "view" function is a function returned by templates that can be used
   to render data into a documentFragment.
@@ -12,8 +12,6 @@ template into an html documentFragment.
   @param {Object} data An object of data used to render the template.
 
   @param {Object.<String, function>} [helpers] Local helper functions used by the template.
-
-  @param {can-view-nodelist/types/NodeList} [nodeList] Local helper functions used by the template.
 
   @return {documentFragment} A documentFragment that contains the HTML rendered by the template.
 
