@@ -603,3 +603,13 @@ QUnit.test(" call partials stored in LetContext as Call Expressions #649", funct
 
 	assert.equal( stacheTestHelpers.innerHTML( frag.lastChild ), "bar" );
 });
+
+QUnit.test("Named Partials render string result in stringOnly state", function(assert) {
+	var view = stache( 
+		'{{<addressView}}.someClass { color: #000; }{{/addressView}}' +
+		'<style>{{addressView()}}</style>'
+	);
+
+	var fragment = view();
+	assert.equal(fragment.firstChild.innerHTML, '.someClass { color: #000; }', "Partial text is rendered");
+});
