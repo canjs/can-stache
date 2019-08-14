@@ -292,10 +292,7 @@ var core = {
 			if (res == null) {
 				return "";
 			}
-			if (res instanceof DocumentFragment) {
-				return res.textContent;
-			}
-			return ""+res;
+			return res.nodeType === 11 ? res.textContent : ""+res;
 		};
 
 		branchRenderer.exprData = exprData;
