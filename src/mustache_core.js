@@ -289,8 +289,13 @@ var core = {
 				res = evaluator();
 			}
 
-
-			return res == null ? "" : ""+res;
+			if (res == null) {
+				return "";
+			}
+			if (res instanceof DocumentFragment) {
+				return res.textContent;
+			}
+			return ""+res;
 		};
 
 		branchRenderer.exprData = exprData;
