@@ -611,5 +611,5 @@ QUnit.test("Named Partials render string result in stringOnly state", function(a
 	);
 
 	var fragment = view();
-	assert.equal(fragment.firstChild.innerHTML, '.someClass { color: #000; }', "Parial text is rendered");
+	assert.equal(fragment.firstChild.innerHTML, '.someClass { color: #000; }', "Partial text is rendered");
 });
