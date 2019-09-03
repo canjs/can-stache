@@ -289,8 +289,10 @@ var core = {
 				res = evaluator();
 			}
 
-
-			return res == null ? "" : ""+res;
+			if (res == null) {
+				return "";
+			}
+			return res.nodeType === 11 ? res.textContent : ""+res;
 		};
 
 		branchRenderer.exprData = exprData;
