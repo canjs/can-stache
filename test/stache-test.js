@@ -54,8 +54,8 @@ var helpersCore = require('can-stache/helpers/core');
 var browserDoc = DOCUMENT();
 
 
-makeTest('can/view/stache dom', browserDoc);
-makeTest('can/view/stache vdom', makeDocument());
+makeTest('can-stache dom', browserDoc);
+makeTest('can-stache vdom', makeDocument());
 
 // HELPERS
 function overwriteGlobalHelper(name, fn, method) {
