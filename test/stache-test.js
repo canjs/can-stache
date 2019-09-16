@@ -333,7 +333,8 @@ function makeTest(name, doc, mutation) {
 		// now update the named attribute
 		obsvr.set('named', true);
 
-		assert.deepEqual(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "", 'hidden gone');
+		var hiddenTextNode = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild;
+		assert.notOk(hiddenTextNode && hiddenTextNode.nodeValue, 'hidden gone');
 
 	});
 
