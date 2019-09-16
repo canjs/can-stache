@@ -38,8 +38,8 @@ var helpersCore = require('can-stache/helpers/core');
 var makeStacheTestHelpers = require("../test/helpers");
 var browserDoc = DOCUMENT();
 
-makeTest('can/view/stache dom', browserDoc);
-makeTest('can/view/stache vdom', makeDocument());
+makeTest('can-stache dom', browserDoc);
+makeTest('can-stache vdom', makeDocument());
 
 
 // HELPERS
@@ -4483,7 +4483,7 @@ function makeTest(name, doc, mutation) {
 				counter++;
 			}
 		});
-		
+
 		queues.batch.start();
 		state.set({
 			action: 'edit',

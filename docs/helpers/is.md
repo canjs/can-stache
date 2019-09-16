@@ -1,7 +1,7 @@
 @function can-stache.helpers.is {{#is(expressions)}}
 @parent can-stache/deprecated
 
-@deprecated {4.15.0} Use [can-stache.helpers.if] instead.
+@deprecated {4.15.0} Use [can-stache.helpers.eq] instead.
 
 @signature `{{#is([EXPRESSION...])}}FN{{else}}INVERSE{{/is}}`
 
