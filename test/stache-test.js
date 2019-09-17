@@ -4040,12 +4040,11 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("joinBase helper joins to the baseURL", function(assert) {
 
 		var baseUrl = System.baseURL || getBaseURL();
-		var template = stache("{{joinBase 'hello/' name}}");
+		var template = "{{joinBase 'hello/' name}}";
 		var map = new SimpleMap({ name: "world" });
+		var text = getText("{{joinBase 'hello/' name}}", map);
 
-		var frag = template(map);
-
-		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
+		assert.equal(text, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
 
 	});
 
