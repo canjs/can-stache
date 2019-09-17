@@ -4040,7 +4040,6 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("joinBase helper joins to the baseURL", function(assert) {
 
 		var baseUrl = System.baseURL || getBaseURL();
-		var template = "{{joinBase 'hello/' name}}";
 		var map = new SimpleMap({ name: "world" });
 		var text = getText("{{joinBase 'hello/' name}}", map);
 

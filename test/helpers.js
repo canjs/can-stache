@@ -102,15 +102,14 @@ var clone = function(node) {
 
 	// Fix weird cloneNode bug in IE11
 	if(clonedLength && clonedLength > length) {
-		var index = 1;
 		var first = clonedChildNodes[0];
 
 		for(var index = 1; index < clonedLength; index++) {
-			var node = clonedChildNodes[index];
+			var clonedChildNode = clonedChildNodes[index];
 
-			if(node.nodeType === 3) {
-				first.nodeValue += node.nodeValue;
-				node.parentNode.removeChild(node);
+			if (clonedChildNode.nodeType === 3) {
+				first.nodeValue += clonedChildNode.nodeValue;
+				clonedChildNode.parentNode.removeChild(clonedChildNode);
 			}
 		}
 	}
