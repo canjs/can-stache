@@ -333,7 +333,8 @@ function makeTest(name, doc, mutation) {
 		// now update the named attribute
 		obsvr.set('named', true);
 
-		assert.deepEqual(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "", 'hidden gone');
+		var hiddenTextNode = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild;
+		assert.notOk(hiddenTextNode && hiddenTextNode.nodeValue, 'hidden gone');
 
 	});
 
@@ -4039,12 +4040,10 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("joinBase helper joins to the baseURL", function(assert) {
 
 		var baseUrl = System.baseURL || getBaseURL();
-		var template = stache("{{joinBase 'hello/' name}}");
 		var map = new SimpleMap({ name: "world" });
+		var text = getText("{{joinBase 'hello/' name}}", map);
 
-		var frag = template(map);
-
-		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
+		assert.equal(text, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
 
 	});
 
@@ -4111,7 +4110,6 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("inner expressions with computes", function(assert) {
 		var template = stache("{{helperA helperB(1,valueA,propA=valueB propC=2) 'def' outerPropA=helperC(2,valueB)}}");
-
 
 		var valueB = new SimpleObservable("B");
 		var changes = 0;
