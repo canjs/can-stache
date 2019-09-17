@@ -94,8 +94,31 @@ var removePlaceholderNodes = function(node){
 	return node;
 };
 
+var clone = function(node) {
+	var length = childNodes(node).length;
+	var cloned = node.cloneNode(true);
+	var clonedChildNodes = ArrayFrom(childNodes(cloned));
+	var clonedLength = clonedChildNodes.length;
+
+	// Fix weird cloneNode bug in IE11
+	if(clonedLength && clonedLength > length) {
+		var index = 1;
+		var first = clonedChildNodes[0];
+
+		for(var index = 1; index < clonedLength; index++) {
+			var node = clonedChildNodes[index];
+
+			if(node.nodeType === 3) {
+				first.nodeValue += node.nodeValue;
+				node.parentNode.removeChild(node);
+			}
+		}
+	}
+	return cloned;
+};
+
 function cloneAndClean(node) {
-	return removePlaceholderNodes( node.cloneNode(true) );
+	return removePlaceholderNodes( clone(node) );
 }
 
 var createHelpers = function(doc) {

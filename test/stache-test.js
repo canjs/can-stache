@@ -4112,7 +4112,6 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("inner expressions with computes", function(assert) {
 		var template = stache("{{helperA helperB(1,valueA,propA=valueB propC=2) 'def' outerPropA=helperC(2,valueB)}}");
 
-
 		var valueB = new SimpleObservable("B");
 		var changes = 0;
 
