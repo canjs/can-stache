@@ -29,27 +29,26 @@ the context can later be retrieved by [can-dom-data].
 Let’s look at a simple example:
 
 ```js
-import Component from "can-component";
-import domData from "can-dom-data";
+import { StacheElement, domData } from "can";
 
-Component.extend({
-  tag: "todo-list",
-  view: `
+class TodoList extends StacheElement {
+	static view = `
     <ul>
-      {{#each(todos)}}
-        <li {{domData("todo")}}>
+      {{#each(this.todos)}}
+        <li on:click="../addTodo(scope.element)" {{domData("todo")}}>
           {{title}}
         </li>
       {{/each}}
     </ul>
-  `,
-  events: {
-    "li click": function(element) {
-      const todo = domData.get(element, "todo");
-      // Do something with todo
-    }
+	`;
+
+  addTodo(element) {
+    const todo = domData.get(element, "todo");
+    // Do something with todo
   }
-});
+}
+
+customElements.define("todo-list", TodoList);
 ```
 
 > **Note:** this contrived example is just to demonstrate the `{{domData}}`
@@ -66,25 +65,25 @@ specific value with the element so the value can later be retrieved by
 Here’s another example:
 
 ```js
-import Component from "can-component";
-import domData from "can-dom-data";
+import {StacheElement, domData} from "can";
 
-Component.extend({
-  tag: "todo-list",
-  view: `
+class TodoList extends StacheElement {
+  static view = `
     <ul>
-      {{#each(todos)}}
-        <li {{domData("todos", ../todos)}}>
-          {{title}}
+      {{#for(todo of this.todos)}}
+        <li on:click="this.addTodo(scope.element)"
+          {{domData("todos", this.todos)}}>
+          {{todo.title}}
         </li>
       {{/each}}
     </ul>
-  `,
-  events: {
-    "li click": function(element) {
-      const todos = domData.get(element, "todos");
-      // Now you have access to the entire todos list
-    }
+  `;
+
+  addTodo(element) {
+    const todos = domData.get(element, "todos");
+    // Now you have access to the entire todos list
   }
-});
+}
+
+customElements.define("todo-list", TodoList);
 ```

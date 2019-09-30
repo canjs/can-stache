@@ -41,17 +41,20 @@ const data3 = { some: function() {
 //-> "value"
 
 // A observable can-map
-const data4 = { some: new DefineMap( { key: "value" } ) };
+const data4 = { some: new ObservableObject( { key: "value" } ) };
 
 //-> canCompute("value")
 
 // A method on an observable can-map that reads observables
-const Some = DefineMap.extend( {
-	value: "string",
-	key: function() {
+class Some extends ObservableObject {
+	static props = {
+		value: String,
+	};
+
+	key() {
 		return this.value;
 	}
-} );
+}
 const data5 = { some: new Some( { value: "value" } ) };
 
 //-> compute(function(){ return this.value; })

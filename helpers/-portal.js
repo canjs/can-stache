@@ -102,14 +102,6 @@ function portalHelper(elementObservable, options){
 		placeholderElement.parentNode.replaceChild(commentPlaceholder, placeholderElement);
 		commentPlaceholderDispose = domMutate.onNodeRemoved(commentPlaceholder, teardownEverything);
 		return commentPlaceholder;
-		//var frag = doc.createDocumentFragment();
-		//domMutateNode.appendChild.call(frag, comment);
-		/*nodeLists.replace([el], frag);
-
-		var nodeList = [comment];
-		nodeList.expression = "portal";
-		nodeLists.register(nodeList, teardown, options.nodeList, true);
-		nodeLists.update(options.nodeList, [comment]);*/
 	};
 }
 

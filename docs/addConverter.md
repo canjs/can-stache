@@ -26,18 +26,18 @@
 
 
   ```js
-  import {stache, Reflect as canReflect, DefineMap} from "can";
+  import {stache, Reflect as canReflect, ObservableObject} from "can";
 
   stache.registerConverter( "stringToNumber", {
-  	get: function( numberObservable ) {
+  	get( numberObservable ) {
   		return "" + canReflect.getValue(numberObservable);
   	},
-  	set: function( string, numberObservable ) {
+  	set( string, numberObservable ) {
   		canReflect.setValue(numberObservable, +string);
   	}
   } );
 
-  var data = new DefineMap({age: 36});
+  var data = new ObservableObject({age: 36});
   var frag = stache(`<input value:bind="age"/> Age: {{age}}`)(data);
 
   document.body.append(frag);
@@ -53,8 +53,8 @@
 
 > __NOTE__: Before creating your own converter, you may want to look at what’s provided by [can-stache-converters].
 
-These helpers are useful for avoiding creating [can-define/map/map] getters and setters that do similar conversions on the view model.  Instead,
-a converter can keep your viewModels more ignorant of the demands of the
+These helpers are useful for avoiding creating [can-observable-object] getters and setters that do similar conversions on the component.  Instead,
+a converter can keep your components more ignorant of the demands of the
 view.  Especially as the view’s most common demand is that everything
 must be converted to a string.
 
@@ -68,7 +68,7 @@ but one that should probably be part of a view model.
 The following converts both ways `hours` and `minutes` to `value`.
 
 ```js
-import {stache, DefineMap, queues, Reflect as canReflect} from "can";
+import {stache, ObservableObject, queues, Reflect as canReflect} from "can";
 
 stache.addConverter( "hoursAndMinutes", {
 	get: function( hours, minutes ) {
@@ -83,7 +83,7 @@ stache.addConverter( "hoursAndMinutes", {
 	}
 } );
 
-var data = new DefineMap({hours: 3, minutes: 17});
+var data = new ObservableObject({hours: 3, minutes: 17});
 var frag = stache(`
 	<input value:bind="hoursAndMinutes(hours, minutes)"/>
 	Hours: {{hours}}, Minutes: {{minutes}}`
@@ -96,7 +96,7 @@ document.body.append(frag);
 It is possible to add multiple converters at once by passing an object instead of a string to the `name` argument:
 
 ```js
-import {stache, DefineMap, queues, Reflect as canReflect} from "can";
+import {stache, ObservableObject, queues, Reflect as canReflect} from "can";
 
 stache.addConverter({
 	"numberToHex": {
@@ -117,7 +117,7 @@ stache.addConverter({
 	}
 });
 
-var data = new DefineMap({fname: "Cherif", age: 36});
+var data = new ObservableObject({fname: "Cherif", age: 36});
 var frag = stache(`
 	<div>
 		<input value:bind="capitalize(fname)"/>

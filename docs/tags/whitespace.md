@@ -18,21 +18,24 @@
   pre {border: solid 1px;}
   </style>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `
+  class MyDemo extends StacheElement {
+    static view = `
       <pre>
         {{this.message}}
       </pre>
       <pre>
         {{- this.message -}}
-      </pre>`,
-    ViewModel: {
-      message: {default: "Hi There!"}
-    }
-  });
+      </pre>
+    `;
+
+    static props = {
+      message: "Hi There!"
+    };
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
@@ -58,11 +61,10 @@
   }
   </style>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `
+  class MyDemo extends StacheElement {
+    static view = `
       <span class="slantycolors">
         orange
       </span>
@@ -76,11 +78,15 @@
       </span>
       <span class="slantycolors">
         {{message}}
-      </span>`,
-    ViewModel: {
-      message: {default: "There's no {{--}} before me."}
-    }
-  });
+      </span>
+    `;
+
+    static props = {
+      message: "There's no {{--}} before me."
+    };
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen

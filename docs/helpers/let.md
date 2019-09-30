@@ -14,27 +14,29 @@ the ViewModel's `name.first` and `name.last` value:
 ```html
 <let-example></let-example>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "let-example",
-	view: `
-		{{let first=this.name.first, last=this.name.last}}
-		<p>First: {{first}}, Last: {{last}}</p>
-	`,
-	ViewModel: {
-		user: {
-			default() {
-				return {
-					name: {
-						first: "Justin",
-						last: "Meyer"
-					}
-				};
-			}
-		}
-	}
-});
+class LetExample extends StacheElement {
+  static view = `
+    {{let first=this.name.first, last=this.name.last}}
+    <p>First: {{first}}, Last: {{last}}</p>
+  `;
+
+  static props = {
+    user: {
+      get default() {
+        return {
+          name: {
+            first: "Justin",
+            last: "Meyer"
+          }
+        };
+      }
+    }
+	};
+}
+
+customElements.define("let-example", LetExample);
 </script>
 ```
 
@@ -65,21 +67,21 @@ The following creates `name` variable two times, a different value is referenced
 ```html
 <script type="module">
 
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-app",
-	view: `
-		{{# let name="Cherif" }}
-			<div> Customer: {{name}} </div>
-		{{/ let }}
+class MyApp extends StacheElement {
+  static view = `
+    {{# let name="Cherif" }}
+      <div> Customer: {{name}} </div>
+    {{/ let }}
 
-		{{# let name="XBox" }}
-			<div> Product: {{name}} </div>
-		{{/ let }}
-	`,
-	ViewModel: {}
-});
+    {{# let name="XBox" }}
+      <div> Product: {{name}} </div>
+    {{/ let }}
+  `;
+}
+
+customElements.define("my-app", MyApp);
 </script>
 ```
 
@@ -97,27 +99,29 @@ the following adds variables to the template:
 ```html
 <let-example></let-example>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "let-example",
-	view: `
-		{{let first=this.name.first, last=this.name.last}}
-		<p>First: {{first}}, Last: {{last}}</p>
-	`,
-	ViewModel: {
-		user: {
-			default() {
-				return {
-					name: {
-						first: "Justin",
-						last: "Meyer"
-					}
-				};
-			}
-		}
-	}
-});
+class LetExample extends StacheElement {
+  static view = `
+    {{let first=this.name.first, last=this.name.last}}
+    <p>First: {{first}}, Last: {{last}}</p>
+  `;
+
+  static props = {
+    user: {
+      get default() {
+        return {
+          name: {
+            first: "Justin",
+            last: "Meyer"
+          }
+        };
+      }
+    }
+  };
+}
+
+customElements.define("let-example", LetExample);
 </script>
 ```
 
@@ -129,27 +133,29 @@ block:
 ```html
 <for-let-example></for-let-example>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "for-let-example",
-	view: `
-		{{# for(user of this.users) }}
-			{{let first=user.name.first, last=this.name.last}}
-			<p>First: {{first}}, Last: {{last}}</p>
-		{{/ for}}
-	`,
-	ViewModel: {
-		users: {
-			default() {
-				return [
-					{ name: { first: "Justin", last: "Meyer" } },
-					{ name: { first: "Ramiya", last: "Meyer" } }
-				];
-			}
-		}
-	}
-});
+class ForLetExample extends StacheElement {
+  static view = `
+    {{# for(user of this.users) }}
+      {{let first=user.name.first, last=this.name.last}}
+      <p>First: {{first}}, Last: {{last}}</p>
+    {{/ for}}
+  `;
+
+  static props = {
+    users: {
+      get default() {
+        return [
+          { name: { first: "Justin", last: "Meyer" } },
+          { name: { first: "Ramiya", last: "Meyer" } }
+        ];
+      }
+    }
+  };
+}
+
+customElements.define("for-let-example", ForLetExample);
 </script>
 ```
 

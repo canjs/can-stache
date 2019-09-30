@@ -43,21 +43,25 @@ For components, this makes it easier to have separate `<title>` and `<meta>` tag
 For example this component:
 
 ```js
-import { Component } from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "cart-page",
-	view: `
-		{{#portal(head)}}
-		<title>Cart | Dog Stuff</title>
-		{{/portal}}
-	`,
-	ViewModel: {
-		head: {
-			default: () => document.head
-		}
-	}
-});
+class CartPage extends StacheElement {
+  static view = `
+    {{#portal(head)}}
+    <title>Cart | Dog Stuff</title>
+    {{/portal}}
+  `;
+
+  static props = {
+    head: {
+      get default() {
+        return document.head;
+      }
+    }
+  };
+}
+
+customElements.define("cart-page", CartPage);
 ```
 
 Will insert `<title>Cart | Dog Stuff</title>` into the document head.
