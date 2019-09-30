@@ -3350,19 +3350,6 @@ function makeTest(name, doc, mutation) {
 
 	});
 
-	QUnit.test("viewCallbacks passes parent node list", function(assert) {
-		assert.expect(1);
-
-		var nodeList = [];
-		var template = stache("<node-list-passed />");
-
-		viewCallbacks.tag("node-list-passed", function(el, tagData){
-			assert.strictEqual(tagData.parentNodeList, nodeList, "got parentNodeList");
-		});
-
-		template({}, nodeList);
-	});
-
 	QUnit.test("./ in key", function(assert) {
 		var template = stache( "<div><label>{{name}}</label>{{#children}}<span>{{./name}}-{{name}}</span>{{/children}}</div>");
 

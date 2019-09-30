@@ -52,7 +52,7 @@ module.exports = {
 	},
 	// Sets .fn and .inverse on a helperOptions object and makes sure
 	// they can reference the current scope and options.
-	createRenderers: function(helperOptions, scope /*TODO: , nodeList*/, truthyRenderer, falseyRenderer, isStringOnly){
+	createRenderers: function(helperOptions, scope, truthyRenderer, falseyRenderer, isStringOnly){
 		helperOptions.fn = truthyRenderer ? this.makeRendererConvertScopes(truthyRenderer, scope, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
 		helperOptions.inverse = falseyRenderer ? this.makeRendererConvertScopes(falseyRenderer, scope, isStringOnly, helperOptions.metadata) : createNoOpRenderer(helperOptions.metadata);
 		helperOptions.isSection = !!(truthyRenderer || falseyRenderer);
@@ -82,11 +82,11 @@ module.exports = {
 			ObservationRecorder.ignore(convertedRenderer);
 	},
 	makeView: function(renderer){
-		var view = ObservationRecorder.ignore(function(scope, nodeList){
+		var view = ObservationRecorder.ignore(function(scope){
 			if(!(scope instanceof Scope)) {
 				scope = new Scope(scope);
 			}
-			return renderer(scope, nodeList);
+			return renderer(scope);
 		});
 		view[isViewSymbol] = true;
 		return view;

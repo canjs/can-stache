@@ -82,8 +82,6 @@ function portalHelper(elementObservable, options){
 			endPortalledPlaceholder[keepNodeSymbol] = true;
 			portalElement.appendChild(startPortalledPlaceholder);
 			portalElement.appendChild(endPortalledPlaceholder);
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
 
 			var observable = new Observation(portalContents, null, {isObservable: false});
 
