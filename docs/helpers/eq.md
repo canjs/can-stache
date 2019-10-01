@@ -10,21 +10,23 @@ Render something if two values are equal.
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-  	tag: "my-demo",
-  	view: `
-  		{{# eq(this.state, 'loggedIn') }}
-  			<button on:click="this.state ='loggedOut'">Log Out</button>
-  		{{else}}
-  			<button on:click="this.state = 'loggedIn'">Log In</button>
-  		{{/ eq }}
-  	`,
-  	ViewModel: {
-  		state: {default: true}
-  	}
-  });
+  class MyDemo extends StacheElement {
+    static view = `
+      {{# eq(this.state, 'loggedIn') }}
+        <button on:click="this.state ='loggedOut'">Log Out</button>
+      {{else}}
+        <button on:click="this.state = 'loggedIn'">Log In</button>
+      {{/ eq }}
+    `;
+
+    static props = {
+      state: ""
+    };
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen

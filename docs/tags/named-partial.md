@@ -50,30 +50,30 @@ Named partials are sub-templates in a larger template that aren’t rendered unt
 <partial-demo></partial-demo>
 
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "partial-demo",
-	view: `
-		{{<addressView}}
-			<div>{{this.street}}, {{this.city}}</div>
-		{{/addressView}}
+class PartialDemo extends StacheElement {
+  static view = `
+    {{<addressView}}
+      <div>{{this.street}}, {{this.city}}</div>
+    {{/addressView}}
 
-		<div>
-			{{ addressView(this.business.address) }}
-		</div>
-		<ul>
-			{{# for(person of this.people) }}
-				<li>
-					{{ person.fullName }}, {{ person.birthday }}
-					{{ addressView(person.address) }}
-				</li>
-			{{/ for }}
-		</ul>
-	`,
-	ViewModel: {
+    <div>
+      {{ addressView(this.business.address) }}
+    </div>
+    <ul>
+      {{# for(person of this.people) }}
+        <li>
+          {{ person.fullName }}, {{ person.birthday }}
+          {{ addressView(person.address) }}
+        </li>
+      {{/ for }}
+    </ul>
+  `;
+
+  static props = {
 		business: {
-			default(){
+			get default() {
 				return {
 					name: "Bitvoi",
 					address: { street: "Bitovi Way", city: "World" }
@@ -81,7 +81,7 @@ Component.extend({
 			}
 		},
 		people: {
-			default(){
+			get default() {
 				return [
 					{
 						fullName: "James Atherton",
@@ -100,8 +100,10 @@ Component.extend({
 				];
 			}
 		}
-	}
-});
+	};
+}
+
+customElements.define("partial-demo", PartialDemo);
 </script>
 ```
 @codepen
@@ -112,23 +114,23 @@ Named partials can also references their own name in a [can-stache.tags.partial 
 <partial-demo></partial-demo>
 
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "partial-demo",
-	view: `
-		{{< recursiveView }}
-			<div>{{this.name}} <b>Type:</b> {{#if(this.nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
-			{{# for(node of this.nodes) }}
-				{{ recursiveView(node) }}
-			{{/ for }}
-		{{/ recursiveView }}
+class PartialDemo extends StacheElement {
+  static view = `
+    {{< recursiveView }}
+      <div>{{this.name}} <b>Type:</b> {{#if(this.nodes.length)}}Branch{{else}}Leaf{{/if}}</div>
+      {{# for(node of this.nodes) }}
+        {{ recursiveView(node) }}
+      {{/ for }}
+    {{/ recursiveView }}
 
-		{{ recursiveView(this.yayRecursion) }}
-	`,
-	ViewModel: {
+    {{ recursiveView(this.yayRecursion) }}
+  `;
+
+  static props = {
 		yayRecursion: {
-			default(){
+			get default() {
 				return {
 					name: "Root",
 					nodes: [
@@ -153,8 +155,10 @@ Component.extend({
 				}
 			}
 		}
-	}
-});
+	};
+}
+
+customElements.define("partial-demo", PartialDemo);
 </script>
 ```
 @codepen

@@ -369,15 +369,7 @@ var eachHelper = function(items) {
 		// checking its value.
 		options.metadata.rendered = true;
 		return function(el){
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
-			/*TODO: var nodeList = [el];
-			nodeList.expression = "live.list";
-			nodeLists.register(nodeList, null, options.nodeList, true);
-			// runs nest replacements
-			nodeLists.update(options.nodeList, [el]);*/
-
-			var cb = function (item, index, parentNodeList) {
+			var cb = function (item, index) {
 				var aliases = {};
 
 				if (canReflect.size(hashOptions) > 0) {
@@ -395,12 +387,11 @@ var eachHelper = function(items) {
 					.add({ index: index }, { special: true })
 					.add(item),
 				options.options
-				// TODO: , parentNodeList
 				);
 			};
 
-			live.list(el, items, cb, options.context , /* TODO: el.parentNode, nodeList,*/ function(list, parentNodeList){
-				return options.inverse(options.scope.add(list), options.options /* TODO:, parentNodeList*/);
+			live.list(el, items, cb, options.context , function(list){
+				return options.inverse(options.scope.add(list), options.options);
 			});
 		};
 	}

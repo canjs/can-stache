@@ -252,7 +252,7 @@ and the data passed.
 ```
 
 ```js
-new DefineMap( { name: "John" } );
+new ObservableObject( { name: "John" } );
 ```
 
 ```js
@@ -284,7 +284,7 @@ new DefineMap( { name: "John" } );
 ```
 
 ```js
-new DefineMap( { name: "John" } );
+new ObservableObject( { name: "John" } );
 ```
 
 ```js
@@ -306,7 +306,7 @@ For example, when a route matches the string passed to our
 routing helper it will show/hide the text.
 
 ```js
-stache.registerHelper( "routing", function( str, options ) {
+stache.registerHelper( "routing", ( str, options ) => {
 	if ( route.attr( "filter" ) === str ) {
 		return options.fn( this );
 	}
@@ -328,7 +328,7 @@ to the helper as `options.hash`. Additionally, when using [can-stache.tags.secti
 you can set a custom context by passing the object instead of `this`.
 
 ```js
-stache.registerHelper( "exercise", function( group, action, num, options ) {
+stache.registerHelper( "exercise", ( group, action, num, options ) => {
 	if ( group && group.length > 0 && action && num > 0 ) {
 		return options.fn( {
 			group: group,

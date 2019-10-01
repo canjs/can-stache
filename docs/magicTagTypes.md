@@ -48,30 +48,30 @@ Inserts the unescaped value of `expression` into the result.
 <div><b>Justin</b></div>
 ```
 
-This also works for rendering [can-component] instances:
+This also works for rendering [can-stache-element] instances:
 
 ```js
-import Component from "can-component";
-import stache from "can-stache";
+import {StacheElement, stache} from "can";
 
-const MyGreeting = Component.extend({
-  tag: "my-greeting",
-  view: "<p>Hello {{subject}}</p>",
-  ViewModel: {
-    subject: "string"
+class MyGreeting extends StacheElement {
+  static view = `<p>Hello {{subject}}</p>`;
+
+  static props = {
+    subject: String
   }
-});
+}
+
+customElements.define("my-greeting", MyGreeting);
+
 
 const myGreetingInstance = new MyGreeting({
-  viewModel: {
-    subject: "friend"
-  }
+  subject: "friend"
 });
 
 const template = stache("<div>{{{componentInstance}}}</div>");
 
 const fragment = template({
-  componentInstance: myGreetingInstance
+  componentInstance
 });
 
 fragment; //-> <div><my-greeting><p>Hello friend</p></my-greeting></div>

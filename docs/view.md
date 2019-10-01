@@ -1,4 +1,4 @@
-@typedef {function(Object,Object.<String, function>,can-view-nodelist/types/NodeList):documentFragment} can-stache.view(data, helpers,nodeList) view
+@typedef {function(Object,Object.<String, function>):documentFragment} can-stache.view(data, helpers) view
 @parent can-stache.types
 
 @description A function returned by [can-stache] that renders a

@@ -82,8 +82,6 @@ function portalHelper(elementObservable, options){
 			endPortalledPlaceholder[keepNodeSymbol] = true;
 			portalElement.appendChild(startPortalledPlaceholder);
 			portalElement.appendChild(endPortalledPlaceholder);
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
 
 			var observable = new Observation(portalContents, null, {isObservable: false});
 
@@ -102,14 +100,6 @@ function portalHelper(elementObservable, options){
 		placeholderElement.parentNode.replaceChild(commentPlaceholder, placeholderElement);
 		commentPlaceholderDispose = domMutate.onNodeRemoved(commentPlaceholder, teardownEverything);
 		return commentPlaceholder;
-		//var frag = doc.createDocumentFragment();
-		//domMutateNode.appendChild.call(frag, comment);
-		/*nodeLists.replace([el], frag);
-
-		var nodeList = [comment];
-		nodeList.expression = "portal";
-		nodeLists.register(nodeList, teardown, options.nodeList, true);
-		nodeLists.update(options.nodeList, [comment]);*/
 	};
 }
 

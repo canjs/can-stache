@@ -11,7 +11,7 @@
   `ScopeKeyData`:
 
   ```js
-  import {stache, Reflect as canReflect, DefineMap} from "can";
+  import {stache, Reflect as canReflect, ObservableObject} from "can";
 
   stache.addLiveHelper( "upper", function( str ) {
 	console.log(str); //-> ScopeKeyData{}
@@ -21,7 +21,7 @@
   	}
   	return str.toUpperCase();
   } );
-  var data = new DefineMap({name: "Justin"});
+  var data = new ObservableObject({name: "Justin"});
   var frag = stache(`{{upper(name)}}`)(data);
 
   document.body.append(frag);
@@ -39,9 +39,9 @@
   the observable passed to `incrementEverySecond()`:
 
   ```js
-  import {stache, Reflect as canReflect, DefineMap, domMutate} from "can";
+  import {stache, Reflect as canReflect, ObservableObject, domMutate} from "can";
 
-  stache.addLiveHelper( "incrementEverySecond", function( value ) {
+  stache.addLiveHelper( "incrementEverySecond", ( value ) => {
 	var interval = setInterval(function(){
 		var current = canReflect.getValue(value);
 		canReflect.setValue(value, current+1);
@@ -54,7 +54,7 @@
 		})
 	}
   } );
-  var data = new DefineMap({age: 1});
+  var data = new ObservableObject({age: 1});
   var frag = stache(`{{incrementEverySecond(age)}} Age is: {{age}}`)(data);
 
   document.body.append(frag);
