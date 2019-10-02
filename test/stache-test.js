@@ -1,19 +1,5 @@
 /* jshint asi:true,multistr:true,indent:false,latedef:nofunc*/
-require('./expression-test');
-require('../helpers/-debugger-test');
-require('./nodelist-test');
-require('../helpers/-if-test');
-require('../helpers/-and-or-test');
-require('../helpers/-is-test');
-require('../helpers/-for-of-test');
-require('../helpers/-let-test');
-require('../helpers/-each-test');
-require('../helpers/-converter-test');
-require('../helpers/-portal-test');
-require('./section-test');
-require("./partials-test");
-require("./filename-test");
-require("./warnings-test");
+
 var stache = require('../can-stache');
 var core = require('../src/mustache_core');
 var clone = require('steal-clone');
@@ -32,7 +18,6 @@ var encoder = require('can-attribute-encoder');
 var viewCallbacks = require('can-view-callbacks');
 var Scope = require('can-view-scope');
 var parser = require('can-view-parser');
-var nodeLists = require('can-view-nodelist');
 
 var makeDocument = require('can-vdom/make-document/make-document');
 var globals = require('can-globals');
@@ -50,12 +35,12 @@ var testHelpers = require('can-test-helpers');
 var canLog = require('can-log');
 var debug = require('../helpers/-debugger');
 var helpersCore = require('can-stache/helpers/core');
-
+var makeStacheTestHelpers = require("../test/helpers");
 var browserDoc = DOCUMENT();
-
 
 makeTest('can-stache dom', browserDoc);
 makeTest('can-stache vdom', makeDocument());
+
 
 // HELPERS
 function overwriteGlobalHelper(name, fn, method) {
@@ -72,11 +57,13 @@ function overwriteGlobalHelper(name, fn, method) {
 }
 
 function makeTest(name, doc, mutation) {
+	var stacheTestHelpers = makeStacheTestHelpers(doc);
+
 	var isNormalDOM = doc === window.document;
 
 	var innerHTML = function(node){
 		return "innerHTML" in node ?
-			node.innerHTML :
+			stacheTestHelpers.cloneAndClean(node).innerHTML :
 			undefined;
 	};
 	var getValue = function(node){
@@ -99,7 +86,7 @@ function makeTest(name, doc, mutation) {
 	var getText = function(template, data, options){
 			var div = doc.createElement("div");
 			div.appendChild( stache(template)(data, options) );
-			return cleanHTMLTextForIE( innerHTML(div) );
+			return cleanHTMLTextForIE( innerHTML(stacheTestHelpers.cloneAndClean(div)) );
 		},
 		getAttr = function (el, attrName) {
 			return attrName === "class" ?
@@ -178,7 +165,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stashed({
 			message: "World"
 		});
-		assert.equal( innerHTML(frag.firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
+		assert.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).toLowerCase(), "<span>hello world!</span>","got back the right text");
 	});
 
 	QUnit.test("a section helper", function(assert) {
@@ -194,9 +181,9 @@ function makeTest(name, doc, mutation) {
 
 
 		var frag = stashed({});
-		assert.equal(frag.firstChild.firstChild.nodeName.toLowerCase(), "span", "got a span");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeName.toLowerCase(), "span", "got a span");
 
-		assert.equal(innerHTML(frag.firstChild.firstChild), "Hello World!","got back the right text");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild), "Hello World!","got back the right text");
 
 	});
 
@@ -251,7 +238,7 @@ function makeTest(name, doc, mutation) {
 			attributes: "foo='bar'"
 		});
 
-		assert.equal(frag.firstChild.getAttribute('foo'), "bar", "{{attributes}} set");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), "bar", "{{attributes}} set");
 
 		template = stache("<div {{#if truthy}}foo='{{baz}}'{{/if}}/>");
 
@@ -260,14 +247,14 @@ function makeTest(name, doc, mutation) {
 			baz: "bar"
 		});
 
-		assert.equal(frag.firstChild.getAttribute('foo'), "bar", "foo='{{baz}}' set");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), "bar", "foo='{{baz}}' set");
 
 		frag = template({
 			truthy: false,
 			baz: "bar"
 		});
 
-		assert.equal(frag.firstChild.getAttribute('foo'), null, "attribute not set if not truthy");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute('foo'), null, "attribute not set if not truthy");
 
 
 	});
@@ -307,11 +294,11 @@ function makeTest(name, doc, mutation) {
 
 		//equal(frag.children.length, 2, "there are 2 childNodes");
 
-		assert.ok(/top: 0px/.test(   frag.firstChild.firstChild.getAttribute("style") ), "0px");
+		assert.ok(/top: 0px/.test(   stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("style") ), "0px");
 
 		boxes[0].tick();
 
-		assert.ok(! /top: 0px/.test( frag.firstChild.firstChild.getAttribute("style")) , "!0px");
+		assert.ok(! /top: 0px/.test( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("style")) , "!0px");
 
 	});
 
@@ -321,7 +308,7 @@ function makeTest(name, doc, mutation) {
 			completed: 0
 		});
 
-		assert.equal( frag.firstChild.firstChild.nodeValue, "0", 'zero shown' );
+		assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "0", 'zero shown' );
 	});
 
 	QUnit.test('Inverted section function returning numbers', function(assert) {
@@ -341,12 +328,13 @@ function makeTest(name, doc, mutation) {
 			todos: todos
 		});
 
-		assert.deepEqual(frag.firstChild.firstChild.nodeValue, "hidden", 'hidden shown');
+		assert.deepEqual(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "hidden", 'hidden shown');
 
 		// now update the named attribute
 		obsvr.set('named', true);
 
-		assert.deepEqual(frag.firstChild.firstChild.nodeValue, "", 'hidden gone');
+		var hiddenTextNode = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild;
+		assert.notOk(hiddenTextNode && hiddenTextNode.nodeValue, 'hidden gone');
 
 	});
 
@@ -361,14 +349,14 @@ function makeTest(name, doc, mutation) {
 
 		var frag = tpl(teacher);
 
-		assert.deepEqual(innerHTML(frag.firstChild), "&lt;strong&gt;Mrs Peters&lt;/strong&gt;");
-		assert.deepEqual(innerHTML(frag.lastChild.firstChild), "Mrs Peters");
+		assert.deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "&lt;strong&gt;Mrs Peters&lt;/strong&gt;");
+		assert.deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild), "Mrs Peters");
 
 		teacher.set('name', '<i>Mr Scott</i>');
 
-		assert.deepEqual(innerHTML(frag.firstChild), "&lt;i&gt;Mr Scott&lt;/i&gt;");
+		assert.deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "&lt;i&gt;Mr Scott&lt;/i&gt;");
 
-		assert.deepEqual(innerHTML(frag.lastChild.firstChild), "Mr Scott");
+		assert.deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild), "Mr Scott");
 
 	});
 
@@ -470,7 +458,7 @@ function makeTest(name, doc, mutation) {
 		var div = doc.createElement("div");
 		div.appendChild(frag);
 
-		assert.equal(innerHTML( div ), t.expected);
+		assert.equal(innerHTML( stacheTestHelpers.cloneAndClean(div) ), t.expected);
 
 		assert.equal(getText(t.template, {}), t.expected2);
 	});
@@ -539,7 +527,7 @@ function makeTest(name, doc, mutation) {
 			}
 		}));
 
-		assert.deepEqual(innerHTML(div), "foo");
+		assert.deepEqual(innerHTML(stacheTestHelpers.cloneAndClean(div)), "foo");
 	});
 
 	if(isNormalDOM) {
@@ -642,7 +630,7 @@ function makeTest(name, doc, mutation) {
 
 		div.appendChild(stache(t.template)(t.data2));
 
-		assert.deepEqual( innerHTML(div), expected, 'Using Observe.List');
+		assert.deepEqual( innerHTML(stacheTestHelpers.cloneAndClean(div)), expected, 'Using Observe.List');
 		t.data2.names.push('What');
 	});
 
@@ -1476,7 +1464,7 @@ function makeTest(name, doc, mutation) {
 				div.insertBefore(span.firstChild, span);
 				div.removeChild(span);
 			}
-			actual = innerHTML(div);
+			actual = innerHTML(stacheTestHelpers.cloneAndClean(div));
 
 			assert.equal(actual, result, "canCompute resolved for helper " + result);
 		}
@@ -2377,7 +2365,7 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		var divs = getChildNodes(frag);
+		var divs = getChildNodes(stacheTestHelpers.cloneAndClean(frag));
 		assert.equal(divs.length, 4, "there are 4 divs");
 
 		var vals = canReflect.toArray(divs).map(function (div) {
@@ -2678,9 +2666,9 @@ function makeTest(name, doc, mutation) {
 		var lis = tpl.getElementsByTagName('li');
 		assert.equal(lis.length, 3, "three lis");
 
-		assert.equal(innerHTML(lis[0]), '0 a', "first index and value are correct");
-		assert.equal(innerHTML(lis[1]), '1 b', "second index and value are correct");
-		assert.equal(innerHTML(lis[2]), '2 c', "third index and value are correct");
+		assert.equal(innerHTML(lis[0]), '0 a', "A: first index and value are correct");
+		assert.equal(innerHTML(lis[1]), '1 b', "A: second index and value are correct");
+		assert.equal(innerHTML(lis[2]), '2 c', "A: third index and value are correct");
 
 		// add a few more items
 		list.push('d', 'e');
@@ -2688,28 +2676,28 @@ function makeTest(name, doc, mutation) {
 		lis = tpl.getElementsByTagName('li');
 		assert.equal(lis.length, 5, "five lis");
 
-		assert.equal(innerHTML(lis[3]), '3 d', "fourth index and value are correct");
-		assert.equal(innerHTML(lis[4]), '4 e', "fifth index and value are correct");
+		assert.equal(innerHTML(lis[3]), '3 d', "B: fourth index and value are correct");
+		assert.equal(innerHTML(lis[4]), '4 e', "B: fifth index and value are correct");
 
 		// splice off a few items and add some more
 		list.splice(0, 2, 'z', 'y');
 
 		lis = tpl.getElementsByTagName('li');
 		assert.equal(lis.length, 5, "five lis");
-		assert.equal(innerHTML(lis[0]), '0 z', "first item updated");
-		assert.equal(innerHTML(lis[1]), '1 y', "second item updated");
-		assert.equal(innerHTML(lis[2]), '2 c', "third item the same");
-		assert.equal(innerHTML(lis[3]), '3 d', "fourth item the same");
-		assert.equal(innerHTML(lis[4]), '4 e', "fifth item the same");
+		assert.equal(innerHTML(lis[0]), '0 z', "C: first item updated");
+		assert.equal(innerHTML(lis[1]), '1 y', "C: second item updated");
+		assert.equal(innerHTML(lis[2]), '2 c', "C: third item the same");
+		assert.equal(innerHTML(lis[3]), '3 d', "C: fourth item the same");
+		assert.equal(innerHTML(lis[4]), '4 e', "C: fifth item the same");
 
 		// splice off from the middle
 		list.splice(2, 2);
 
 		lis = tpl.getElementsByTagName('li');
 		assert.equal(lis.length, 3, "three lis");
-		assert.equal(innerHTML(lis[0]), '0 z', "first item the same");
-		assert.equal(innerHTML(lis[1]), '1 y', "second item the same");
-		assert.equal(innerHTML(lis[2]), '2 e', "fifth item now the 3rd item");
+		assert.equal(innerHTML(lis[0]), '0 z', "D: first item the same");
+		assert.equal(innerHTML(lis[1]), '1 y', "D: second item the same");
+		assert.equal(innerHTML(lis[2]), '2 e', "D: fifth item now the 3rd item");
 	});
 
 	QUnit.test('Rendering keys of an object with #each and scope.key', function(assert) {
@@ -2839,8 +2827,8 @@ function makeTest(name, doc, mutation) {
 
 		items.push("a");
 
-		assert.equal(frag.firstChild.getElementsByTagName("li")
-			.length, 3, "there are 3 elements - "+frag.firstChild.innerHTML);
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")
+			.length, 3, "there are 3 elements - "+stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML);
 
 	});
 
@@ -2854,8 +2842,8 @@ function makeTest(name, doc, mutation) {
 
 		var frag = tmp(data);
 
-		assert.equal(innerHTML(frag.firstChild.getElementsByTagName("li")[0]), "0");
-		assert.equal(innerHTML(frag.firstChild.getElementsByTagName("li")[1]), "");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")[0]), "0");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li")[1]), "");
 
 	});
 
@@ -2900,7 +2888,7 @@ function makeTest(name, doc, mutation) {
 		], function (content) {
 			var div = doc.createElement('div');
 			div.appendChild(stache(content)());
-			assert.equal(innerHTML(div), content, 'Content did not change: "' + content + '"');
+			assert.equal(div.innerHTML, content, 'Content did not change: "' + content + '"');
 		});
 	});
 
@@ -2936,9 +2924,27 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{safeHelper()}}</div>")
 
 		var frag = template();
-		assert.equal(frag.firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
+		var cleaned= stacheTestHelpers.cloneAndClean(frag);
+
+		assert.equal(cleaned.firstChild.firstChild.nodeName.toLowerCase(), "p", "got a p element");
 
 	});
+	window.getChildNodes = getChildNodes;
+	window.print = function(node){
+		var text = "";
+		if(node.nodeType === 1 || node.nodeType === 11) {
+			text += "<"+node.nodeName+">";
+			stacheTestHelpers.ArrayFrom( getChildNodes(node) ).forEach(function(child) {
+				text += print(child);
+			});
+			text += "</"+node.nodeName+">";
+		} else if(node.nodeType === 3){
+			text += node.nodeValue;
+		} else if(node.nodeType) {
+			text += "<! "+node.nodeValue +" ->";
+		}
+		return text;
+	}
 
 	QUnit.test("directly nested subitems and each (#605)", function(assert) {
 
@@ -2963,6 +2969,7 @@ function makeTest(name, doc, mutation) {
 			labels = div.getElementsByTagName("label");
 
 		assert.equal(labels.length, 1, "initially one label");
+
 		data.get('item').get('subitems')
 			.push('second');
 
@@ -3052,7 +3059,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map);
 
-		var lis = frag.firstChild.getElementsByTagName("li");
+		var lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 		assert.equal(lis.length, 3, "there are 3 properties of map's data property");
 
 		assert.equal(innerHTML(lis[0]), "some : test");
@@ -3318,7 +3325,7 @@ function makeTest(name, doc, mutation) {
 			assert.equal(typeof tagData.subtemplate, "function", "got subtemplate");
 			var frag = tagData.subtemplate(tagData.scope.add({last: "Meyer"}));
 
-			assert.equal( innerHTML(frag.firstChild), "Justin Meyer", "rendered right");
+			assert.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "Justin Meyer", "rendered right");
 		});
 
 		var template = stache("<stache-tag><span>{{../first}} {{last}}</span></stache-tag>")
@@ -3341,19 +3348,6 @@ function makeTest(name, doc, mutation) {
 
 		template({});
 
-	});
-
-	QUnit.test("viewCallbacks passes parent node list", function(assert) {
-		assert.expect(1);
-
-		var nodeList = [];
-		var template = stache("<node-list-passed />");
-
-		viewCallbacks.tag("node-list-passed", function(el, tagData){
-			assert.strictEqual(tagData.parentNodeList, nodeList, "got parentNodeList");
-		});
-
-		template({}, nodeList);
 	});
 
 	QUnit.test("./ in key", function(assert) {
@@ -3470,7 +3464,7 @@ function makeTest(name, doc, mutation) {
 				return opts.fn();
 			}
 		});
-		var node = frag.firstChild;
+		var node = stacheTestHelpers.cloneAndClean(frag).firstChild;
 
 		assert.equal(innerHTML(node), 'baz', 'Context is forwarded correctly');
 	});
@@ -3493,9 +3487,9 @@ function makeTest(name, doc, mutation) {
 
 		});
 
-		assert.equal(innerHTML(frag.firstChild), '0', 'Context is set correctly for falsey values');
-		assert.equal(innerHTML(frag.childNodes.item(1)), '', 'Context is set correctly for falsey values');
-		assert.equal(innerHTML(frag.childNodes.item(2)), '', 'Context is set correctly for falsey values');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), '0', 'Context is set correctly for falsey values');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).childNodes.item(1)), '', 'Context is set correctly for falsey values');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).childNodes.item(2)), '', 'Context is set correctly for falsey values');
 	});
 
 	QUnit.test("Custom elements created with default namespace in IE8", function(assert) {
@@ -3530,14 +3524,14 @@ function makeTest(name, doc, mutation) {
 		}
 
 		frag = stache(t.template)({}, t.helpers);
-		assert.equal(frag.firstChild.nodeValue, t.expected);
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, t.expected);
 	});
 
 	QUnit.test("{{else}} with {{#unless}} (#988)", function(assert) {
 		var tmpl = "<div>{{#unless noData}}data{{else}}no data{{/unless}}</div>";
 
 		var frag = stache(tmpl)({ noData: true });
-		assert.equal(innerHTML(frag.firstChild), 'no data', 'else with unless worked');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'no data', 'else with unless worked');
 	});
 
 	QUnit.test("{{else}} within an attribute (#974)", function(assert) {
@@ -3571,7 +3565,7 @@ function makeTest(name, doc, mutation) {
 				'<circle r="25" cx="25" cy="25"></circle>' +
 				'</svg>';
 			var frag = stache(template)({});
-			assert.equal(frag.firstChild.firstChild.getAttribute("r"), "25");
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.getAttribute("r"), "25");
 		} else {
 			assert.expect(0);
 		}
@@ -3622,7 +3616,7 @@ function makeTest(name, doc, mutation) {
 			team : team
 		});
 
-		assert.equal(innerHTML(frag.firstChild), "ARS", "got value");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "ARS", "got value");
 
 	});
 
@@ -3637,22 +3631,23 @@ function makeTest(name, doc, mutation) {
 
 		// Only node in IE is <table>, text in other browsers
 		var index = getChildNodes(frag).length === 2 ? 1 : 0;
-		var tagName = frag.childNodes.item(index).firstChild.firstChild.tagName.toLowerCase();
+		var tagName = stacheTestHelpers.cloneAndClean(frag).childNodes.item(index).firstChild.firstChild.tagName.toLowerCase();
 
 		assert.equal(tagName, 'col', '<col> nodes added in proper position');
 	});
 
 	QUnit.test('splicing negative indices works (#1038)', function(assert) {
 		// http://jsfiddle.net/ZrWVQ/2/
-		var template = '{{#each list}}<p>{{.}}</p>{{/each}}';
+		var template = '<div>{{#each list}}<p>{{.}}</p>{{/each}}</div>';
 		var list = new DefineList(['a', 'b', 'c', 'd']);
 		var frag = stache(template)({
 			list: list
 		});
-		var children = getChildNodes(frag).length;
+		var children = frag.firstChild.getElementsByTagName("p").length;
 
 		list.splice(-1);
-		assert.equal(getChildNodes(frag).length, children - 1, 'Child node removed');
+
+		assert.equal(frag.firstChild.getElementsByTagName("p").length, children - 1, 'Child node removed');
 	});
 
 	QUnit.test('stache can accept an intermediate (#1387)', function(assert) {
@@ -3773,7 +3768,7 @@ function makeTest(name, doc, mutation) {
 
 		data.get("items").push("foo");
 
-		var spans = frag.firstChild.getElementsByTagName("span");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
 
 		assert.equal(spans.length,1, "one span");
 
@@ -3823,38 +3818,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template({d: promise});
 
-		assert.equal(innerHTML(frag.firstChild), "AltValue", "read value");
-
-	});
-
-	QUnit.test("possible to teardown immediate nodeList (#1593)", function(assert) {
-		assert.expect(3);
-		var map = new SimpleMap({show: true});
-
-
-
-		var template = stache("{{#if show}}<span/>TEXT{{/if}}");
-		var nodeList = nodeLists.register([], undefined, true);
-		var frag = template(map,{},nodeList);
-		nodeLists.update(nodeList, getChildNodes(frag));
-
-		assert.equal(nodeList.length, 1, "our nodeList has the nodeList of #if show");
-		var meta = map[canSymbol.for("can.meta")];
-		assert.ok(meta.handlers.get([]).length, "there is one handler");
-
-		nodeLists.unregister(nodeList);
-
-		// has to be async b/c of the temporary bind for performance
-		var done = assert.async();
-		var check = function(){
-			if(!meta.handlers.get([]).length) {
-				assert.ok(true, "there is no handler");
-				done();
-			} else {
-				setTimeout(check,20);
-			}
-		};
-		check();
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "AltValue", "read value");
 
 	});
 
@@ -3879,7 +3843,7 @@ function makeTest(name, doc, mutation) {
 		product.set(1);
 		queues.batch.stop();
 
-		assert.equal(frag.firstChild.getElementsByTagName('span').length, 1, "no duplicates");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('span').length, 1, "no duplicates");
 
 	});
 
@@ -3893,7 +3857,7 @@ function makeTest(name, doc, mutation) {
 				radius: 6
 			});
 
-			assert.equal(frag.firstChild.namespaceURI, "http://www.w3.org/2000/svg", "svg namespace");
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.namespaceURI, "http://www.w3.org/2000/svg", "svg namespace");
 
 		});
 	}
@@ -3921,7 +3885,7 @@ function makeTest(name, doc, mutation) {
 		// 2. Set that key to a canCompute
 		myMap.set('test', new Observation(function() { return "def"; }));
 
-		assert.equal(frag.firstChild.firstChild.nodeValue, "def", "correct value");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "def", "correct value");
 	});
 
 	QUnit.test('template with a block section and nested if doesnt render correctly', function(assert) {
@@ -3933,9 +3897,9 @@ function makeTest(name, doc, mutation) {
 			"{{#bar}}<div>{{#if ../foo}}My Meals{{else}}My Order{{/if}}</div>{{/bar}}"
 		)(myMap);
 
-		assert.equal(innerHTML(frag.firstChild), 'My Order', 'shows else case');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'My Order', 'shows else case');
 		myMap.set('foo', true);
-		assert.equal(innerHTML(frag.firstChild), 'My Meals', 'shows if case');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'My Meals', 'shows if case');
 	});
 
 	QUnit.test('addHelper', function(assert) {
@@ -3950,7 +3914,7 @@ function makeTest(name, doc, mutation) {
 			first: 2,
 			second: 4
 		}));
-		assert.equal(innerHTML(frag.firstChild), 'Result: 6');
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), 'Result: 6');
 	});
 
 	QUnit.test('Helper handles list replacement (#1652)', function(assert) {
@@ -4063,12 +4027,10 @@ function makeTest(name, doc, mutation) {
 	QUnit.test("joinBase helper joins to the baseURL", function(assert) {
 
 		var baseUrl = System.baseURL || getBaseURL();
-		var template = stache("{{joinBase 'hello/' name}}");
 		var map = new SimpleMap({ name: "world" });
+		var text = getText("{{joinBase 'hello/' name}}", map);
 
-		var frag = template(map);
-
-		assert.equal(frag.firstChild.nodeValue, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
+		assert.equal(text, joinURIs(baseUrl, "hello/world"), "joined from baseUrl");
 
 	});
 
@@ -4080,7 +4042,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map, { module: { uri: baseUrl } });
 
-		assert.equal(frag.firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "http://foocdn.com/hello/world", "relative lookup works");
 	});
 
 	QUnit.test('Custom attribute callbacks are called when in a conditional within a live section', function(assert) {
@@ -4130,12 +4092,11 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		assert.equal(frag.firstChild.nodeValue, "helperA value");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperA value");
 	});
 
 	QUnit.test("inner expressions with computes", function(assert) {
 		var template = stache("{{helperA helperB(1,valueA,propA=valueB propC=2) 'def' outerPropA=helperC(2,valueB)}}");
-
 
 		var valueB = new SimpleObservable("B");
 		var changes = 0;
@@ -4181,14 +4142,14 @@ function makeTest(name, doc, mutation) {
 			}
 		});
 
-		assert.equal(frag.firstChild.nodeValue, "helperB=B-helperC=B");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperB=B-helperC=B");
 
 		changes++;
 		queues.batch.start();
 		valueB.set("X");
 		queues.batch.stop();
 
-		assert.equal(frag.firstChild.nodeValue, "helperB=X-helperC=X");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "helperB=X-helperC=X");
 	});
 
 	QUnit.test("parent scope functions not called with arguments (#1833)", function(assert) {
@@ -4214,7 +4175,7 @@ function makeTest(name, doc, mutation) {
 			arg: age
 		});
 
-		assert.equal( frag.firstChild.nodeValue, "64", "method call works");
+		assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "64", "method call works");
 
 	});
 
@@ -4284,13 +4245,13 @@ function makeTest(name, doc, mutation) {
 			'<span class="num1">{{num1}}</span>' +
 			'<span class="num2">{{num2()}}</span>')(map);
 
-		assert.equal(frag.firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
-		assert.equal(frag.lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '1', 'Rendered correct value');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '2', 'Rendered correct value');
 
 		map.set('num1', map.get('num1') * 2);
 
-		assert.equal(frag.firstChild.firstChild.nodeValue, '2', 'Rendered correct value');
-		assert.equal(frag.lastChild.firstChild.nodeValue, '4', 'Rendered correct value');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '2', 'Rendered correct value');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '4', 'Rendered correct value');
 	});
 
 	QUnit.test('eq called twice (#1931)', function(assert) {
@@ -4318,13 +4279,14 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<div>{{#each list}}<span>{{.}}</span>{{else}}<label>empty</label>{{/each}}</div>");
 		var frag = template({list: list});
 		list.replace([]);
-		var spans = frag.firstChild.getElementsByTagName("span");
-		var labels = frag.firstChild.getElementsByTagName("label");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
+		var labels = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("label");
 		assert.equal(spans.length, 0, "truthy case doesn't render");
 		assert.equal(labels.length, 1, "empty case");
 	});
 
-	QUnit.test("Re-evaluating a case in a switch (#1988)", function(assert) {
+	test("Re-evaluating a case in a switch (#1988)", function(assert){
+		//debugger;
 		var template = stache(
 			"{{#switch page}}" +
 				"{{#case 'home'}}" +
@@ -4350,22 +4312,22 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(map);
 
-		assert.equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "home", "'home' is the first item shown");
 
 		map.set("page", "users");
-		assert.equal(frag.firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.getAttribute("id"), "users", "'users' is the item shown when the page is users");
 
 		map.set("slug", "Matthew");
-		assert.equal(frag.firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.getAttribute("id"), "user", "'user' is the item shown when the page is users and there is a slug");
 
 		queues.batch.start();
 		map.set("page", "home");
 		map.set("slug", undefined);
 		queues.batch.stop();
 
-		assert.equal(frag.firstChild.getAttribute("id"), "home", "'home' is the first item shown");
-		assert.equal(frag.firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
-		assert.equal(frag.firstChild.nextSibling.nextSibling, undefined, "there are no more nodes");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "home", "'home' is the first item shown");
+		//equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.nodeType, 3, "the next sibling is a TextNode");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling, undefined, "there are no more nodes");
 	});
 
 	QUnit.test("Rendering live bound indices with #each, scope.index and a simple CanList (#2067)", function(assert) {
@@ -4388,20 +4350,21 @@ function makeTest(name, doc, mutation) {
 
 	QUnit.test("scope.index content should be skipped by ../ (#1554)", function(assert) {
 		var list = new DefineList(["a","b"]);
-		var tmpl = stache('{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}');
+		var tmpl = stache('<div>{{#each items}}<li>{{.././items.indexOf(this)}}</li>{{/each}}</div>');
 		var frag = tmpl({items: list});
-		assert.equal(frag.lastChild.firstChild.nodeValue, "1", "read indexOf");
+
+		assert.equal(frag.firstChild.getElementsByTagName("li")[1].innerHTML, "1", "read indexOf");
 	});
 
 	QUnit.test("rendering style tag (#2035)",function(assert) {
 		var map = new SimpleMap({color: 'green'});
 		var frag = stache('<style>body {color: {{color}} }</style>')(map);
-		var content = frag.firstChild.firstChild.nodeValue;
+		var content = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue;
 		assert.equal(content,"body {color: green }","got the right style text");
 
 		map = new SimpleMap({showGreen: true});
 		frag = stache('<style>body {color: {{#showGreen}}green{{/showGreen}} }</style>')(map);
-		content = frag.firstChild.firstChild.nodeValue;
+		content = stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue;
 		assert.equal(content,"body {color: green }","sub expressions work");
 
 	});
@@ -4411,13 +4374,13 @@ function makeTest(name, doc, mutation) {
 			preview: true
 		});
 		var frag = stache("<div {{#if preview}}checked{{/if}}></div>")(map);
-		assert.equal(frag.firstChild.getAttribute("checked"), "", "got attribute");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("checked"), "", "got attribute");
 	});
 
 	QUnit.test("sections with attribute spacing (#2097)", function(assert) {
 		var template = stache('<div {{#foo}} disabled {{/foo}}>');
 		var frag = template({foo: true});
-		assert.equal(frag.firstChild.getAttribute("disabled"),"","disabled set");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("disabled"),"","disabled set");
 	});
 
 	QUnit.test("readonly as a custom attribute", function(assert) {
@@ -4425,7 +4388,7 @@ function makeTest(name, doc, mutation) {
 			conditions: false
 		});
 		var frag = stache('<input {{^conditions}}readonly{{/conditions}} name="password" type="password" />')(map);
-		assert.equal(frag.firstChild.getAttribute("readonly"),"","readonly set");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("readonly"),"","readonly set");
 	});
 
 	QUnit.test("keep scope.index working with multi-dimensional arrays (#2127)", function(assert) {
@@ -4437,7 +4400,7 @@ function makeTest(name, doc, mutation) {
 
 		var frag = template(data);
 
-		var spans = frag.firstChild.getElementsByTagName("span");
+		var spans = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("span");
 		assert.equal( spans[0].firstChild.nodeValue, "0");
 	});
 
@@ -4470,8 +4433,8 @@ function makeTest(name, doc, mutation) {
 		queues.batch.stop();
 
 
-	    assert.ok( innerHTML(frag.firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
-	    assert.ok( innerHTML(frag.firstChild).indexOf("INNER1") === -1, "does not have INNER1");
+	    assert.ok( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).indexOf("OUTER2") >= 0, "has OUTER2");
+	    assert.ok( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild).indexOf("INNER1") === -1, "does not have INNER1");
 
 
 	});
@@ -4496,15 +4459,16 @@ function makeTest(name, doc, mutation) {
 			trace: function(value, options) {
 
 				if(counter === 0) {
-					assert.equal(value, 'view todos');
+					assert.equal(value, 'view todos', "first we should see view-todos");
 				} else if(counter === 1) {
-					assert.equal(value, 'edit recipes')
+					assert.equal(value, 'edit recipes', "next we should see edit-recipes")
 				} else {
 					assert.ok(false, 'Traced an unexpected template call: '+value);
 				}
 				counter++;
 			}
 		});
+
 		queues.batch.start();
 		state.set({
 			action: 'edit',
@@ -4567,7 +4531,7 @@ function makeTest(name, doc, mutation) {
 			  c: true
           }));
 
-          assert.equal(frag.firstChild.getAttribute("f"),"f", "able to set f");
+          assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("f"),"f", "able to set f");
 	});
 
 	QUnit.test("Bracket expression", function(assert) {
@@ -4677,15 +4641,15 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<ul>{{#each .}}<li>{{contextHelper .}}</li>{{/each}}</ul>");
 		var items = new DefineList(["one","two"]);
 		var frag = template(items);
-		var lis = frag.firstChild.getElementsByTagName("li");
+		var lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 
 		items.set(1,"TWO");
-		lis = frag.firstChild.getElementsByTagName("li");
-		//assert.equal(computes[1](), "TWO", "compute value is right");
+		lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
+		//QUnit.equal(computes[1](), "TWO", "compute value is right");
 		assert.equal( lis[1].innerHTML, "TWO", "is TWO");
 
 		computes[1]("2");
-		lis = frag.firstChild.getElementsByTagName("li");
+		lis = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("li");
 		assert.equal( lis[1].innerHTML, "2", "is 2");
 	});
 
@@ -4753,7 +4717,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache.from("some-template");
 		var frag = template({message: "Hello"});
 
-		assert.equal(frag.firstChild.nodeValue, "Hello");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "Hello");
 	});
 
 	QUnit.test("foo().bar", function(assert) {
@@ -5111,8 +5075,8 @@ function makeTest(name, doc, mutation) {
 		viewCallbacks.tag("my-email", function(el, tagData){
 			assert.ok(tagData.templates, "has templates");
 			frag = tagData.templates.subject({subject: "Hello"})
-			assert.equal(frag.firstChild.nodeName, 'H2');
-			assert.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeName, 'H2');
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "Hello");
 		});
 
 		frag = template({});
@@ -5137,8 +5101,8 @@ function makeTest(name, doc, mutation) {
 		viewCallbacks.tag("my-email", function(el, tagData){
 			assert.ok(tagData.templates, "has templates");
 			frag = tagData.templates.subject({subject: "Hello"})
-			assert.equal(frag.firstChild.nodeName, 'H' + count++);
-			assert.equal(frag.firstChild.firstChild.nodeValue, "Hello");
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeName, 'H' + count++);
+			assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, "Hello");
 		});
 
 		frag = template({});
@@ -5196,7 +5160,7 @@ function makeTest(name, doc, mutation) {
 			assert.equal(typeof tagData.subtemplate, "function", "got subtemplate");
 			var frag = tagData.subtemplate({last: "Meyer"});
 
-			assert.equal( innerHTML(frag.firstChild), "Meyer", "rendered right");
+			assert.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "Meyer", "rendered right");
 		});
 
 		var template = stache("<stache-tag><span>{{last}}</span></stache-tag>")
@@ -5406,7 +5370,7 @@ function makeTest(name, doc, mutation) {
 		var renderer = stache("<p>{{globalValue 'value' 0='indexed'}}</p>");
 		var frag = renderer({});
 
-		var fraghtml = innerHTML(frag.lastChild);
+		var fraghtml = innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild);
 
 		assert.equal(fraghtml, "value:indexed");
 
@@ -5414,7 +5378,7 @@ function makeTest(name, doc, mutation) {
 		renderer = stache("<p>{{globalValue 'value' zero='strung'}}</p>");
 		frag = renderer({});
 
-		fraghtml = innerHTML(frag.lastChild);
+		fraghtml = innerHTML(stacheTestHelpers.cloneAndClean(frag).lastChild);
 
 		assert.equal(fraghtml, "value:strung");
 	});
@@ -5450,8 +5414,8 @@ function makeTest(name, doc, mutation) {
 
 		view = renderer(viewModel);
 
-		assert.equal(view.firstChild.firstChild.nodeValue, "John", "Object AND hash values - Got the first name");
-		assert.equal(view.firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Object AND hash values - Got the last name");
+		assert.equal(stacheTestHelpers.cloneAndClean(view).firstChild.firstChild.nodeValue, "John", "Object AND hash values - Got the first name");
+		assert.equal(stacheTestHelpers.cloneAndClean(view).firstChild.nextSibling.firstChild.nodeValue, "Gardner", "Object AND hash values - Got the last name");
 
 
 	});
@@ -5471,16 +5435,18 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache(
-			"{{#each people person=value num=index}}" +
+			"<div>{{#each people person=value num=index}}" +
 				"<div class=\"person\" data-index=\"{{num}}\"><span>{{person.first}}</span>" +
 				"<span>{{person.last}}</span></div>" +
-			"{{/each}}"
+			"{{/each}}</div>"
 		);
 
 		var view = renderer(viewModel);
+		var divs = view.firstChild.getElementsByTagName("div");
+		var spans = view.firstChild.getElementsByTagName("span");
 
-		assert.equal(view.lastChild.getAttribute('data-index'), "2", "Got the index");
-		assert.equal(view.firstChild.nextSibling.firstChild.firstChild.nodeValue, "John", "Got aliased value");
+		assert.equal(divs[divs.length - 1].getAttribute('data-index'), "2", "Got the index");
+		assert.equal(spans[0].firstChild.nodeValue, "John", "Got aliased value");
 	});
 
 	QUnit.test("can assign hash using each on an iterable map #300", function(assert) {
@@ -5492,15 +5458,16 @@ function makeTest(name, doc, mutation) {
 		});
 
 		var renderer = stache(
-			"{{#each flags flagValue=value flagKey=key}}" +
+			"<div>{{#each flags flagValue=value flagKey=key}}" +
 				"<span>{{flagKey}}: {{flagValue}}</span>" +
-			"{{/each}}"
+			"{{/each}}</div>"
 		);
 
-		var view = renderer(viewModel);
+		var view = renderer(viewModel),
+			spans = view.firstChild.getElementsByTagName("span");
 
-		assert.equal(view.firstChild.firstChild.nodeValue, "isJSCool", "Got the key");
-		assert.equal(view.firstChild.lastChild.nodeValue, "yep", "Got aliased value");
+		assert.equal(spans[0].firstChild.nodeValue, "isJSCool", "Got the key");
+		assert.equal(spans[0].lastChild.nodeValue, "yep", "Got aliased value");
 	});
 
 	QUnit.test('check if <content> is already registred #165', function(assert) {
@@ -5804,8 +5771,8 @@ function makeTest(name, doc, mutation) {
 		var template = stache('<p>{{scope.lineNumber}}</p>\n<p>{{scope.lineNumber}}</p>');
 		var frag = template();
 
-		assert.equal(frag.firstChild.firstChild.nodeValue, '1');
-		assert.equal(frag.lastChild.firstChild.nodeValue, '2');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.firstChild.nodeValue, '1');
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, '2');
 	});
 
 	QUnit.test("using scope.index works when using #each with arrays", function(assert) {
@@ -6151,7 +6118,7 @@ function makeTest(name, doc, mutation) {
 			name: function(first) { return first; }
 		};
 		var frag = stache("<div id='{{name \"matthew\"}}'></div>")(vm);
-		assert.equal(frag.firstChild.getAttribute("id"), "matthew", "able to set the attribute");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getAttribute("id"), "matthew", "able to set the attribute");
 	});
 
 	QUnit.test("#case and #default should not change context (#475)", function(assert) {
@@ -6189,16 +6156,16 @@ function makeTest(name, doc, mutation) {
 			name: ""
 		});
 		var frag = stache("<input value='{{name}}'>")(vm);
-		assert.equal(frag.firstChild.value, "", "initially empty");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "", "initially empty");
 
 		vm.name = "matthew";
-		assert.equal(frag.firstChild.value, "matthew", "set to matthew");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "matthew", "set to matthew");
 
 		frag.firstChild.value = "mark"
 		assert.equal(frag.firstChild.value, "mark", "set to mark");
 
 		vm.name = "paul";
-		assert.equal(frag.firstChild.value, "paul", "set to paul");
+		assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.value, "paul", "set to paul");
 	});
 
 	testHelpers.dev.devOnlyTest("Can use magic tags within attributes without warnings (#477)", function (assert){
@@ -6231,12 +6198,12 @@ function makeTest(name, doc, mutation) {
 		var frag = renderer(map);
 
 		assert.ok(true, "no error");
-		assert.equal( innerHTML(frag.firstChild), "", "no content");
+		assert.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "", "no content");
 
 		map.set("foo", function(){
 			return "bar";
 		});
-		assert.equal( innerHTML(frag.firstChild), "bar", "updated to bar");
+		assert.equal( innerHTML(stacheTestHelpers.cloneAndClean(frag).firstChild), "bar", "updated to bar");
 	});
 
 	QUnit.test("each should premptively bind values", function(assert) {
@@ -6274,7 +6241,7 @@ function makeTest(name, doc, mutation) {
 		});
 
 		// Basics look correct
-		assert.equal(innerHTML(fragment.firstChild), "Hello world", "fragment has correct text content");
+		assert.equal(innerHTML(stacheTestHelpers.cloneAndClean(fragment).firstChild), "Hello world", "fragment has correct text content");
 	});
 
 	QUnit.test("addHelper can take an object of helpers", function(assert) {
@@ -6291,7 +6258,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span>{{helperOne()}}</span><span>{{helperTwo()}}</span>");
 		var frag = template();
 
-		var spanOne = frag.firstChild;
+		var spanOne = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var spanTwo = spanOne.nextSibling;
 
 		assert.equal(spanOne.firstChild.nodeValue, "one");
@@ -6311,7 +6278,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span foo></span><span bar></span>");
 		var frag = template();
 
-		var firstSpan = frag.firstChild;
+		var firstSpan = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var secondSpan = firstSpan.nextSibling;
 
 		assert.equal(firstSpan.firstChild.nodeValue, "foo");
@@ -6336,7 +6303,7 @@ function makeTest(name, doc, mutation) {
 		var template = stache("<span foo2></span><span bar2></span>");
 		var frag = template();
 
-		var firstSpan = frag.firstChild;
+		var firstSpan = stacheTestHelpers.cloneAndClean(frag).firstChild;
 		var secondSpan = firstSpan.nextSibling;
 
 		assert.equal(firstSpan.firstChild.nodeValue, "foo");
@@ -6382,7 +6349,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stache("<div>{{foo}}</div>")(map);
 		map.set("foo", "<p></p>");
 
-		assert.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+		assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
 
 	});
 
@@ -6403,7 +6370,7 @@ function makeTest(name, doc, mutation) {
 		var frag = stache("<div>{{foo}}</div>")(map);
 		teardown();
 
-		assert.equal( frag.firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
+		assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 0, "no paragraphs");
 
 
 		map = new SimpleMap({
@@ -6412,7 +6379,7 @@ function makeTest(name, doc, mutation) {
 
 		frag = stache("<div>{{foo}}</div>")(map);
 
-		assert.equal( frag.firstChild.getElementsByTagName("p").length, 1, "paragraphs");
+		assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p").length, 1, "paragraphs");
 
 	});
 
@@ -6425,8 +6392,8 @@ function makeTest(name, doc, mutation) {
 			'</svg>';
 
 			var frag = stache(svg)({});
-			var svgTag = frag.firstChild;
-			var useTag = frag.firstChild.getElementsByTagName('use')[0];
+			var svgTag = stacheTestHelpers.cloneAndClean(frag).firstChild;
+			var useTag = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('use')[0];
 
 			assert.equal(svgTag.getAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns'), "http://www.w3.org/2000/svg", "xmlns attr");
 			assert.equal(useTag.getAttributeNS("http://www.w3.org/1999/xlink", 'href'), "#h-shape", "xlink:href attr");

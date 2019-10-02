@@ -4,7 +4,7 @@
 // only stache uses these helpers.  Ideally, these utilities could be used
 // in other libraries implementing Mustache-like features.
 var live = require('can-view-live');
-var nodeLists = require('can-view-nodelist');
+var liveHelpers = require("can-view-live/lib/helpers");
 
 var Observation = require('can-observation');
 var ObservationRecorder = require('can-observation-recorder');
@@ -21,11 +21,10 @@ var defineLazyValue = require("can-define-lazy-value");
 var toDOMSymbol = canSymbol.for("can.toDOM");
 
 // Lazily lookup the context only if it's needed.
-function HelperOptions(scope, nodeList, exprData, stringOnly) {
+function HelperOptions(scope, exprData, stringOnly) {
 	this.metadata = { rendered: false };
 	this.stringOnly = stringOnly;
 	this.scope = scope;
-	this.nodeList = nodeList;
 	this.exprData = exprData;
 }
 defineLazyValue(HelperOptions.prototype,"context", function(){
@@ -75,7 +74,7 @@ var core = {
 	 * @param {String} [stringOnly] A flag to indicate that only strings will be returned by subsections.
 	 * @return {Function} An 'evaluator' function that evaluates the expression.
 	 */
-	makeEvaluator: function (scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+	makeEvaluator: function (scope, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
 
 		if(mode === "^") {
 			var temp = truthyRenderer;
@@ -84,9 +83,9 @@ var core = {
 		}
 
 		var value,
-			helperOptions = new HelperOptions(scope, nodeList, exprData, stringOnly);
+			helperOptions = new HelperOptions(scope , exprData, stringOnly);
 			// set up renderers
-			utils.createRenderers(helperOptions, scope, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.createRenderers(helperOptions, scope ,truthyRenderer, falseyRenderer, stringOnly);
 
 		if(exprData instanceof expression.Call) {
 			value = exprData.value(scope, helperOptions);
@@ -169,16 +168,13 @@ var core = {
 			exprData = core.expression.parse(expressionString);
 		}
 
-		return function(scope, parentSectionNodeList){
+		return function(scope){
 			//!steal-remove-start
 			if (process.env.NODE_ENV !== 'production') {
 				scope.set('scope.filename', state.filename);
 				scope.set('scope.lineNumber', state.lineNo);
 			}
 			//!steal-remove-end
-			var nodeList = [this];
-			nodeList.expression = ">" + partialName;
-			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
 			var partialFrag = new Observation(function(){
 				var localPartialName = partialName;
@@ -203,7 +199,7 @@ var core = {
 
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(partialScope, nodeList)
+						return partial.render ? partial.render(partialScope)
 							: partial(partialScope);
 					};
 				}
@@ -222,7 +218,7 @@ var core = {
 
 					renderer = function() {
 						if(typeof localPartialName === "function"){
-							return localPartialName(partialScope, {}, nodeList);
+							return localPartialName(partialScope, {});
 						} else {
 							var domRenderer = core.getTemplateById(localPartialName);
 							//!steal-remove-start
@@ -235,16 +231,15 @@ var core = {
 								}
 							}
 							//!steal-remove-end
-							return domRenderer ? domRenderer(partialScope, {}, nodeList) : getDocument().createDocumentFragment();
+							return domRenderer ? domRenderer(partialScope, {}) : getDocument().createDocumentFragment();
 						}
 					};
 				}
 				var res = ObservationRecorder.ignore(renderer)();
 				return frag(res);
 			});
-			canReflect.setPriority(partialFrag,nodeList.nesting );
 
-			live.html(this, partialFrag, this.parentNode, nodeList);
+			live.html(this, partialFrag);
 		};
 	},
 	// ## mustacheCore.makeStringBranchRenderer
@@ -274,7 +269,7 @@ var core = {
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if(mode || !evaluator) {
-				evaluator = makeEvaluator( scope, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+				evaluator = makeEvaluator( scope, mode, exprData, truthyRenderer, falseyRenderer, true);
 				if(!mode) {
 					scope.__cache[fullExpression] = evaluator;
 				}
@@ -319,7 +314,7 @@ var core = {
 		var exprData = core.expression.parse(expressionString);
 
 		// A branching renderer takes truthy and falsey renderer.
-		var branchRenderer = function branchRenderer(scope, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		var branchRenderer = function branchRenderer(scope, truthyRenderer, falseyRenderer){
 			// If this is within a tag, make sure we only get string values.
 			var stringOnly = state.tag;
 			//!steal-remove-start
@@ -328,15 +323,10 @@ var core = {
 				scope.set('scope.lineNumber', state.lineNo);
 			}
 			//!steal-remove-end
-			var nodeList = [this];
-			nodeList.expression = expressionString;
-			// register this nodeList.
-			// Register it with its parent ONLY if this is directly nested.  Otherwise, it's unnecessary.
-			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
+			var evaluator = makeEvaluator( scope, mode, exprData, truthyRenderer, falseyRenderer, stringOnly );
 
 			// Create a compute that can not be observed by other
 			// computes. This is important because this renderer is likely called by
@@ -357,10 +347,6 @@ var core = {
 				}
 				//!steal-remove-end
 				observable = new Observation(evaluator,null,{isObservable: false});
-			}
-
-			if(canReflect.setPriority(observable, nodeList.nesting) === false) {
-				throw new Error("can-stache unable to set priority on observable");
 			}
 
 			// Bind on the computeValue to set the cached value. This helps performance
@@ -401,11 +387,9 @@ var core = {
 						}
 					}
 					//!steal-remove-end
-					live.text(this, observable, this.parentNode, nodeList);
+					live.text(this, observable);
 				} else {
-					live.html(this, observable, this.parentNode, {
-						nodeList: nodeList
-					});
+					live.html(this, observable);
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
@@ -418,17 +402,15 @@ var core = {
 					live.attrs(this, value);
 				}
 				else if(state.text && !valueShouldBeInsertedAsHTML(value)) {
-					this.nodeValue = live.makeString(value);
+					this.nodeValue = liveHelpers.makeString(value);
 				}
 				else if( value != null ){
 					if (typeof value[viewInsertSymbol] === "function") {
-						var insert = value[viewInsertSymbol]({
-							nodeList: nodeList
-						});
-						var oldNodes = nodeLists.update(nodeList, [insert]);
-						nodeLists.replace(oldNodes, insert);
+						var insert = value[viewInsertSymbol]({});
+						this.parentNode.replaceChild( insert, this );
 					} else {
-						nodeLists.replace([this], frag(value, this.ownerDocument));
+						this.parentNode.replaceChild(frag(value, this.ownerDocument), this);
+						//domMutateNode.replaceChild.call(this.parentNode, frag(value, this.ownerDocument), this);
 					}
 				}
 			}

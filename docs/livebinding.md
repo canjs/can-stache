@@ -4,8 +4,7 @@
 
 Live binding refers to templates which update themselves when their state or data changes.
 [can-stache] templates are able to listen to observables
-(like [can-define/map/map], [can-define/list/list], and [can-compute]) changing and update the page
-to reflect those changes.
+(like [can-observable-object], [can-observable-array], and [can-observation]) changing and update the page to reflect those changes.
 
 Live binding lets you focus on changing data and state without having to worry about also updating the
 DOM to reflect those changes.
@@ -25,7 +24,7 @@ In this example, we have a simple user welcome screen.
 ```
 
 ```js
-const data = new DefineMap( {
+const data = new ObservableObject( {
 	user: "Tina Fey",
 	messages: 0
 } );

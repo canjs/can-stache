@@ -1,6 +1,5 @@
 "use strict";
 var live = require('can-view-live');
-var nodeLists = require('can-view-nodelist');
 var utils = require('../src/utils');
 var getBaseURL = require('can-globals/base-url/base-url');
 var joinURIs = require('can-join-uris');
@@ -370,15 +369,7 @@ var eachHelper = function(items) {
 		// checking its value.
 		options.metadata.rendered = true;
 		return function(el){
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
-			var nodeList = [el];
-			nodeList.expression = "live.list";
-			nodeLists.register(nodeList, null, options.nodeList, true);
-			// runs nest replacements
-			nodeLists.update(options.nodeList, [el]);
-
-			var cb = function (item, index, parentNodeList) {
+			var cb = function (item, index) {
 				var aliases = {};
 
 				if (canReflect.size(hashOptions) > 0) {
@@ -395,13 +386,12 @@ var eachHelper = function(items) {
 					.add(aliases, { notContext: true })
 					.add({ index: index }, { special: true })
 					.add(item),
-				options.options,
-				parentNodeList
+				options.options
 				);
 			};
 
-			live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
-				return options.inverse(options.scope.add(list), options.options, parentNodeList);
+			live.list(el, items, cb, options.context , function(list){
+				return options.inverse(options.scope.add(list), options.options);
 			});
 		};
 	}
@@ -489,8 +479,8 @@ var dataHelper = function(attr, value) {
 
 // ## UNLESS HELPER
 var unlessHelper = function (expr, options) {
-	if(!options) {	
-		return !ifHelper.apply(this, [expr]);	
+	if(!options) {
+		return !ifHelper.apply(this, [expr]);
 	}
 	return ifHelper.apply(this, [expr, assign(assign({}, options), {
 		fn: options.inverse,
@@ -502,7 +492,7 @@ unlessHelper.isLiveBound = true;
 
 
 // ## Converters
-// ## NOT converter
+// ## NOT converter
 var notConverter = {
 	get: function(obs, options){
 		if(helpersCore.looksLikeOptions(options)) {

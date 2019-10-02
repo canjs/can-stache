@@ -3,6 +3,8 @@ var stache = require("can-stache");
 var DefineList = require("can-define/list/list");
 var canReflect = require("can-reflect");
 var helpersCore = require('./core');
+var stacheTestHelpers = require("../test/helpers")(document);
+
 
 require("./-for-of");
 
@@ -11,20 +13,20 @@ QUnit.module("can-stache #for(of) helper");
 
 QUnit.test("basics", function(assert) {
 
-    var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
-    var list = new DefineList([34234,2,1,3]);
-    var frag = template({
+	var template = stache("<div>{{#for(value of list)}}<p>{{this.vmProp}}{{value}}</p>{{/for}}</div>");
+	var list = new DefineList([34234,2,1,3]);
+	var frag = template({
 		list: list,
 		vmProp: "1"
 	});
-    list.sort();
-    // list.splice(0,4,1,2,3,34234);
+	list.sort();
+	// list.splice(0,4,1,2,3,34234);
 
-    var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
-        return +p.innerHTML;
-    });
+	var order = [].map.call( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p"), function(p){
+		return +p.innerHTML;
+	});
 
-    assert.deepEqual(order, [11,12,13,134234]);
+	assert.deepEqual(order, [11,12,13,134234]);
 
 
 
@@ -56,7 +58,7 @@ QUnit.test("basics", function(assert) {
 		}
 	};
 
-	var result = template(vm).firstChild.innerHTML.replace(/\s+/g," ");
+	var result =  stacheTestHelpers.cloneAndClean( template(vm) ).firstChild.innerHTML.replace(/\s+/g," ");
 	assert.equal(result, "Hello, you have 1. <div> Justin <ul> <li>for-in yes</li> </ul> </div>");
 });
 
@@ -78,7 +80,7 @@ QUnit.test("create an observable let scope (#593)", function(assert) {
 	canReflect.setValue( obs[0] , 1);
 	canReflect.setValue( obs[1] , 2);
 
-	var labels = frag.firstChild.getElementsByTagName("label");
+	var labels = stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("label");
 
 	assert.equal(labels[0].innerHTML,"1", "first element");
 	assert.equal(labels[1].innerHTML,"2", "first element");
@@ -94,7 +96,7 @@ QUnit.test("works with non observables", function(assert) {
 		vmProp: "1"
 	});
 
-    var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
+    var order = [].map.call( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p"), function(p){
         return +p.innerHTML;
     });
 
@@ -109,7 +111,7 @@ QUnit.test("works as string only", function(assert) {
 		list: list,
 		vmProp: "a"
 	});
-	assert.equal( frag.firstChild.className, "[a-1][a-2][a-3]");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.className, "[a-1][a-2][a-3]");
 });
 
 QUnit.test("scope.index works", function(assert) {
@@ -119,7 +121,7 @@ QUnit.test("scope.index works", function(assert) {
 		list: list,
 		vmProp: "a"
 	});
-	assert.equal( frag.firstChild.innerHTML, "[0][1][2]");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "[0][1][2]");
 });
 
 QUnit.test("for(list) works", function(assert) {
@@ -129,7 +131,7 @@ QUnit.test("for(list) works", function(assert) {
 		list: list,
 		vmProp: "a"
 	});
-	assert.equal( frag.firstChild.innerHTML, "[0][1][2]");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "[0][1][2]");
 });
 
 
@@ -143,7 +145,7 @@ QUnit.test("for(value of object) works in a string", function(assert) {
 		object: object
 	});
 
-	assert.equal( frag.firstChild.className, "[first-FIRST][second-SECOND]");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.className, "[first-FIRST][second-SECOND]");
 });
 
 QUnit.test("else contains the correct this", function(assert) {
@@ -152,7 +154,11 @@ QUnit.test("else contains the correct this", function(assert) {
 		items: [],
 		message: "empty"
 	});
-	assert.equal(frag.firstChild.nextSibling.nodeValue, "empty", "got the value from the VM");
+	var cleaned = stacheTestHelpers.cloneAndClean(frag);
+
+	assert.equal(
+		cleaned.firstChild.nodeValue,
+		"empty", "got the value from the VM");
 });
 
 QUnit.test("forOf works after calling helpersCore.__resetHelpers", function(assert) {
@@ -166,7 +172,7 @@ QUnit.test("forOf works after calling helpersCore.__resetHelpers", function(asse
 	});
 	list.sort();
 
-	var order = [].map.call( frag.firstChild.getElementsByTagName("p"), function(p){
+	var order = [].map.call( stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName("p"), function(p){
 			return +p.innerHTML;
 	});
 

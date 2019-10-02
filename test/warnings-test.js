@@ -1,3 +1,5 @@
+var QUnit = require("steal-qunit");
+
 var testHelpers = require('can-test-helpers');
 var stache = require('../can-stache');
 var DefineMap = require("can-define/map/map");
@@ -5,6 +7,7 @@ var Scope = require("can-view-scope");
 
 QUnit.module("can-stache: warnings");
 
+//var stacheTestHelpers = require("../test/helpers")(document);
 
 testHelpers.dev.devOnlyTest("lineNumber should be set on the scope inside of a rendered string (#415)", function (assert) {
 	var scope = new Scope({ foo: "classVal" });

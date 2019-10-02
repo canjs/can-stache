@@ -1,16 +1,17 @@
 var canReflect = require("can-reflect");
 var live = require("can-view-live");
-var nodeLists = require("can-view-nodelist");
 var Observation = require("can-observation");
-var getDocument = require("can-globals/document/document");
 var domMutate = require("can-dom-mutate");
 var domMutateNode = require("can-dom-mutate/node");
 var canSymbol = require("can-symbol");
+var liveHelpers = require("can-view-live/lib/helpers");
 
 var keepNodeSymbol = canSymbol.for("done.keepNode");
 
 function portalHelper(elementObservable, options){
-	function evaluator() {
+	var debugName = "portal(" + canReflect.getName(elementObservable) + ")";
+
+	function portalContents() {
 		var frag = options.fn(
 			options.scope
 			.addLetContext({}),
@@ -19,74 +20,86 @@ function portalHelper(elementObservable, options){
 
 		var child = frag.firstChild;
 		while(child) {
+			// makes sure DoneJS does not remove these nodes
 			child[keepNodeSymbol] = true;
 			child = child.nextSibling;
 		}
 
+
 		return frag;
 	}
 
-	var el, nodeList, removeNodeRemovalListener;
-	function teardown() {
-		var root = el;
+	//!steal-remove-start
+	if(process.env.NODE_ENV !== 'production') {
+		Object.defineProperty(portalContents,"name",{
+			value: debugName+" contents"
+		});
+	}
+	//!steal-remove-end
 
-		if(removeNodeRemovalListener) {
-			removeNodeRemovalListener();
-			removeNodeRemovalListener = null;
-		}
 
-		if(el) {
+	// Where we are portalling
+	var portalElement,
+		startPortalledPlaceholder,
+		endPortalledPlaceholder,
+		commentPlaceholderDispose;
+	function teardownPortalledContent() {
+
+		if(portalElement) {
 			canReflect.offValue(elementObservable, getElementAndRender);
-			el = null;
+			portalElement = null;
 		}
 
-		if(nodeList) {
-			canReflect.eachListLike(nodeList, function(node) {
-				if(root === node.parentNode) {
-					domMutateNode.removeChild.call(root, node);
-				}
-			});
-			nodeList = null;
+		if(startPortalledPlaceholder && endPortalledPlaceholder) {
+			var parentNode = startPortalledPlaceholder.parentNode;
+			if(parentNode) {
+				liveHelpers.range.remove({start: startPortalledPlaceholder, end: endPortalledPlaceholder});
+				domMutateNode.removeChild.call(parentNode, startPortalledPlaceholder );
+				domMutateNode.removeChild.call(parentNode, endPortalledPlaceholder );
+				startPortalledPlaceholder = endPortalledPlaceholder = null;
+			}
 		}
 	}
-
+	function teardownEverything(){
+		if(commentPlaceholderDispose) {
+			commentPlaceholderDispose();
+		}
+		teardownPortalledContent();
+	}
+	// The element has changed
 	function getElementAndRender() {
-		teardown();
-		el = canReflect.getValue(elementObservable);
+		// remove the old rendered content and unbind if we've bound before
+		teardownPortalledContent();
 
-		if(el) {
-			var node = getDocument().createTextNode("");
-			domMutateNode.appendChild.call(el, node);
+		canReflect.onValue(elementObservable, getElementAndRender);
 
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
-			nodeList = [node];
-			nodeList.expression = "live.html";
-			nodeLists.register(nodeList, null, null, true);
+		portalElement = canReflect.getValue(elementObservable);
 
-			var observable = new Observation(evaluator, null, {isObservable: false});
+		if(portalElement) {
+			startPortalledPlaceholder = portalElement.ownerDocument.createComment(debugName+" contents");
+			endPortalledPlaceholder = portalElement.ownerDocument.createComment("can-end-placeholder");
+			startPortalledPlaceholder[keepNodeSymbol] = true;
+			endPortalledPlaceholder[keepNodeSymbol] = true;
+			portalElement.appendChild(startPortalledPlaceholder);
+			portalElement.appendChild(endPortalledPlaceholder);
 
-			live.html(node, observable, el, nodeList);
-			removeNodeRemovalListener = domMutate.onNodeRemoval(el, teardown);
+			var observable = new Observation(portalContents, null, {isObservable: false});
+
+			live.html(startPortalledPlaceholder, observable);
 		} else {
 			options.metadata.rendered = true;
 		}
-		canReflect.onValue(elementObservable, getElementAndRender);
+
 	}
 
 	getElementAndRender();
 
-	return function(el) {
-		var doc = getDocument();
-		var comment = doc.createComment("portal(" + canReflect.getName(elementObservable) + ")");
-		var frag = doc.createDocumentFragment();
-		domMutateNode.appendChild.call(frag, comment);
-		nodeLists.replace([el], frag);
+	return function(placeholderElement) {
+		var commentPlaceholder = placeholderElement.ownerDocument.createComment(debugName);
 
-		var nodeList = [comment];
-		nodeList.expression = "portal";
-		nodeLists.register(nodeList, teardown, options.nodeList, true);
-		nodeLists.update(options.nodeList, [comment]);
+		placeholderElement.parentNode.replaceChild(commentPlaceholder, placeholderElement);
+		commentPlaceholderDispose = domMutate.onNodeRemoved(commentPlaceholder, teardownEverything);
+		return commentPlaceholder;
 	};
 }
 

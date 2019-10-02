@@ -8,6 +8,8 @@ var SimpleMap = require('can-simple-map');
 var DefineList = require('can-define/list/list');
 var stache = require("can-stache");
 
+var stacheTestHelpers = require("../test/helpers")(document);
+
 QUnit.module("can-stache converters");
 
 QUnit.test("addLiveConverter helpers push and pull correct values", function(assert) {
@@ -130,10 +132,10 @@ QUnit.test("not works also like if", function(assert) {
 		}
 	});
 
-	assert.equal(frag.firstChild.innerHTML, "TRUTHY");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	assert.equal(frag.firstChild.innerHTML, "FALSY");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "FALSY");
 });
 
 QUnit.test("not works inside if", function(assert) {
@@ -150,8 +152,8 @@ QUnit.test("not works inside if", function(assert) {
 		}
 	});
 
-	assert.equal(frag.firstChild.innerHTML, "TRUTHY");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "TRUTHY");
 
 	data.set("value", true);
-	assert.equal(frag.firstChild.innerHTML, "FALSY");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.innerHTML, "FALSY");
 });

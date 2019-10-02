@@ -47,8 +47,9 @@ QUnit.test("Stache with boolean property with {{#if}}", function(assert) {
 
 	var nested = new NestedMap();
 	var template = stache('{{#if isEnabled}}Enabled{{/if}}');
-	var frag = template(nested);
-	assert.equal(frag.firstChild.nodeValue, 'Enabled');
+	var frag = stacheTestHelpers.removePlaceholderNodes( template(nested) );
+
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'Enabled');
 });
 
 QUnit.test("#each with #if directly nested (#750)", function(assert) {
@@ -75,7 +76,7 @@ QUnit.test("#each with #if directly nested (#750)", function(assert) {
 
 	data.get('list').pop();
 
-	assert.equal(frag.firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.getElementsByTagName('li').length, 1, "only first should be visible");
 
 });
 
@@ -85,11 +86,11 @@ QUnit.test("call expression with #if", function(assert) {
 	var template = stache("{{#if(truthy)}}true{{else}}false{{/if}}");
 	var frag = template({truthy: truthy});
 
-	assert.equal( frag.firstChild.nodeValue, "true", "set to true");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "true", "set to true");
 
 	truthy.set(false);
 
-	assert.equal( frag.firstChild.nodeValue, "false", "set to false");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, "false", "set to false");
 });
 
 QUnit.test("#if works with call expressions", function(assert) {
@@ -100,10 +101,10 @@ QUnit.test("#if works with call expressions", function(assert) {
 	var div = document.createElement("div");
 	var frag = template(map);
 
-	div.appendChild(frag);
-	assert.equal(div.innerHTML, "foo");
+	div.appendChild( frag);
+	assert.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "foo");
 	map.foo = false;
-	assert.equal(div.innerHTML, "bar");
+	assert.equal( stacheTestHelpers.cloneAndClean(div).innerHTML, "bar");
 });
 
 
@@ -114,7 +115,7 @@ QUnit.test("Inverse {{if}} doesn't render truthy section when value is truthy", 
 		isTrue: function() { return true; }
 	});
 	div.appendChild(frag);
-	assert.equal(div.innerHTML, "", "No textnode rendered");
+	assert.equal(stacheTestHelpers.cloneAndClean(div).innerHTML, "", "No textnode rendered");
 });
 
 QUnit.test("#if should not re-render children", function(assert) {

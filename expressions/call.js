@@ -95,8 +95,6 @@ Call.prototype.value = function(scope, helperOptions){
 				if(!(args[0] instanceof Scope)){
 					args[0] = scope.getTemplateContext().add(args[0]);
 				}
-				// and include nodeLists
-				args.push(helperOptions.nodeList);
 			}
 			if(arguments.length) {
 				args.unshift(new SetIdentifier(newVal));

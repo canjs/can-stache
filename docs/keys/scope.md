@@ -45,7 +45,7 @@ const view = stache( `
 {{/each}}
 ` );
 
-const data = new DefineMap( {
+const data = new ObservableObject( {
 	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
@@ -70,7 +70,7 @@ When looping over an array, [can-define/list/list], or [can-list], you an use `s
 Indexes start at 0.  If you want to start at 1, you can create a helper like:
 
 ```js
-stache.registerHelper( "scope.indexNum", function( options ) {
+stache.registerHelper( "scope.indexNum", ( options ) => {
 	return options.scope.get( "scope.index" ) + 1;
 } );
 ```
@@ -114,7 +114,7 @@ const view = stache( `
 {{/each}}
 ` );
 
-const data = new DefineMap( {
+const data = new ObservableObject( {
 	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
@@ -137,11 +137,11 @@ const view = stache( `
 {{/each}}
 ` );
 
-const parentVm = new DefineMap( {
+const parentVm = new ObservableObject( {
 	exclamation: "*&!#?!"
 } );
 
-const vm = new DefineMap( {
+const vm = new ObservableObject( {
 	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
@@ -179,7 +179,7 @@ const view = stache( `
 {{/each}}
 ` );
 
-const vm = new DefineMap( {
+const vm = new ObservableObject( {
 	tasks: [ "one", "two" ],
 	exclamation: "!!!"
 } );
