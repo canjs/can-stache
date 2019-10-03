@@ -56,11 +56,11 @@
     "can-stache-key": "^1.3.1",
     "can-string": "<2.0.0",
     "can-symbol": "^1.6.4",
-    "can-view-callbacks": "^5.0.0-pre.1",
-    "can-view-live": "^5.0.0-pre.1",
+    "can-view-callbacks": "^5.0.0",
+    "can-view-live": "^5.0.0",
     "can-view-parser": "^4.0.0",
     "can-view-scope": "^4.12.0",
-    "can-view-target": "^5.0.0-pre.0"
+    "can-view-target": "^5.0.0"
   },
   "devDependencies": {
     "can-define": "^2.0.4",
