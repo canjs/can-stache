@@ -72,7 +72,7 @@
     "detect-cyclic-packages": "^1.1.0",
     "http-server": "^0.11.0",
     "jshint": "^2.9.4",
-    "steal": "^1.5.19",
+    "steal": "^2.2.4",
     "steal-benchmark": "^0.0.1",
     "steal-qunit": "^2.0.0",
     "steal-tools": "^1.0.1",
