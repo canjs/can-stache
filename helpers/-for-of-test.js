@@ -197,7 +197,7 @@ QUnit.test("for(integerValue) works", function (assert) {
 	var frag = template({
 		integerValue: 3
 	});
-	assert.equal( frag.firstChild.innerHTML, "[0][1][2]" );
+	assert.equal( stacheTestHelpers.cloneAndClean(frag.firstChild).innerHTML, "[0][1][2]" );
 });
 
 QUnit.test("for(ittr of intVal) works", function (assert) {
@@ -217,5 +217,5 @@ QUnit.test("for(integerValue) uses else block for negatives", function (assert) 
 	var frag = template({
 		integerValue: -3
 	});
-	assert.equal( frag.firstChild.innerHTML, "val is negative" );
+	assert.equal( stacheTestHelpers.cloneAndClean(frag.firstChild).innerHTML, "val is negative" );
 });
