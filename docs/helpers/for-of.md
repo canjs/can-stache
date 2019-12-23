@@ -1,11 +1,24 @@
 @function can-stache.helpers.for-of for(of)
 @parent can-stache.htags 5
-@description Loop through a list of values.
+@description Loop through a list of values, keys in an object, or integers.
 
 @signature `{{# for( VARIABLE_NAME of EXPRESSION ) }}FN{{else}}INVERSE{{/ for}}`
 
-  `for` is used to to loop through a list of values and
-  write out HTML for each value.  `for` works by looping through
+  `for` is used to to loop through:
+  - an array-like list of values
+    ```
+    {{# for(task of this.tasks) }} {{task.name}} {{/for}}
+    ```
+  - keys in an object
+    ```
+    {{# for( this.task ) }} {{scope.key}} {{scope.value}} {{/for}}
+    ```
+  - integers starting from 0
+    ```
+    {{# for( this.tasks.length ) }} {{scope.value}} {{/for}}
+    ```
+
+  If an __array-like list of values__ is passed, `for` loops through
   each value returned by `EXPRESSION` and points a
   a local [can-stache.helpers.let let-like] variable named   `VARIABLE_NAME` at each value.
 
@@ -35,7 +48,7 @@
   ```
   @codepen
 
-  If an object of key-values are passed, the values of the object will be looped through.
+  If an __object of key-values__ are passed, the values of the object will be looped through.
   You can access the key with `scope.key`:
 
   ```js
@@ -65,7 +78,7 @@
   ```
   @codepen
 
-  If a positive integer value is passed, it will loop that number of times.
+  If a __positive integer__ value is passed, it will loop that number of times.
   You can access the current index with `scope.index`:
 
   ```js
