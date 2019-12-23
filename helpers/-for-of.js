@@ -13,6 +13,23 @@ var bindAndRead = function (value) {
 	}
 };
 
+function forOfInteger(integer, variableName, options) {
+	var result = [];
+	for (var i = 0; i < integer; i++) {
+		var variableScope = {};
+		if(variableName !== undefined){
+			variableScope[variableName] = i;
+		}
+		result.push(
+			options.fn( options.scope
+				.add({ index: i }, { special: true })
+				.addLetContext(variableScope) )
+		);
+	}
+
+	return options.stringOnly ? result.join('') : result;
+}
+
 function forOfObject(object, variableName, options){
 	var result = [];
 	canReflect.each(object, function(val, key){
@@ -67,6 +84,9 @@ var forHelper = function(helperOptions) {
 		options = args.pop(),
 		resolved = bindAndRead(items);
 
+	if(resolved && resolved === Math.floor(resolved)) {
+		return forOfInteger(resolved, variableName, helperOptions);
+	}
 	if(resolved && !canReflect.isListLike(resolved)) {
 		return forOfObject(resolved,variableName, helperOptions);
 	}
