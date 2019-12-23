@@ -15,7 +15,7 @@
     ```
   - integers starting from 0
     ```
-    {{# for( this.tasks.length ) }} {{scope.value}} {{/for}}
+    {{# for( this.tasks.length ) }} {{scope.index}} {{/for}}
     ```
 
   If an __array-like list of values__ is passed, `for` loops through
