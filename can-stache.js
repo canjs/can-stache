@@ -27,7 +27,6 @@ var canSymbol = require("can-symbol");
 // Make sure that we can also use our modules with Stache as a plugin
 
 require('can-view-target');
-require('can-view-nodelist');
 
 
 if(!viewCallbacks.tag("content")) {
@@ -117,6 +116,8 @@ function stache (filename, template) {
 				var createdSection = section.last();
 				if ( createdSection.startedWith === "<" ) {
 					inlinePartials[ stache ] = section.endSubSectionAndReturnRenderer();
+					// Remove *TWO* nodes because we now have a start and an end comment for the section....
+					section.removeCurrentNode();
 					section.removeCurrentNode();
 				} else {
 					section.endSection();
@@ -169,7 +170,7 @@ function stache (filename, template) {
 					var sectionItem = {
 						type: "section"
 					};
-					section.startSection(renderer);
+					section.startSection(renderer, stache);
 					section.last().startedWith = mode;
 
 					// If we are a directly nested section, count how many we are within
@@ -241,7 +242,7 @@ function stache (filename, template) {
 				section.add(state.node);
 				if(isCustomTag) {
 					// Call directlyNested now as it's stateful.
-					addAttributesCallback(state.node, function(scope, parentNodeList){
+					addAttributesCallback(state.node, function(scope){
 						//!steal-remove-start
 						if (process.env.NODE_ENV !== 'production') {
 							scope.set('scope.lineNumber', lineNo);
@@ -251,7 +252,6 @@ function stache (filename, template) {
 							scope: scope,
 							subtemplate: null,
 							templateType: "stache",
-							parentNodeList: parentNodeList,
 							directlyNested: directlyNested
 						});
 					});
@@ -310,7 +310,7 @@ function stache (filename, template) {
 				} else {
 					// Get the last element in the stack
 					var current = state.sectionElementStack[state.sectionElementStack.length - 1];
-					addAttributesCallback(oldNode, function(scope, parentNodeList){
+					addAttributesCallback(oldNode, function(scope){
 						//!steal-remove-start
 						if (process.env.NODE_ENV !== 'production') {
 							scope.set('scope.lineNumber', lineNo);
@@ -320,7 +320,6 @@ function stache (filename, template) {
 							scope: scope,
 							subtemplate: renderer  ? makeRendererConvertScopes(renderer) : renderer,
 							templateType: "stache",
-							parentNodeList: parentNodeList,
 							templates: current.templates,
 							directlyNested: current.directlyNested
 						});
@@ -376,7 +375,7 @@ function stache (filename, template) {
 					if( !state.node.attributes ) {
 						state.node.attributes = [];
 					}
-					state.node.attributes.push(function(scope, nodeList){
+					state.node.attributes.push(function(scope){
 						//!steal-remove-start
 						if (process.env.NODE_ENV !== 'production') {
 							scope.set('scope.lineNumber', lineNo);
@@ -384,8 +383,7 @@ function stache (filename, template) {
 						//!steal-remove-end
 						attrCallback(this,{
 							attributeName: attrName,
-							scope: scope,
-							nodeList: nodeList
+							scope: scope
 						});
 					});
 				}
@@ -496,14 +494,7 @@ function stache (filename, template) {
 
 	var renderer = section.compile();
 
-	var scopifiedRenderer = ObservationRecorder.ignore(function(scope, options, nodeList){
-
-		// Support passing nodeList as the second argument
-		if (nodeList === undefined && canReflect.isListLike(options)) {
-			nodeList = options;
-			options = undefined;
-		}
-
+	var scopifiedRenderer = ObservationRecorder.ignore(function(scope, options){
 		// if an object is passed to options, assume it is the helpers object
 		if (options && !options.helpers && !options.partials && !options.tags) {
 			options = {
@@ -543,7 +534,7 @@ function stache (filename, template) {
 			scope._parent = templateContextScope;
 		}
 
-		return renderer(scope.addLetContext(), nodeList);
+		return renderer(scope.addLetContext());
 	});
 
 	// Identify is a view type

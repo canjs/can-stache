@@ -1,6 +1,10 @@
+var QUnit = require("steal-qunit");
+
 var testHelpers = require('can-test-helpers');
 var stache = require('../can-stache');
 var DefineMap = require("can-define/map/map");
+
+var stacheTestHelpers = require("../test/helpers")(document);
 
 QUnit.module("can-stache: filename");
 
@@ -36,7 +40,7 @@ testHelpers.dev.devOnlyTest("scope has filename", function (assert){
 	var template = stache('some-file', '{{scope.filename}}');
 	var frag = template();
 
-	assert.equal(frag.firstChild.nodeValue, 'some-file');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'some-file');
 });
 
 testHelpers.dev.devOnlyTest("scope has correct filename after calling a partial", function (assert){
@@ -50,6 +54,6 @@ testHelpers.dev.devOnlyTest("scope has correct filename after calling a partial"
 	});
 	vm.set('foo', 'bar');
 
-	assert.equal(frag.firstChild.nodeValue, 'some-file');
-	assert.equal(frag.firstChild.nextSibling.firstChild.nodeValue, 'some-partial');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nodeValue, 'some-file');
+	assert.equal(stacheTestHelpers.cloneAndClean(frag).firstChild.nextSibling.firstChild.nodeValue, 'some-partial');
 });

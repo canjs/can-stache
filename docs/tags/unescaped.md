@@ -14,27 +14,28 @@ output of the template.
   <markdown-edit></markdown-edit>
   <script src="//cdnjs.cloudflare.com/ajax/libs/showdown/1.8.7/showdown.min.js"></script>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "markdown-edit",
-    view: `
+  class MarkdownEdit extends StacheElement {
+    static view = `
       <textarea on:input:value:bind="this.value"
           rows="4" style="width: 90%"></textarea>
       <div>{{{this.html}}}</div>
-    `,
-    ViewModel: {
-      value: {
-        default: "# Hello World\nHow are __you__?"
-      },
+    `;
+
+    static props = {
+      value: "# Hello World\nHow are __you__?",
       converter: {
-        Default: showdown.Converter
+        get default() {
+          return new showdown.Converter();
+        }
       },
       get html(){
         return this.converter.makeHtml(this.value);
       }
-    }
-  });
+    };
+  };
+  customElements.define("markdown-edit", MarkdownEdit);
   </script>
   ```
   @codepen
@@ -65,21 +66,22 @@ output of the template.
 `{{{expression}}}` can be used to render [can-component] instances:
 
 ```js
-import Component from "can-component";
-import stache from "can-stache";
+import {StacheElement, stache} from "can";
 
-const MyGreeting = Component.extend({
-  tag: "my-greeting",
-  view: "<p>Hello {{subject}}</p>",
-  ViewModel: {
-    subject: "string"
-  }
-});
+class MyGreeting extends StacheElement {
+  static view = `
+    <p>Hello {{subject}}</p>
+  `;
+
+  static props = {
+    subject: type.maybeConvert(String)
+  };
+}
+
+customElements.define("my-greeting", MyGreeting);
 
 const myGreetingInstance = new MyGreeting({
-  viewModel: {
-    subject: "friend"
-  }
+  subject: "friend"
 });
 
 const template = stache("<div>{{{componentInstance}}}</div>");

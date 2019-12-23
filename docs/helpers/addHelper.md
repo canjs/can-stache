@@ -144,9 +144,9 @@ For example, when a route matches the string passed to our
 routing helper it will show/hide the text.
 
 ```js
-import {stache, DefineMap} from "can";
+import {stache, ObservableObject} from "can";
 
-stache.addHelper( "isReady", function( status, options ) {
+stache.addHelper( "isReady", ( status, options ) => {
 
 	if ( ["new","backlog"].indexOf(status) !== -1 ) {
 		return options.fn();
@@ -155,7 +155,7 @@ stache.addHelper( "isReady", function( status, options ) {
 	}
 } );
 
-var data = new DefineMap({status: "new"});
+var data = new ObservableObject({status: "new"});
 var frag = stache(`
 	{{# isReady(status) }}
 		I am ready.
@@ -184,7 +184,7 @@ to the helper as `options.hash`. Additionally, when using [can-stache.tags.secti
 you can set a custom context by passing the object instead of `this`.
 
 ```js
-stache.addHelper( "exercise", function( group, action, num, options ) {
+stache.addHelper( "exercise", ( group, action, num, options ) => {
 	if ( group && group.length > 0 && action && num > 0 ) {
 		return options.fn( {
 			group: group,

@@ -14,18 +14,19 @@ console.
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `
+  class MyDemo extends StacheElement {
+    static view = `
       {{ let value=false }}
       {{# if(value) }}
         {{ debugger }}
       {{/ if }}
       <button on:click="value = true">Show</button>
-    `
-  });
+    `;
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
@@ -39,16 +40,17 @@ console.
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `
+  class MyDemo extends StacheElement {
+    static view = `
       {{ let value=false }}
       {{ debugger(value) }}
       <button on:click="value = true">Set to true</button>
-    `
-  });
+    `;
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
@@ -61,16 +63,17 @@ console.
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `
+  class MyDemo extends StacheElement {
+    static view = `
       {{ let value=false }}
       {{ debugger(value, 2) }}
       <button on:click="value = 2">Set to 2</button>
-    `
-  });
+    `;
+  }
+
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen

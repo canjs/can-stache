@@ -36,21 +36,24 @@
   ```
   @codepen
 
-  `stache` is most commonly used by [can-component] to define a component's
-  [can-component.prototype.view]:
+  `stache` is most commonly used by [can-stache-element] to define a component's
+  [can-stache-element/static.view]:
 
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `<h1>Hello {{this.subject}}</h1>`,
-    ViewModel: {
+  class MyDemo extends StacheElement {
+    static view = `
+      <h1>Hello {{this.subject}}</h1>
+    `;
+
+    static props = {
       subject: {default: "World"}
-    }
-  });
+    };
+  };
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
 
@@ -75,7 +78,7 @@ Stache templates are used to:
 
 - Convert data into HTML.
 - Update the HTML when observable data changes.
-- Enable [can-component custom elements] and [can-stache-bindings event and data bindings].
+- Enable [can-stache-element custom elements] and [can-stache-bindings event and data bindings].
 
 Stache is designed to be:
 
@@ -136,23 +139,26 @@ The following sections show you how to:
 
 There are several ways to load a stache template:
 
-- As a component's [can-component.prototype.view].
+- As a component's [can-stache-element/static.view].
 
-  [can-component] automatically processes strings passed to the `view` property as
+  [can-stache-element] automatically processes strings passed to the `view` property as
   [can-stache] templates.
 
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-    tag: "my-demo",
-    view: `<h1>Hello {{ this.subject }}</h1>`,
-    ViewModel: {
-      subject: {default: "World"}
-    }
-  });
+  class MyDemo extends StacheElement {
+    static view = `
+      <h1>Hello {{ this.subject }}</h1>
+    `;
+
+    static props = {
+      subject: "World"
+    };
+  };
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
@@ -184,14 +190,15 @@ There are several ways to load a stache template:
   create `.stache` file and import them like:
 
   ```js
-  import {Component} from "can";
+  import {StacheElement} from "can";
   import view from "./my-component.stache";
 
-  Component.extend({
-    tag: "my-component"
-    view,
-    ViewModel: { ... }
-  });
+  static MyComponent extends StacheElement {
+    static view = view;
+    static props = { ... }
+  }
+
+  customElements.define("my-component", MyComponent);
   ```
 
 ### Writing values
@@ -202,15 +209,18 @@ uses [can-stache.tags.escaped] to write out the `ViewModel`'s `subject`:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `<h1>Hello {{ this.subject }}</h1>`,
-	ViewModel: {
-		subject: {default: "World"}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>Hello {{ this.subject }}</h1>
+    `;
+
+    static props = {
+        subject: "World"
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -220,20 +230,22 @@ You can use [can-stache.tags.escaped] on any part of an HTML element except the 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<h1 class='{{this.className}}' {{this.otherAttributes}}>
-			Hello {{ this.subject }}
-		</h1>`,
-	ViewModel: {
-		subject: {default: "World"},
-		className: {default: "bigger"},
-		otherAttributes: {default: "id='123'"}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1 class='{{this.className}}' {{this.otherAttributes}}>
+            Hello {{ this.subject }}
+        </h1>
+    `;
+
+    static props = {
+        subject: "World",
+        className: "bigger",
+        otherAttributes: "id='123'"
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -243,18 +255,22 @@ You can call methods within [can-stache.tags.escaped] too:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `<h1>Hello {{ this.caps( this.subject ) }}</h1>`,
-	ViewModel: {
-		subject: {default: "World"},
-		caps( text ){
-			return text.toUpperCase();
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>Hello {{ this.caps( this.subject ) }}</h1>
+    `;
+
+    static props = {
+        subject: "World"
+    };
+
+    caps(text) {
+        return text.toUpperCase();
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -271,27 +287,29 @@ For example, the following renders a sun if the `time` property equals `"day"`:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<p on:click="this.toggle()">
-			Time:
-			{{# eq(this.time,"day") }}
-				SUN 🌞
-			{{ else }}
-				MOON 🌚
-			{{/ eq }}
-		</p>
-	`,
-	ViewModel: {
-		time: {default: "day"},
-		toggle(){
-			this.time = (this.time === "day" ? "night" : "day");
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <p on:click="this.toggle()">
+            Time:
+            {{# eq(this.time,"day") }}
+                SUN 🌞
+            {{ else }}
+                MOON 🌚
+            {{/ eq }}
+        </p>
+    `;
+
+    static props = {
+        time: "day"
+    };
+
+    toggle() {
+        this.time = (this.time === "day" ? "night" : "day");
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -322,28 +340,30 @@ we can show the sun if `this.time` equals `"day"` or `"afternoon"` as follows:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<p on:click="this.toggle()">
-			Time:
-			{{# or( eq(this.time,"day"), eq(this.time, "afternoon") ) }}
-				SUN 🌞
-			{{ else }}
-				MOON 🌚
-			{{/ eq }}
-		</p>
-	`,
-	ViewModel: {
-		time: {default: "day"},
-		toggle(){
-			this.time = (this.time === "day" ? "night" :
-				(this.time === "night" ? "afternoon" : "day"));
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <p on:click="this.toggle()">
+            Time:
+            {{# or( eq(this.time,"day"), eq(this.time, "afternoon") ) }}
+                SUN 🌞
+            {{ else }}
+                MOON 🌚
+            {{/ eq }}
+        </p>
+    `;
+
+    static props = {
+        time: "day"
+    };
+
+    toggle() {
+        this.time = (this.time === "day" ? "night" :
+            (this.time === "night" ? "afternoon" : "day"));
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -360,29 +380,30 @@ each todo:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<ul>
-			{{# for(todo of this.todos) }}
-				<li>{{ todo.name }}</li>
-			{{/ for }}
-		</ul>
-	`,
-	ViewModel: {
-		todos: {
-			default(){
-				return [
-					{name: "Writing"},
-					{name: "Branching"},
-					{name: "Looping"}
-				]
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <ul>
+            {{# for(todo of this.todos) }}
+                <li>{{ todo.name }}</li>
+            {{/ for }}
+        </ul>
+    `;
+
+    static props = {
+        todos: {
+            get default() {
+                return [
+                    {name: "Writing"},
+                    {name: "Branching"},
+                    {name: "Looping"}
+                ]
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -393,29 +414,30 @@ array. The following writes out the index with each todo's name:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<ul>
-			{{# for(todo of this.todos) }}
-				<li>{{scope.index}} {{ todo.name }}</li>
-			{{/ for }}
-		</ul>
-	`,
-	ViewModel: {
-		todos: {
-			default(){
-				return [
-					{name: "Writing"},
-					{name: "Branching"},
-					{name: "Looping"}
-				]
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <ul>
+            {{# for(todo of this.todos) }}
+                <li>{{scope.index}} {{ todo.name }}</li>
+            {{/ for }}
+        </ul>
+    `;
+
+    static props = {
+        todos: {
+            get default() {
+                return [
+                    {name: "Writing"},
+                    {name: "Branching"},
+                    {name: "Looping"}
+                ]
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -425,28 +447,29 @@ Use [can-stache.helpers.for-of] to loop through key-value objects.
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<ul>
-			{{# for(value of this.object) }}
-				<li>{{scope.key}} {{ value }}</li>
-			{{/ for }}
-		</ul>
-	`,
-	ViewModel: {
-		object: {
-			default(){
-				return {
-					first: "FIRST",
-					value: "VALUE"
-				};
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <ul>
+            {{# for(value of this.object) }}
+                <li>{{scope.key}} {{ value }}</li>
+            {{/ for }}
+        </ul>
+    `;
+
+    static props = {
+        object: {
+            get default() {
+                return {
+                    first: "FIRST",
+                    value: "VALUE"
+                };
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -455,26 +478,28 @@ Component.extend({
 ### Listening to events
 
 [can-stache-bindings.event] documents how you can listen to events on elements or
-[can-component.prototype.ViewModel]s. The following listens to `click`s on a button:
+[can-stache-element/static.props props]. The following listens to `click`s on a button:
 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<button on:click="this.increment()">+1</button>
-		Count: {{this.count}}
-	`,
-	ViewModel: {
-		count: {default: 0},
-		increment(){
-			this.count++;
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <button on:click="this.increment()">+1</button>
+        Count: {{this.count}}
+    `;
+
+    static props = {
+        count: 0
+    };
+
+    increment() {
+        this.count++;
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -482,8 +507,7 @@ Component.extend({
 ### Binding to properties and attributes
 
 [can-stache-bindings] provides directional bindings to connect
-values in stache to element or [can-component.prototype.ViewModel]
-properties or attributes.
+values in stache to element [can-stache-element/static.props] or attributes.
 
 This makes it easy to:
 
@@ -495,47 +519,49 @@ This makes it easy to:
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-  	tag: "my-demo",
-  	view: `
-  		<input type="checkbox"
-  			checked:from="not( eq(this.status, 'critical') )" />
-  			Can ignore?
+  class MyDemo extends StacheElement {
+      static view = `
+          <input type="checkbox"
+              checked:from="not( eq(this.status, 'critical') )" />
+              Can ignore?
 
-  		<button on:click="this.status = 'critical'">Critical</button>
-		<button on:click="this.status = 'medium'">Medium</button>
-		<button on:click="this.status = 'low'">Low</button>
-  	`,
-  	ViewModel: {
-  		status: {default: "low"}
-  	}
-  });
+          <button on:click="this.status = 'critical'">Critical</button>
+          <button on:click="this.status = 'medium'">Medium</button>
+          <button on:click="this.status = 'low'">Low</button>
+      `;
+
+      static props = {
+          status: "low"
+      };
+  };
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
 
 - Update a value when an element property changes.
 
-  The following updates the [can-component.prototype.ViewModel]'s `name`
+  The following updates the [can-stache-element/static.props] `name`
   when the `<input/>` changes:
 
   ```html
   <my-demo></my-demo>
   <script type="module">
-  import {Component} from "can";
+  import {StacheElement} from "can";
 
-  Component.extend({
-  	tag: "my-demo",
-  	view: `
-  		<input value:to="this.name" placeholder="name"/>
-  		Name: {{ this.name }}
-  	`,
-  	ViewModel: {
-  		name: {default: ""}
-  	}
-  });
+  class MyDemo extends StacheElement {
+      static view = `
+          <input value:to="this.name" placeholder="name"/>
+          Name: {{ this.name }}
+      `;
+
+      static props = {
+          name: ""
+      };
+  };
+  customElements.define("my-demo", MyDemo);
   </script>
   ```
   @codepen
@@ -550,57 +576,58 @@ create a `name` variable and write to that:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		{{ let name='' }}
-		<input value:to="name" placeholder="name"/>
-		Name: {{ name }}
-	`
-});
+class MyDemo extends StacheElement {
+    static view = `
+        {{ let name='' }}
+        <input value:to="name" placeholder="name"/>
+        Name: {{ name }}
+    `;
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
 
-Variables can help you avoid unnecessary [can-component.prototype.ViewModel] properties
-like above. This is very handy when wiring [can-component Component]s within a
+Variables can help you avoid unnecessary [can-stache-element/static.props]
+like above. This is very handy when wiring [can-stache-element StacheElement]s within a
 [can-stache.helpers.for-of] loop as follows:
 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		{{# for(todo of this.todos) }}
-			{{ let locked=true }}
-			<div>
-				<p>
-					Locked:
-					<input type='checkbox' checked:bind="locked"/>
-				</p>
-				<p>
-					<input type='value' value:bind="todo.name" disabled:from="locked"/>
-				</p>
-			</div>
-		{{/ for }}
-	`,
-	ViewModel: {
-		todos: {
-			default(){
-				return [
-					{name: "Writing"},
-					{name: "Branching"},
-					{name: "Looping"}
-				];
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        {{# for(todo of this.todos) }}
+            {{ let locked=true }}
+            <div>
+                <p>
+                    Locked:
+                    <input type='checkbox' checked:bind="locked"/>
+                </p>
+                <p>
+                    <input type='value' value:bind="todo.name" disabled:from="locked"/>
+                </p>
+            </div>
+        {{/ for }}
+    `;
+
+    static props = {
+        todos: {
+            get default() {
+                return [
+                    {name: "Writing"},
+                    {name: "Branching"},
+                    {name: "Looping"}
+                ];
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -623,21 +650,22 @@ template. The following makes an `upperCase` helper:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {stache, Component} from "can";
+import {stache, StacheElement} from "can";
 
 stache.addHelper("upperCase", function(value){
 	return value.toUpperCase();
 })
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<h1>Hello {{ upperCase(this.subject) }}</h1>
-	`,
-	ViewModel: {
-		subject: {default: "World"}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>Hello {{ upperCase(this.subject) }}</h1>
+    `;
+
+    static props = {
+        subject: "World"
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -649,47 +677,43 @@ a similar helper.
 __Component Methods__
 
 Instead of creating a global helper, add your helper functions on
-your component [can-component.prototype.ViewModel].  The following
-adds the `upperCase` method to the [can-component.prototype.ViewModel].
+your component.  The following adds the `upperCase` method to the component.
 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {stache, Component} from "can";
+import { stache, StacheElement, type } from "can";
 
-function upperCase(value){
-	return value.toUpperCase();
-}
+class MyDemo extends StacheElement {
+    static view = `
+      <h1>Hello {{ this.upperCase(this.subject) }}</h1>
+    `;
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<h1>Hello {{ this.upperCase(this.subject) }}</h1>
-	`,
-	ViewModel: {
-		subject: {default: "World"},
+    static props = {
+      subject: "World"
+    };
 
-		// View Helpers
-		upperCase: upperCase
-	}
-});
+    // View Helpers
+    upperCase(value) {
+      return value.toUpperCase();
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
 
 
 <details>
-<summary>Importing Functions (older method)</summary>
+<summary>Importing Functions</summary>
 
-If you are using a module loader to import stache files, [can-view-import]
-can be used to import a function to a [can-stache/keys/scope/scope.vars] variable:
+If you are using a module loader to import stache files, [can-view-import] can
+be used to import a function to a [can-stache.helpers.let let variable]:
 
 ```html
-<can-import from="app/helpers/upperCase"  module.default:to="scope.vars.myModule"/>
+<can-import from="app/helpers/upperCase"  module.default:to="upperCase"/>
+{{upperCase(name)}}
 ```
-
-A replacement for this technique is being [designed here](https://github.com/canjs/can-stache/issues/610).
-
 </details>
 
 
@@ -699,45 +723,47 @@ A replacement for this technique is being [designed here](https://github.com/can
 Partials are snippets of HTML that might be used several places. There are a few
 ways of reusing HTML.
 
-__Using Components__
+__Using Custom Elements__
 
-You can always define and use [can-component]. The following defines and uses
+You can always define and use [can-stache-element]. The following defines and uses
 an `<address-view>` component:
 
 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "address-view",
-	view: `
-		<address>{{this.street}}, {{this.city}}</address>
-	`
-});
+class AddressView extends StacheElement {
+    static view = `
+        <address>{{this.street}}, {{this.city}}</address>
+    `;
+};
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<h2>{{this.user1.name}}</h2>
-		<address-view street:from="user1.street" city:from="user1.city"/>
-		<h2>{{this.user2.name}}</h2>
-		<address-view street:from="user2.street" city:from="user2.city"/>
-	`,
-	ViewModel: {
-		user1: {
-			default(){
-				return {name: "Ramiya", street: "Stave", city: "Chicago"}
-			}
-		},
-		user2: {
-			default(){
-				return {name: "Bohdi", street: "State", city: "Chi-city"}
-			}
-		}
-	}
-});
+customElements.define("address-view", AddressView);
+
+class MyDemo extends StacheElement {
+    static view = `
+        <h2>{{this.user1.name}}</h2>
+        <address-view street:from="user1.street" city:from="user1.city"/>
+        <h2>{{this.user2.name}}</h2>
+        <address-view street:from="user2.street" city:from="user2.city"/>
+    `;
+
+    static props = {
+        user1: {
+            get default() {
+                return {name: "Ramiya", street: "Stave", city: "Chicago"}
+            }
+        },
+        user2: {
+            get default() {
+                return {name: "Bohdi", street: "State", city: "Chi-city"}
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -745,44 +771,45 @@ Component.extend({
 __Calling views__
 
 You can create views programmatically with `stache`, make those views available
-to another view (typically through the [can-component.prototype.ViewModel]).  The following
-creates an `addressView` and makes it available to `<my-demo>`'s [can-component.prototype.view]
+to another view (typically through the [can-stache-element/static.props]).  The following
+creates an `addressView` and makes it available to `<my-demo>`'s [can-stache-element/static.view]
 through the `addressView` property on the `ViewModel`:
 
 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {stache, Component} from "can";
+import {stache, StacheElement} from "can";
 
 const addressView = stache(`<address>{{this.street}}, {{this.city}}</address>`);
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<h2>{{this.user1.name}}</h2>
-		{{ addressView(street=user1.street city=user1.city) }}
-		<h2>{{this.user2.name}}</h2>
-		{{ addressView(street=user2.street city=user2.city) }}
-	`,
-	ViewModel: {
-		addressView: {
-			default(){
-				return addressView;
-			}
-		},
-		user1: {
-			default(){
-				return {name: "Ramiya", street: "Stave", city: "Chicago"}
-			}
-		},
-		user2: {
-			default(){
-				return {name: "Bohdi", street: "State", city: "Chi-city"}
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h2>{{this.user1.name}}</h2>
+        {{ addressView(street=user1.street city=user1.city) }}
+        <h2>{{this.user2.name}}</h2>
+        {{ addressView(street=user2.street city=user2.city) }}
+    `;
+
+    static props = {
+      addressView: {
+          get default() {
+              return addressView;
+          }
+      },
+      user1: {
+          get default() {
+              return {name: "Ramiya", street: "Stave", city: "Chicago"}
+          }
+      },
+      user2: {
+          get default() {
+              return {name: "Bohdi", street: "State", city: "Chi-city"}
+          }
+      }
+  };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -796,32 +823,33 @@ to create an inline partial:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		{{< addressView }}
-			<address>{{ this.street}}, {{ this.city }}</address>
-		{{/ addressView }}
-		<h2>{{ this.user1.name }}</h2>
-		{{ addressView(user1) }}
-		<h2>{{ this.user2.name }}</h2>
-		{{ addressView(user2) }}
-	`,
-	ViewModel: {
-		user1: {
-			default(){
-				return {name: "Ramiya", street: "Stave", city: "Chicago"}
-			}
-		},
-		user2: {
-			default(){
-				return {name: "Bohdi", street: "State", city: "Chi-city"}
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        {{< addressView }}
+            <address>{{ this.street}}, {{ this.city }}</address>
+        {{/ addressView }}
+        <h2>{{ this.user1.name }}</h2>
+        {{ addressView(user1) }}
+        <h2>{{ this.user2.name }}</h2>
+        {{ addressView(user2) }}
+    `;
+
+    static props = {
+        user1: {
+            get default() {
+                return {name: "Ramiya", street: "Stave", city: "Chicago"}
+            }
+        },
+        user2: {
+            get default() {
+                return {name: "Bohdi", street: "State", city: "Chi-city"}
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -845,44 +873,48 @@ The following "virtual" keys can be read from promises:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import { StacheElement, type } from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<div>
-			{{# if(promise.isPending) }} Pending... {{/ if }}
-			{{# if(promise.isRejected) }}
-				Rejected! {{ promise.reason }}
-			{{/ if }}
-			{{# if(promise.isResolved) }}
-				Resolved: {{ promise.value }}
-			{{/ if}}
-		</div>
-		<button on:click="resolve('RESOLVED',2000)">Resolve in 2s</button>
-		<button on:click="reject('REJECTED',2000)">Reject in 2s</button>
-	`,
-	ViewModel: {
-		promise: "any",
-		resolve(value, time){
-			this.promise = new Promise((resolve)=>{
-				setTimeout(()=>{
-					resolve(value);
-				},time)
-			});
-		},
-		reject(value, time){
-			this.promise = new Promise((resolve, reject)=>{
-				setTimeout(()=>{
-					reject(value);
-				},time)
-			});
-		},
-		connectedCallback(){
-			this.resolve("RESOLVED", 2000);
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <div>
+            {{# if(promise.isPending) }} Pending... {{/ if }}
+            {{# if(promise.isRejected) }}
+                Rejected! {{ promise.reason }}
+            {{/ if }}
+            {{# if(promise.isResolved) }}
+                Resolved: {{ promise.value }}
+            {{/ if}}
+        </div>
+        <button on:click="resolve('RESOLVED',2000)">Resolve in 2s</button>
+        <button on:click="reject('REJECTED',2000)">Reject in 2s</button>
+    `;
+
+    static props = {
+        promise: type.Any
+    };
+
+    resolve(value, time) {
+        this.promise = new Promise((resolve)=>{
+            setTimeout(()=>{
+                resolve(value);
+            },time)
+        });
+    }
+
+    reject(value, time) {
+        this.promise = new Promise((resolve, reject)=>{
+            setTimeout(()=>{
+                reject(value);
+            },time)
+        });
+    }
+
+    connected() {
+        this.resolve("RESOLVED", 2000);
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -898,34 +930,38 @@ The following listens to when a todo's `complete` event is fired and calls `this
 <my-demo></my-demo>
 <script src="//cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
 <script type="module">
-import {Component} from "can";
+import {ObservableObject, StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		{{# for(todo of todos) }}
-			<div on:complete:by:todo="this.shake(scope.element)">
-				<input type="checkbox" checked:bind="todo.complete"/>
-				{{todo.name}}
-			</div>
-		{{/ for }}
-	`,
-	ViewModel: {
-		todos: {
-			default: ()=> [
-				{name: "animate", complete: false},
-				{name: "celebrate", complete: true}
-			]
-		},
-		shake(element){
-			anime({
-				targets: element,
-				translateX: [ 10,-10,0 ],
-				easing: 'linear'
-			});
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        {{# for(todo of todos) }}
+            <div on:complete:by:todo="this.shake(scope.element)">
+                <input type="checkbox" checked:bind="todo.complete"/>
+                {{todo.name}}
+            </div>
+        {{/ for }}
+    `;
+
+    static props = {
+        todos: {
+            get default() {
+                return [
+                    new ObservableObject({name: "animate", complete: false}),
+                    new ObservableObject({name: "celebrate", complete: true})
+                ];
+            }
+        }
+    };
+
+    shake(element) {
+        anime({
+            targets: element,
+            translateX: [ 10,-10,0 ],
+            easing: 'linear'
+        });
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -964,27 +1000,29 @@ you can access all those helpers on `scope.helpers` like `scope.helpers.eq`.
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<p on:click="this.toggle()">
-			Time:
-			{{# scope.helpers.eq(this.eq,"day") }}
-				SUN 🌞
-			{{ else }}
-				MOON 🌚
-			{{/ }}
-		</p>
-	`,
-	ViewModel: {
-		eq: {default: "day"},
-		toggle(){
-			this.eq = (this.eq === "day" ? "night" : "day");
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <p on:click="this.toggle()">
+            Time:
+            {{# scope.helpers.eq(this.eq,"day") }}
+                SUN 🌞
+            {{ else }}
+                MOON 🌚
+            {{/ }}
+        </p>
+    `;
+
+    static props = {
+        eq: "day"
+    };
+
+    toggle() {
+        this.eq = (this.eq === "day" ? "night" : "day");
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1169,19 +1207,28 @@ A [can-stache/expressions/call] calls a function looked up in the [can-view-scop
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: 'my-demo',
-	view: `<h1>{{ this.pluralize(this.type, this.ages.length) }}</h1>`,
-	ViewModel: {
-		pluralize( type, count ) {
-			return type + ( count === 1 ? "" : "s" );
-		},
-		ages: {default: ()=> [ 22, 32, 42 ] },
-		type: {default: "age"}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>{{ this.pluralize(this.type, this.ages.length) }}</h1>
+    `;
+
+    static props = {
+        ages: {
+            get default() {
+                return [ 22, 32, 42 ];
+            }
+        },
+
+        type: "age"
+    };
+
+    pluralize(type, count) {
+        return type + ( count === 1 ? "" : "s" );
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1193,19 +1240,28 @@ an object with the hash properties and values will be passed. For example:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: 'my-demo',
-	view: `<h1>{{ this.pluralize(word=this.type count=this.ages.length) }}</h1>`,
-	ViewModel: {
-		pluralize( options ) {
-			return options.word + ( options.count === 1 ? "" : "s" );
-		},
-		ages: {default: ()=> [ 22, 32, 42 ] },
-		type: {default: "age"}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>{{ this.pluralize(word=this.type count=this.ages.length) }}</h1>
+    `;
+
+    static props = {
+        ages: {
+            get default() {
+                return [ 22, 32, 42 ];
+            }
+        },
+
+        type: "age"
+    };
+
+    pluralize(options) {
+        return options.word + ( options.count === 1 ? "" : "s" );
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1219,21 +1275,26 @@ argument. Notice how `method` is called below:
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: 'my-demo',
-	view: `<h1>{{ this.method(a=this.aProp b=null, c=this.func() ) }}</h1>`,
-	ViewModel: {
-		method( arg1, arg2 ) {
-			console.log(arg1, arg2) //-> {aProp: "aValue", b: null},{c:"FUNC"}
-		},
-		aProp: {default: "aValue" },
-		func(){
-			return "FUNC";
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>{{ this.method(a=this.aProp b=null, c=this.func() ) }}</h1>
+    `;
+
+    static props = {
+        aProp: "aValue"
+    };
+
+    method(arg1, arg2) {
+        console.log(arg1, arg2) //-> {aProp: "aValue", b: null},{c:"FUNC"}
+    }
+
+    func() {
+        return "FUNC";
+    }
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1245,37 +1306,42 @@ A [can-stache/expressions/bracket] can be used to look up a dynamic property in 
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: 'my-demo',
-	view: `
-		<table>
-			{{# for(record of records) }}
-				<tr>
-					{{# for(key of keys )}}
-						<td>{{ record[key] }}</td>
-					{{/ for}}
-				</tr>
-			{{/ for}}
-		</table>
-	`,
-	ViewModel: {
-		records: {
-			default: ()=> [
-				{first: "Justin", last: "Meyer", label: "Dad"},
-				{first: "Payal", last: "Meyer", label: "Mom"},
-				{first: "Ramiya", last: "Meyer", label: "Babu"},
-				{first: "Bohdi", last: "Meyer", label: "Baby"}
-			]
-		},
-		keys: {
-			default: ()=> [
-				"first","last","label"
-			]
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <table>
+            {{# for(record of records) }}
+                <tr>
+                    {{# for(key of keys )}}
+                        <td>{{ record[key] }}</td>
+                    {{/ for}}
+                </tr>
+            {{/ for}}
+        </table>
+    `;
+
+    static props = {
+        records: {
+            get default() {
+                return [
+                    {first: "Justin", last: "Meyer", label: "Dad"},
+                    {first: "Payal", last: "Meyer", label: "Mom"},
+                    {first: "Ramiya", last: "Meyer", label: "Babu"},
+                    {first: "Bohdi", last: "Meyer", label: "Baby"}
+                ];
+            }
+        },
+        keys: {
+            get default() {
+                return [
+                    "first","last","label"
+                ];
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1286,19 +1352,22 @@ This can be useful for looking up values using keys containing non-alphabetic ch
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: 'my-demo',
-	view: `<h1>{{ this.data["special:prop"] }}</h1>`,
-	ViewModel: {
-		data: {
-			default(){
-				return {"special:prop": "SPECIAL VALUE"}
-			}
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <h1>{{ this.data["special:prop"] }}</h1>
+    `;
+
+    static props = {
+        data: {
+            get default() {
+                return {"special:prop": "SPECIAL VALUE"}
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1360,27 +1429,30 @@ section. In the following example `todo` is only available between `{{# for(...)
 ```html
 <my-demo></my-demo>
 <script type="module">
-import {Component} from "can";
+import {StacheElement} from "can";
 
-Component.extend({
-	tag: "my-demo",
-	view: `
-		<ul>
-			{{# for(todo of this.todos) }}
-				<li>{{ todo.name }}</li>
-			{{/ for }}
-		</ul>
-	`,
-	ViewModel: {
-		todos: {
-			default: () => [
-				{name: "Writing"},
-				{name: "Branching"},
-				{name: "Looping"}
-			]
-		}
-	}
-});
+class MyDemo extends StacheElement {
+    static view = `
+        <ul>
+            {{# for(todo of this.todos) }}
+                <li>{{ todo.name }}</li>
+            {{/ for }}
+        </ul>
+    `;
+
+    static props = {
+        todos: {
+            get default() {
+                return [
+                    {name: "Writing"},
+                    {name: "Branching"},
+                    {name: "Looping"}
+                ];
+            }
+        }
+    };
+};
+customElements.define("my-demo", MyDemo);
 </script>
 ```
 @codepen
@@ -1394,12 +1466,12 @@ scope and then walk to parent scopes until it finds a value.
 [can-view-scope] is used by `stache` internally to hold and lookup values.  This is similar to
 how JavaScript’s closures hold variables, except you can use it programmatically.
 
-[can-component] and [can-view-callbacks.tag can-view-callbacks.tag] allow you to define custom
+[can-stache-element] and [can-view-callbacks.tag can-view-callbacks.tag] allow you to define custom
 elements for use within a stache template.  [can-view-callbacks.attr can-view-callbacks.attr] allow
 you to define custom attributes.
 
 [can-stache-bindings] sets up __element and bindings__ between a stache template’s [can-view-scope],
-component [can-component.prototype.ViewModel viewModels], or an element’s attributes.
+component [can-stache-element/static.props], or an element’s attributes.
 
 ## How it works
 

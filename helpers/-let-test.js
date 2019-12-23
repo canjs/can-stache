@@ -5,6 +5,8 @@ var SimpleMap = require("can-simple-map");
 var Scope = require("can-view-scope");
 var helpersCore = require('can-stache/helpers/core');
 
+var stacheTestHelpers = require("../test/helpers")(document);
+
 require("./-let");
 
 QUnit.module("can-stache let helper");
@@ -19,11 +21,11 @@ QUnit.test("basics without commas", function(assert) {
 
 	var frag = template(vm);
 
-	assert.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	assert.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya", "value updated");
 });
 
 QUnit.test("basics with commas", function(assert) {
@@ -36,11 +38,11 @@ QUnit.test("basics with commas", function(assert) {
 
 	var frag = template(vm);
 
-	assert.equal( frag.lastChild.innerHTML, "Justin-2", "got initial value");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin-2", "got initial value");
 
 	vm.name = "Ramiya";
 
-	assert.equal( frag.lastChild.innerHTML, "Ramiya-2", "value updated");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya-2", "value updated");
 });
 
 QUnit.test("make undefined variables settable", function(assert) {
@@ -58,7 +60,7 @@ QUnit.test("make undefined variables settable", function(assert) {
 
 
 	scope.set("userName","Justin");
-	assert.deepEqual( frag.lastChild.firstChild.nodeValue, "Justin");
+	assert.deepEqual( stacheTestHelpers.cloneAndClean(frag).lastChild.firstChild.nodeValue, "Justin");
 
 });
 
@@ -96,11 +98,11 @@ QUnit.test("let works after calling helpersCore.__resetHelpers", function(assert
 
 	var frag = template(vm);
 
-	assert.equal( frag.lastChild.innerHTML, "Justin", "got initial value");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Justin", "got initial value");
 
 	vm.name = "Ramiya";
 
-	assert.equal( frag.lastChild.innerHTML, "Ramiya", "value updated");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).lastChild.innerHTML, "Ramiya", "value updated");
 });
 
 QUnit.test("let multiple updates (#650)", function(assert) {
@@ -170,5 +172,5 @@ QUnit.test("let does not observe itself", function(assert) {
 	vm.set("delete", true);
 
 	assert.ok(true, "got here without breaking");
-	assert.equal( frag.firstChild.querySelector("p").innerHTML, "You are deleting");
+	assert.equal( stacheTestHelpers.cloneAndClean(frag).firstChild.querySelector("p").innerHTML, "You are deleting");
 });

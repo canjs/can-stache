@@ -1,7 +1,6 @@
 var canReflect = require("can-reflect");
 var Observation = require("can-observation");
 var live = require('can-view-live');
-var nodeLists = require('can-view-nodelist');
 var expression = require("../src/expression");
 var KeyObservable = require("../src/key-observable");
 
@@ -110,16 +109,8 @@ var forHelper = function(helperOptions) {
 		// checking its value.
 		options.metadata.rendered = true;
 		return function(el){
-			// make a child nodeList inside the can.view.live.html nodeList
-			// so that if the html is re
-			var nodeList = [el];
-			nodeList.expression = "live.list";
-			nodeLists.register(nodeList, null, options.nodeList, true);
-			// runs nest replacements
-			nodeLists.update(options.nodeList, [el]);
 
-
-			var cb = function (item, index, parentNodeList) {
+			var cb = function (item, index) {
 				var variableScope = {};
 				if(variableName !== undefined){
 					variableScope[variableName] = item;
@@ -128,13 +119,12 @@ var forHelper = function(helperOptions) {
 					options.scope
 					.add({ index: index }, { special: true })
 					.addLetContext(variableScope),
-				options.options,
-				parentNodeList
+					options.options
 				);
 			};
 
-			live.list(el, items, cb, options.context, el.parentNode, nodeList, function(list, parentNodeList){
-				return options.inverse(options.scope, options.options, parentNodeList);
+			live.list(el, items, cb, options.context, function(list){
+				return options.inverse(options.scope, options.options);
 			});
 		};
 	}
