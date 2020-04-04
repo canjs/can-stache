@@ -6357,7 +6357,7 @@ function makeTest(name, doc, mutation) {
 		assert.expect(3);
 
 		var map = new SimpleMap({
-			foo: ["<p></p>"]
+			foo: new DefineList(["<p></p>"])
 		});
 
 		var teardown = testHelpers.dev.willWarn(/stache.safeString/, function(message, matched) {

@@ -236,3 +236,17 @@ testHelpers.dev.devOnlyTest("Warn on missmatch closing tag ", function (assert) 
 	stache('missmatch.stache', "{{#let foo='bar'}} {{foo}}")();
 	assert.equal(warningTeardown(), 1, "got expected warning");
 });
+
+testHelpers.dev.devOnlyTest("builtIn types should not warn #613", function () {
+	var VM = DefineMap.extend({
+		date: "any"
+	});
+
+	var vm = new VM({
+		date: new Date()
+	});
+
+	var teardown = testHelpers.dev.willWarn(/Previously, the result of/);
+	stache('<div>{{date}}</div>')(vm);
+	QUnit.equal(teardown(), 0, 'did not get warning');
+});
