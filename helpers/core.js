@@ -218,6 +218,46 @@ var ifHelper = assign(function ifHelper(expr, options) {
 
 
 
+// ## IF ELSE HELPER
+var ifElseHelper = function(expression, options){
+	helpersCore.resolve(expression);
+	var found = false;
+
+	var caseHelper = function(value, options) {
+		if(!found && helpersCore.resolve(expression) === helpersCore.resolve(value)) {
+			found = true;
+			return options.fn(options.scope);
+		}
+	};
+	caseHelper.requiresOptionsArgument = true;
+
+	// create default helper as a value-like function
+	// so that either {{#default}} or {{#default()}} will work
+	var defaultHelper = function(options) {
+		if (!found) {
+			return options ? options.scope.peek('this') : true;
+		}
+	};
+	defaultHelper.requiresOptionsArgument = true;
+	canReflect.assignSymbols(defaultHelper, {
+		"can.isValueLike": true,
+		"can.isFunctionLike": false,
+		"can.getValue": function() {
+			// pass the helperOptions passed to {{#switch}}
+			return this(options);
+		}
+	});
+
+	var newScope = options.scope.add({
+		case: caseHelper,
+		default: defaultHelper
+	}, { notContext: true });
+
+	return options.fn(newScope, options);
+};
+ifElseHelper.requiresOptionsArgument = true;
+
+
 //## EQ/IS HELPER
 var isHelper = helpersCore._makeLogicHelper("eq", function eqHelper(args){
 	var curValue, lastValue;
@@ -514,6 +554,7 @@ assign(builtInHelpers, {
 	eachOf: eachHelper,
 	index: indexHelper,
 	'if': ifHelper,
+	'ifElse': ifElseHelper,
 	is: isHelper,
 	eq: isHelper,
 	unless: unlessHelper,
